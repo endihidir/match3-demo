@@ -76,7 +76,7 @@ namespace Core.Pool
             }
         }
 
-        public void ReturnToPool<T>(T objectRef, float duration, float delay, Action onComplete = null) where T : Component
+        public void ReturnObject<T>(T objectRef, float duration, float delay, Action onComplete = null) where T : Component
         {
             if (!objectRef) { ConditionalDebug.LogError($"[{GetType()}] Return failed: null/destroyed object"); return; }
 
@@ -95,28 +95,28 @@ namespace Core.Pool
                 }
             }
             
-            group.HideObject(pooledObject, duration, delay, onComplete);
+            group.ReturnObject(pooledObject, duration, delay, onComplete);
         }
         
-        public void HideAllObjectsOfType<T>(float duration, float delay, Action onComplete = null) where T : Component, IPooledObject
+        public void ReturnAllObjectsOfType<T>(float duration, float delay, Action onComplete = null) where T : Component, IPooledObject
         {
-            var pooledObjects = PoolObjectGroup.FindPooledObjectsOfType<T>();
+            var pooledObjects = PoolSearchUtils.FindPooledObjectsOfType<T>();
             
             foreach (var pooledObject in pooledObjects)
             {
-                ReturnToPool(pooledObject, duration, delay, onComplete);
+                ReturnObject(pooledObject, duration, delay, onComplete);
             }
         }
 
-        public void HideAll(float duration, float delay, Action onComplete = null)
+        public void ReturnAll(float duration, float delay, Action onComplete = null)
         {
-            var pooledObjects = PoolObjectGroup.FindPooledObjectsOfType<IPooledObject>();
+            var pooledObjects = PoolSearchUtils.FindPooledObjectsOfType<IPooledObject>();
             
             foreach (var pooledObject in pooledObjects)
             {
                 if (pooledObject is Component component)
                 {
-                    ReturnToPool(component, duration, delay, onComplete);
+                    ReturnObject(component, duration, delay, onComplete);
                 }
             }
         }
@@ -134,19 +134,6 @@ namespace Core.Pool
             poolObjectGroup.ClearAll<T>();
             
             _pooledGroupsWithType.Remove(key);
-        }
-
-        public int GetPoolCount<T>() where T : IPooledObject
-        {
-            var key = typeof(T);
-
-            if (!_pooledGroupsWithType.TryGetValue(key, out var poolObjectGroup))
-            {
-                ConditionalDebug.LogError($"You can not get pool count because {key} does not exist in the list of prefabs.");
-                return 0;
-            }
-
-            return poolObjectGroup.Pool.Count;
         }
 
         private void CacheAllPooledObjects()
@@ -244,14 +231,13 @@ namespace Core.Pool
         public T GetObject<T>(T prefab, bool show = true, int poolCount = 1, Action onComplete = null) where T : Component;
         public T GetObject<T>(bool show = true, float duration = 0f, float delay = 0f, Action onComplete = null) where T : Component, IPooledObject;
     
-        public void HideAllObjectsOfType<T>(float duration = 0f, float delay = 0f, Action onComplete = null) where T : Component, IPooledObject;
-        public void HideAll(float duration, float delay, Action onComplete = null);
+        public void ReturnAllObjectsOfType<T>(float duration = 0f, float delay = 0f, Action onComplete = null) where T : Component, IPooledObject;
+        public void ReturnAll(float duration, float delay, Action onComplete = null);
         public void RemovePool<T>() where T : IPooledObject;
-        public int GetPoolCount<T>() where T : IPooledObject;
     }
     
     public interface IReturnToPool
     {
-        public void ReturnToPool<T>(T objectRef, float duration = 0f, float delay = 0f, Action onComplete = null) where T : Component;
+        public void ReturnObject<T>(T objectRef, float duration = 0f, float delay = 0f, Action onComplete = null) where T : Component;
     }
 }

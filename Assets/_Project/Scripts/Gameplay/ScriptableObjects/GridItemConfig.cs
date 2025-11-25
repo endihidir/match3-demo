@@ -1,4 +1,3 @@
-using System;
 using Core.Item;
 using UnityEngine;
 
@@ -8,6 +7,7 @@ namespace Core.Config
     public class ItemConfigContainer : ScriptableObject
     {
         [field: SerializeField] private BaseItemConfig[] ItemConfigs { get; set; }
+        [field: SerializeField] public ItemEffectSettingsConfig DefaultEffectSettings { get; private set; }
 
         public T GetConfig<T>() where T : BaseItemConfig
         {
@@ -22,11 +22,11 @@ namespace Core.Config
             return null;
         }
         
-        public Sprite GetSprite(Enum type) => type switch
+        public Sprite GetSprite(GridItemKind kind, int typeId) => kind switch
         {
-            ItemType itemType => GetConfig<ItemConfig>().GetSprite(itemType),
-            BoosterType boosterType => GetConfig<BoosterConfig>().GetSprite(boosterType),
-            ObstacleType obstacleType => GetConfig<ObstacleConfig>().GetSprite(obstacleType),
+            GridItemKind.Regular => GetConfig<ItemConfig>().GetSprite((ItemType)typeId),
+            GridItemKind.Booster => GetConfig<BoosterItemConfig>().GetSprite((BoosterType)typeId),
+            GridItemKind.Obstacle => GetConfig<ObstacleItemConfig>().GetSprite((ObstacleType)typeId),
             _ => null
         };
     }

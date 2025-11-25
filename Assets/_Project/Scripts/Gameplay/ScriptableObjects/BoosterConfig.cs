@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Core.Config
 {
     [CreateAssetMenu(fileName = "BoosterConfig", menuName = "Match3/ItemConfigs/BoosterConfig", order = -1)]
-    public class BoosterConfig : BaseEnumConfig<BoosterType, BoosterConfigData>
+    public class BoosterItemConfig : EnumItemConfig<BoosterType, BoosterConfigData>
     {
         public Sprite GetSprite(BoosterType itemType) => Configs[itemType].sprite;
         public BoosterEffectConfig GetEffectConfig(BoosterType itemType) => Configs[itemType].boosterEffectConfig;

@@ -12,13 +12,13 @@ namespace Core.LifetimeScopes
 {
     public class AppLifetimeScope : LifetimeScope
     {
-        [SerializeField] private AppConfigContainer _appConfigContainer;
+        [field: SerializeField] private AppConfigContainer AppConfigContainer {get; set;}
         
         protected override void Configure(IContainerBuilder builder)
         {
-            _appConfigContainer?.Initialize();
+            AppConfigContainer?.Initialize();
             
-            builder.RegisterInstance(_appConfigContainer);
+            builder.RegisterInstance(AppConfigContainer);
             
             builder.RegisterEntryPoint<AppBootstrapper>();
 
@@ -28,9 +28,9 @@ namespace Core.LifetimeScopes
             
             builder.Register<SaveService>(Lifetime.Singleton).As<ISaveService>();
             
-            builder.Register<MVPContextContainer>(Lifetime.Singleton).As<IMVPContextContainer, ITickable>();
+            builder.Register<MVPContextService>(Lifetime.Singleton).As<IMVPContextService, ITickable>();
             
-            builder.Register<GlobalModelContainer>(Lifetime.Singleton).As<IGlobalModelContainer>();
+            builder.Register<GlobalModelService>(Lifetime.Singleton).As<IGlobalModelService>();
         }
     }
 }

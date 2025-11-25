@@ -1,5 +1,6 @@
 using Core.Bootstrapper;
 using Core.Configs;
+using Core.Item.Factories;
 using Core.SceneService;
 using UnityEngine;
 using VContainer;
@@ -9,15 +10,19 @@ namespace Core.LifetimeScopes
 {
     public class GameLifetimeScope : LifetimeScope
     {
-        [SerializeField] private GameConfigContainer _gameConfigContainer;
+        [field: SerializeField] private GameConfigContainer GameConfigContainer {get; set;}
 
         protected override void Configure(IContainerBuilder builder)
         {
-            builder.RegisterInstance(_gameConfigContainer);
+            builder.RegisterInstance(GameConfigContainer);
 
             builder.RegisterEntryPoint<GameBootstrapper>();
 
             builder.Register<GridPresenter>(Lifetime.Scoped).As<IGridPresenter>();
+            
+            builder.Register<GridItemFactory>(Lifetime.Scoped).As<IGridItemFactory>();
+            
+            builder.Register<ItemEffectFactory>(Lifetime.Scoped).As<IItemEffectFactory>();
         }
     }
 }

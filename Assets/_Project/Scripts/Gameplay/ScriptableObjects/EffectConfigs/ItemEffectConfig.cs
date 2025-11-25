@@ -2,8 +2,8 @@ using UnityEngine;
 
 namespace Core.Config
 {
-    [CreateAssetMenu(fileName = "ItemEffectConfig", menuName = "Match3/ItemConfigs/Effects/ItemEffectConfig", order = 0)]
-    public class ItemEffectConfig : BaseEffectConfig
+    [CreateAssetMenu(fileName = "RegularEffectConfig", menuName = "Match3/ItemConfigs/Effects/RegularEffectConfig", order = 0)]
+    public class RegularEffectConfig : BaseEffectConfig
     {
         
     }
