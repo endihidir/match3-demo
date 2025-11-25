@@ -21,13 +21,13 @@ namespace Core.Item.Factories
     {
         private readonly IObjectPoolService _objectPoolService;
         private readonly IItemEffectFactory _itemEffectFactory;
-        private readonly ItemConfigContainer _itemConfigContainer;
+        private readonly IItemSpriteProvider _itemSpriteProvider;
         
         public GridItemFactory(IObjectPoolService objectPoolService, IItemEffectFactory itemEffectFactory, ItemConfigContainer itemConfigContainer)
         {
             _objectPoolService = objectPoolService;
             _itemEffectFactory = itemEffectFactory;
-            _itemConfigContainer = itemConfigContainer;
+            _itemSpriteProvider = itemConfigContainer;
         }
         
         public GridItemObject GetItem(GridItemKind itemKind, int typeId, Vector2Int gridPos)
@@ -38,7 +38,14 @@ namespace Core.Item.Factories
     
             if (itemBehaviour == null)
             {
-                itemBehaviour = new GridItemBehaviour(itemObject, _itemEffectFactory, _itemConfigContainer);
+                var behaviourData = new ItemBehaviourData()
+                {
+                    objectView = itemObject,
+                    itemEffectFactory = _itemEffectFactory,
+                    itemSpriteProvider = _itemSpriteProvider
+                };
+                
+                itemBehaviour = new GridItemBehaviour(behaviourData);
                 
                 itemObject.BindBehaviour(itemBehaviour);
             }

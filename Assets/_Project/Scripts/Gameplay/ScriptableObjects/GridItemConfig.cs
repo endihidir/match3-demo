@@ -1,13 +1,14 @@
 using Core.Item;
+using NaughtyAttributes;
 using UnityEngine;
 
 namespace Core.Config
 {
     //[CreateAssetMenu(fileName = "ItemConfigContainer", menuName = "Match3/ItemConfigContainer", order = 0)]
-    public class ItemConfigContainer : ScriptableObject
+    public class ItemConfigContainer : ScriptableObject, IItemSpriteProvider
     {
+        [field: SerializeField, Required] public ItemEffectSettingsConfig DefaultEffectSettings { get; private set; }
         [field: SerializeField] private BaseItemConfig[] ItemConfigs { get; set; }
-        [field: SerializeField] public ItemEffectSettingsConfig DefaultEffectSettings { get; private set; }
 
         public T GetConfig<T>() where T : BaseItemConfig
         {
@@ -29,5 +30,10 @@ namespace Core.Config
             GridItemKind.Obstacle => GetConfig<ObstacleItemConfig>().GetSprite((ObstacleType)typeId),
             _ => null
         };
+    }
+    
+    public interface IItemSpriteProvider
+    {
+        Sprite GetSprite(GridItemKind kind, int typeId);
     }
 }
