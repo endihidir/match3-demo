@@ -6,11 +6,10 @@ namespace Core.Item.Factories
 {
     public interface IItemEffectFactory
     {
-        IBaseItemEffect GetEffect(GridItemKind kind, int typeId, IItemObject owner);
-
-        IBaseItemEffect GetEffect(ItemType type, IItemObject owner) => GetEffect(GridItemKind.Regular,(int)type, owner);
-        IBaseItemEffect GetEffect(ObstacleType type, IItemObject owner) => GetEffect(GridItemKind.Obstacle,(int)type, owner);
-        IBaseItemEffect GetEffect(BoosterType type, IItemObject owner) => GetEffect(GridItemKind.Booster,(int)type, owner);
+        IBaseItemEffect GetEffect(IItemObject owner, GridItemKind kind, int typeId);
+        IBaseItemEffect GetEffect(IItemObject owner, ItemType type) => GetEffect(owner, GridItemKind.Regular,(int)type);
+        IBaseItemEffect GetEffect(IItemObject owner, ObstacleType type) => GetEffect(owner, GridItemKind.Obstacle,(int)type);
+        IBaseItemEffect GetEffect(IItemObject owner, BoosterType type) => GetEffect(owner, GridItemKind.Booster,(int)type);
         void ReleaseEffect(IBaseItemEffect effect);
     }
     
@@ -24,7 +23,7 @@ namespace Core.Item.Factories
             _itemConfigContainer = itemConfigContainer;
         }
 
-        public IBaseItemEffect GetEffect(GridItemKind kind, int typeId, IItemObject owner)
+        public IBaseItemEffect GetEffect(IItemObject owner, GridItemKind kind, int typeId)
         {
             IBaseItemEffect effect = kind switch
             {
@@ -37,7 +36,16 @@ namespace Core.Item.Factories
             if (effect == null) return null;
 
             var config = GetConfigForKind(kind);
-            effect.Initialize(owner, config, typeId, _itemConfigContainer.DefaultEffectSettings);
+            
+            var effectData = new EffectData
+            {
+                owner = owner,
+                itemConfig = config,
+                typeId = typeId,
+                defaultSettings = _itemConfigContainer.DefaultEffectSettings
+            };
+            
+            effect.Initialize(effectData);
             return effect;
         }
 
@@ -75,5 +83,13 @@ namespace Core.Item.Factories
             GridItemKind.Obstacle => _itemConfigContainer.GetConfig<ObstacleItemConfig>(),
             _ => null
         };
+    }
+
+    public struct EffectData
+    {
+        public IItemObject owner;
+        public BaseItemConfig itemConfig;
+        public int typeId;
+        public ItemEffectSettingsConfig defaultSettings;
     }
 }

@@ -198,11 +198,15 @@ namespace Core.Pool
             var poolData = _poolServiceConfig.poolDataConfigs;
         
             var poolAssetConfig = poolData.FirstOrDefault(x => x.poolObject.GetComponent<T>() != null);
-        
-            if (!poolAssetConfig) return null;
+
+            if (!poolAssetConfig)
+            {
+                ConditionalDebug.LogError("Required component not found!");
+                return null;
+            }
         
             poolObjectGroup.Initialize(poolAssetConfig.poolObject, _pooledObjectsParent, poolAssetConfig.GetSize(), poolAssetConfig.isLazy, poolAssetConfig.isUnique)
-                               .CreatePool();
+                .CreatePool();
             
             _pooledGroupsWithType.Add(type, poolObjectGroup);
             

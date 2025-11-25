@@ -39,15 +39,15 @@ namespace Core.Item
         public Vector2Int GridPos { get; private set; }
         public IBaseItemEffect ItemEffect { get; private set; }
 
-        private ItemConfigContainer ItemConfigContainer { get; }
+        private IItemSpriteProvider ItemSpriteProvider { get; }
         private IItemEffectFactory ItemEffectFactory { get; }
 
-        public GridItemBehaviour(IGridItemObjectView objectView, IItemEffectFactory itemEffectFactory, ItemConfigContainer itemConfigContainer)
+        public GridItemBehaviour(ItemBehaviourData itemBehaviourData)
         {
-            Transform = objectView.Transform;
-            SpriteRenderer = objectView.SpriteRenderer;
-            ItemConfigContainer = itemConfigContainer;
-            ItemEffectFactory = itemEffectFactory;
+            Transform = itemBehaviourData.objectView.Transform;
+            SpriteRenderer = itemBehaviourData.objectView.SpriteRenderer;
+            ItemSpriteProvider = itemBehaviourData.itemSpriteProvider;
+            ItemEffectFactory = itemBehaviourData.itemEffectFactory;
         }
         public void Initialize(Vector2Int gridPos, GridItemKind itemKind, int typeId)
         {
@@ -60,8 +60,8 @@ namespace Core.Item
         {
             ItemKind = itemKind;
             TypeId = typeId;
-            SpriteRenderer.sprite = ItemConfigContainer.GetSprite(ItemKind, TypeId);
-            ItemEffect = ItemEffectFactory.GetEffect(ItemKind, TypeId, this);
+            SpriteRenderer.sprite = ItemSpriteProvider.GetSprite(ItemKind, TypeId);
+            ItemEffect = ItemEffectFactory.GetEffect(this, ItemKind, TypeId);
         }
 
         public void Dispose()
@@ -71,5 +71,12 @@ namespace Core.Item
             SpriteRenderer.sprite = null;
             ItemEffectFactory.ReleaseEffect(ItemEffect);
         }
+    }
+
+    public struct ItemBehaviourData
+    {
+        public IGridItemObjectView objectView;
+        public IItemEffectFactory itemEffectFactory;
+        public IItemSpriteProvider itemSpriteProvider;
     }
 }

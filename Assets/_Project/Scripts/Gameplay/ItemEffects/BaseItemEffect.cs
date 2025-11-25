@@ -1,4 +1,5 @@
 using Core.Config;
+using Core.Item.Factories;
 using Core.Systems;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
@@ -8,7 +9,7 @@ namespace Core.Item
     public interface IBaseItemEffect
     {
         public bool IsInProgress { get; }
-        void Initialize(IItemObject itemObject, BaseItemConfig config, int typeId, ItemEffectSettingsConfig defaultSettings);
+        IBaseItemEffect Initialize(EffectData effectData);
         void Shake();
         Tween Shift(IGridModel gridModel);
         UniTask ShiftAsync(IGridModel gridModel);
@@ -18,23 +19,23 @@ namespace Core.Item
     
     public abstract class BaseItemEffect<T> : IBaseItemEffect where T : BaseItemConfig
     {
-        protected IItemObject ItemObject;
+        protected IItemObject Owner;
         protected T ItemConfig;
         protected int TypeId;
-
-        private Tween _shakeTween;
-        private Tween _shiftTween;
-        private ItemEffectSettingsConfig _defaultSettings;
-
-        public bool IsInProgress => _shakeTween != null || _shiftTween != null;
         
-        public void Initialize(IItemObject itemObject, BaseItemConfig config, int typeId, ItemEffectSettingsConfig defaultSettings)
+        private ItemEffectSettingsConfig _defaultSettings;
+        private Tween _shakeTween, _shiftTween;
+
+        public bool IsInProgress => _shakeTween.IsActive() || _shiftTween.IsActive();
+        
+        public IBaseItemEffect Initialize(EffectData effectData)
         {
-            ItemObject = itemObject;
-            ItemConfig = (T)config;
-            TypeId = typeId;
-            _defaultSettings = defaultSettings;
+            Owner = effectData.owner;
+            ItemConfig = (T)effectData.itemConfig;
+            TypeId = effectData.typeId;
+            _defaultSettings = effectData.defaultSettings;
             OnInitialized();
+            return this;
         }
 
         protected abstract void OnInitialized();
@@ -45,18 +46,18 @@ namespace Core.Item
 
             _shakeTween?.Kill();
 
-            _shakeTween = ItemObject.Transform.DOShakePosition(shakeSettings.duration, shakeSettings.strength);
+            _shakeTween = Owner.Transform.DOShakePosition(shakeSettings.duration, shakeSettings.strength);
         }
 
         public virtual Tween Shift(IGridModel gridModel)
         {
-            var worldPos = gridModel.GridToWorld(ItemObject.GridPos);
+            var worldPos = gridModel.GridToWorld(Owner.GridPos);
             
             var shiftSettings = SelectedShiftSettings();
 
             _shiftTween?.Kill();
 
-            _shiftTween = ItemObject.Transform.DOMove(worldPos, shiftSettings.duration);
+            _shiftTween = Owner.Transform.DOMove(worldPos, shiftSettings.duration);
 
             return _shiftTween;
         }
@@ -85,7 +86,7 @@ namespace Core.Item
             _shakeTween?.Kill();
             _shiftTween?.Kill();
 
-            ItemObject = null;
+            Owner = null;
             ItemConfig = null;
             TypeId = 0;
         }
