@@ -5,16 +5,16 @@ using UnityEngine;
 namespace Core.Config
 {
     [CreateAssetMenu(fileName = "ItemConfig", menuName = "Match3/ItemConfigs/ItemConfig", order = -1)]
-    public class ItemConfig : BaseEnumConfig<ItemType, ItemConfigData>
+    public class ItemConfig : EnumItemConfig<ItemType, ItemConfigData>
     {
         public Sprite GetSprite(ItemType itemType) => Configs[itemType].sprite;
-        public ItemEffectConfig GetEffectConfig(ItemType itemType) => Configs[itemType].itemEffectConfig;
+        public RegularEffectConfig GetEffectConfig(ItemType itemType) => Configs[itemType].regularEffectConfig;
     }
        
     [Serializable]
     public struct ItemConfigData
     {
         public Sprite sprite;
-        public ItemEffectConfig itemEffectConfig;
+        public RegularEffectConfig regularEffectConfig;
     }
 }

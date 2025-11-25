@@ -2,6 +2,8 @@ using Cysharp.Threading.Tasks;
 using Core.Generated;
 using Core.SceneService;
 using Core.Pool;
+using Core.SaveSystem;
+using UnityEngine;
 using VContainer.Unity;
 
 namespace Core.Bootstrapper
@@ -30,10 +32,20 @@ namespace Core.Bootstrapper
             {
                 await _sceneLoadService.LoadBootSceneAsync();
             }
+
+            CreateSaveDispatcher();
             
             _objectPoolService.Initialize();
             
             await _sceneLoadService.LoadSceneAsync(SceneType.MenuScene);
+        }
+
+        private static void CreateSaveDispatcher()
+        {
+            if (!Object.FindObjectOfType<SaveDispatcher>(true))
+            {
+                new GameObject(nameof(SaveDispatcher)).AddComponent<SaveDispatcher>();
+            }
         }
     }
 }

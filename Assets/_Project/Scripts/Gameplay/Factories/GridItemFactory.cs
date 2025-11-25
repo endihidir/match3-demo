@@ -1,4 +1,3 @@
-using System;
 using Core.Config;
 using Core.Pool;
 using UnityEngine;
@@ -7,24 +6,31 @@ namespace Core.Item.Factories
 {
     public interface IGridItemFactory
     {
-        GridItemObject GetItem(Enum itemType, Vector2Int gridPos);
-        void HideItem(GridItemObject popUp);
-        void HideAllItems();
+        GridItemObject GetItem(GridItemKind itemKind, int typeId, Vector2Int gridPos);
+        GridItemObject GetItem(ItemType type, Vector2Int gridPos) => GetItem(GridItemKind.Regular, (int)type, gridPos);
+        GridItemObject GetItem(BoosterType type, Vector2Int gridPos) => GetItem(GridItemKind.Booster, (int)type, gridPos);
+        GridItemObject GetItem(ObstacleType type, Vector2Int gridPos) => GetItem(GridItemKind.Obstacle, (int)type, gridPos);
+        void ReleaseItem(GridItemObject item);
+        void ReleaseItem(GameObject item);
+        void ReleaseItem(Transform item);
+        void ReleaseAllItems();
         void RemoveItemPool();
     }
     
     public class GridItemFactory : IGridItemFactory
     {
         private readonly IObjectPoolService _objectPoolService;
+        private readonly IItemEffectFactory _itemEffectFactory;
         private readonly ItemConfigContainer _itemConfigContainer;
         
-        public GridItemFactory(IObjectPoolService objectPoolService, ItemConfigContainer itemConfigContainer)
+        public GridItemFactory(IObjectPoolService objectPoolService, IItemEffectFactory itemEffectFactory, ItemConfigContainer itemConfigContainer)
         {
             _objectPoolService = objectPoolService;
+            _itemEffectFactory = itemEffectFactory;
             _itemConfigContainer = itemConfigContainer;
         }
         
-        public GridItemObject GetItem(Enum itemType, Vector2Int gridPos)
+        public GridItemObject GetItem(GridItemKind itemKind, int typeId, Vector2Int gridPos)
         {
             var itemObject = _objectPoolService.GetObject<GridItemObject>();
 
@@ -32,22 +38,21 @@ namespace Core.Item.Factories
     
             if (itemBehaviour == null)
             {
-                itemBehaviour = new GridItemBehaviour(itemObject.transform, itemObject.SpriteRenderer, _itemConfigContainer);
+                itemBehaviour = new GridItemBehaviour(itemObject, _itemEffectFactory, _itemConfigContainer);
+                
                 itemObject.BindBehaviour(itemBehaviour);
             }
-
-            itemBehaviour.ApplyItemType(itemType);
             
-            itemBehaviour.SetGridPos(gridPos);
-            
+            itemBehaviour.Initialize(gridPos, itemKind, typeId);
 
             return itemObject;
         }
 
-        public void HideItem(GridItemObject popUp) => _objectPoolService.ReturnToPool(popUp);
-
-        public void HideAllItems() => _objectPoolService.HideAllObjectsOfType<GridItemObject>();
-
+        public void ReleaseItem(GridItemObject item) => _objectPoolService.ReturnObject(item);
+        public void ReleaseItem(GameObject item) => _objectPoolService.ReturnObject(item.transform);
+        public void ReleaseItem(Transform item) => _objectPoolService.ReturnObject(item);
+        public void ReleaseAllItems() => _objectPoolService.ReturnAllObjectsOfType<GridItemObject>();
         public void RemoveItemPool() => _objectPoolService.RemovePool<GridItemObject>();
     }
+
 }

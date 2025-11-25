@@ -171,7 +171,7 @@ MonoBehaviour:
   autoRun: 1
   autoInjectGameObjects:
   - {fileID: 495241981}
-  _gameConfigContainer: {fileID: 11400000, guid: f503e54070851b94ebd161bb6103e266,
+  <GameConfigContainer>k__BackingField: {fileID: 11400000, guid: f503e54070851b94ebd161bb6103e266,
     type: 2}
 --- !u!1 &495241981
 GameObject:

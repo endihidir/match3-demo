@@ -53,7 +53,7 @@ namespace Core.Pool
             return this;
         }
 
-        public T GetObject<T>(bool show = true, float duration = 0f, float delay = 0f, Action onComplete = null) where T : Component
+        public T GetObject<T>(bool activate = true, float duration = 0f, float delay = 0f, Action onComplete = null) where T : Component
         {
             if (HasAnyPooledMissing()) ClearPool();
             
@@ -78,34 +78,32 @@ namespace Core.Pool
                 }
             }
             
-            if (show) 
-                pooledObject?.Show(duration, delay, onComplete);
+            if (activate) 
+                pooledObject?.Activate(duration, delay, onComplete);
 
 
-            if (pooledObject is T tComponent)
+            switch (pooledObject)
             {
-                component = tComponent;
+                case T tComp:
+                    component = tComp;
+                    break;
+                case Component comp:
+                    component = comp.GetComponent<T>();
+                    ConditionalDebug.LogWarning($"[{GetType()}] Expected component '{typeof(T).Name}' not found on pooled object '{comp.gameObject.name}'.", component);
+                    break;
+                default:
+                    ConditionalDebug.LogError($"[{GetType()}] IPooledObject is not a Component! Object: {pooledObject}");
+                    break;
             }
-            else if (pooledObject is Component comp)
-            {
-                component = comp.GetComponent<T>();
-                
-                ConditionalDebug.LogWarning($"[PoolManager] Expected component '{typeof(T).Name}' not found on pooled object '{comp.gameObject.name}'.", component);
-            }
-            else
-            {
-                ConditionalDebug.LogError($"[PoolManager] IPooledObject is not a Component! Object: {pooledObject}");
-            }
-            
             
             return component;
         }
 
-        public void HideObject<T>(T pooledObject, float duration, float delay, Action onComplete) where T : IPooledObject
+        public void ReturnObject<T>(T pooledObject, float duration, float delay, Action onComplete) where T : IPooledObject
         {
             if (!pooledObject.IsActive) return;
 
-            pooledObject.Hide(duration, delay, ()=> ReturnToPool(pooledObject, onComplete));
+            pooledObject.Deactivate(duration, delay, ()=> ReturnToPool(pooledObject, onComplete));
         }
 
         private void ClearPool()
@@ -129,7 +127,7 @@ namespace Core.Pool
         {
             ClearPool();
 
-            foreach (var pooledObject in FindPooledObjectsOfType<T>())
+            foreach (var pooledObject in PoolSearchUtils.FindPooledObjectsOfType<T>())
             {
                 if (pooledObject is Component pooledObj)
                 {
@@ -161,7 +159,7 @@ namespace Core.Pool
             
             if (onInitialize)
             {
-                obj.Hide();
+                obj.Deactivate();
             }
 
             Pool.Enqueue(obj);
@@ -182,17 +180,10 @@ namespace Core.Pool
             pooledObjectT.SetParent(_poolParent.transform);
 
             pooledObjectT.localPosition = Vector3.zero;
-
-            pooledObject.Hide();
             
             Pool.Enqueue(pooledObject);
 
             onComplete?.Invoke();
-        }
-        
-        public static IEnumerable<T> FindPooledObjectsOfType<T>(bool includeInactive = false) where T : IPooledObject
-        {
-            return Object.FindObjectsOfType<MonoBehaviour>(includeInactive).OfType<T>().Where(pooledObject => pooledObject.IsActive);
         }
         
         private bool HasAnyPooledMissing() => Pool.Any(pooledObject => pooledObject is null);

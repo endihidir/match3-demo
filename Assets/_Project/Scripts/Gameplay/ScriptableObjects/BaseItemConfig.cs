@@ -9,12 +9,9 @@ namespace Core.Config
     public abstract class BaseItemConfig : ScriptableObject
     {
         protected bool IsEditor => Application.isEditor;
-        
-        public ShiftSettingsConfig defaultShiftSettings;
-        public ShakeSettingsConfig defaultShakeSettings;
     }
     
-    public abstract class BaseEnumConfig<TEnum, TData> : BaseItemConfig where TEnum : Enum
+    public abstract class EnumItemConfig<TEnum, TData> : BaseItemConfig where TEnum : Enum
     {
         [field: SerializeField] 
         protected SerializedDictionary<TEnum, TData> Configs { get; private set; }

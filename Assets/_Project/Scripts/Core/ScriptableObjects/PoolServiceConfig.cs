@@ -7,6 +7,6 @@ namespace Core.Configs
     { 
         [Header("POOL DATA")] 
         
-        public PoolAssetConfig[] poolDataConfigs;
+        public PooledAssetConfig[] poolDataConfigs;
     }
 }

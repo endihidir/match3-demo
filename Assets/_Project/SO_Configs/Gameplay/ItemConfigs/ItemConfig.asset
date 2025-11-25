@@ -12,23 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93efc0437ffa4d31a5407733bea9f322, type: 3}
   m_Name: ItemConfig
   m_EditorClassIdentifier: 
-  defaultShiftSettings: {fileID: 0}
-  defaultShakeSettings: {fileID: 0}
   <Configs>k__BackingField:
     _serializedList:
     - Key: 1
       Value:
-        sprite: {fileID: 0}
-        itemEffectConfig: {fileID: 0}
+        sprite: {fileID: 21300000, guid: 714434f083d633140a41e8101ec09313, type: 3}
+        regularEffectConfig: {fileID: 11400000, guid: 0d6374e57bc586d42ae2a13c6158bba4,
+          type: 2}
     - Key: 2
       Value:
-        sprite: {fileID: 0}
-        itemEffectConfig: {fileID: 0}
+        sprite: {fileID: 21300000, guid: 499846c952225eb4ba64fdcd5af77679, type: 3}
+        regularEffectConfig: {fileID: 11400000, guid: b219ed335cd3fb64f9bc6a2ca1c77bad,
+          type: 2}
     - Key: 3
       Value:
-        sprite: {fileID: 0}
-        itemEffectConfig: {fileID: 0}
+        sprite: {fileID: 21300000, guid: fc844722a03dbed46b10e4eb36964d16, type: 3}
+        regularEffectConfig: {fileID: 11400000, guid: aba051751a45f4142b7fdee8ec773dd3,
+          type: 2}
     - Key: 4
       Value:
-        sprite: {fileID: 0}
-        itemEffectConfig: {fileID: 0}
+        sprite: {fileID: 21300000, guid: 3e20fb662d86e5645b868401253a29a5, type: 3}
+        regularEffectConfig: {fileID: 11400000, guid: f8895328b20116c4990afbc36899c997,
+          type: 2}
