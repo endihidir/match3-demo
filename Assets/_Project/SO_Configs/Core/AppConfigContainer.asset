@@ -15,3 +15,4 @@ MonoBehaviour:
   sceneLoadServiceConfig: {fileID: 11400000, guid: 4d6eab558b2ec6b41b8945150b149cfa,
     type: 2}
   poolServiceConfig: {fileID: 11400000, guid: c3b82a1ade8844248924be7eca5ebfa5, type: 2}
+  levelDataConfig: {fileID: 11400000, guid: 4c80ae77d5bd7a04d905910a05d7a523, type: 2}

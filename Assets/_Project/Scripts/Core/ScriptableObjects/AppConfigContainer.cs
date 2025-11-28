@@ -9,6 +9,7 @@ namespace Core.Configs
     {
         public SceneLoadServiceConfig sceneLoadServiceConfig;
         public PoolServiceConfig poolServiceConfig;
+        [FormerlySerializedAs("levelDataConfig")] public LevelDataServiceConfig levelDataServiceConfig;
         
         public void Initialize()
         {

@@ -1,5 +1,6 @@
 using Core.Bootstrapper;
 using Core.Configs;
+using Core.Level;
 using Core.MVPContext;
 using Core.SceneService;
 using Core.Pool;
@@ -26,11 +27,13 @@ namespace Core.LifetimeScopes
             
             builder.Register<ObjectPoolService>(Lifetime.Singleton).As<IObjectPoolService>();
             
-            builder.Register<SaveService>(Lifetime.Singleton).As<ISaveService>();
+            builder.Register<DataPersistenceService>(Lifetime.Singleton).As<IDataPersistenceService>();
             
             builder.Register<MVPContextService>(Lifetime.Singleton).As<IMVPContextService, ITickable>();
             
             builder.Register<GlobalModelService>(Lifetime.Singleton).As<IGlobalModelService>();
+            
+            builder.Register<LevelDataService>(Lifetime.Singleton).As<ILevelDataService, IInitializable>();
         }
     }
 }

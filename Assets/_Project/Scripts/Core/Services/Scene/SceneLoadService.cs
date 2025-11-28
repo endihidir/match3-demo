@@ -196,7 +196,7 @@ namespace Core.SceneService
 
             catch (Exception ex)
             {
-                ConditionalDebug.LogError(ex);
+                EditorDebug.LogError(ex);
             }
         }
 

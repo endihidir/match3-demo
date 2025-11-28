@@ -89,10 +89,10 @@ namespace Core.Pool
                     break;
                 case Component comp:
                     component = comp.GetComponent<T>();
-                    ConditionalDebug.LogWarning($"[{GetType()}] Expected component '{typeof(T).Name}' not found on pooled object '{comp.gameObject.name}'.", component);
+                    EditorDebug.LogWarning($"[{GetType()}] Expected component '{typeof(T).Name}' not found on pooled object '{comp.gameObject.name}'.", component);
                     break;
                 default:
-                    ConditionalDebug.LogError($"[{GetType()}] IPooledObject is not a Component! Object: {pooledObject}");
+                    EditorDebug.LogError($"[{GetType()}] IPooledObject is not a Component! Object: {pooledObject}");
                     break;
             }
             
@@ -135,7 +135,7 @@ namespace Core.Pool
                 }
                 else
                 {
-                    ConditionalDebug.LogError($"{pooledObject.GetType()} is not Component!");
+                    EditorDebug.LogError($"{pooledObject.GetType()} is not Component!");
                 }
             }
         }
@@ -171,7 +171,7 @@ namespace Core.Pool
 
             if (pooledObject is not Component pooledObj)
             {
-                ConditionalDebug.LogError($"{pooledObject.GetType()} is not Component!");
+                EditorDebug.LogError($"{pooledObject.GetType()} is not Component!");
                 return;
             }
             
