@@ -78,11 +78,11 @@ namespace Core.Pool
 
         public void ReturnObject<T>(T objectRef, float duration, float delay, Action onComplete = null) where T : Component
         {
-            if (!objectRef) { ConditionalDebug.LogError($"[{GetType()}] Return failed: null/destroyed object"); return; }
+            if (!objectRef) { EditorDebug.LogError($"[{GetType()}] Return failed: null/destroyed object"); return; }
 
             if (!objectRef.TryGetComponent<IPooledObject>(out var pooledObject))
             {
-                ConditionalDebug.LogError($"[{GetType()}] Return failed: object is not IPooledObject.");
+                EditorDebug.LogError($"[{GetType()}] Return failed: object is not IPooledObject.");
                 return;
             }
 
@@ -90,7 +90,7 @@ namespace Core.Pool
             {
                 if (!_pooledGroupsWithType.TryGetValue(pooledObject.GetType(), out group))
                 {
-                    ConditionalDebug.LogError($"[{GetType()}] Return failed: no group for '{objectRef.name}' ({objectRef.GetType().Name}).");
+                    EditorDebug.LogError($"[{GetType()}] Return failed: no group for '{objectRef.name}' ({objectRef.GetType().Name}).");
                     return;
                 }
             }
@@ -127,7 +127,7 @@ namespace Core.Pool
 
             if (!_pooledGroupsWithType.TryGetValue(key, out var poolObjectGroup))
             {
-                ConditionalDebug.LogError($"You can not remove pool because {key} does not exist in the list of prefabs.");
+                EditorDebug.LogError($"You can not remove pool because {key} does not exist in the list of prefabs.");
                 return;
             }
 
@@ -144,7 +144,7 @@ namespace Core.Pool
             {
                 if (!poolAssetConfig.poolObject)
                 {
-                    ConditionalDebug.LogError("There is missing prefab in pool object list!");
+                    EditorDebug.LogError("There is missing prefab in pool object list!");
                     continue;
                 }
 
@@ -201,7 +201,7 @@ namespace Core.Pool
 
             if (!poolAssetConfig)
             {
-                ConditionalDebug.LogError("Required component not found!");
+                EditorDebug.LogError("Required component not found!");
                 return null;
             }
         

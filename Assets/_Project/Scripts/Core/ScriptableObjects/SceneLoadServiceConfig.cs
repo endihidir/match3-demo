@@ -20,7 +20,7 @@ namespace Core.Configs
 
             if (!sceneConfig)
             {
-                ConditionalDebug.LogError($"GetSceneData failed: config not found for sceneId '{sceneId}'.");
+                EditorDebug.LogError($"GetSceneData failed: config not found for sceneId '{sceneId}'.");
                 return sceneReferences;
             }
             
@@ -42,7 +42,7 @@ namespace Core.Configs
 
             if (!sceneConfig)
             {
-                ConditionalDebug.LogError($"TryGetActiveSceneById failed: config not found for sceneId '{sceneId}'.");
+                EditorDebug.LogError($"TryGetActiveSceneById failed: config not found for sceneId '{sceneId}'.");
                 return false;
             }
             
