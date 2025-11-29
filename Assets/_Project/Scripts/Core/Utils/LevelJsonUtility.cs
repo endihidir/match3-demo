@@ -50,7 +50,7 @@ namespace Core.Level
 
             if (levelJson.grid == null || levelJson.grid.Length != expectedLength)
             {
-                EditorDebug.Log($"Grid length mismatch. Expected: {expectedLength}, Actual: {levelJson.grid?.Length ?? 0}");
+                EditorLogger.Log($"Grid length mismatch. Expected: {expectedLength}, Actual: {levelJson.grid?.Length ?? 0}");
             }
 
             for (var index = 0; index < expectedLength; index++)
@@ -82,7 +82,7 @@ namespace Core.Level
         {
             if (!Enum.TryParse(typeStr, out JsonGridObjectType jsonType))
             {
-                EditorDebug.Log("Invalid grid object type: " + typeStr);
+                EditorLogger.Log("Invalid grid object type: " + typeStr);
                 return CreateRandomItemCell();
             }
 
@@ -217,7 +217,7 @@ namespace Core.Level
 
             if (levelJson.grid == null || levelJson.grid.Length != width * height)
             {
-                EditorDebug.LogError("LevelJson.grid size does not match grid dimensions.");
+                EditorLogger.LogError("LevelJson.grid size does not match grid dimensions.");
                
                 for (int y = 0; y < height; y++)
                 {

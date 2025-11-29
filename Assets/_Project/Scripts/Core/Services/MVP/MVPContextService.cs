@@ -21,10 +21,9 @@ namespace Core.MVPContext
     public interface IMVPContext : IDisposable
     {
         TModel ResolveModel<TModel>() where TModel : class, IModel;
-        TModel ResolveSharedModel<TModel>() where TModel : class, IModel;
+        TModel ResolveGlobalModel<TModel>() where TModel : class, IModel;
         TView ResolveView<TView>() where TView : class, IView;
         TPresenter ResolvePresenter<TPresenter>() where TPresenter : class, IPresenter;
-        bool TryGetPresenter<TPresenter>(out TPresenter presenter) where TPresenter : class, IPresenter;
         void UpdatePresenters();
     }
 
@@ -39,7 +38,7 @@ namespace Core.MVPContext
         {
             if (!owner)
             {
-                EditorDebug.LogError("[ContextFactory] GetContext(Component): owner is null.");
+                EditorLogger.LogError("[ContextFactory] GetContext(Component): owner is null.");
                 return null;
             }
             
@@ -50,7 +49,7 @@ namespace Core.MVPContext
         {
             if (!owner)
             {
-                EditorDebug.LogError("[ContextFactory] GetContext(GameObject): owner is null.");
+                EditorLogger.LogError("[ContextFactory] GetContext(GameObject): owner is null.");
                 return null;
             }
             
@@ -72,7 +71,7 @@ namespace Core.MVPContext
         {
             if (!owner)
             {
-                EditorDebug.LogError("[ContextFactory] Release(Component): owner is null.");
+                EditorLogger.LogError("[ContextFactory] Release(Component): owner is null.");
                 return false;
             }
             
@@ -83,7 +82,7 @@ namespace Core.MVPContext
         {
             if (!owner)
             {
-                EditorDebug.LogError("[ContextFactory] Release(GameObject): owner is null.");
+                EditorLogger.LogError("[ContextFactory] Release(GameObject): owner is null.");
                 return false;
             }
             
@@ -118,7 +117,7 @@ namespace Core.MVPContext
             }
 
             public TModel ResolveModel<TModel>() where TModel : class, IModel => _mvpContextGroup.ResolveModel<TModel>();
-            public TModel ResolveSharedModel<TModel>() where TModel : class, IModel
+            public TModel ResolveGlobalModel<TModel>() where TModel : class, IModel
             {
                 var globalModelContainer = _mvpContextGroup.ObjectResolver.Resolve<IGlobalModelService>();
                 return globalModelContainer.Resolve<TModel>();
@@ -126,9 +125,7 @@ namespace Core.MVPContext
 
             public TView ResolveView<TView>() where TView : class, IView => _mvpContextGroup.ResolveView<TView>();
             public TPresenter ResolvePresenter<TPresenter>() where TPresenter : class, IPresenter => _mvpContextGroup.ResolvePresenter<TPresenter>();
-            public bool TryGetPresenter<TPresenter>(out TPresenter presenter) where TPresenter : class, IPresenter => _mvpContextGroup.TryGetPresenter(out presenter);
             public void UpdatePresenters() => _mvpContextGroup.UpdatePresenters();
-            
             public void Dispose() => _mvpContextGroup.Dispose();
         }
     }

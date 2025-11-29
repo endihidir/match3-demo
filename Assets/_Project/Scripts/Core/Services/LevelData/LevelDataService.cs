@@ -10,7 +10,10 @@ namespace Core.Level
 {
     public interface ILevelDataService
     {
-        bool HasInit { get; }
+        bool IsInitialized { get; } 
+        bool ResetLevelOnLimit { get; }
+        bool UseInfiniteLevel { get; }
+        UniTask WaitUntilInitializedAsync(); 
         LevelDefinition[] LevelDefinitions { get; }
         LevelDefinition SerializeToLevelDefinition(int level);
     }
@@ -18,7 +21,9 @@ namespace Core.Level
     public class LevelDataService : ILevelDataService, IInitializable
     {
         private readonly LevelDataServiceConfig _levelDataServiceConfig;
-        public bool HasInit { get; private set; }
+        public bool IsInitialized { get; private set; }
+        public bool ResetLevelOnLimit => true; //TODO: Get this form config
+        public bool UseInfiniteLevel => true; //TODO: Get this form config
         public LevelDefinition[] LevelDefinitions { get; private set; }
 
         public LevelDataService(AppConfigContainer appConfigContainer)
@@ -39,13 +44,13 @@ namespace Core.Level
                     InitializeFromResources();
                     break;
                 case LevelSourceType.Addressables:
-                    EditorDebug.LogError("Addressables are not supported yet!");
+                    EditorLogger.LogError("Addressables are not supported yet!");
                     return;
             }
 
             await UniTask.Yield();
             
-            HasInit = true;
+            IsInitialized = true;
         }
         
         private void InitializeFromResources()
@@ -74,8 +79,16 @@ namespace Core.Level
             }
             catch (Exception e)
             {
-                EditorDebug.Log("JSON error:" + e);
+                EditorLogger.Log("JSON error:" + e);
                 throw;
+            }
+        }
+        
+        public async UniTask WaitUntilInitializedAsync()
+        {
+            while (!IsInitialized)
+            {
+                await UniTask.Yield();
             }
         }
     }

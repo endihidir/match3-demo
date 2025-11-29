@@ -27,13 +27,13 @@ namespace Core.LifetimeScopes
             
             builder.Register<ObjectPoolService>(Lifetime.Singleton).As<IObjectPoolService>();
             
-            builder.Register<DataPersistenceService>(Lifetime.Singleton).As<IDataPersistenceService>();
+            builder.Register<LevelDataService>(Lifetime.Singleton).As<ILevelDataService, IInitializable>();
             
             builder.Register<MVPContextService>(Lifetime.Singleton).As<IMVPContextService, ITickable>();
             
-            builder.Register<GlobalModelService>(Lifetime.Singleton).As<IGlobalModelService>();
+            builder.Register<DataPersistenceService>(Lifetime.Singleton).As<IDataPersistenceService>();
             
-            builder.Register<LevelDataService>(Lifetime.Singleton).As<ILevelDataService, IInitializable>();
+            builder.Register<GlobalModelService>(Lifetime.Singleton).As<IGlobalModelService>();
         }
     }
 }

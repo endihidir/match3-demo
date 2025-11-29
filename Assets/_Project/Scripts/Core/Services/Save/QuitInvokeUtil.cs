@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -15,7 +16,7 @@ namespace Core.SaveSystem
         private static bool _cached;
         
         private static readonly List<Action> _staticInvokes = new();
-        private static readonly Dictionary<Type, List<Action<UnityEngine.Object>>> _instanceInvokesByDeclType = new();
+        private static readonly Dictionary<Type, List<Action<Object>>> _instanceInvokesByDeclType = new();
         
         private static readonly string[] _allowedAsmPrefixes =
         {
@@ -66,6 +67,7 @@ namespace Core.SaveSystem
             if (_cached) return;
             _cached = true;
 
+            EnsureSaveDispatcherExists();
 #if UNITY_EDITOR
             var methods = TypeCache.GetMethodsWithAttribute<InvokeOnQuitAttribute>();
             
@@ -108,8 +110,7 @@ namespace Core.SaveSystem
 
         private static void TryRegisterMethod(MethodInfo m)
         {
-            if (m.ReturnType != typeof(void) || m.GetParameters().Length != 0)
-                return;
+            if (m.ReturnType != typeof(void) || m.GetParameters().Length != 0) return;
 
             if (m.IsStatic)
             {
@@ -130,7 +131,7 @@ namespace Core.SaveSystem
 
                 if (!_instanceInvokesByDeclType.TryGetValue(declType, out var list))
                 {
-                    list = new List<Action<UnityEngine.Object>>();
+                    list = new List<Action<Object>>();
                     _instanceInvokesByDeclType[declType] = list;
                 }
 
@@ -157,10 +158,10 @@ namespace Core.SaveSystem
             return false;
         }
 
-        private static List<UnityEngine.Object> FindAllOfType(Type t)
+        private static List<Object> FindAllOfType(Type t)
         {
 #if UNITY_2023_1_OR_NEWER
-            var arr = UnityEngine.Object.FindObjectsByType(t, FindObjectsInactive.Include, FindObjectsSortMode.None);
+            var arr = Object.FindObjectsByType(t, FindObjectsInactive.Include, FindObjectsSortMode.None);
             return arr?.ToList();
 #else
             var arr = Resources.FindObjectsOfTypeAll(t);
@@ -174,10 +175,21 @@ namespace Core.SaveSystem
             catch (Exception e) { Debug.LogException(e); }
         }
 
-        private static void SafeInvoke(Action<UnityEngine.Object> a, UnityEngine.Object target)
+        private static void SafeInvoke(Action<Object> a, Object target)
         {
             try { a(target); }
             catch (Exception e) { Debug.LogException(e); }
+        }
+        
+        private static void EnsureSaveDispatcherExists()
+        {
+            if (Object.FindObjectOfType<SaveDispatcher>(true)) return;
+            
+            var obj = new GameObject(nameof(SaveDispatcher));
+            
+            Object.DontDestroyOnLoad(obj);
+            
+            obj.AddComponent<SaveDispatcher>();
         }
     }
 }

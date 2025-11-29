@@ -9,15 +9,8 @@ namespace Core.Level
     {
         [field: SerializeField] public int Count { get; set; }
         [field: SerializeField] public ObstacleType ObstacleType { get; set; }
-
-        public Vector3 WorldPos { get; set; }
-        public event EventHandler<int> OnUIGoalUpdated;
-        
-        public void RaiseUIGoalUpdated()
-        {
-            OnUIGoalUpdated?.Invoke(this, Count);
-        }
-        
+        public event EventHandler<int> OnGoalUpdated;
+        public void RaiseGoalStatus() => OnGoalUpdated?.Invoke(this, Count);
         public LevelGoal Clone()
         {
             return new LevelGoal
