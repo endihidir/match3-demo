@@ -13,16 +13,17 @@ namespace Core.SceneService
 {
     public interface ISceneLoadService
     {
-        public event Action<bool, SceneType> OnBeforeSceneLoad;
-        public event Func<bool, SceneType, UniTask>  OnAfterScenesLoad; 
-        public event Action<string> OnSceneLoad; 
-        public event Action<SceneType> OnScenesReady;
-        public event Action<string> OnSceneUnloaded; 
-        public LoadingProgress LoadingProgress { get; }
-        public bool IsInStartScene { get; }
-        public bool IsInAnyGameScene { get; }
-        public UniTask LoadBootSceneAsync();
-        public UniTask LoadSceneAsync(SceneType sceneType, bool useLoadingScene = false, bool reloadDupScenes = false);
+        event Action<bool, SceneType> OnBeforeSceneLoad;
+        event Func<bool, SceneType, UniTask>  OnAfterScenesLoad; 
+        event Action<string> OnSceneLoad; 
+        event Action<SceneType> OnScenesReady;
+        event Action<string> OnSceneUnloaded; 
+        LoadingProgress LoadingProgress { get; }
+        bool IsInBootScene { get; }
+         bool IsInAnyGameScene { get; }
+        UniTask EnsureBootSceneLoadedAsync();
+        UniTask LoadBootSceneAsync();
+        UniTask LoadSceneAsync(SceneType sceneType, bool useLoadingScene = false, bool reloadDupScenes = false);
     }
 
     public class SceneLoadService : ISceneLoadService
@@ -37,7 +38,7 @@ namespace Core.SceneService
         public event Action<string> OnSceneUnloaded;
         public LoadingProgress LoadingProgress { get; }
 
-        public bool IsInStartScene
+        public bool IsInBootScene
         {
             get
             {
@@ -79,6 +80,16 @@ namespace Core.SceneService
             _operationGroup = new AsyncOperationGroup(10);
 
             LoadingProgress = new LoadingProgress();
+        }
+        
+        public async UniTask EnsureBootSceneLoadedAsync()
+        {
+            if (IsInBootScene)
+            {
+                return;
+            }
+
+            await LoadBootSceneAsync();
         }
 
         public async UniTask LoadBootSceneAsync()
@@ -196,7 +207,7 @@ namespace Core.SceneService
 
             catch (Exception ex)
             {
-                EditorDebug.LogError(ex);
+                EditorLogger.LogError(ex);
             }
         }
 

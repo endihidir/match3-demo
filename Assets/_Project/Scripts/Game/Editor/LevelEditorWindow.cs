@@ -203,7 +203,7 @@ namespace Editor
         {
             if (newHeight <= 0 || newWidth <= 0)
             {
-                EditorDebug.LogError("Invalid grid dimensions. Height and Width must be greater than 0.");
+                EditorLogger.LogError("Invalid grid dimensions. Height and Width must be greater than 0.");
                 return;
             }
 
@@ -244,7 +244,7 @@ namespace Editor
         {
             if (!_config)
             {
-                EditorDebug.LogError("LevelDataServiceConfig is not assigned.");
+                EditorLogger.LogError("LevelDataServiceConfig is not assigned.");
                 return;
             }
 
@@ -261,7 +261,7 @@ namespace Editor
 
             if (levelJson == null)
             {
-                EditorDebug.LogError($"Failed to parse LevelJson from path: {path}");
+                EditorLogger.LogError($"Failed to parse LevelJson from path: {path}");
                 return;
             }
 
@@ -271,7 +271,7 @@ namespace Editor
             
             _gridObjects = LevelJsonUtility.ToEditorGrid(levelJson);
 
-            EditorDebug.Log($"Level {_levelNumber} loaded from {path}");
+            EditorLogger.Log($"Level {_levelNumber} loaded from {path}");
         }
 
         private void SaveOrOverrideLevel()
@@ -285,7 +285,7 @@ namespace Editor
             var json = LevelJsonUtility.BuildPrettyPrintedJson(_levelNumber, _gridWidth, _gridHeight, _moveCount, _gridObjects);
 
             File.WriteAllText(path, json);
-            EditorDebug.Log($"Level {_levelNumber} saved to {path}");
+            EditorLogger.Log($"Level {_levelNumber} saved to {path}");
 
             AssetDatabase.Refresh();
         }

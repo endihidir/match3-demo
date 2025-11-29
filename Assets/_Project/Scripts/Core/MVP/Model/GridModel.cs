@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using Core.Extensions;
+using Core.MVPContext.Interfaces;
 using UnityEngine;
 
 namespace Core.Models
 {
-    public interface IGridModel<T> where T : class
+    public interface IGridModel<T> : IModel where T : class
     {
         int Width { get; }
         int Height { get; }

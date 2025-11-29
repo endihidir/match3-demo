@@ -8,6 +8,21 @@ using UnityEngine;
 
 namespace Core.Pool
 {
+    public interface IObjectPoolService : IReturnToPool, IDisposable
+    {
+        void Initialize();
+        T GetObject<T>(T prefab, bool show = true, int poolCount = 1, Action onComplete = null) where T : Component;
+        T GetObject<T>(bool show = true, float duration = 0f, float delay = 0f, Action onComplete = null) where T : Component, IPooledObject;
+        void RemovePool<T>() where T : IPooledObject;
+    }
+    
+    public interface IReturnToPool
+    {
+        void ReturnObject<T>(T objectRef, float duration = 0f, float delay = 0f, Action onComplete = null) where T : Component;
+        void ReturnAllObjectsOfType<T>(float duration = 0f, float delay = 0f, Action onComplete = null) where T : Component, IPooledObject;
+        void ReturnAll(float duration, float delay, Action onComplete = null);
+    }
+    
     public class ObjectPoolService : IObjectPoolService
     {
         private const string ROOT_NAME = "PooledObjectHolder";
@@ -78,11 +93,11 @@ namespace Core.Pool
 
         public void ReturnObject<T>(T objectRef, float duration, float delay, Action onComplete = null) where T : Component
         {
-            if (!objectRef) { EditorDebug.LogError($"[{GetType()}] Return failed: null/destroyed object"); return; }
+            if (!objectRef) { EditorLogger.LogError($"[{GetType()}] Return failed: null/destroyed object"); return; }
 
             if (!objectRef.TryGetComponent<IPooledObject>(out var pooledObject))
             {
-                EditorDebug.LogError($"[{GetType()}] Return failed: object is not IPooledObject.");
+                EditorLogger.LogError($"[{GetType()}] Return failed: object is not IPooledObject.");
                 return;
             }
 
@@ -90,7 +105,7 @@ namespace Core.Pool
             {
                 if (!_pooledGroupsWithType.TryGetValue(pooledObject.GetType(), out group))
                 {
-                    EditorDebug.LogError($"[{GetType()}] Return failed: no group for '{objectRef.name}' ({objectRef.GetType().Name}).");
+                    EditorLogger.LogError($"[{GetType()}] Return failed: no group for '{objectRef.name}' ({objectRef.GetType().Name}).");
                     return;
                 }
             }
@@ -127,7 +142,7 @@ namespace Core.Pool
 
             if (!_pooledGroupsWithType.TryGetValue(key, out var poolObjectGroup))
             {
-                EditorDebug.LogError($"You can not remove pool because {key} does not exist in the list of prefabs.");
+                EditorLogger.LogError($"You can not remove pool because {key} does not exist in the list of prefabs.");
                 return;
             }
 
@@ -144,7 +159,7 @@ namespace Core.Pool
             {
                 if (!poolAssetConfig.poolObject)
                 {
-                    EditorDebug.LogError("There is missing prefab in pool object list!");
+                    EditorLogger.LogError("There is missing prefab in pool object list!");
                     continue;
                 }
 
@@ -201,7 +216,7 @@ namespace Core.Pool
 
             if (!poolAssetConfig)
             {
-                EditorDebug.LogError("Required component not found!");
+                EditorLogger.LogError("Required component not found!");
                 return null;
             }
         
@@ -227,21 +242,5 @@ namespace Core.Pool
            
             _pooledGroupsWithType = null;
         }
-    }
-    
-    public interface IObjectPoolService : IReturnToPool, IDisposable
-    {
-        public void Initialize();
-        public T GetObject<T>(T prefab, bool show = true, int poolCount = 1, Action onComplete = null) where T : Component;
-        public T GetObject<T>(bool show = true, float duration = 0f, float delay = 0f, Action onComplete = null) where T : Component, IPooledObject;
-    
-        public void ReturnAllObjectsOfType<T>(float duration = 0f, float delay = 0f, Action onComplete = null) where T : Component, IPooledObject;
-        public void ReturnAll(float duration, float delay, Action onComplete = null);
-        public void RemovePool<T>() where T : IPooledObject;
-    }
-    
-    public interface IReturnToPool
-    {
-        public void ReturnObject<T>(T objectRef, float duration = 0f, float delay = 0f, Action onComplete = null) where T : Component;
     }
 }

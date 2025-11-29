@@ -4,7 +4,7 @@ using Debug = UnityEngine.Debug;
 
 namespace Core.Utils
 {
-    public static class EditorDebug
+    public static class EditorLogger
     {
         [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void Log(string message, Object context = null)
