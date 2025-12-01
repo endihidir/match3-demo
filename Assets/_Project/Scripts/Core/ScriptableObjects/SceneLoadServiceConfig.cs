@@ -13,19 +13,19 @@ namespace Core.Configs
         [SerializeField] private List<SceneAssetConfig> sceneAssetConfigs;
         [field: SerializeField] public float ProgressSpeed { get; private set; } = 4f;
         
-        public List<SceneReference> GetSceneData(string sceneId)
+        public List<SceneReference> GetSceneGroupData(string sceneGroupId)
         {
-            var sceneConfig = sceneAssetConfigs.FirstOrDefault(x => x.sceneId == sceneId);
+            var sceneConfig = sceneAssetConfigs.FirstOrDefault(x => x.GetSceneGroupId() == sceneGroupId);
 
             var sceneReferences = new List<SceneReference>();
 
             if (!sceneConfig)
             {
-                EditorLogger.LogError($"GetSceneData failed: config not found for sceneId '{sceneId}'.");
+                EditorLogger.LogError($"GetSceneData failed: config not found for sceneGroupId '{sceneGroupId}'.");
                 return sceneReferences;
             }
             
-            var sceneDataList = sceneConfig.sceneDataList;
+            var sceneDataList = sceneConfig.SceneDataList;
 
             foreach (var groupSceneData in sceneDataList)
             {
@@ -35,19 +35,19 @@ namespace Core.Configs
             return sceneReferences;
         }
         
-        public bool TryGetActiveSceneById(string sceneId, out Scene scene)
+        public bool TryGetActiveSceneBy(string sceneGroupId, out Scene scene)
         {
             scene = default;
             
-            var sceneConfig = sceneAssetConfigs.FirstOrDefault(x => x.sceneId == sceneId);
+            var sceneConfig = sceneAssetConfigs.FirstOrDefault(x => x.GetSceneGroupId() == sceneGroupId);
 
             if (!sceneConfig)
             {
-                EditorLogger.LogError($"TryGetActiveSceneById failed: config not found for sceneId '{sceneId}'.");
+                EditorLogger.LogError($"TryGetActiveSceneById failed: config not found for sceneGroupId '{sceneGroupId}'.");
                 return false;
             }
             
-            var sceneDataList = sceneConfig.sceneDataList;
+            var sceneDataList = sceneConfig.SceneDataList;
 
             foreach (var groupSceneData in sceneDataList)
             {

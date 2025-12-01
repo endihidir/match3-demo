@@ -1,42 +1,55 @@
 using System;
 using System.Collections.Generic;
 using Eflatun.SceneReference;
+using NaughtyAttributes;
+using UnityEngine;
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-using UnityEngine;
 
 namespace Core.Configs
 {
     [CreateAssetMenu(menuName = "Match3/SceneConfigs/SceneAssetConfig")]
     public class SceneAssetConfig : ScriptableObject
     {
-        public string sceneId;
-        public List<GroupSceneData> sceneDataList;
+        [field: SerializeField, ShowIf(nameof(HasMultipleSceneData))] 
+        private string SceneGroupId { get; set; }
+        [field: SerializeField] public List<GroupSceneData> SceneDataList { get;  private set; }
+        private bool HasMultipleSceneData => SceneDataList.Count > 1;
 
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            if (sceneDataList.Count < 1)
+            if (!string.IsNullOrEmpty(SceneGroupId)) return;
+            
+            SceneGroupId = GetSceneGroupId();
+                
+            EditorUtility.SetDirty(this);
+        }
+#endif
+
+        public string GetSceneGroupId()
+        {
+            if (SceneDataList.Count < 1)
             {
-                sceneId = string.Empty;
+                SceneGroupId = string.Empty;
             }
-            else if (sceneDataList.Count == 1)
+            else if (SceneDataList.Count == 1)
             {
-                var sceneData = sceneDataList[0];
+                var sceneData = SceneDataList[0];
                 
                 if (sceneData.sceneReference != null)
                 {
                     sceneData.isActiveByDefault = true;
-                    sceneId = sceneData.sceneReference.Name;
+                    SceneGroupId = sceneData.sceneReference.Name;
                 }
 
-                sceneDataList[0] = sceneData;
+                SceneDataList[0] = sceneData;
             }
             
-            EditorUtility.SetDirty(this);
+            return SceneGroupId;
         }
-#endif
     }
 
     [Serializable]

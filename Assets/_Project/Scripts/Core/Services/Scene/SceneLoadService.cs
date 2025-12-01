@@ -25,7 +25,7 @@ namespace Core.SceneService
 
     public interface ISceneLoadInfo
     {
-        SceneType CurrentSceneType { get; }
+        SceneGroupType CurrentSceneGroupType { get; }
         float ProgressSpeed { get; }
     }
     
@@ -34,7 +34,7 @@ namespace Core.SceneService
         bool IsInAnyGameScene { get; }
         bool IsInBootScene { get; }
         UniTask LoadBootSceneAsync();
-        UniTask LoadSceneAsync(SceneType sceneType, bool useTransitionView = false, bool reloadDupScenes = false);
+        UniTask LoadSceneGroupAsync(SceneGroupType groupType, bool useTransitionView = false, bool reloadDupScenes = false);
     }
 
     public class SceneLoadService : ISceneLoadService, ISceneLoadEvents, ISceneLoadInfo, ITickable
@@ -48,7 +48,7 @@ namespace Core.SceneService
         public event Func<UniTask> OnBeforeTransitionOut;
         public event Action OnTransitionComplete;
         public float ProgressSpeed { get; }
-        public SceneType CurrentSceneType { get; private set; }
+        public SceneGroupType CurrentSceneGroupType { get; private set; }
         public ProgressHandler Progress { get; }
 
         public bool IsInAnyGameScene {
@@ -57,8 +57,8 @@ namespace Core.SceneService
                 var current = SceneManager.GetActiveScene().name;
                 var firstScene = BuildSettingsUtils.GetFirstBuildSceneName();
                 var sceneNames = new List<string> { firstScene };
-                var sceneTypes = Enum.GetValues(typeof(SceneType));
-                sceneNames.AddRange(from SceneType sceneType in sceneTypes select SceneIdLookup.GetSceneId(sceneType));
+                var sceneTypes = Enum.GetValues(typeof(SceneGroupType));
+                sceneNames.AddRange(from SceneGroupType sceneType in sceneTypes select SceneIdLookup.GetSceneGroupId(sceneType));
                 return sceneNames.Contains(current);
             }
         }
@@ -94,30 +94,30 @@ namespace Core.SceneService
             }
         }
 
-        public async UniTask LoadSceneAsync(SceneType sceneType, bool useTransitionView = false, bool reloadDupScenes = false)
+        public async UniTask LoadSceneGroupAsync(SceneGroupType groupType, bool useTransitionView = false, bool reloadDupScenes = false)
         {
-            var loadedScenes = new List<string>();
-
-            var sceneId = SceneIdLookup.GetSceneId(sceneType);
-            
             OnBeforeTransition?.Invoke(useTransitionView);
 
             var sceneCount = SceneManager.sceneCount;
             
             var currentSceneId = SceneManager.GetActiveScene().name;
-
+          
+            var loadedScenes = new List<string>();
+            
             for (var i = 0; i < sceneCount; i++)
             {
                 loadedScenes.Add(currentSceneId);
             }
             
-            CurrentSceneType = SceneIdLookup.GetSceneType(currentSceneId);
+            CurrentSceneGroupType = SceneIdLookup.GetSceneGroupType(currentSceneId);
             
             await UnloadSceneAsync();
                  
             OnScenesUnload?.Invoke();
             
-            var sceneGroup = _sceneLoadConfig.GetSceneData(sceneId);
+            var sceneId = SceneIdLookup.GetSceneGroupId(groupType);
+            
+            var sceneGroup = _sceneLoadConfig.GetSceneGroupData(sceneId);
             
             for (int i = 0; i < sceneGroup.Count; i++)
             {
@@ -150,14 +150,12 @@ namespace Core.SceneService
             
             OnBeforeScenesActivate?.Invoke();
             
-            if (_sceneLoadConfig.TryGetActiveSceneById(sceneId, out var activeScene) && activeScene.IsValid())
+            if (_sceneLoadConfig.TryGetActiveSceneBy(sceneId, out var activeScene) && activeScene.IsValid())
             {
                 SceneManager.SetActiveScene(activeScene);
             }
 
             Progress?.Report(1f);
-
-            CurrentSceneType = sceneType;
             
             if (OnBeforeTransitionOut != null)
             {
@@ -165,6 +163,8 @@ namespace Core.SceneService
             }
             
             OnTransitionComplete?.Invoke();
+            
+            CurrentSceneGroupType = groupType;
         }
 
         private async UniTask UnloadSceneAsync()
@@ -215,9 +215,9 @@ namespace Core.SceneService
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                if(CurrentSceneType == SceneType.MenuScene) return;
+                if(CurrentSceneGroupType == SceneGroupType.MenuScene) return;
                 
-                LoadSceneAsync(SceneType.MenuScene, true).Forget();
+                LoadSceneGroupAsync(SceneGroupType.MenuScene, true).Forget();
             }
         }
     }
