@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using Core.Item;
-using Core.Utils;
+using Core.Level;
 using UnityEngine;
 
-namespace Core.Level
+namespace Core.Utils
 {
-    public static class LevelJsonUtility
+    public static class LevelJsonUtils
     {
         // ========= RUNTIME =========
         private struct ObstacleCounts
@@ -55,7 +55,7 @@ namespace Core.Level
 
             for (var index = 0; index < expectedLength; index++)
             {
-                var pos = CoordinateUtility.ToPos(index, width);
+                var pos = CoordinateUtils.ToPos(index, width);
                 var col = pos.x;
                 var reversedRow = pos.y;
                 var row = height - 1 - reversedRow; // JSON top-down, runtime bottom-up

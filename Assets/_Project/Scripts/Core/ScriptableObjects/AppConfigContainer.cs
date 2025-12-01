@@ -1,6 +1,4 @@
-using Core.Configs;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Core.Configs
 {
@@ -9,7 +7,7 @@ namespace Core.Configs
     {
         public SceneLoadServiceConfig sceneLoadServiceConfig;
         public PoolServiceConfig poolServiceConfig;
-        [FormerlySerializedAs("levelDataConfig")] public LevelDataServiceConfig levelDataServiceConfig;
+        public LevelDataServiceConfig levelDataServiceConfig;
         
         public void Initialize()
         {

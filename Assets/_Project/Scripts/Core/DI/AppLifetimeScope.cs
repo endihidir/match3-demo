@@ -23,7 +23,7 @@ namespace Core.LifetimeScopes
             
             builder.RegisterEntryPoint<AppBootstrapper>();
 
-            builder.Register<SceneLoadService>(Lifetime.Singleton).As<ISceneLoadService>();
+            builder.Register<SceneLoadService>(Lifetime.Singleton).As<ISceneLoadService, ISceneLoadEvents, ISceneLoadInfo, ITickable>();
             
             builder.Register<ObjectPoolService>(Lifetime.Singleton).As<IObjectPoolService>();
             
@@ -34,6 +34,7 @@ namespace Core.LifetimeScopes
             builder.Register<DataPersistenceService>(Lifetime.Singleton).As<IDataPersistenceService>();
             
             builder.Register<GlobalModelService>(Lifetime.Singleton).As<IGlobalModelService>();
+            
         }
     }
 }

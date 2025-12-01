@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using Eflatun.SceneReference;
 using Core.Configs;
@@ -8,121 +9,116 @@ using Core.Utils;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
+using VContainer.Unity;
 
 namespace Core.SceneService
 {
-    public interface ISceneLoadService
+    public interface ISceneLoadEvents
     {
-        event Action<bool, SceneType> OnBeforeSceneLoad;
-        event Func<bool, SceneType, UniTask>  OnAfterScenesLoad; 
-        event Action<string> OnSceneLoad; 
-        event Action<SceneType> OnScenesReady;
-        event Action<string> OnSceneUnloaded; 
-        LoadingProgress LoadingProgress { get; }
-        bool IsInBootScene { get; }
-         bool IsInAnyGameScene { get; }
-        UniTask EnsureBootSceneLoadedAsync();
-        UniTask LoadBootSceneAsync();
-        UniTask LoadSceneAsync(SceneType sceneType, bool useLoadingScene = false, bool reloadDupScenes = false);
+        event Action<bool> OnBeforeTransition;
+        event Action OnScenesUnload; 
+        ProgressHandler Progress { get; }
+        event Action OnBeforeScenesActivate; 
+        event Func<UniTask>  OnBeforeTransitionOut; 
+        event Action OnTransitionComplete;
     }
 
-    public class SceneLoadService : ISceneLoadService
+    public interface ISceneLoadInfo
+    {
+        SceneType CurrentSceneType { get; }
+        float ProgressSpeed { get; }
+    }
+    
+    public interface ISceneLoadService
+    {
+        bool IsInAnyGameScene { get; }
+        bool IsInBootScene { get; }
+        UniTask LoadBootSceneAsync();
+        UniTask LoadSceneAsync(SceneType sceneType, bool useTransitionView = false, bool reloadDupScenes = false);
+    }
+
+    public class SceneLoadService : ISceneLoadService, ISceneLoadEvents, ISceneLoadInfo, ITickable
     {
         private readonly SceneLoadServiceConfig _sceneLoadConfig;
         private readonly AsyncOperationHandleGroup _handleGroup;
         private readonly AsyncOperationGroup _operationGroup;
-        public event Action<bool, SceneType> OnBeforeSceneLoad;
-        public event Func<bool, SceneType, UniTask> OnAfterScenesLoad;
-        public event Action<string> OnSceneLoad;
-        public event Action<SceneType> OnScenesReady;
-        public event Action<string> OnSceneUnloaded;
-        public LoadingProgress LoadingProgress { get; }
+        public event Action<bool> OnBeforeTransition;
+        public event Action OnScenesUnload;
+        public event Action OnBeforeScenesActivate;
+        public event Func<UniTask> OnBeforeTransitionOut;
+        public event Action OnTransitionComplete;
+        public float ProgressSpeed { get; }
+        public SceneType CurrentSceneType { get; private set; }
+        public ProgressHandler Progress { get; }
+
+        public bool IsInAnyGameScene {
+            get
+            {
+                var current = SceneManager.GetActiveScene().name;
+                var firstScene = BuildSettingsUtils.GetFirstBuildSceneName();
+                var sceneNames = new List<string> { firstScene };
+                var sceneTypes = Enum.GetValues(typeof(SceneType));
+                sceneNames.AddRange(from SceneType sceneType in sceneTypes select SceneIdLookup.GetSceneId(sceneType));
+                return sceneNames.Contains(current);
+            }
+        }
 
         public bool IsInBootScene
         {
             get
             {
                 var current = SceneManager.GetActiveScene().name;
-
+            
                 var firstScene = BuildSettingsUtils.GetFirstBuildSceneName();
 
                 return current == firstScene;
             }
         }
 
-        public bool IsInAnyGameScene {
-            get
-            {
-                var current = SceneManager.GetActiveScene().name;
-
-                var firstScene = BuildSettingsUtils.GetFirstBuildSceneName();
-                var sceneNames = new List<string> { firstScene };
-
-                var sceneTypes = Enum.GetValues(typeof(SceneType));
-                
-                foreach (var type in sceneTypes)
-                {
-                    var sceneType = (SceneType)type;
-                    
-                    sceneNames.Add(SceneIdLookup.GetSceneId(sceneType));
-                }
-                
-                return sceneNames.Contains(current);
-            }
-        }
-
         public SceneLoadService(AppConfigContainer appConfigContainer)
         {
             _sceneLoadConfig = appConfigContainer.sceneLoadServiceConfig;
-
             _handleGroup = new AsyncOperationHandleGroup(10);
-
             _operationGroup = new AsyncOperationGroup(10);
-
-            LoadingProgress = new LoadingProgress();
-        }
-        
-        public async UniTask EnsureBootSceneLoadedAsync()
-        {
-            if (IsInBootScene)
-            {
-                return;
-            }
-
-            await LoadBootSceneAsync();
+            Progress = new ProgressHandler();
+            ProgressSpeed = _sceneLoadConfig.ProgressSpeed;
         }
 
         public async UniTask LoadBootSceneAsync()
         {
-            var current = SceneManager.GetActiveScene().name;
-
             var firstScene = BuildSettingsUtils.GetFirstBuildSceneName();
 
-            if (current != firstScene)
+            if (!IsInBootScene)
             {
                 await SceneManager.LoadSceneAsync(firstScene, LoadSceneMode.Single);
             }
         }
 
-        public async UniTask LoadSceneAsync(SceneType sceneType, bool useLoadingScene = false, bool reloadDupScenes = false)
+        public async UniTask LoadSceneAsync(SceneType sceneType, bool useTransitionView = false, bool reloadDupScenes = false)
         {
             var loadedScenes = new List<string>();
 
             var sceneId = SceneIdLookup.GetSceneId(sceneType);
-
-            OnBeforeSceneLoad?.Invoke(useLoadingScene, sceneType);
+            
+            OnBeforeTransition?.Invoke(useTransitionView);
 
             var sceneCount = SceneManager.sceneCount;
+            
+            var currentSceneId = SceneManager.GetActiveScene().name;
 
             for (var i = 0; i < sceneCount; i++)
             {
-                loadedScenes.Add(SceneManager.GetSceneAt(i).name);
+                loadedScenes.Add(currentSceneId);
             }
-
+            
+            CurrentSceneType = SceneIdLookup.GetSceneType(currentSceneId);
+            
             await UnloadSceneAsync();
-
+                 
+            OnScenesUnload?.Invoke();
+            
             var sceneGroup = _sceneLoadConfig.GetSceneData(sceneId);
-
+            
             for (int i = 0; i < sceneGroup.Count; i++)
             {
                 var sceneReference = sceneGroup[i];
@@ -141,74 +137,34 @@ namespace Core.SceneService
 
                     _handleGroup.Handles.Add(sceneHandle);
                 }
-
-                OnSceneLoad?.Invoke(sceneReference.Name);
             }
 
             while (!_operationGroup.IsDone || !_handleGroup.IsDone)
             {
-                var avg = CombinedProgress(_operationGroup, _handleGroup);
+                var avg = AsyncOperationUtils.CombinedProgress(_operationGroup, _handleGroup);
 
-                LoadingProgress?.Report(avg);
+                Progress?.Report(avg);
 
                 await UniTask.Delay(100);
             }
-
+            
+            OnBeforeScenesActivate?.Invoke();
+            
             if (_sceneLoadConfig.TryGetActiveSceneById(sceneId, out var activeScene) && activeScene.IsValid())
             {
                 SceneManager.SetActiveScene(activeScene);
             }
 
-            LoadingProgress?.Report(1f);
+            Progress?.Report(1f);
 
-            if (OnAfterScenesLoad != null)
+            CurrentSceneType = sceneType;
+            
+            if (OnBeforeTransitionOut != null)
             {
-                await InvokeAfterScenesLoadAll(useLoadingScene, sceneId);
+                await OnBeforeTransitionOut.Invoke();
             }
-
-            OnScenesReady?.Invoke(sceneType);
-        }
-
-        private static float CombinedProgress(AsyncOperationGroup op, AsyncOperationHandleGroup handle)
-        {
-            var nOp = op.Operations.Count;
-            var nHd = handle.Handles.Count;
-
-            if (nOp == 0 && nHd == 0) return 0f;
-            if (nOp == 0) return handle.Progress;
-            if (nHd == 0) return op.Progress;
-
-            return (op.Progress * nOp + handle.Progress * nHd) / (nOp + nHd);
-        }
-
-        private async UniTask InvokeAfterScenesLoadAll(bool useUI, string sceneName)
-        {
-            var list = OnAfterScenesLoad?.GetInvocationList();
-
-            if (list == null || list.Length == 0) return;
-
-            var tasks = new UniTask[list.Length];
-
-            for (int i = 0; i < list.Length; i++)
-            {
-                var fn = (Func<bool, string, UniTask>)list[i];
-                tasks[i] = SafeCall(fn, useUI, sceneName);
-            }
-
-            await UniTask.WhenAll(tasks);
-        }
-
-        private async UniTask SafeCall(Func<bool, string, UniTask> fn, bool useUI, string sceneName)
-        {
-            try
-            {
-                await fn(useUI, sceneName);
-            }
-
-            catch (Exception ex)
-            {
-                EditorLogger.LogError(ex);
-            }
+            
+            OnTransitionComplete?.Invoke();
         }
 
         private async UniTask UnloadSceneAsync()
@@ -224,8 +180,6 @@ namespace Core.SceneService
                 if (sceneName == bootSceneName) continue;
 
                 await Addressables.UnloadSceneAsync(handle);
-                
-                OnSceneUnloaded?.Invoke(sceneName);
             }
 
             _handleGroup.Handles.Clear();
@@ -245,8 +199,6 @@ namespace Core.SceneService
                 if (op == null) continue;
 
                 _operationGroup.Operations.Add(op);
-                
-                OnSceneUnloaded?.Invoke(sceneName);
             }
 
             while (!_operationGroup.IsDone)
@@ -258,16 +210,15 @@ namespace Core.SceneService
 
             await Resources.UnloadUnusedAssets();
         }
-    }
-    
-    public class LoadingProgress : IProgress<float>
-    {
-        public event Action<float> Progressed;
-        
-        private const float RATIO = 1f;
-        public void Report(float value)
+
+        public void Tick()
         {
-            Progressed?.Invoke(value / RATIO);
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                if(CurrentSceneType == SceneType.MenuScene) return;
+                
+                LoadSceneAsync(SceneType.MenuScene, true).Forget();
+            }
         }
     }
 }

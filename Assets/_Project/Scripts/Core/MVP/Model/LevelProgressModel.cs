@@ -29,10 +29,23 @@ namespace Core.Models
         private readonly ILevelDataService _levelDataService;
 
         private LevelProgressData _levelProgressData;
-
-        public int CurrentLevelIndex => _levelProgressData.currentLevelIndex;
-        public int DisplayLevelNumber => _levelDataService.UseInfiniteLevel ? _levelProgressData.displayLevelNumber : _levelProgressData.currentLevelIndex + 1;
         public int MaxLevel => _levelDataService.LevelDefinitions?.Length ?? 0;
+        public int CurrentLevelIndex => _levelProgressData.currentLevelIndex;
+        public int DisplayLevelNumber
+        {
+            get
+            {
+                if (_levelDataService.UseInfiniteLevel) return _levelProgressData.displayLevelNumber;
+
+                var defs = _levelDataService.LevelDefinitions;
+                
+                if (defs == null || defs.Length == 0) return 1;
+
+                var idx = Mathf.Clamp(_levelProgressData.currentLevelIndex, 0, defs.Length - 1);
+                
+                return defs[idx].LevelNumber;
+            }
+        }
 
         public event Action OnProgressChanged;
 
@@ -50,58 +63,54 @@ namespace Core.Models
             _levelProgressData = _persistence.LoadFromJson(SaveKey, defaultState);
             
             Clamp();
+            
+            EnsureInfiniteDisplayIsValid();
+        }
+        
+        private void EnsureInfiniteDisplayIsValid()
+        {
+            if (!_levelDataService.UseInfiniteLevel) return;
+
+            _levelProgressData.displayLevelNumber = Mathf.Max(_levelProgressData.displayLevelNumber, _levelProgressData.currentLevelIndex + 1);
         }
 
         private void Clamp()
         {
-            var max = MaxLevel;
-            
-            _levelProgressData.currentLevelIndex = max > 0 ? Mathf.Clamp(_levelProgressData.currentLevelIndex, 0, max - 1) 
+            _levelProgressData.currentLevelIndex = MaxLevel > 0 ? Mathf.Clamp(_levelProgressData.currentLevelIndex, 0, MaxLevel - 1) 
                                                            : Mathf.Max(0, _levelProgressData.currentLevelIndex);
-            
-            if (!_levelDataService.UseInfiniteLevel)
-                _levelProgressData.displayLevelNumber = _levelProgressData.currentLevelIndex + 1;
+
+            if (_levelDataService.UseInfiniteLevel)
+                _levelProgressData.displayLevelNumber = Mathf.Max(_levelProgressData.displayLevelNumber, 1);
         }
 
         public void SetLevel(int levelIndex)
         {
-            var max = MaxLevel;
-            
-            if (max <= 0) return;
+            if (MaxLevel <= 0) return;
 
-            var clamped = Mathf.Clamp(levelIndex, 0, max - 1);
+            var clamped = Mathf.Clamp(levelIndex, 0, MaxLevel - 1);
             
             if (clamped == _levelProgressData.currentLevelIndex) return;
 
             _levelProgressData.currentLevelIndex = clamped;
 
             if (!_levelDataService.UseInfiniteLevel)
-                _levelProgressData.displayLevelNumber = clamped + 1;
+                _levelProgressData.displayLevelNumber = _levelDataService.LevelDefinitions[clamped].LevelNumber;
 
             RaiseChanged();
         }
 
         public void AdvanceLevel()
         {
-            var max = MaxLevel;
-            
-            if (max <= 0) return;
+            if (MaxLevel <= 0) return;
 
             var next = _levelProgressData.currentLevelIndex + 1;
-
-            if (next >= max)
-                next = _levelDataService.ResetLevelOnLimit ? 0 : max - 1;
+            
+            next = next >= MaxLevel ? (_levelDataService.ResetLevelOnLimit ? 0 : MaxLevel - 1) : next;
 
             _levelProgressData.currentLevelIndex = next;
 
             if (_levelDataService.UseInfiniteLevel)
-            {
                 _levelProgressData.displayLevelNumber++;
-            }
-            else
-            {
-                _levelProgressData.displayLevelNumber = next + 1;
-            }
 
             RaiseChanged();
         }
@@ -109,7 +118,9 @@ namespace Core.Models
         public void ResetProgress()
         {
             _levelProgressData.currentLevelIndex = 0;
-            _levelProgressData.displayLevelNumber = 1;
+            
+            if (_levelDataService.UseInfiniteLevel)
+                _levelProgressData.displayLevelNumber = 1;
 
             RaiseChanged();
         }

@@ -11,7 +11,7 @@ namespace Core.Presenters
 {
     public interface IMainMenuPresenter : IPresenter, IDisposable
     {
-        IMainMenuPresenter Initialize(IMainMenuView mainMenuView, IPlayButtonView playButtonView);
+        
     }
     
     public sealed class MainMenuPresenter : IMainMenuPresenter
@@ -19,18 +19,16 @@ namespace Core.Presenters
         private readonly ILevelProgressReadModel _levelProgressReadModel;
         private readonly ISceneLoadService _sceneLoadService;
         
+        private IPlayButtonView _playButtonView;
+        
         public MainMenuPresenter(ISceneLoadService sceneLoadService, IGlobalModelService globalModelService)
         {
             _sceneLoadService = sceneLoadService;
             _levelProgressReadModel = globalModelService.Resolve<LevelProgressModel>();
         }
         
-        private IMainMenuView _mainMenuView;
-        private IPlayButtonView _playButtonView;
-        
-        public IMainMenuPresenter Initialize(IMainMenuView mainMenuView, IPlayButtonView playButtonView)
+        public IMainMenuPresenter Initialize(IPlayButtonView playButtonView)
         {
-            _mainMenuView = mainMenuView;
             _playButtonView = playButtonView;
             
             playButtonView.SetText($"Level {_levelProgressReadModel.DisplayLevelNumber}");
@@ -42,7 +40,7 @@ namespace Core.Presenters
 
         private void AddListeners()
         {
-            _playButtonView.Button.onClick.AddListener(OnClickPlayButton);
+            _playButtonView.ClickedEvent.AddListener(OnClickPlayButton);
         }
 
         private void OnClickPlayButton() => LoadSceneAsync().Forget();
@@ -53,7 +51,7 @@ namespace Core.Presenters
 
         private void RemoveListeners()
         {
-            _playButtonView.Button.onClick.RemoveListener(OnClickPlayButton);
+            _playButtonView.ClickedEvent.RemoveListener(OnClickPlayButton);
         }
         
         public void Dispose()

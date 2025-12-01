@@ -11,6 +11,7 @@ namespace Core.Configs
     public class SceneLoadServiceConfig : ScriptableObject
     {
         [SerializeField] private List<SceneAssetConfig> sceneAssetConfigs;
+        [field: SerializeField] public float ProgressSpeed { get; private set; } = 4f;
         
         public List<SceneReference> GetSceneData(string sceneId)
         {

@@ -61,8 +61,13 @@ namespace Core.Item
         public void ApplyItem(GridItemKind itemKind,  int typeId)
         {
             ItemKind = itemKind;
+            
             TypeId = typeId;
+            
             SpriteRenderer.sprite = ItemSpriteProvider.GetSprite(ItemKind, TypeId);
+            
+            if(ItemEffect != null) ItemEffectFactory.ReleaseEffect(ItemEffect);
+            
             ItemEffect = ItemEffectFactory.GetEffect(this, ItemKind, TypeId);
         }
 

@@ -15,3 +15,4 @@ MonoBehaviour:
   sceneAssetConfigs:
   - {fileID: 11400000, guid: 19a51d13761b2354fa6241b6f7c0f5dc, type: 2}
   - {fileID: 11400000, guid: db9c0b26870358f45911076fa81ba0dd, type: 2}
+  <ProgressSpeed>k__BackingField: 10
