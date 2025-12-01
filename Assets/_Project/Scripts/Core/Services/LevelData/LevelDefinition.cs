@@ -7,11 +7,11 @@ namespace Core.Level
 {
     public class LevelDefinition
     {
-        public int LevelNumber { get; private set; }
-        public GridObjectTypeData[,] GridObjectTypes { get; private set; }
-        public Vector2Int GridSize { get; private set; }
-        public List<LevelGoal> Goals { get; private set; }
-        public int MoveLimit { get; private set; }
+        public int LevelNumber { get; }
+        public GridObjectTypeData[,] GridObjectTypes { get; }
+        public Vector2Int GridSize { get; }
+        public List<LevelGoal> Goals { get; }
+        public int MoveLimit { get; }
 
         public LevelDefinition(int levelNumber, int moveLimit, GridObjectTypeData[,] gridItems, List<LevelGoal> goals)
         {
@@ -24,7 +24,7 @@ namespace Core.Level
 
         public override string ToString()
         {
-            return $"LevelNumber:{LevelNumber}, GridSize:{GridSize}, NumberOfMoves:{MoveLimit}, Goals:{Goals.Count}";
+            return $"LevelNumber:{LevelNumber}, MoveLimit:{MoveLimit}, GridSize:{GridSize}, Goals:{Goals.Count}";
         }
     }
     

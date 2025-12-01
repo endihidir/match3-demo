@@ -135,7 +135,7 @@ namespace Core.Extensions
 
             for (int i = 0; i < cellCount; i++)
             {
-                var pos = CoordinateUtility.ToPos(i, model.Width);
+                var pos = CoordinateUtils.ToPos(i, model.Width);
                 var center = model.GridToWorld(pos, cam);
                 var half= model.CellSize * 0.5f;
                 

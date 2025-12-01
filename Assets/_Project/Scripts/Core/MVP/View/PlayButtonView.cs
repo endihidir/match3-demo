@@ -1,27 +1,32 @@
 using Core.MVPContext.Interfaces;
+using Core.UI;
 using TMPro;
 using UnityEngine.UI;
+using ButtonClickedEvent = UnityEngine.UI.Button.ButtonClickedEvent;
 
 namespace Core.Views
 {
     public interface IPlayButtonView : IView
     {
-        public Button Button { get; }
+        public ButtonClickedEvent ClickedEvent { get; }
         void SetText(string text);
-        IPlayButtonView Initialize(Button button, TextMeshProUGUI buttonText);
+        void EnableButton(bool value);
     }
     public sealed class PlayButtonView : IPlayButtonView
     {
-        public Button Button { get; private set; }
+        private Button _playButton;
         private TextMeshProUGUI _label;
+        public ButtonClickedEvent ClickedEvent { get; private set; }
         
-        public IPlayButtonView Initialize(Button button, TextMeshProUGUI label)
+        public IPlayButtonView Initialize(PlayButtonUI playButtonUI)
         {
-            Button  = button;
-            _label = label;
+            _playButton = playButtonUI.Button;
+            _label = playButtonUI.Label;
+            ClickedEvent = _playButton.onClick;
             return this;
         }
 
+        public void EnableButton(bool value) => _playButton.interactable = value;
         public void SetText(string text) => _label?.SetText(text);
     }
 }

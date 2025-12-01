@@ -269,7 +269,7 @@ namespace Editor
             _gridHeight = levelJson.grid_height;
             _moveCount = levelJson.move_count;
             
-            _gridObjects = LevelJsonUtility.ToEditorGrid(levelJson);
+            _gridObjects = LevelJsonUtils.ToEditorGrid(levelJson);
 
             EditorLogger.Log($"Level {_levelNumber} loaded from {path}");
         }
@@ -282,7 +282,7 @@ namespace Editor
             /*var levelJson = LevelJsonUtility.ConvertToLevelJson(_levelNumber, _gridWidth, _gridHeight, _moveCount, _gridObjects);
             var json = JsonUtility.ToJson(levelJson, true);*/
 
-            var json = LevelJsonUtility.BuildPrettyPrintedJson(_levelNumber, _gridWidth, _gridHeight, _moveCount, _gridObjects);
+            var json = LevelJsonUtils.BuildPrettyPrintedJson(_levelNumber, _gridWidth, _gridHeight, _moveCount, _gridObjects);
 
             File.WriteAllText(path, json);
             EditorLogger.Log($"Level {_levelNumber} saved to {path}");

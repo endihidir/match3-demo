@@ -29,7 +29,7 @@ namespace Core.Bootstrapper
         {
             if(!_sceneLoadService.IsInAnyGameScene) return;
 
-            await _sceneLoadService.EnsureBootSceneLoadedAsync();
+            await _sceneLoadService.LoadBootSceneAsync();
             
             await _levelDataService.WaitUntilInitializedAsync();
             

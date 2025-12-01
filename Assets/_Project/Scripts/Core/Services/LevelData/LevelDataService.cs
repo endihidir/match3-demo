@@ -61,7 +61,7 @@ namespace Core.Level
 
             foreach (var asset in assets)
             {
-                var levelDefinition = LevelJsonUtility.ParseToLevelDefinition(asset);
+                var levelDefinition = LevelJsonUtils.ParseToLevelDefinition(asset);
                 list.Add(levelDefinition);
             }
             
@@ -75,7 +75,7 @@ namespace Core.Level
             try
             {
                 var jsonFile = Resources.Load<TextAsset>(_levelDataServiceConfig.GetResourcePath(level));
-                return LevelJsonUtility.ParseToLevelDefinition(jsonFile);
+                return LevelJsonUtils.ParseToLevelDefinition(jsonFile);
             }
             catch (Exception e)
             {
