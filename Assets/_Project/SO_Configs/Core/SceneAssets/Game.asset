@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23ec87ac7d394d118772e2aa07182c2f, type: 3}
   m_Name: Game
   m_EditorClassIdentifier: 
-  sceneId: GameScene
-  sceneDataList:
+  <OverrideSceneId>k__BackingField: 0
+  <SceneId>k__BackingField: GameScene
+  <SceneDataList>k__BackingField:
   - isActiveByDefault: 1
     sceneReference:
       asset: {fileID: 102900000, guid: 137bc6d47969eb046bb132f70438c5d4, type: 3}

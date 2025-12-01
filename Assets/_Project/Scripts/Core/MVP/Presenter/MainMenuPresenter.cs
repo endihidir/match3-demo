@@ -46,7 +46,7 @@ namespace Core.Presenters
         private void OnClickPlayButton() => LoadSceneAsync().Forget();
         private async UniTask LoadSceneAsync()
         {
-            await _sceneLoadService.LoadSceneAsync(SceneType.GameScene, true);
+            await _sceneLoadService.LoadSceneGroupAsync(SceneGroupType.GameScene, true);
         }
 
         private void RemoveListeners()

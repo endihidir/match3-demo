@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23ec87ac7d394d118772e2aa07182c2f, type: 3}
   m_Name: Menu
   m_EditorClassIdentifier: 
-  sceneId: MenuScene
-  sceneDataList:
+  <SceneGroupId>k__BackingField: MenuScene
+  <SceneDataList>k__BackingField:
   - isActiveByDefault: 1
     sceneReference:
       asset: {fileID: 102900000, guid: 167a430e5ab976243a6287b0fc320334, type: 3}

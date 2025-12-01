@@ -35,7 +35,7 @@ namespace Core.Bootstrapper
             
             _objectPoolService.Initialize();
             
-            await _sceneLoadService.LoadSceneAsync(SceneType.MenuScene);
+            await _sceneLoadService.LoadSceneGroupAsync(SceneGroupType.MenuScene);
         }
     }
 }
