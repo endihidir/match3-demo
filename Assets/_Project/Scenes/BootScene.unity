@@ -349,7 +349,7 @@ GameObject:
   - component: {fileID: 914714660}
   - component: {fileID: 914714661}
   m_Layer: 0
-  m_Name: BootSceneViewContext
+  m_Name: TransitionViewContext
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -382,7 +382,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49d6935990344907a8b4c1efe13d3b58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <SceneSystems>k__BackingField:
+  <ToggleObjects>k__BackingField:
   - {fileID: 1393686377}
   - {fileID: 1594220465}
   <CanvasGroup>k__BackingField: {fileID: 356978612}
@@ -530,55 +530,6 @@ MonoBehaviour:
   <SliderImage>k__BackingField: {fileID: 840731220}
   <SliderTxt>k__BackingField: {fileID: 2024630190}
   <PercentageTxt>k__BackingField: {fileID: 1836220343}
---- !u!1 &1320785111
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1320785112}
-  - component: {fileID: 1320785113}
-  m_Layer: 0
-  m_Name: BootLifetimeScope
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1320785112
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1320785111}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1320785113
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1320785111}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 06e41da061c540a1a4a7043119529689, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentReference:
-    TypeName: Core.LifetimeScopes.AppLifetimeScope
-  autoRun: 1
-  autoInjectGameObjects:
-  - {fileID: 914714659}
 --- !u!1 &1393686377
 GameObject:
   m_ObjectHideFlags: 0
@@ -591,7 +542,7 @@ GameObject:
   - component: {fileID: 1393686380}
   - component: {fileID: 1393686378}
   m_Layer: 0
-  m_Name: MainCamera
+  m_Name: Camera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -680,7 +631,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 0
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -1063,7 +1014,7 @@ GameObject:
   - component: {fileID: 2045105128}
   - component: {fileID: 2045105127}
   m_Layer: 5
-  m_Name: Canvas_UI
+  m_Name: Canvas_Transition
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1126,7 +1077,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_VertexColorAlwaysGammaSpace: 0
+  m_VertexColorAlwaysGammaSpace: 1
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -1158,6 +1109,5 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1393686381}
-  - {fileID: 1320785112}
   - {fileID: 914714660}
   - {fileID: 2045105130}

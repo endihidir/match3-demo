@@ -16,17 +16,7 @@ MonoBehaviour:
   m_Data:
     m_SerializedData: []
   m_GUID: 8ea765aaea279344ba07e3de98e9e535
-  m_SerializeEntries:
-  - m_GUID: 137bc6d47969eb046bb132f70438c5d4
-    m_Address: Assets/_Project/Scenes/GameScene.unity
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 167a430e5ab976243a6287b0fc320334
-    m_Address: Assets/_Project/Scenes/MenuScene.unity
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
+  m_SerializeEntries: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 40b0144963eec554bac91fe21001b940, type: 2}
   m_SchemaSet:
