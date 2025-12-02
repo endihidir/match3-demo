@@ -1,5 +1,4 @@
 using System;
-using Core.Extensions;
 using Core.MVPContext.Interfaces;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
@@ -10,8 +9,8 @@ namespace Core.Views
 {
     public interface IFadeAnimationView : IView, IDisposable
     {
-        UniTask EnableAsync(float duration = 0f, float delay = 0f, Action onComplete = null);
-        UniTask DisableAsync(float duration = 0.2f, float delay = 1f, Action onComplete = null);
+        UniTask FadeInAsync(float duration = 0f, float delay = 0f, Action onComplete = null);
+        UniTask FadeOutAsync(float duration = 0.2f, float delay = 1f, Action onComplete = null);
     }
     
     public class FadeAnimationView : IFadeAnimationView
@@ -32,11 +31,13 @@ namespace Core.Views
             return this;
         }
 
-        public async UniTask EnableAsync(float duration = 0f, float delay = 0f, Action onComplete = null)
+        public async UniTask FadeInAsync(float duration = 0f, float delay = 0f, Action onComplete = null)
         {
             _sliderTween.Kill(true);
             
-            _sliderTween = _graphic ? _graphic.DOFadeSafe(1f, duration) : _canvasGroup.DOFadeSafe(1f, duration);
+            SetInteractable(true);
+            
+            _sliderTween = _graphic ? _graphic.DOFade(1f, duration) : _canvasGroup.DOFade(1f, duration);
             
             _sliderTween.SetEase(Ease.Linear).SetDelay(delay);
 
@@ -45,22 +46,35 @@ namespace Core.Views
             onComplete?.Invoke();
         }
 
-        public async UniTask DisableAsync(float duration = 0.2f, float delay = 1f, Action onComplete = null)
+        public async UniTask FadeOutAsync(float duration = 0.2f, float delay = 1f, Action onComplete = null)
         {
             _sliderTween.Kill(true);
             
-            _sliderTween = _graphic ? _graphic.DOFadeSafe(0f, duration) : _canvasGroup.DOFadeSafe(0f, duration);
+            _sliderTween = _graphic ? _graphic.DOFade(0f, duration) : _canvasGroup.DOFade(0f, duration);
             
             _sliderTween.SetEase(Ease.Linear).SetDelay(delay);
 
             await _sliderTween.AsyncWaitForCompletion();
             
+            SetInteractable(false);
+            
             onComplete?.Invoke();
         }
-
-        public void Dispose()
+        
+        private void SetInteractable(bool value)
         {
-            _sliderTween.Kill();
+            if (_canvasGroup)
+            {
+                _canvasGroup.interactable = value;
+                _canvasGroup.blocksRaycasts = value;
+            }
+
+            if (_graphic)
+            {
+                _graphic.raycastTarget = value;
+            }
         }
+
+        public void Dispose() => _sliderTween.Kill();
     }
 }

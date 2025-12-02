@@ -5,11 +5,14 @@ using Cysharp.Threading.Tasks;
 using Eflatun.SceneReference;
 using Core.Configs;
 using Core.Generated;
+using Core.UI;
 using Core.Utils;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
+using VContainer;
 using VContainer.Unity;
+using Object = UnityEngine.Object;
 
 namespace Core.SceneService
 {
@@ -33,7 +36,7 @@ namespace Core.SceneService
     {
         bool IsInAnyGameScene { get; }
         bool IsInBootScene { get; }
-        UniTask LoadBootSceneAsync();
+        UniTask InitBootSceneAsync();
         UniTask LoadSceneGroupAsync(SceneGroupType groupType, bool useTransitionView = false, bool reloadDupScenes = false);
     }
 
@@ -42,56 +45,50 @@ namespace Core.SceneService
         private readonly SceneLoadServiceConfig _sceneLoadConfig;
         private readonly AsyncOperationHandleGroup _handleGroup;
         private readonly AsyncOperationGroup _operationGroup;
+        private readonly string _firstSceneName;
+        private readonly IObjectResolver _objectResolver;
         public event Action<bool> OnBeforeTransition;
         public event Action OnScenesUnload;
         public event Action OnBeforeScenesActivate;
         public event Func<UniTask> OnBeforeTransitionOut;
         public event Action OnTransitionComplete;
-        public float ProgressSpeed { get; }
         public SceneGroupType CurrentSceneGroupType { get; private set; }
         public ProgressHandler Progress { get; }
+        public float ProgressSpeed { get; }
+        private string ActiveSceneName => SceneManager.GetActiveScene().name;
 
-        public bool IsInAnyGameScene {
-            get
-            {
-                var current = SceneManager.GetActiveScene().name;
-                var firstScene = BuildSettingsUtils.GetFirstBuildSceneName();
-                var sceneNames = new List<string> { firstScene };
-                var sceneTypes = Enum.GetValues(typeof(SceneGroupType));
-                sceneNames.AddRange(from SceneGroupType sceneType in sceneTypes select SceneIdLookup.GetSceneGroupId(sceneType));
-                return sceneNames.Contains(current);
-            }
-        }
-
-        public bool IsInBootScene
+        public bool IsInAnyGameScene 
         {
             get
             {
-                var current = SceneManager.GetActiveScene().name;
-            
-                var firstScene = BuildSettingsUtils.GetFirstBuildSceneName();
-
-                return current == firstScene;
+                var sceneNames = new List<string> { _firstSceneName };
+                var sceneGroupTypes = Enum.GetValues(typeof(SceneGroupType));
+                sceneNames.AddRange(from SceneGroupType sceneGroupType in sceneGroupTypes select SceneIdLookup.GetSceneGroupId(sceneGroupType));
+                return sceneNames.Contains(ActiveSceneName);
             }
         }
 
-        public SceneLoadService(AppConfigContainer appConfigContainer)
+        public bool IsInBootScene => ActiveSceneName.Equals(_firstSceneName);
+
+        public SceneLoadService(AppConfigContainer appConfigContainer, IObjectResolver objectResolver)
         {
             _sceneLoadConfig = appConfigContainer.sceneLoadServiceConfig;
             _handleGroup = new AsyncOperationHandleGroup(10);
             _operationGroup = new AsyncOperationGroup(10);
+            _objectResolver = objectResolver;
+            _firstSceneName = BuildSettingsUtils.GetFirstBuildSceneName();
+            
             Progress = new ProgressHandler();
             ProgressSpeed = _sceneLoadConfig.ProgressSpeed;
         }
 
-        public async UniTask LoadBootSceneAsync()
+        public async UniTask InitBootSceneAsync()
         {
-            var firstScene = BuildSettingsUtils.GetFirstBuildSceneName();
-
-            if (!IsInBootScene)
-            {
-                await SceneManager.LoadSceneAsync(firstScene, LoadSceneMode.Single);
-            }
+            if (!IsInBootScene) await SceneManager.LoadSceneAsync(_firstSceneName, LoadSceneMode.Single);
+            
+            var sceneTransitionContext = Object.FindObjectOfType<TransitionViewContext>();
+            if (!sceneTransitionContext) return;
+            _objectResolver.Inject(sceneTransitionContext);
         }
 
         public async UniTask LoadSceneGroupAsync(SceneGroupType groupType, bool useTransitionView = false, bool reloadDupScenes = false)
@@ -99,17 +96,15 @@ namespace Core.SceneService
             OnBeforeTransition?.Invoke(useTransitionView);
 
             var sceneCount = SceneManager.sceneCount;
-            
-            var currentSceneId = SceneManager.GetActiveScene().name;
           
             var loadedScenes = new List<string>();
             
             for (var i = 0; i < sceneCount; i++)
             {
-                loadedScenes.Add(currentSceneId);
+                loadedScenes.Add(ActiveSceneName);
             }
             
-            CurrentSceneGroupType = SceneIdLookup.GetSceneGroupType(currentSceneId);
+            CurrentSceneGroupType = SceneIdLookup.GetSceneGroupType(ActiveSceneName);
             
             await UnloadSceneAsync();
                  
@@ -119,22 +114,18 @@ namespace Core.SceneService
             
             var sceneGroup = _sceneLoadConfig.GetSceneGroupData(sceneId);
             
-            for (int i = 0; i < sceneGroup.Count; i++)
+            foreach (var sceneReference in sceneGroup)
             {
-                var sceneReference = sceneGroup[i];
-
                 if (!reloadDupScenes && loadedScenes.Contains(sceneReference.Name)) continue;
 
                 if (sceneReference.State == SceneReferenceState.Regular)
                 {
                     var operation = SceneManager.LoadSceneAsync(sceneReference.Path, LoadSceneMode.Additive);
-
                     _operationGroup.Operations.Add(operation);
                 }
                 else if (sceneReference.State == SceneReferenceState.Addressable)
                 {
                     var sceneHandle = Addressables.LoadSceneAsync(sceneReference.Path, LoadSceneMode.Additive);
-
                     _handleGroup.Handles.Add(sceneHandle);
                 }
             }
@@ -169,15 +160,13 @@ namespace Core.SceneService
 
         private async UniTask UnloadSceneAsync()
         {
-            var bootSceneName = BuildSettingsUtils.GetFirstBuildSceneName();
-            
-            foreach (var handle in _handleGroup.Handles.ToArray())
+            foreach (var handle in _handleGroup.Handles)
             {
                 if (!handle.IsValid()) continue;
 
                 var sceneName = handle.Result.Scene.name;
                 
-                if (sceneName == bootSceneName) continue;
+                if (sceneName.Equals(_firstSceneName)) continue;
 
                 await Addressables.UnloadSceneAsync(handle);
             }
@@ -192,7 +181,7 @@ namespace Core.SceneService
 
                 var sceneName = sceneAt.name;
                 
-                if (sceneName == bootSceneName) continue;
+                if (sceneName.Equals(_firstSceneName)) continue;
 
                 var op = SceneManager.UnloadSceneAsync(sceneAt);
                 
@@ -213,12 +202,13 @@ namespace Core.SceneService
 
         public void Tick()
         {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                if(CurrentSceneGroupType == SceneGroupType.MenuScene) return;
+#if UNITY_EDITOR // FOR EDITOR TEST! Delete it!!
+            if (!Input.GetKeyDown(KeyCode.Space)) return;
+            
+            if(CurrentSceneGroupType == SceneGroupType.MenuScene) return;
                 
-                LoadSceneGroupAsync(SceneGroupType.MenuScene, true).Forget();
-            }
+            LoadSceneGroupAsync(SceneGroupType.MenuScene, true).Forget();
+#endif
         }
     }
 }

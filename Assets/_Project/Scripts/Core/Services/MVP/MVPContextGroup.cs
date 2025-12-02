@@ -23,18 +23,17 @@ namespace Core.MVPContext
         private readonly List<IPresenter> _presenters = new();
 
         public IObjectResolver ObjectResolver { get; }
-
         public MVPContextGroup(IObjectResolver objectResolver) => ObjectResolver = objectResolver;
 
-        public TView ResolveView<TView>() where TView : class, IView => GetOrCreate<IView, TView>(_views, false);
         public TModel ResolveModel<TModel>() where TModel : class, IModel => GetOrCreate<IModel, TModel>(_models);
+        public TView ResolveView<TView>() where TView : class, IView => GetOrCreate<IView, TView>(_views, false);
         public TPresenter ResolvePresenter<TPresenter>() where TPresenter : class, IPresenter => GetOrCreate<IPresenter, TPresenter>(_presenters);
 
         private TImpl GetOrCreate<TIFace, TImpl>(List<TIFace> map, bool useResolver = true) where TIFace : class where TImpl : class, TIFace
         {
-            var a = map.FirstOrDefault(x=> x is TImpl);
+            var context = map.FirstOrDefault(x=> x is TImpl);
 
-            if (a != null) return a as TImpl;
+            if (context != null) return context as TImpl;
             
             var result = useResolver ? ObjectResolver.CreateInstance<TImpl>() : Activator.CreateInstance<TImpl>();
             

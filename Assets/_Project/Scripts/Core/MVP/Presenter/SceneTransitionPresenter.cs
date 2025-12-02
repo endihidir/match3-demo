@@ -8,24 +8,17 @@ using UnityEngine;
 
 namespace Core.Presenters
 {
-    public interface ISceneTransitionPresenter : IPresenter, IUpdater, IDisposable
-    {
-        public void StartLoadingProgress(float ratio);
-        public void ResetProgress();
-    }
-    
-    public class SceneTransitionPresenter : ISceneTransitionPresenter
+    public class SceneTransitionPresenter : IPresenter, IUpdater, IDisposable
     {
         private readonly ISceneLoadEvents _sceneLoadEvents;
-        private ISceneTransitionProgressModel _model;
+        private ISceneTransitionModel _model;
         private ISceneTransitionView _view;
         private bool _isTransitionViewEnabled = false;
-
         public SceneTransitionPresenter(ISceneLoadEvents sceneLoadEvents) => _sceneLoadEvents = sceneLoadEvents;
 
-        public ISceneTransitionPresenter Initialize(ISceneTransitionProgressModel progressModel, ISceneTransitionView view)
+        public void Initialize(ISceneTransitionModel model, ISceneTransitionView view)
         {
-            _model = progressModel;
+            _model = model;
             _view = view;
             
             _sceneLoadEvents.OnBeforeTransition += OnBeforeTransition;
@@ -34,11 +27,7 @@ namespace Core.Presenters
             
             _view.SetLabelText("Loading...");
             _view.DisableAsync(0f, .25f).Forget();
-            return this;
         }
-        
-        public void StartLoadingProgress(float ratio) => _model.SetTargetRatio(ratio);
-        public void ResetProgress() => _model.ResetProgress();
 
         public void Update()
         {
@@ -58,13 +47,15 @@ namespace Core.Presenters
             _isTransitionViewEnabled = useTransitionView;
    
             if (!_isTransitionViewEnabled) return;
+
+            _model.ResetProgress();
             
-            ResetProgress();
+            _view.SetFillAmount(_model.FillAmount);
             
             _view.EnableAsync().Forget();
         }
 
-        private void OnTransitionProgressed(float ratio) => StartLoadingProgress(ratio);
+        private void OnTransitionProgressed(float ratio) => _model.SetTargetRatio(ratio);
         private async UniTask OnBeforeTransitionOut()
         {
             if (!_isTransitionViewEnabled) return;
