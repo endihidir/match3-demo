@@ -5,29 +5,11 @@ using UnityEngine;
 
 namespace Core.Item
 {
-    public interface IItemType
+    public interface IGridItemBehaviour : IItemTypeReader, IItemTypeWriter, IItemObjectReader, IItemObjectWriter
     {
-        GridItemKind ItemKind { get; }
-        int TypeId { get; }
-        void ApplyItem(GridItemKind itemKind, int typeId);
-        void ApplyItem(ItemType type) => ApplyItem(GridItemKind.Regular, (int)type);
-        void ApplyItem(BoosterType type) => ApplyItem(GridItemKind.Booster, (int)type);
-        void ApplyItem(ObstacleType type) => ApplyItem(GridItemKind.Obstacle, (int)type);
-        void ApplyItem(GridObjectTypeData data) => ApplyItem(data.gridItemKind, data.typeId);
-    }
-
-    public interface IItemObject
-    {
-        Vector2Int GridPos { get; }
-        SpriteRenderer SpriteRenderer { get; }
-        Transform Transform { get; }
         IBaseItemEffect ItemEffect { get; }
-        void SetGridPos(Vector2Int gridPos);
-    }
-
-    public interface IGridItemBehaviour : IItemType, IItemObject
-    {
         void Initialize(Vector2Int gridPos, GridItemKind itemKind, int typeId);
+        void Initialize(Vector2Int gridPos, GridObjectTypeData typeData) => Initialize(gridPos, typeData.gridItemKind, typeData.typeId);
         void Dispose();
     }
     
@@ -35,19 +17,18 @@ namespace Core.Item
     {
         public SpriteRenderer SpriteRenderer { get; private set; }
         public Transform Transform { get; private set; }
-        
         public GridItemKind ItemKind { get; private set; }
         public int TypeId { get; private set; }
         public Vector2Int GridPos { get; private set; }
         public IBaseItemEffect ItemEffect { get; private set; }
-
+        
         private IItemSpriteProvider ItemSpriteProvider { get; }
         private IItemEffectFactory ItemEffectFactory { get; }
 
         public GridItemBehaviour(ItemBehaviourData itemBehaviourData)
         {
-            Transform = itemBehaviourData.objectView.Transform;
-            SpriteRenderer = itemBehaviourData.objectView.SpriteRenderer;
+            Transform = itemBehaviourData.itemObject.Transform;
+            SpriteRenderer = itemBehaviourData.itemObject.SpriteRenderer;
             ItemSpriteProvider = itemBehaviourData.itemSpriteProvider;
             ItemEffectFactory = itemBehaviourData.itemEffectFactory;
         }
@@ -82,7 +63,7 @@ namespace Core.Item
 
     public struct ItemBehaviourData
     {
-        public IGridItemObjectView objectView;
+        public IGridItemObject itemObject;
         public IItemEffectFactory itemEffectFactory;
         public IItemSpriteProvider itemSpriteProvider;
     }

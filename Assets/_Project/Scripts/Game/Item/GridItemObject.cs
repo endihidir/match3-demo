@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Core.Item
 {
-    public class GridItemObject : PooledObject, IGridItemObjectView
+    public class GridItemObject : PooledObject, IGridItemObject
     {
         [field: SerializeField] public SpriteRenderer SpriteRenderer { get; private set; }
         public Transform Transform => transform;
@@ -26,7 +26,7 @@ namespace Core.Item
         }
     }
 
-    public interface IGridItemObjectView
+    public interface IGridItemObject
     {
         public SpriteRenderer SpriteRenderer { get; }
         public Transform Transform { get; }

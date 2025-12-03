@@ -20,7 +20,7 @@ namespace Core.Item
     
     public abstract class BaseItemEffect<T> : IBaseItemEffect where T : BaseItemConfig
     {
-        protected IItemObject Owner;
+        protected IItemObjectReader Owner;
         protected T ItemConfig;
         protected int TypeId;
         

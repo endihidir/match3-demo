@@ -2,14 +2,9 @@ using Core.MVPContext;
 using UnityEngine;
 using VContainer;
 
-namespace Core.UI
+namespace Core.Context
 {
-    public interface IViewContext
-    {
-        public IMVPContext MVPContext { get; }
-    }
-    
-    public abstract class BaseViewContext : MonoBehaviour, IViewContext
+    public abstract class SelfViewContext : MonoBehaviour, IContextOwner
     {
         private IMVPContextService _mvpContextService;
         public IMVPContext MVPContext { get; private set; }

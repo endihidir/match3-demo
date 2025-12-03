@@ -270,7 +270,7 @@ GameObject:
   - component: {fileID: 364117313}
   - component: {fileID: 364117314}
   m_Layer: 0
-  m_Name: MainMenuContext
+  m_Name: MainMenuViewContext
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

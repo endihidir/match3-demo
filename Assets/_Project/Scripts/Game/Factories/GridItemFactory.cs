@@ -11,13 +11,13 @@ namespace Core.Item.Factories
         GridItemObject GetItem(BoosterType type, Vector2Int gridPos) => GetItem(GridItemKind.Booster, (int)type, gridPos);
         GridItemObject GetItem(ObstacleType type, Vector2Int gridPos) => GetItem(GridItemKind.Obstacle, (int)type, gridPos);
         void ReleaseItem(GridItemObject item);
-        void ReleaseItem(GameObject item);
         void ReleaseItem(Transform item);
+        void ReleaseItem(GameObject item) => ReleaseItem(item.transform);
         void ReleaseAllItems();
         void RemoveItemPool();
     }
     
-    public class GridItemFactory : IGridItemFactory
+    public sealed class GridItemFactory : IGridItemFactory
     {
         private readonly IObjectPoolService _objectPoolService;
         private readonly IItemEffectFactory _itemEffectFactory;
@@ -40,7 +40,7 @@ namespace Core.Item.Factories
             {
                 var behaviourData = new ItemBehaviourData()
                 {
-                    objectView = itemObject,
+                    itemObject = itemObject,
                     itemEffectFactory = _itemEffectFactory,
                     itemSpriteProvider = _itemSpriteProvider
                 };
@@ -56,10 +56,8 @@ namespace Core.Item.Factories
         }
 
         public void ReleaseItem(GridItemObject item) => _objectPoolService.ReturnObject(item);
-        public void ReleaseItem(GameObject item) => _objectPoolService.ReturnObject(item.transform);
         public void ReleaseItem(Transform item) => _objectPoolService.ReturnObject(item);
         public void ReleaseAllItems() => _objectPoolService.ReturnAllObjectsOfType<GridItemObject>();
         public void RemoveItemPool() => _objectPoolService.RemovePool<GridItemObject>();
     }
-
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Eflatun.SceneReference;
 using Core.Configs;
+using Core.Context;
 using Core.Generated;
 using Core.UI;
 using Core.Utils;
@@ -86,7 +87,7 @@ namespace Core.SceneService
         {
             if (!IsInBootScene) await SceneManager.LoadSceneAsync(_firstSceneName, LoadSceneMode.Single);
             
-            var sceneTransitionContext = Object.FindObjectOfType<TransitionViewContext>();
+            var sceneTransitionContext = Object.FindObjectOfType<TransitionScreenContext>();
             if (!sceneTransitionContext) return;
             _objectResolver.Inject(sceneTransitionContext);
         }
