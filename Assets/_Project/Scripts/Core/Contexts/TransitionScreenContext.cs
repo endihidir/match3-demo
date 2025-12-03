@@ -1,11 +1,12 @@
 using Core.Models;
 using Core.Presenters;
+using Core.UI;
 using Core.Views;
 using UnityEngine;
 
-namespace Core.UI
+namespace Core.Context
 {
-    public class TransitionViewContext : BaseViewContext
+    public class TransitionScreenContext : SelfViewContext
     {
         [field: SerializeField] private GameObject[] ToggleObjects { get; set; }
         [field: SerializeField] private CanvasGroup CanvasGroup { get; set; }

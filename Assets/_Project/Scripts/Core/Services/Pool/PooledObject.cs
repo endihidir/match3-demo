@@ -6,7 +6,7 @@ namespace Core.Pool
     public class PooledObject : MonoBehaviour, IPooledObject
     {
         public int PoolKey { get; set; }
-        public bool IsActive => gameObject.activeInHierarchy;
+        public virtual bool IsActive => gameObject.activeInHierarchy;
 
         public virtual void Activate(float duration = 0f, float delay = 0f, Action onComplete = null)
         {

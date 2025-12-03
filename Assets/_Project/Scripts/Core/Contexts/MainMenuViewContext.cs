@@ -1,10 +1,11 @@
 using Core.Presenters;
+using Core.UI;
 using Core.Views;
 using UnityEngine;
 
-namespace Core.UI
+namespace Core.Context
 {
-    public class MenuSceneViewContext : BaseViewContext
+    public class MainMenuViewContext : SelfViewContext
     {
         [field: SerializeField] private PlayButtonUI PlayButtonUI { get; set; }
         

@@ -6,10 +6,10 @@ namespace Core.Item.Factories
 {
     public interface IItemEffectFactory
     {
-        IBaseItemEffect GetEffect(IItemObject owner, GridItemKind kind, int typeId);
-        IBaseItemEffect GetEffect(IItemObject owner, ItemType type) => GetEffect(owner, GridItemKind.Regular,(int)type);
-        IBaseItemEffect GetEffect(IItemObject owner, ObstacleType type) => GetEffect(owner, GridItemKind.Obstacle,(int)type);
-        IBaseItemEffect GetEffect(IItemObject owner, BoosterType type) => GetEffect(owner, GridItemKind.Booster,(int)type);
+        IBaseItemEffect GetEffect(IItemObjectReader owner, GridItemKind kind, int typeId);
+        IBaseItemEffect GetEffect(IItemObjectReader owner, ItemType type) => GetEffect(owner, GridItemKind.Regular,(int)type);
+        IBaseItemEffect GetEffect(IItemObjectReader owner, ObstacleType type) => GetEffect(owner, GridItemKind.Obstacle,(int)type);
+        IBaseItemEffect GetEffect(IItemObjectReader owner, BoosterType type) => GetEffect(owner, GridItemKind.Booster,(int)type);
         void ReleaseEffect(IBaseItemEffect effect);
     }
     
@@ -23,7 +23,7 @@ namespace Core.Item.Factories
             _itemConfigContainer = itemConfigContainer;
         }
 
-        public IBaseItemEffect GetEffect(IItemObject owner, GridItemKind kind, int typeId)
+        public IBaseItemEffect GetEffect(IItemObjectReader owner, GridItemKind kind, int typeId)
         {
             IBaseItemEffect effect = kind switch
             {
@@ -87,7 +87,7 @@ namespace Core.Item.Factories
 
     public struct EffectData
     {
-        public IItemObject owner;
+        public IItemObjectReader owner;
         public BaseItemConfig itemConfig;
         public int typeId;
         public ItemEffectSettingsConfig defaultSettings;
