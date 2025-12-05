@@ -4,6 +4,6 @@ namespace Core.Context
 {
     public interface IContextOwner
     {
-        public IMVPContext MVPContext { get; }
+        public IMVPContext OwnerContext { get; }
     }
 }

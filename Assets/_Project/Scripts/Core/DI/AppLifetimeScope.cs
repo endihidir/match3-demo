@@ -1,6 +1,7 @@
 using Core.Bootstrapper;
 using Core.Configs;
 using Core.Level;
+using Core.Models;
 using Core.MVPContext;
 using Core.SceneService;
 using Core.Pool;
@@ -23,18 +24,23 @@ namespace Core.LifetimeScopes
             
             builder.RegisterEntryPoint<AppBootstrapper>();
 
-            builder.Register<SceneLoadService>(Lifetime.Singleton).As<ISceneLoadService, ISceneLoadEvents, ISceneLoadInfo, ITickable>();
-            
+            RegisterServices(builder);
+
+            RegisterGlobalModels(builder);
+        }
+
+        private static void RegisterServices(IContainerBuilder builder)
+        {
+            builder.Register<SceneLoadService>(Lifetime.Singleton).As<ISceneLoadService, ISceneLoadEvents, ISceneLoadData, ITickable>();
             builder.Register<ObjectPoolService>(Lifetime.Singleton).As<IObjectPoolService>();
-            
             builder.Register<LevelDataService>(Lifetime.Singleton).As<ILevelDataService, IInitializable>();
-            
             builder.Register<MVPContextService>(Lifetime.Singleton).As<IMVPContextService, ITickable>();
-            
             builder.Register<DataPersistenceService>(Lifetime.Singleton).As<IDataPersistenceService>();
-            
-            builder.Register<GlobalModelService>(Lifetime.Singleton).As<IGlobalModelService>();
-            
+        }
+        
+        private static void RegisterGlobalModels(IContainerBuilder builder)
+        {
+            builder.Register<LevelProgressModel>(Lifetime.Singleton).As<ILevelProgressReadModel, ILevelProgressWriteModel>();
         }
     }
 }

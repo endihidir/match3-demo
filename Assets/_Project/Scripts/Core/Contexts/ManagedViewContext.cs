@@ -1,18 +1,23 @@
 using Core.MVPContext;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Core.Context
 {
     public abstract class ManagedViewContext : MonoBehaviour, IContextOwner
     { 
-        public IMVPContext MVPContext { get; private set; }
-        public void Construct(IMVPContextService mvpContextService)
-        {
-            MVPContext = mvpContextService.GetContext(this);
+        public IMVPContext RootContext { get; protected set; }
+        public IMVPContext OwnerContext { get; private set; }
         
-            Initialize();
+        public async UniTask Construct(IMVPContext rootContext, IMVPContext ownerContext)
+        {
+            RootContext = rootContext;
+            
+            OwnerContext = ownerContext;
+        
+            await Initialize();
         }
 
-        protected abstract void Initialize();
+        protected abstract UniTask Initialize();
     }
 }

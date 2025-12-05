@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Core.Extensions;
 using Core.MVPContext.Interfaces;
+using Core.SaveSystem;
 using VContainer;
 
 namespace Core.MVPContext
@@ -33,28 +34,38 @@ namespace Core.MVPContext
         {
             var context = map.FirstOrDefault(x=> x is TImpl);
 
-            if (context != null) return context as TImpl;
+            if (context != null)
+            {
+                TryRegisterToAutoSave(context);
+                return context as TImpl;
+            }
             
             var result = useResolver ? ObjectResolver.CreateInstance<TImpl>() : Activator.CreateInstance<TImpl>();
             
             map.Add(result);
+            
+            TryRegisterToAutoSave<TIFace>(result);
 
             return result;
         }
-        
+
+        private static void TryRegisterToAutoSave<TIFace>(TIFace result) where TIFace : class
+        {
+            if (typeof(TIFace) == typeof(IModel) && result is IAutoSave autoSaveNew) 
+                AutoSaveHandler.Register(autoSaveNew);
+        }
+
         public void UpdatePresenters()
         {
             foreach (var presenter in _presenters)
-            {
-                if (presenter is IUpdater updater)
-                {
+                if (presenter is IUpdater updater) 
                     updater.Update();
-                }
-            }
         }
         
         public void Dispose()
         {
+            UnregisterAutoSave(_models);
+            
             DisposeAll(_models);
             DisposeAll(_presenters);
             DisposeAll(_views);
@@ -62,6 +73,13 @@ namespace Core.MVPContext
             _models.Clear();
             _presenters.Clear();
             _views.Clear();
+        }
+
+        private static void UnregisterAutoSave<T>(IEnumerable<T> items)
+        {
+            foreach (var model in items)
+                if (model is IAutoSave autoSave) 
+                    AutoSaveHandler.Unregister(autoSave);
         }
 
         private static void DisposeAll<T>(IEnumerable<T> items)

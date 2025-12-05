@@ -207,7 +207,6 @@ namespace Core.Utils
 
         // ========= EDITOR =========
         
-        
         public static JsonGridObjectType[,] ToEditorGrid(LevelJson levelJson)
         {
             var width = levelJson.grid_width;
