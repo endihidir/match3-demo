@@ -20,7 +20,6 @@ namespace Core.MVPContext
     public interface IMVPContext : IDisposable
     {
         TModel ResolveModel<TModel>() where TModel : class, IModel;
-        TModel ResolveGlobalModel<TModel>() where TModel : class, IModel;
         TView ResolveView<TView>() where TView : class, IView;
         TPresenter ResolvePresenter<TPresenter>() where TPresenter : class, IPresenter;
         void UpdatePresenters();
@@ -30,7 +29,11 @@ namespace Core.MVPContext
     {
         private readonly Dictionary<int, IMVPContext> _contexts = new();
         private readonly IObjectResolver _objectResolver;
-        public MVPContextService(IObjectResolver objectResolver) => _objectResolver = objectResolver;
+
+        public MVPContextService(IObjectResolver objectResolver)
+        {
+            _objectResolver = objectResolver;
+        }
 
         public IMVPContext GetContext(int ownerID)
         {
@@ -60,12 +63,6 @@ namespace Core.MVPContext
             public MVPContext(IObjectResolver objectResolver) => _mvpContextGroup = new MVPContextGroup(objectResolver);
 
             public TModel ResolveModel<TModel>() where TModel : class, IModel => _mvpContextGroup.ResolveModel<TModel>();
-            public TModel ResolveGlobalModel<TModel>() where TModel : class, IModel
-            {
-                var globalModelContainer = _mvpContextGroup.ObjectResolver.Resolve<IGlobalModelService>();
-                return globalModelContainer.Resolve<TModel>();
-            }
-
             public TView ResolveView<TView>() where TView : class, IView => _mvpContextGroup.ResolveView<TView>();
             public TPresenter ResolvePresenter<TPresenter>() where TPresenter : class, IPresenter => _mvpContextGroup.ResolvePresenter<TPresenter>();
             public void UpdatePresenters() => _mvpContextGroup.UpdatePresenters();

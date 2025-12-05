@@ -11,12 +11,12 @@ namespace Core.Level
         public GridObjectTypeData[,] GridObjectTypes { get; }
         public Vector2Int GridSize { get; }
         public List<LevelGoal> Goals { get; }
-        public int MoveLimit { get; }
+        public int MoveCount { get; }
 
-        public LevelDefinition(int levelNumber, int moveLimit, GridObjectTypeData[,] gridItems, List<LevelGoal> goals)
+        public LevelDefinition(int levelNumber, int moveCount, GridObjectTypeData[,] gridItems, List<LevelGoal> goals)
         {
             LevelNumber = levelNumber;
-            MoveLimit = moveLimit;
+            MoveCount = moveCount;
             GridObjectTypes = gridItems;
             GridSize = new Vector2Int(GridObjectTypes.GetLength(0), GridObjectTypes.GetLength(1));
             Goals = goals;
@@ -24,7 +24,7 @@ namespace Core.Level
 
         public override string ToString()
         {
-            return $"LevelNumber:{LevelNumber}, MoveLimit:{MoveLimit}, GridSize:{GridSize}, Goals:{Goals.Count}";
+            return $"LevelNumber:{LevelNumber}, MoveLimit:{MoveCount}, GridSize:{GridSize}, Goals:{Goals.Count}";
         }
     }
     

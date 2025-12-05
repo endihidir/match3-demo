@@ -27,7 +27,7 @@ namespace Core.SceneService
         event Action OnTransitionComplete;
     }
 
-    public interface ISceneLoadInfo
+    public interface ISceneLoadData
     {
         SceneGroupType CurrentSceneGroupType { get; }
         float ProgressSpeed { get; }
@@ -41,7 +41,7 @@ namespace Core.SceneService
         UniTask LoadSceneGroupAsync(SceneGroupType groupType, bool useTransitionView = false, bool reloadDupScenes = false);
     }
 
-    public class SceneLoadService : ISceneLoadService, ISceneLoadEvents, ISceneLoadInfo, ITickable
+    public class SceneLoadService : ISceneLoadService, ISceneLoadEvents, ISceneLoadData, ITickable
     {
         private readonly SceneLoadServiceConfig _sceneLoadConfig;
         private readonly AsyncOperationHandleGroup _handleGroup;

@@ -1,4 +1,6 @@
+using System.Linq;
 using Core.MVPContext;
+using Cysharp.Threading.Tasks;
 using NaughtyAttributes;
 using UnityEngine;
 using VContainer;
@@ -8,27 +10,34 @@ namespace Core.Context
     public abstract class RootViewContext : MonoBehaviour, IContextOwner
     {
         [field: SerializeField] private ManagedViewContext[] ManagedContexts { get; set; }
-
-        private IMVPContextService _mvpContextService;
-        public IMVPContext MVPContext { get; private set; }
+        private IMVPContextService MvpContextService { get; set; }
+        public IMVPContext OwnerContext { get; private set; }
         private bool IsPlaying => Application.isPlaying;
-
+        
         [Inject]
         private void Construct(IMVPContextService mvpContextService)
         {
-            _mvpContextService = mvpContextService;
-            MVPContext = _mvpContextService.GetContext(this);
+            MvpContextService = mvpContextService;
+            
+            OwnerContext = MvpContextService.GetContext(this);
 
-            Initialize();          
-            InitializeChildren();
+            ConstructAsync().Forget();
         }
 
-        protected abstract void Initialize();
-        protected virtual void InitializeChildren()
+        private async UniTask ConstructAsync()
+        {
+            await Initialize();
+            await InitializeChildren();
+        }
+
+        protected abstract UniTask Initialize();
+        protected virtual async UniTask InitializeChildren()
         {
             foreach (var child in ManagedContexts)
             {
-                child?.Construct(_mvpContextService);
+                var childContext = MvpContextService.GetContext(child);
+                
+                await child.Construct(OwnerContext, childContext);
             }
         }
 
@@ -36,12 +45,26 @@ namespace Core.Context
         {
             foreach (var child in ManagedContexts)
             {
-                _mvpContextService?.Release(child);
+                MvpContextService.Release(child);
             }
             
-            _mvpContextService?.Release(this);
+            MvpContextService.Release(this);
         }
         
+        public bool TryGetChildContext<T>(out T context) where T : IContextOwner
+        {
+            var selectedContext = ManagedContexts.FirstOrDefault(x => x is T);
+         
+            if (selectedContext is T contextOwner)
+            {
+                context = contextOwner;
+                return true;
+            }
+            
+            context = default;
+            return false;
+        }
+
         [Button, HideIf(nameof(IsPlaying))]
         private void PullChildContexts() => ManagedContexts = GetComponentsInChildren<ManagedViewContext>();
     }

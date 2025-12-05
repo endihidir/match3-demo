@@ -37,10 +37,10 @@ namespace Core.Views
             
             SetInteractable(true);
             
+            _sliderTween.SetEase(Ease.Linear).SetDelay(delay);
+            
             _sliderTween = _graphic ? _graphic.DOFade(1f, duration) : _canvasGroup.DOFade(1f, duration);
             
-            _sliderTween.SetEase(Ease.Linear).SetDelay(delay);
-
             await _sliderTween.AsyncWaitForCompletion();
             
             onComplete?.Invoke();
@@ -50,9 +50,9 @@ namespace Core.Views
         {
             _sliderTween.Kill(true);
             
-            _sliderTween = _graphic ? _graphic.DOFade(0f, duration) : _canvasGroup.DOFade(0f, duration);
-            
             _sliderTween.SetEase(Ease.Linear).SetDelay(delay);
+            
+            _sliderTween = _graphic ? _graphic.DOFade(0f, duration) : _canvasGroup.DOFade(0f, duration);
 
             await _sliderTween.AsyncWaitForCompletion();
             

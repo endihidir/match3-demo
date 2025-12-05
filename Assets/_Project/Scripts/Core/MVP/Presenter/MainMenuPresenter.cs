@@ -1,7 +1,6 @@
 using System;
 using Core.Generated;
 using Core.Models;
-using Core.MVPContext;
 using Core.MVPContext.Interfaces;
 using Core.SceneService;
 using Core.Views;
@@ -21,10 +20,10 @@ namespace Core.Presenters
         
         private IPlayButtonView _playButtonView;
         
-        public MainMenuPresenter(ISceneLoadService sceneLoadService, IGlobalModelService globalModelService)
+        public MainMenuPresenter(ISceneLoadService sceneLoadService, ILevelProgressReadModel levelProgressReadModel)
         {
             _sceneLoadService = sceneLoadService;
-            _levelProgressReadModel = globalModelService.Resolve<LevelProgressModel>();
+            _levelProgressReadModel = levelProgressReadModel;
         }
         
         public IMainMenuPresenter Initialize(IPlayButtonView playButtonView)

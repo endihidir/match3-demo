@@ -69,7 +69,7 @@ namespace Core.SaveSystem
 
             EnsureSaveDispatcherExists();
 #if UNITY_EDITOR
-            var methods = TypeCache.GetMethodsWithAttribute<InvokeOnQuitAttribute>();
+            var methods = TypeCache.GetMethodsWithAttribute<AutoSaveAttribute>();
             
             for (int i = 0; i < methods.Count; i++)
             {
@@ -100,7 +100,7 @@ namespace Core.SaveSystem
                     for (int mi = 0; mi < methods.Length; mi++)
                     {
                         var m = methods[mi];
-                        if (m.GetCustomAttribute<InvokeOnQuitAttribute>() == null) continue;
+                        if (m.GetCustomAttribute<AutoSaveAttribute>() == null) continue;
                         TryRegisterMethod(m);
                     }
                 }

@@ -14,15 +14,15 @@ namespace Core.Context
         
         protected override void Initialize()
         {
-            var transitionModel = MVPContext.ResolveModel<SceneTransitionModel>();
+            var transitionModel = OwnerContext.ResolveModel<SceneTransitionModel>();
             
-            var fadeAnimation = MVPContext.ResolveView<FadeAnimationView>()
+            var fadeAnimation = OwnerContext.ResolveView<FadeAnimationView>()
                                           .Initialize(CanvasGroup);
 
-            var transitionView = MVPContext.ResolveView<SceneTransitionView>()
+            var transitionView = OwnerContext.ResolveView<SceneTransitionView>()
                                            .Initialize(fadeAnimation, ProgressBarUI, ToggleObjects);
             
-            MVPContext.ResolvePresenter<SceneTransitionPresenter>()
+            OwnerContext.ResolvePresenter<SceneTransitionPresenter>()
                       .Initialize(transitionModel, transitionView);
         }
     }

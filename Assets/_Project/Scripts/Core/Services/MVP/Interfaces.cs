@@ -16,7 +16,7 @@ namespace Core.MVPContext.Interfaces
        
     }
 
-    public interface ISaveData
+    public interface IAutoSave
     {
         public void Save();
     }

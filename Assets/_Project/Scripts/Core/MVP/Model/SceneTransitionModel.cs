@@ -19,7 +19,7 @@ namespace Core.Models
         public float FillAmount { get; private set; }
         public float TargetRatio { get; private set; }
 
-        public SceneTransitionModel(ISceneLoadInfo sceneLoadInfo) => _progressSpeed = sceneLoadInfo.ProgressSpeed;
+        public SceneTransitionModel(ISceneLoadData sceneLoadData) => _progressSpeed = sceneLoadData.ProgressSpeed;
 
         public void SetTargetRatio(float val)
         {

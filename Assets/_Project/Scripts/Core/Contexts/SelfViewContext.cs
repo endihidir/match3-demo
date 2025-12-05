@@ -6,20 +6,20 @@ namespace Core.Context
 {
     public abstract class SelfViewContext : MonoBehaviour, IContextOwner
     {
-        private IMVPContextService _mvpContextService;
-        public IMVPContext MVPContext { get; private set; }
+        private IMVPContextService MvpContextService { get; set; }
+        public IMVPContext OwnerContext { get; private set; }
 
         [Inject]
         private void Construct(IMVPContextService mvpContextService)
         {
-            _mvpContextService = mvpContextService;
+            MvpContextService = mvpContextService;
             
-            MVPContext = _mvpContextService.GetContext(this);
+            OwnerContext = MvpContextService.GetContext(this);
             
             Initialize();
         }
         
         protected abstract void Initialize();
-        protected virtual void OnDestroy() => _mvpContextService?.Release(this);
+        protected virtual void OnDestroy() => MvpContextService?.Release(this);
     }
 }

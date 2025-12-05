@@ -15,8 +15,8 @@ namespace Core.Item
     
     public class GridItemBehaviour : IGridItemBehaviour
     {
-        public SpriteRenderer SpriteRenderer { get; private set; }
         public Transform Transform { get; private set; }
+        public SpriteRenderer SpriteRenderer { get; private set; }
         public GridItemKind ItemKind { get; private set; }
         public int TypeId { get; private set; }
         public Vector2Int GridPos { get; private set; }
@@ -42,18 +42,16 @@ namespace Core.Item
         public void ApplyItem(GridItemKind itemKind,  int typeId)
         {
             ItemKind = itemKind;
-            
             TypeId = typeId;
-            
             SpriteRenderer.sprite = ItemSpriteProvider.GetSprite(ItemKind, TypeId);
             
-            if(ItemEffect != null) ItemEffectFactory.ReleaseEffect(ItemEffect);
-            
+            ItemEffectFactory.ReleaseEffect(ItemEffect);
             ItemEffect = ItemEffectFactory.GetEffect(this, ItemKind, TypeId);
         }
 
         public void Dispose()
         {
+            GridPos = default;
             ItemKind = GridItemKind.None;
             TypeId = 0;
             SpriteRenderer.sprite = null;

@@ -11,11 +11,11 @@ namespace Core.Context
         
         protected override void Initialize()
         {
-            var playButtonView = MVPContext.ResolveView<PlayButtonView>()
-                                           .Initialize(PlayButtonUI);
+            var playButtonView = OwnerContext.ResolveView<PlayButtonView>()
+                                             .Initialize(PlayButtonUI);
             
-            MVPContext.ResolvePresenter<MainMenuPresenter>()
-                      .Initialize(playButtonView);
+            OwnerContext.ResolvePresenter<MainMenuPresenter>()
+                        .Initialize(playButtonView);
         }
     }
 }
