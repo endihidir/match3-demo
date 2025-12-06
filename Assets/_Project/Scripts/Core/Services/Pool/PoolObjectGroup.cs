@@ -112,6 +112,8 @@ namespace Core.Pool
             {
                 if (pooledObject is Component pooledObj)
                 {
+                    if (!pooledObj) continue;
+                    
                     Object.Destroy(pooledObj.gameObject);
                 }
             }

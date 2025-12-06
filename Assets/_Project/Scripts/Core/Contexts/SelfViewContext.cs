@@ -1,25 +1,20 @@
-using Core.MVPContext;
 using UnityEngine;
 using VContainer;
 
 namespace Core.Context
 {
-    public abstract class SelfViewContext : MonoBehaviour, IContextOwner
+    public abstract class SelfViewContext : MonoBehaviour
     {
-        private IMVPContextService MvpContextService { get; set; }
-        public IMVPContext OwnerContext { get; private set; }
+        protected IObjectResolver ObjectResolver { get; private set; }
 
         [Inject]
-        private void Construct(IMVPContextService mvpContextService)
+        private void Construct(IObjectResolver objectResolver)
         {
-            MvpContextService = mvpContextService;
-            
-            OwnerContext = MvpContextService.GetContext(this);
+            ObjectResolver = objectResolver;
             
             Initialize();
         }
         
         protected abstract void Initialize();
-        protected virtual void OnDestroy() => MvpContextService?.Release(this);
     }
 }

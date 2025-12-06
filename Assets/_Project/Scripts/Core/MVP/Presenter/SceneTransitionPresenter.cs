@@ -5,10 +5,15 @@ using Core.SceneService;
 using Core.Views;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using VContainer.Unity;
 
 namespace Core.Presenters
 {
-    public class SceneTransitionPresenter : IPresenter, IUpdater, IDisposable
+    public interface ISceneTransitionPresenter : IPresenter
+    {
+        ISceneTransitionPresenter Initialize(ISceneTransitionModel model, ISceneTransitionView view);
+    }
+    public class SceneTransitionPresenter : ISceneTransitionPresenter, ITickable, IDisposable
     {
         private readonly ISceneLoadEvents _sceneLoadEvents;
         private ISceneTransitionModel _model;
@@ -16,7 +21,7 @@ namespace Core.Presenters
         private bool _isTransitionViewEnabled = false;
         public SceneTransitionPresenter(ISceneLoadEvents sceneLoadEvents) => _sceneLoadEvents = sceneLoadEvents;
 
-        public void Initialize(ISceneTransitionModel model, ISceneTransitionView view)
+        public ISceneTransitionPresenter Initialize(ISceneTransitionModel model, ISceneTransitionView view)
         {
             _model = model;
             _view = view;
@@ -27,9 +32,10 @@ namespace Core.Presenters
             
             _view.SetLabelText("Loading...");
             _view.DisableAsync(0f, .25f).Forget();
+            return this;
         }
 
-        public void Update()
+        public void Tick()
         {
             if(!_isTransitionViewEnabled) return;
             

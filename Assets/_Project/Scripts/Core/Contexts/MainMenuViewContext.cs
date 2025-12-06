@@ -2,6 +2,7 @@ using Core.Presenters;
 using Core.UI;
 using Core.Views;
 using UnityEngine;
+using VContainer;
 
 namespace Core.Context
 {
@@ -11,11 +12,10 @@ namespace Core.Context
         
         protected override void Initialize()
         {
-            var playButtonView = OwnerContext.ResolveView<PlayButtonView>()
-                                             .Initialize(PlayButtonUI);
+            var playButtonView = ObjectResolver.Resolve<IPlayButtonView>().Initialize(PlayButtonUI);
             
-            OwnerContext.ResolvePresenter<MainMenuPresenter>()
-                        .Initialize(playButtonView);
+            ObjectResolver.Resolve<IMainMenuPresenter>()
+                          .Initialize(playButtonView);
         }
     }
 }

@@ -7,23 +7,22 @@ namespace Core.Item
     public class GridItemObject : PooledObject, IGridItemObject
     {
         [field: SerializeField] public SpriteRenderer SpriteRenderer { get; private set; }
+        [field: SerializeField] public GridItemState State { get; private set; }
         public Transform Transform => transform;
-        public IGridItemBehaviour Behaviour { get; private set; }
-        public void BindBehaviour(IGridItemBehaviour behaviour) => Behaviour = behaviour;
-        
+        public void BindState(GridItemState state) => State = state;
+        public void ResetState()
+        {
+            State?.Dispose();
+            State = null;
+        }
         public override void Deactivate(float duration = 0, float delay = 0, Action onComplete = null)
         {
             base.Deactivate(duration, delay, onComplete);
-            Reset();
+            ResetState();
         }
 
-        private void OnDestroy() => Reset();
+        private void OnDestroy() => ResetState();
 
-        private void Reset()
-        {
-            Behaviour?.Dispose();
-            Behaviour = null;
-        }
     }
 
     public interface IGridItemObject

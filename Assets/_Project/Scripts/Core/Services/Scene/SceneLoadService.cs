@@ -4,16 +4,12 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Eflatun.SceneReference;
 using Core.Configs;
-using Core.Context;
 using Core.Generated;
-using Core.UI;
 using Core.Utils;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
-using VContainer;
 using VContainer.Unity;
-using Object = UnityEngine.Object;
 
 namespace Core.SceneService
 {
@@ -47,7 +43,6 @@ namespace Core.SceneService
         private readonly AsyncOperationHandleGroup _handleGroup;
         private readonly AsyncOperationGroup _operationGroup;
         private readonly string _firstSceneName;
-        private readonly IObjectResolver _objectResolver;
         public event Action<bool> OnBeforeTransition;
         public event Action OnScenesUnload;
         public event Action OnBeforeScenesActivate;
@@ -71,12 +66,11 @@ namespace Core.SceneService
 
         public bool IsInBootScene => ActiveSceneName.Equals(_firstSceneName);
 
-        public SceneLoadService(AppConfigContainer appConfigContainer, IObjectResolver objectResolver)
+        public SceneLoadService(AppConfigContainer appConfigContainer)
         {
             _sceneLoadConfig = appConfigContainer.sceneLoadServiceConfig;
             _handleGroup = new AsyncOperationHandleGroup(10);
             _operationGroup = new AsyncOperationGroup(10);
-            _objectResolver = objectResolver;
             _firstSceneName = BuildSettingsUtils.GetFirstBuildSceneName();
             
             Progress = new ProgressHandler();
@@ -85,11 +79,9 @@ namespace Core.SceneService
 
         public async UniTask InitBootSceneAsync()
         {
-            if (!IsInBootScene) await SceneManager.LoadSceneAsync(_firstSceneName, LoadSceneMode.Single);
-            
-            var sceneTransitionContext = Object.FindObjectOfType<TransitionScreenContext>();
-            if (!sceneTransitionContext) return;
-            _objectResolver.Inject(sceneTransitionContext);
+            if (IsInBootScene) return;
+           
+            await SceneManager.LoadSceneAsync(_firstSceneName, LoadSceneMode.Single);
         }
 
         public async UniTask LoadSceneGroupAsync(SceneGroupType groupType, bool useTransitionView = false, bool reloadDupScenes = false)
