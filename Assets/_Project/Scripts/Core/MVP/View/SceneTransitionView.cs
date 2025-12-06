@@ -10,6 +10,7 @@ namespace Core.Views
 {
     public interface ISceneTransitionView : IView
     {
+        ISceneTransitionView Initialize(IFadeAnimationView fadeAnimationView, ProgressBarUI progressBarUI, GameObject[] toggleObjects);
         UniTask EnableAsync(float duration = 0f, float delay = 0f, Action onComplete = null);
         UniTask DisableAsync(float duration = 0.2f, float delay = 0f, Action onComplete = null);
         void SetFillAmount(float value);

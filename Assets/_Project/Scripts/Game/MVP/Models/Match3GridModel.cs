@@ -3,12 +3,12 @@ using UnityEngine;
 
 namespace Core.Models
 {
-    public interface IMatch3GridModel : IGridModel<IGridItemBehaviour>
+    public interface IMatch3GridModel : IGridModel<IGridItemState>
     {
         void Swap(Vector2Int a, Vector2Int b);
     }
     
-    public class Match3GridModel : GridModel<IGridItemBehaviour>, IMatch3GridModel
+    public class Match3GridModel : GridModel<IGridItemState>, IMatch3GridModel
     {
         public void Swap(Vector2Int a, Vector2Int b)
         {

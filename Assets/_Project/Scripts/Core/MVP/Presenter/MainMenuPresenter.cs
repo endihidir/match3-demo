@@ -10,7 +10,7 @@ namespace Core.Presenters
 {
     public interface IMainMenuPresenter : IPresenter, IDisposable
     {
-        
+        IMainMenuPresenter Initialize(IPlayButtonView playButtonView);
     }
     
     public sealed class MainMenuPresenter : IMainMenuPresenter

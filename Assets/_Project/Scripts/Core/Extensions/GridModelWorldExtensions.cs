@@ -151,37 +151,37 @@ namespace Core.Extensions
             }
         }
 
-        private static float GetScreenWidth<T>(IGridModel<T> model, Camera cam) where T : class
+        public static float GetScreenWidth<T>(this IGridModel<T> model, Camera cam) where T : class
         {
             return Mathf.Abs(GetLeftX(model, cam) - GetRightX(model, cam));
         }
 
-        private static float GetScreenHeight<T>(IGridModel<T> model, Camera cam) where T : class
+        public static float GetScreenHeight<T>(this IGridModel<T> model, Camera cam) where T : class
         {
             return Mathf.Abs(GetTopY(model, cam) - GetBottomY(model, cam));
         }
 
-        private static float GetRightX<T>(IGridModel<T> model, Camera cam) where T : class
+        public static float GetRightX<T>(this IGridModel<T> model, Camera cam) where T : class
         {
             return GetOriginPos(model, cam, Vector3.right).x;
         }
 
-        private static float GetTopY<T>(IGridModel<T> model, Camera cam) where T : class
+        public static float GetTopY<T>(this IGridModel<T> model, Camera cam) where T : class
         {
             return GetOriginPos(model, cam, Vector3.up).y;
         }
 
-        private static float GetLeftX<T>(IGridModel<T> model, Camera cam) where T : class
+        public static float GetLeftX<T>(this IGridModel<T> model, Camera cam) where T : class
         {
             return GetOriginPos(model, cam, Vector3.zero).x;
         }
 
-        private static float GetBottomY<T>(IGridModel<T> model, Camera cam) where T : class
+        public static float GetBottomY<T>(this IGridModel<T> model, Camera cam) where T : class
         {
             return GetOriginPos(model, cam, Vector3.zero).y;
         }
 
-        private static Vector3 GetOriginPos<T>(IGridModel<T> model, Camera cam, Vector3 origin) where T : class
+        public static Vector3 GetOriginPos<T>(this IGridModel<T> model, Camera cam, Vector3 origin) where T : class
         {
             return cam.ViewportToWorldPoint(origin.With(z: cam.nearClipPlane)) + new Vector3(model.OriginOffset.x, -model.OriginOffset.y, 0f);
         }

@@ -1,4 +1,5 @@
 using Core.Config;
+using Core.Configs;
 using Core.Pool;
 using UnityEngine;
 
@@ -17,40 +18,37 @@ namespace Core.Item.Factories
         void RemoveItemPool();
     }
     
-    public sealed class GridItemFactory : IGridItemFactory
+    public class GridItemFactory : IGridItemFactory
     {
         private readonly IObjectPoolService _objectPoolService;
-        private readonly IItemEffectFactory _itemEffectFactory;
+        private readonly IItemAnimationFactory _itemAnimationFactory;
         private readonly IItemSpriteProvider _itemSpriteProvider;
         
-        public GridItemFactory(IObjectPoolService objectPoolService, IItemEffectFactory itemEffectFactory, ItemConfigContainer itemConfigContainer)
+        public GridItemFactory(IObjectPoolService objectPoolService, IItemAnimationFactory itemAnimationFactory, GameConfigContainer gameConfigContainer)
         {
             _objectPoolService = objectPoolService;
-            _itemEffectFactory = itemEffectFactory;
-            _itemSpriteProvider = itemConfigContainer;
+            _itemAnimationFactory = itemAnimationFactory;
+            _itemSpriteProvider = gameConfigContainer.ItemConfigContainer;
         }
         
         public GridItemObject GetItem(GridItemKind itemKind, int typeId, Vector2Int gridPos)
         {
             var itemObject = _objectPoolService.GetObject<GridItemObject>();
 
-            var itemBehaviour = itemObject.Behaviour;
-    
-            if (itemBehaviour == null)
-            {
-                var behaviourData = new ItemBehaviourData()
-                {
-                    itemObject = itemObject,
-                    itemEffectFactory = _itemEffectFactory,
-                    itemSpriteProvider = _itemSpriteProvider
-                };
-                
-                itemBehaviour = new GridItemBehaviour(behaviourData);
-                
-                itemObject.BindBehaviour(itemBehaviour);
-            }
+            itemObject.ResetState();
             
-            itemBehaviour.Initialize(gridPos, itemKind, typeId);
+            var behaviourData = new ItemBehaviourData()
+            {
+                itemObject = itemObject,
+                itemAnimationFactory = _itemAnimationFactory,
+                itemSpriteProvider = _itemSpriteProvider
+            };
+            
+            var gridItemState = new GridItemState(behaviourData);
+        
+            itemObject.BindState(gridItemState);
+         
+            gridItemState.Initialize(gridPos, itemKind, typeId);
 
             return itemObject;
         }

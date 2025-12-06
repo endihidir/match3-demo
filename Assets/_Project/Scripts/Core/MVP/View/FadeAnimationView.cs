@@ -9,6 +9,8 @@ namespace Core.Views
 {
     public interface IFadeAnimationView : IView, IDisposable
     {
+        IFadeAnimationView Initialize(Graphic graphic);
+        IFadeAnimationView Initialize(CanvasGroup canvasGroup);
         UniTask FadeInAsync(float duration = 0f, float delay = 0f, Action onComplete = null);
         UniTask FadeOutAsync(float duration = 0.2f, float delay = 1f, Action onComplete = null);
     }

@@ -8,6 +8,7 @@ namespace Core.Views
 {
     public interface IPlayButtonView : IView
     {
+        IPlayButtonView Initialize(PlayButtonUI playButtonUI);
         public ButtonClickedEvent ClickedEvent { get; }
         void SetText(string text);
         void EnableButton(bool value);

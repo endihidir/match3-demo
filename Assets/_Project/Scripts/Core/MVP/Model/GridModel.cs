@@ -65,8 +65,11 @@ namespace Core.Models
         public void Initialize(T[,] gridItemData, bool useHeightWidthBacking = true)
         {
             UseHeightWidthBacking = useHeightWidthBacking;
+            
             _width = gridItemData.GetLength(0);
             _height = gridItemData.GetLength(1);
+            
+            this.RecalculateCellSize();
             
             _gridArray = UseHeightWidthBacking ? new T[_height, _width] : new T[_width, _height];
             
@@ -78,8 +81,6 @@ namespace Core.Models
                     SetInternal(pos, gridItemData[x, y]);
                 }
             }
-            
-            this.RecalculateCellSize();
         }
 
         private T GetInternal(Vector2Int pos)

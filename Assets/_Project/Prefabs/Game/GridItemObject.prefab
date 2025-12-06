@@ -46,6 +46,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <SpriteRenderer>k__BackingField: {fileID: 5331621357745402249}
+  <State>k__BackingField:
+    <GridPos>k__BackingField: {x: 0, y: 0}
+    <ItemKind>k__BackingField: 0
+    <TypeId>k__BackingField: 0
 --- !u!1 &4759215270928394382
 GameObject:
   m_ObjectHideFlags: 0
@@ -123,7 +127,7 @@ SpriteRenderer:
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
-  m_DrawMode: 0
+  m_DrawMode: 1
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0

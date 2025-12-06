@@ -3,6 +3,7 @@ using Core.Presenters;
 using Core.UI;
 using Core.Views;
 using UnityEngine;
+using VContainer;
 
 namespace Core.Context
 {
@@ -14,16 +15,16 @@ namespace Core.Context
         
         protected override void Initialize()
         {
-            var transitionModel = OwnerContext.ResolveModel<SceneTransitionModel>();
+            var transitionModel = ObjectResolver.Resolve<ISceneTransitionModel>();
             
-            var fadeAnimation = OwnerContext.ResolveView<FadeAnimationView>()
-                                          .Initialize(CanvasGroup);
+            var fadeAnimation = ObjectResolver.Resolve<IFadeAnimationView>()
+                                              .Initialize(CanvasGroup);
 
-            var transitionView = OwnerContext.ResolveView<SceneTransitionView>()
-                                           .Initialize(fadeAnimation, ProgressBarUI, ToggleObjects);
+            var transitionView = ObjectResolver.Resolve<ISceneTransitionView>()
+                                               .Initialize(fadeAnimation, ProgressBarUI, ToggleObjects);
             
-            OwnerContext.ResolvePresenter<SceneTransitionPresenter>()
-                      .Initialize(transitionModel, transitionView);
+            ObjectResolver.Resolve<ISceneTransitionPresenter>()
+                          .Initialize(transitionModel, transitionView);
         }
     }
 }
