@@ -58,17 +58,22 @@ namespace Core.Presenters
             for (int x = 0; x < width; x++)
                 _active[x, y] = true;
             
-            _active[3, 3] = false;
             _active[0, 0] = false;
-            _active[4, 3] = false;
-            _active[3, 4] = false;
-            _active[4, 4] = false;
+            
+            _active[0, 3] = false;
+            _active[1, 3] = false;
+            _active[2, 3] = false;
+            
+            _active[0, 4] = false;
+            _active[1, 4] = false;
+            _active[2, 4] = false;
+            
             
             _model.Initialize(stateData);
            
-            meshFilter.transform.localPosition = new Vector3(0, -offset, 0);
+            meshFilter.transform.localPosition = new Vector3(0, -offset, -0.3f);
             
-            _model.BuildGridWithHoles(meshFilter, isCellActive: (x, y) => _active[x, y]);
+            _model.BuildGridWithHoles(meshFilter,.15f,.1f,6,(x, y) => _active[x, y]);
             
             var bgTop = meshFilter.mesh.bounds.max.y;
             
@@ -91,11 +96,6 @@ namespace Core.Presenters
             }
 
             return this;
-        }
-
-        public void InitializeGrid()
-        {
-           
         }
 
         public void Refresh()
