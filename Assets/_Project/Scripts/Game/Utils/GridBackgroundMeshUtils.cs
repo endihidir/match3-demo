@@ -34,55 +34,57 @@ namespace Core.Utils
 
             var useRounded = cornerSmoothness > 0f && cornerSegments > 0;
 
-            for (int y = 0; y < model.Height; y++)
+            for (int i = 0; i < model.Height * model.Width; i++)
             {
+                var gridPos = CoordinateUtils.ToPos(i, model.Width);
+                var x = gridPos.x;
+                var y = gridPos.y;
+            
                 var visualY = model.Height - 1 - y;
                 var y0 = (visualY * cellSize) - halfH;
                 var y1 = y0 + cellSize;
+                
+                if (isCellActive != null && !isCellActive(x, y)) continue;
 
-                for (int x = 0; x < model.Width; x++)
+                var x0 = (x * cellSize) - halfW;
+                var x1 = x0 + cellSize;
+
+                var baseIndex = vertices.Count;
+
+                AddVertex(new Vector3(x0, y0, 0f), new Vector2(x, y));
+                AddVertex(new Vector3(x1, y0, 0f), new Vector2(x + 1, y));
+                AddVertex(new Vector3(x1, y1, 0f), new Vector2(x + 1, y + 1));
+                AddVertex(new Vector3(x0, y1, 0f), new Vector2(x, y + 1));
+
+                AddQuad(innerTris, baseIndex, baseIndex + 1, baseIndex + 2, baseIndex + 3);
+                
+                // Edge strips
+                if (IsEmpty(x, y + 1))
                 {
-                    if (isCellActive != null && !isCellActive(x, y)) continue;
-
-                    var x0 = (x * cellSize) - halfW;
-                    var x1 = x0 + cellSize;
-
-                    var baseIndex = vertices.Count;
-
-                    AddVertex(new Vector3(x0, y0, 0f), new Vector2(x, y));
-                    AddVertex(new Vector3(x1, y0, 0f), new Vector2(x + 1, y));
-                    AddVertex(new Vector3(x1, y1, 0f), new Vector2(x + 1, y + 1));
-                    AddVertex(new Vector3(x0, y1, 0f), new Vector2(x, y + 1));
-
-                    AddQuad(innerTris, baseIndex, baseIndex + 1, baseIndex + 2, baseIndex + 3);
-                    
-                    // Edge strips
-                    if (IsEmpty(x, y + 1))
-                    {
-                        AddFrameEdge(frameTris, new Vector3(x0, y0, 0f), new Vector3(x1, y0, 0f), Vector3.down);
-                    }
-
-                    if (IsEmpty(x, y - 1))
-                    {
-                        AddFrameEdge(frameTris, new Vector3(x0, y1, 0f), new Vector3(x1, y1, 0f), Vector3.up);
-                    }
-
-                    if (IsEmpty(x - 1, y))
-                    {
-                        AddFrameEdge(frameTris, new Vector3(x0, y0, 0f), new Vector3(x0, y1, 0f), Vector3.left);
-                    }
-
-                    if (IsEmpty(x + 1, y))
-                    {
-                        AddFrameEdge(frameTris, new Vector3(x1, y0, 0f), new Vector3(x1, y1, 0f), Vector3.right);
-                    }
-                    
-                    // Corners (compressed via TryAddCorner)
-                    TryAddCorner(frameTris, x, y, -1, 0, 0, 1, new Vector3(x0, y0, 0f), Vector3.left,  Vector3.down); // top-left
-                    TryAddCorner(frameTris, x, y,  1, 0, 0, 1, new Vector3(x1, y0, 0f), Vector3.right, Vector3.down); // top-right
-                    TryAddCorner(frameTris, x, y, -1, 0, 0,-1, new Vector3(x0, y1, 0f), Vector3.left,  Vector3.up);   // bottom-left
-                    TryAddCorner(frameTris, x, y,  1, 0, 0,-1, new Vector3(x1, y1, 0f), Vector3.right, Vector3.up);   // bottom-right
+                    AddFrameEdge(frameTris, new Vector3(x0, y0, 0f), new Vector3(x1, y0, 0f), Vector3.down);
                 }
+
+                if (IsEmpty(x, y - 1))
+                {
+                    AddFrameEdge(frameTris, new Vector3(x0, y1, 0f), new Vector3(x1, y1, 0f), Vector3.up);
+                }
+
+                if (IsEmpty(x - 1, y))
+                {
+                    AddFrameEdge(frameTris, new Vector3(x0, y0, 0f), new Vector3(x0, y1, 0f), Vector3.left);
+                }
+
+                if (IsEmpty(x + 1, y))
+                {
+                    AddFrameEdge(frameTris, new Vector3(x1, y0, 0f), new Vector3(x1, y1, 0f), Vector3.right);
+                }
+                
+                // Corners (compressed via TryAddCorner)
+                TryAddCorner(frameTris, x, y, -1, 0, 0, 1, new Vector3(x0, y0, 0f), Vector3.left,  Vector3.down); // top-left
+                TryAddCorner(frameTris, x, y,  1, 0, 0, 1, new Vector3(x1, y0, 0f), Vector3.right, Vector3.down); // top-right
+                TryAddCorner(frameTris, x, y, -1, 0, 0,-1, new Vector3(x0, y1, 0f), Vector3.left,  Vector3.up);   // bottom-left
+                TryAddCorner(frameTris, x, y,  1, 0, 0,-1, new Vector3(x1, y1, 0f), Vector3.right, Vector3.up);   // bottom-right
+                
             }
 
             mesh.SetVertices(vertices);

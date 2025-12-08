@@ -1,5 +1,6 @@
 using Core.Config;
 using Core.Extensions;
+using Core.Level;
 using Core.Models;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
@@ -8,8 +9,9 @@ namespace Core.Item
 {
     public interface IItemAnimation
     {
-        public bool IsInProgress { get; }
-        void Initialize(ItemEffectSettingsConfig defaultSettings);
+        bool IsInProgress { get; }
+        GridObjectTypeData GridObjectTypeData { get; }
+        void Initialize(ItemAnimationConfig defaultItemSettings);
         void Shake();
         Tween Shift(IGridModel<IGridItemState> gridModel);
         UniTask ShiftAsync(IGridModel<IGridItemState> gridModel);
@@ -19,32 +21,41 @@ namespace Core.Item
     
     public class ItemAnimation : IItemAnimation
     {
-        private readonly IItemObjectReader _owner;
-        private ItemEffectSettingsConfig _defaultSettings;
+        private readonly IItemObjectReader _objectReader;
+        
+        private ItemAnimationConfig _animationConfig;
         private Tween _shakeTween, _shiftTween;
-
+        
+        public GridObjectTypeData GridObjectTypeData { get; }
         public bool IsInProgress => _shakeTween.IsActive() || _shiftTween.IsActive();
-        public ItemAnimation(IItemObjectReader owner) => _owner = owner;
-        public void Initialize(ItemEffectSettingsConfig defaultSettings) => _defaultSettings = defaultSettings;
+        public ItemAnimation(IItemObjectReader objectReader, GridObjectTypeData typeData)
+        {
+            _objectReader = objectReader;
+            GridObjectTypeData = typeData;
+        }
+
+        public void Initialize(ItemAnimationConfig itemAnimationConfig) => _animationConfig = itemAnimationConfig;
 
         public virtual void Shake()
         {
-            var shakeSettings = _defaultSettings.shakeSettings;
+            var shakeSettings = _animationConfig.ShakeSettings;
 
             _shakeTween?.Kill();
 
-            _shakeTween = _owner.Transform.DOShakePosition(shakeSettings.duration, shakeSettings.strength);
+            _shakeTween = _objectReader.Transform.DOShakePosition(shakeSettings.duration, shakeSettings.strength)
+                                                 .SetUpdate(_animationConfig.UseUnscaledTime);
         }
 
         public virtual Tween Shift(IGridModel<IGridItemState> gridModel)
         {
-            var worldPos = gridModel.GridToWorld(_owner.GridPos);
+            var worldPos = gridModel.GridToWorld(_objectReader.GridPos);
             
-            var shiftSettings = _defaultSettings.shiftSettings;
+            var shiftSettings = _animationConfig.ShiftSettings;
 
             _shiftTween?.Kill();
 
-            _shiftTween = _owner.Transform.DOMove(worldPos, shiftSettings.duration);
+            _shiftTween = _objectReader.Transform.DOMove(worldPos, shiftSettings.duration)
+                                                 .SetUpdate(_animationConfig.UseUnscaledTime);
 
             return _shiftTween;
         }

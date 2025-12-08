@@ -1,5 +1,6 @@
 using Core.Config;
 using Core.Configs;
+using Core.Level;
 using Core.Pool;
 
 namespace Core.Item.Factories
@@ -17,15 +18,16 @@ namespace Core.Item.Factories
         public ItemAnimationFactory(GameConfigContainer gameConfigContainer)
         {
             _itemConfigContainer = gameConfigContainer.ItemConfigContainer;
-            Initialize(64);
+            Initialize();
         }
 
-        protected override IItemAnimation CreateInstance(AnimationEntity data) => new ItemAnimation(data.owner);
+        protected override IItemAnimation CreateInstance(AnimationEntity data) => new ItemAnimation(data.objectReader, data.gridObjectType);
 
         protected override void OnGet(IItemAnimation item)
         {
             base.OnGet(item);
-            item.Initialize(_itemConfigContainer.DefaultEffectSettings);
+            var config = GetConfig(item.GridObjectTypeData);
+            item.Initialize(config);
         }
 
         protected override void OnRelease(IItemAnimation item)
@@ -39,10 +41,17 @@ namespace Core.Item.Factories
             base.OnDestroy(item);
             item.Dispose();
         }
+
+        private ItemAnimationConfig GetConfig(GridObjectTypeData gridObjectTypeData)
+        {
+            var animationConfig = _itemConfigContainer.GetAnimationConfig(gridObjectTypeData.gridItemKind, gridObjectTypeData.typeId);
+            return animationConfig ? animationConfig : _itemConfigContainer.DefaultAnimationConfigs;
+        }
     }
 
     public struct AnimationEntity
     {
-        public IItemObjectReader owner;
+        public IItemObjectReader objectReader;
+        public GridObjectTypeData gridObjectType;
     }
 }

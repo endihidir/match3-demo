@@ -33,5 +33,12 @@ namespace Core.Level
     {
         public GridItemKind gridItemKind;
         public int typeId;
+
+        public GridObjectTypeData() { }
+        public GridObjectTypeData(GridItemKind gridItemKind, int typeId)
+        {
+            this.gridItemKind = gridItemKind;
+            this.typeId = typeId;
+        }
     }
 }

@@ -29,6 +29,8 @@ namespace Core.Item
         private IItemSpriteProvider ItemSpriteProvider { get; }
         private IItemAnimationFactory ItemAnimationFactory { get; }
 
+        private GridObjectTypeData _typeData;
+
         public GridItemState(ItemBehaviourData itemBehaviourData)
         {
             Transform = itemBehaviourData.itemObject.Transform;
@@ -48,12 +50,14 @@ namespace Core.Item
         {
             ItemKind = itemKind;
             TypeId = typeId;
+            _typeData = new GridObjectTypeData(ItemKind, typeId);
             
             var sprite = ItemSpriteProvider.GetSprite(itemKind, typeId);
             SetSprite(sprite);
       
             ItemAnimationFactory.Release(ItemAnimation);
-            ItemAnimation = ItemAnimationFactory.Get(new AnimationEntity {owner = this});
+            var animationEntity = new AnimationEntity { objectReader = this, gridObjectType = _typeData };
+            ItemAnimation = ItemAnimationFactory.Get(animationEntity);
         }
         
         public void Dispose()
