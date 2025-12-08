@@ -36,21 +36,8 @@ namespace Core.Presenters
             
             var width  = _levelDefinition.GridSize.x;
             var height = _levelDefinition.GridSize.y;
-            var stateData = new IGridItemState[width, height];
             
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    var typeData = _levelDefinition.GridObjectTypes[y, x];
-                    var gridPos  = new Vector2Int(x, y);
-
-                    var item = _gridItemFactory.GetItem(typeData.gridItemKind, typeData.typeId, gridPos);
-                    stateData[x, y] = item.State;
-                }
-            }
-
-            var offset = 2f;
+            _model.InitSize(width, height);
             
             _active = new bool[width, height];
         
@@ -58,7 +45,7 @@ namespace Core.Presenters
             for (int x = 0; x < width; x++)
                 _active[x, y] = true;
             
-            _active[0, 0] = false;
+           // _active[0, 0] = false;
             
             _active[0, 3] = false;
             _active[1, 3] = false;
@@ -68,12 +55,11 @@ namespace Core.Presenters
             _active[1, 4] = false;
             _active[2, 4] = false;
             
-            
-            _model.Initialize(stateData);
+            const float offset = 2f;
            
             meshFilter.transform.localPosition = new Vector3(0, -offset, -0.3f);
             
-            _model.BuildGridWithHoles(meshFilter,.15f,.1f,6,(x, y) => _active[x, y]);
+            _model.BuildGridWithHoles(meshFilter,.2f,1f,20,(x, y) => _active[x, y]);
             
             var bgTop = meshFilter.mesh.bounds.max.y;
             
@@ -81,18 +67,24 @@ namespace Core.Presenters
       
             _model.OriginOffset = new Vector3(0, originOffsetY + offset, 0);
             
-            for (int y = 0; y < height; y++)
+            for (int i = 0; i < height * width; i++)
             {
-                for (int x = 0; x < width; x++)
-                {
-                    var state = stateData[x, y];
-                    if (state == null) continue;
-                    
-                    var worldPos = _model.GridToWorld(state.GridPos, _cam);
-                    state.Transform.position = worldPos;
-                    var size = new Vector2(_model.CellSize, _model.CellSize) * .75f;
-                    state.SetSize(size);
-                }
+                var gridPos = CoordinateUtils.ToPos(i, width);
+                var x = gridPos.x;
+                var y = gridPos.y;
+                
+                if (!_active[x, y]) continue;
+                
+                var typeData = _levelDefinition.GridObjectTypes[y, x];
+                var item = _gridItemFactory.GetItem(typeData.gridItemKind, typeData.typeId, gridPos);
+                var state = item.State;
+                _model.InitData(state);
+                
+                var size = new Vector2(_model.CellSize, _model.CellSize) * .75f;
+                state.SetSize(size);
+                
+                var worldPos = _model.GridToWorld(state.GridPos, _cam);
+                state.Transform.position = worldPos;
             }
 
             return this;

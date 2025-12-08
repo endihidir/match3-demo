@@ -7,16 +7,24 @@ namespace Core.Utils
 {
     public static class GridWithHolesMeshUtils
     {
+        /// <summary>
+        /// Generates a mesh for the Match-3 board with holes (inactive cells).
+        /// Submesh 0 = inner cell quads
+        /// Submesh 1 = outer frame segments + corners
+        /// </summary>
         public static void BuildGridWithHoles<T>(this IGridModel<T> model, MeshFilter meshFilter, float frameThickness = 0.1f, float cornerSmoothness = 0f, int cornerSegments = 6, Func<int, int, bool> isCellActive = null) where T : class
         {
             if (!meshFilter || frameThickness <= 0f) return;
 
             var mesh = new Mesh { name = "GridWithHolesMesh" };
 
-            float w = model.Width * model.CellSize;
-            float h = model.Height * model.CellSize;
-            float halfW = w * 0.5f;
-            float halfH = h * 0.5f;
+            var cellSize = model.CellSize;
+
+            var w = model.Width * cellSize;
+            var h = model.Height * cellSize;
+
+            var halfW = w * 0.5f;
+            var halfH = h * 0.5f;
 
             var vertices = new List<Vector3>();
             var uvs = new List<Vector2>();
@@ -24,154 +32,56 @@ namespace Core.Utils
             var innerTris = new List<int>();
             var frameTris = new List<int>();
 
-            bool useRounded = cornerSmoothness > 0f && cornerSegments > 0;
-            float cornerRadius = (frameThickness * 10f) * cornerSmoothness;
+            var useRounded = cornerSmoothness > 0f && cornerSegments > 0;
 
             for (int y = 0; y < model.Height; y++)
             {
-                int visualY = model.Height - 1 - y;
-                float y0 = (visualY * model.CellSize) - halfH;
-                float y1 = y0 + model.CellSize;
+                var visualY = model.Height - 1 - y;
+                var y0 = (visualY * cellSize) - halfH;
+                var y1 = y0 + cellSize;
 
                 for (int x = 0; x < model.Width; x++)
                 {
                     if (isCellActive != null && !isCellActive(x, y)) continue;
 
-                    float x0 = (x * model.CellSize) - halfW;
-                    float x1 = x0 + model.CellSize;
+                    var x0 = (x * cellSize) - halfW;
+                    var x1 = x0 + cellSize;
 
-                    int baseIndex = vertices.Count;
+                    var baseIndex = vertices.Count;
 
                     AddVertex(new Vector3(x0, y0, 0f), new Vector2(x, y));
                     AddVertex(new Vector3(x1, y0, 0f), new Vector2(x + 1, y));
                     AddVertex(new Vector3(x1, y1, 0f), new Vector2(x + 1, y + 1));
                     AddVertex(new Vector3(x0, y1, 0f), new Vector2(x, y + 1));
 
-                    AddQuad(innerTris, baseIndex + 0, baseIndex + 1, baseIndex + 2, baseIndex + 3);
-
+                    AddQuad(innerTris, baseIndex, baseIndex + 1, baseIndex + 2, baseIndex + 3);
+                    
+                    // Edge strips
                     if (IsEmpty(x, y + 1))
                     {
-                        int vBase = vertices.Count;
-                        float fy0 = y0 - frameThickness;
-                        AddVertex(new Vector3(x0, fy0, 0f), Vector2.zero);
-                        AddVertex(new Vector3(x1, fy0, 0f), Vector2.right);
-                        AddVertex(new Vector3(x1, y0, 0f), Vector2.one);
-                        AddVertex(new Vector3(x0, y0, 0f), Vector2.up);
-                        AddQuad(frameTris, vBase + 0, vBase + 1, vBase + 2, vBase + 3);
+                        AddFrameEdge(frameTris, new Vector3(x0, y0, 0f), new Vector3(x1, y0, 0f), Vector3.down);
                     }
 
                     if (IsEmpty(x, y - 1))
                     {
-                        int vBase = vertices.Count;
-                        float fy1 = y1 + frameThickness;
-                        AddVertex(new Vector3(x0, y1, 0f), Vector2.zero);
-                        AddVertex(new Vector3(x1, y1, 0f), Vector2.right);
-                        AddVertex(new Vector3(x1, fy1, 0f), Vector2.one);
-                        AddVertex(new Vector3(x0, fy1, 0f), Vector2.up);
-                        AddQuad(frameTris, vBase + 0, vBase + 1, vBase + 2, vBase + 3);
+                        AddFrameEdge(frameTris, new Vector3(x0, y1, 0f), new Vector3(x1, y1, 0f), Vector3.up);
                     }
 
                     if (IsEmpty(x - 1, y))
                     {
-                        int vBase = vertices.Count;
-                        float fx0 = x0 - frameThickness;
-                        AddVertex(new Vector3(fx0, y0, 0f), Vector2.zero);
-                        AddVertex(new Vector3(x0, y0, 0f), Vector2.right);
-                        AddVertex(new Vector3(x0, y1, 0f), Vector2.one);
-                        AddVertex(new Vector3(fx0, y1, 0f), Vector2.up);
-                        AddQuad(frameTris, vBase + 0, vBase + 1, vBase + 2, vBase + 3);
+                        AddFrameEdge(frameTris, new Vector3(x0, y0, 0f), new Vector3(x0, y1, 0f), Vector3.left);
                     }
 
                     if (IsEmpty(x + 1, y))
                     {
-                        int vBase = vertices.Count;
-                        float fx1 = x1 + frameThickness;
-                        AddVertex(new Vector3(x1, y0, 0f), Vector2.zero);
-                        AddVertex(new Vector3(fx1, y0, 0f), Vector2.right);
-                        AddVertex(new Vector3(fx1, y1, 0f), Vector2.one);
-                        AddVertex(new Vector3(x1, y1, 0f), Vector2.up);
-                        AddQuad(frameTris, vBase + 0, vBase + 1, vBase + 2, vBase + 3);
+                        AddFrameEdge(frameTris, new Vector3(x1, y0, 0f), new Vector3(x1, y1, 0f), Vector3.right);
                     }
-
-                    if (IsEmpty(x - 1, y) && IsEmpty(x, y + 1))
-                    {
-                        bool innerCorner = IsHoleCell(x - 1, y) && IsHoleCell(x, y + 1);
-                        if (useRounded)
-                        {
-                            AddRoundedCorner(frameTris, new Vector3(x0, y0, 0f), Vector3.left, Vector3.down, innerCorner);
-                        }
-                        else
-                        {
-                            int vBase = vertices.Count;
-                            float fx0 = x0 - frameThickness;
-                            float fy0 = y0 - frameThickness;
-                            AddVertex(new Vector3(fx0, fy0, 0f), Vector2.zero);
-                            AddVertex(new Vector3(x0, fy0, 0f), Vector2.right);
-                            AddVertex(new Vector3(x0, y0, 0f), Vector2.one);
-                            AddVertex(new Vector3(fx0, y0, 0f), Vector2.up);
-                            AddQuad(frameTris, vBase + 0, vBase + 1, vBase + 2, vBase + 3);
-                        }
-                    }
-
-                    if (IsEmpty(x + 1, y) && IsEmpty(x, y + 1))
-                    {
-                        bool innerCorner = IsHoleCell(x + 1, y) && IsHoleCell(x, y + 1);
-                        if (useRounded)
-                        {
-                            AddRoundedCorner(frameTris, new Vector3(x1, y0, 0f), Vector3.right, Vector3.down, innerCorner);
-                        }
-                        else
-                        {
-                            int vBase = vertices.Count;
-                            float fx1 = x1 + frameThickness;
-                            float fy0 = y0 - frameThickness;
-                            AddVertex(new Vector3(x1, fy0, 0f), Vector2.zero);
-                            AddVertex(new Vector3(fx1, fy0, 0f), Vector2.right);
-                            AddVertex(new Vector3(fx1, y0, 0f), Vector2.one);
-                            AddVertex(new Vector3(x1, y0, 0f), Vector2.up);
-                            AddQuad(frameTris, vBase + 0, vBase + 1, vBase + 2, vBase + 3);
-                        }
-                    }
-
-                    if (IsEmpty(x - 1, y) && IsEmpty(x, y - 1))
-                    {
-                        bool innerCorner = IsHoleCell(x - 1, y) && IsHoleCell(x, y - 1);
-                        if (useRounded)
-                        {
-                            AddRoundedCorner(frameTris, new Vector3(x0, y1, 0f), Vector3.left, Vector3.up, innerCorner);
-                        }
-                        else
-                        {
-                            int vBase = vertices.Count;
-                            float fx0 = x0 - frameThickness;
-                            float fy1 = y1 + frameThickness;
-                            AddVertex(new Vector3(fx0, y1, 0f), Vector2.zero);
-                            AddVertex(new Vector3(x0, y1, 0f), Vector2.right);
-                            AddVertex(new Vector3(x0, fy1, 0f), Vector2.one);
-                            AddVertex(new Vector3(fx0, fy1, 0f), Vector2.up);
-                            AddQuad(frameTris, vBase + 0, vBase + 1, vBase + 2, vBase + 3);
-                        }
-                    }
-
-                    if (IsEmpty(x + 1, y) && IsEmpty(x, y - 1))
-                    {
-                        bool innerCorner = IsHoleCell(x + 1, y) && IsHoleCell(x, y - 1);
-                        if (useRounded)
-                        {
-                            AddRoundedCorner(frameTris, new Vector3(x1, y1, 0f), Vector3.right, Vector3.up, innerCorner);
-                        }
-                        else
-                        {
-                            int vBase = vertices.Count;
-                            float fx1 = x1 + frameThickness;
-                            float fy1 = y1 + frameThickness;
-                            AddVertex(new Vector3(x1, y1, 0f), Vector2.zero);
-                            AddVertex(new Vector3(fx1, y1, 0f), Vector2.right);
-                            AddVertex(new Vector3(fx1, fy1, 0f), Vector2.one);
-                            AddVertex(new Vector3(x1, fy1, 0f), Vector2.up);
-                            AddQuad(frameTris, vBase + 0, vBase + 1, vBase + 2, vBase + 3);
-                        }
-                    }
+                    
+                    // Corners (compressed via TryAddCorner)
+                    TryAddCorner(frameTris, x, y, -1, 0, 0, 1, new Vector3(x0, y0, 0f), Vector3.left,  Vector3.down); // top-left
+                    TryAddCorner(frameTris, x, y,  1, 0, 0, 1, new Vector3(x1, y0, 0f), Vector3.right, Vector3.down); // top-right
+                    TryAddCorner(frameTris, x, y, -1, 0, 0,-1, new Vector3(x0, y1, 0f), Vector3.left,  Vector3.up);   // bottom-left
+                    TryAddCorner(frameTris, x, y,  1, 0, 0,-1, new Vector3(x1, y1, 0f), Vector3.right, Vector3.up);   // bottom-right
                 }
             }
 
@@ -185,6 +95,8 @@ namespace Core.Utils
             meshFilter.sharedMesh = mesh;
             return;
 
+            // --------- helpers ---------
+
             void AddVertex(Vector3 v, Vector2 uv)
             {
                 vertices.Add(v);
@@ -194,31 +106,101 @@ namespace Core.Utils
 
             void AddQuad(List<int> tris, int v0, int v1, int v2, int v3)
             {
-                tris.Add(v0);
-                tris.Add(v1);
-                tris.Add(v2);
-                tris.Add(v0);
-                tris.Add(v2);
-                tris.Add(v3);
+                tris.Add(v0); tris.Add(v1); tris.Add(v2);
+                tris.Add(v0); tris.Add(v2); tris.Add(v3);
             }
 
-            void AddRoundedCorner(List<int> tris, Vector3 center, Vector3 dirX, Vector3 dirY, bool inner)
+            /// <summary>
+            /// Generic edge strip between two inner points, extruded along outwardDir by frameThickness.
+            /// innerStart -> innerEnd defines the inner edge on the board.
+            /// </summary>
+            void AddFrameEdge(List<int> tris, Vector3 innerStart, Vector3 innerEnd, Vector3 outwardDir)
             {
-                float r = cornerRadius;
-                Vector3 dx = inner ? -dirX.normalized : dirX.normalized;
-                Vector3 dy = inner ? -dirY.normalized : dirY.normalized;
+                var n = outwardDir.normalized * frameThickness;
 
-                int centerIndex = vertices.Count;
+                var vBase = vertices.Count;
+                var outerStart = innerStart + n;
+                var outerEnd = innerEnd + n;
+
+                AddVertex(outerStart, Vector2.zero);
+                AddVertex(outerEnd, Vector2.right);
+                AddVertex(innerEnd, Vector2.one);
+                AddVertex(innerStart, Vector2.up);
+
+                AddQuad(tris, vBase, vBase + 1, vBase + 2, vBase + 3);
+            }
+
+            /// <summary>
+            /// Corner wrapper: checks neighbors and calls AddCorner if both sides are empty.
+            /// dx1,dy1 and dx2,dy2 are neighbor offsets (e.g. (-1,0) and (0,1) for top-left).
+            /// </summary>
+            void TryAddCorner(List<int> tris, int gx, int gy, int dx1, int dy1, int dx2, int dy2, Vector3 innerCorner, Vector3 dirX, Vector3 dirY)
+            {
+                var nx1 = gx + dx1;
+                var ny1 = gy + dy1;
+                var nx2 = gx + dx2;
+                var ny2 = gy + dy2;
+
+                if (!IsEmpty(nx1, ny1) || !IsEmpty(nx2, ny2)) return;
+
+                var innerCornerFlag = IsHoleCell(nx1, ny1) && IsHoleCell(nx2, ny2);
+                AddCorner(tris, innerCorner, dirX, dirY, innerCornerFlag);
+            }
+
+            /// <summary>
+            /// Unified corner entry: decides square vs rounded based on useRounded.
+            /// innerCorner = cell corner on the board surface.
+            /// dirX, dirY = outward directions along each edge from that corner.
+            /// </summary>
+            void AddCorner(List<int> tris, Vector3 innerCorner, Vector3 dirX, Vector3 dirY, bool innerCornerFlag)
+            {
+                if (useRounded)
+                {
+                    AddRoundedCorner(tris, innerCorner, dirX, dirY, innerCornerFlag);
+                }
+                else
+                {
+                    AddSquareCorner(tris, innerCorner, dirX, dirY, innerCornerFlag);
+                }
+            }
+
+            void AddSquareCorner(List<int> tris, Vector3 innerCorner, Vector3 dirX, Vector3 dirY, bool innerCornerFlag)
+            {
+                var exDir = innerCornerFlag ? -dirX.normalized : dirX.normalized;
+                var eyDir = innerCornerFlag ? -dirY.normalized : dirY.normalized;
+
+                var ex = exDir * frameThickness;
+                var ey = eyDir * frameThickness;
+
+                var vBase = vertices.Count;
+
+                AddVertex(innerCorner + ex + ey, Vector2.zero);
+                AddVertex(innerCorner + ey, Vector2.right);
+                AddVertex(innerCorner, Vector2.one);
+                AddVertex(innerCorner + ex, Vector2.up);
+
+                AddQuad(tris, vBase, vBase + 1, vBase + 2, vBase + 3);
+            }
+
+            void AddRoundedCorner(List<int> tris, Vector3 center, Vector3 dirX, Vector3 dirY, bool innerCornerFlag)
+            {
+                var r = frameThickness * cornerSmoothness;
+                if (r <= 0f) return;
+
+                var dx = innerCornerFlag ? -dirX.normalized : dirX.normalized;
+                var dy = innerCornerFlag ? -dirY.normalized : dirY.normalized;
+
+                var centerIndex = vertices.Count;
                 AddVertex(center, Vector2.zero);
 
-                int prevIndex = -1;
+                var prevIndex = -1;
 
                 for (int i = 0; i <= cornerSegments; i++)
                 {
-                    float t = i / (float)cornerSegments;
-                    float angle = t * 0.5f * Mathf.PI;
-                    Vector3 offset = (dx * Mathf.Cos(angle) + dy * Mathf.Sin(angle)) * r;
-                    int idx = vertices.Count;
+                    var t = i / (float)cornerSegments;
+                    var angle = t * 0.5f * Mathf.PI;
+                    var offset = (dx * Mathf.Cos(angle) + dy * Mathf.Sin(angle)) * r;
+                    var idx = vertices.Count;
                     AddVertex(center + offset, Vector2.zero);
 
                     if (i > 0)
@@ -234,13 +216,17 @@ namespace Core.Utils
 
             bool IsEmpty(int gx, int gy)
             {
-                if (gx < 0 || gx >= model.Width || gy < 0 || gy >= model.Height) return true;
+                if (gx < 0 || gx >= model.Width || gy < 0 || gy >= model.Height)
+                    return true;
+
                 return isCellActive != null && !isCellActive(gx, gy);
             }
 
             bool IsHoleCell(int gx, int gy)
             {
-                if (gx < 0 || gx >= model.Width || gy < 0 || gy >= model.Height) return false;
+                if (gx < 0 || gx >= model.Width || gy < 0 || gy >= model.Height)
+                    return false;
+
                 return isCellActive != null && !isCellActive(gx, gy);
             }
         }
