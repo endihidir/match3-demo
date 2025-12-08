@@ -57,8 +57,7 @@ namespace Core.Utils
             {
                 var pos = CoordinateUtils.ToPos(index, width);
                 var col = pos.x;
-                var reversedRow = pos.y;
-                var row = height - 1 - reversedRow; // JSON top-down, runtime bottom-up
+                var row = pos.y;
 
                 GridObjectTypeData cellData;
 
@@ -72,7 +71,7 @@ namespace Core.Utils
                     cellData = CreateRandomItemCell();
                 }
 
-                grid[row, col] = cellData;
+                grid[col, row] = cellData;
             }
 
             return counts;

@@ -61,7 +61,7 @@ namespace Core.Utils
                 JsonGridObjectType.v  => Encode(ObstacleType.Vase),
 
                 JsonGridObjectType.t  => Encode(BoosterType.Bomb),
-
+                JsonGridObjectType.empty => Encode(ItemType.None),
                 _ => 0
             };
         }

@@ -15,6 +15,7 @@ namespace Core.Level
     public enum JsonGridObjectType
     {
         rand,
+        empty,
         b,
         g,
         r,

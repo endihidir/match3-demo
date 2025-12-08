@@ -16,16 +16,16 @@ MonoBehaviour:
     _serializedList:
     - Key: 1
       Value:
-        sprite: {fileID: 21300000, guid: bcccb43884c472a4b9809d95444b8337, type: 3}
-        boosterEffectConfig: {fileID: 11400000, guid: b593787a2ea5ec645bc18f16cb660af4,
-          type: 2}
+        icon: {fileID: 21300000, guid: bcccb43884c472a4b9809d95444b8337, type: 3}
+        animOverride: 0
+        animationConfig: {fileID: 0}
     - Key: 2
       Value:
-        sprite: {fileID: 21300000, guid: d47770ec4e6fc964181e2e3c3fb30224, type: 3}
-        boosterEffectConfig: {fileID: 11400000, guid: b593787a2ea5ec645bc18f16cb660af4,
-          type: 2}
+        icon: {fileID: 21300000, guid: d47770ec4e6fc964181e2e3c3fb30224, type: 3}
+        animOverride: 0
+        animationConfig: {fileID: 0}
     - Key: 3
       Value:
-        sprite: {fileID: 21300000, guid: 6a4eb1c8bed10e54bb8efee845ef3fc3, type: 3}
-        boosterEffectConfig: {fileID: 11400000, guid: 29588ecd8a9b5ac4b8e5561f49b5b648,
-          type: 2}
+        icon: {fileID: 21300000, guid: 6a4eb1c8bed10e54bb8efee845ef3fc3, type: 3}
+        animOverride: 0
+        animationConfig: {fileID: 0}

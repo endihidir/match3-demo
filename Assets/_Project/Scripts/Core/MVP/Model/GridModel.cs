@@ -17,10 +17,9 @@ namespace Core.Models
         Vector3 OriginOffset { get; set; }
         Color GizmosColor { get; set; }
         float CellSize { get; set; }
-        bool UseHeightWidthBacking { get; }
 
-        void InitSize(int width, int height, bool useHeightWidthBacking = true);
-        void InitData(T gridItemData);
+        void InitSize(int width, int height);
+        void SetData(Vector2Int pos, T value);
         T GetGridObject(Vector2Int gridPos);
         void SetGridObject(Vector2Int gridPos, T item);
 
@@ -45,7 +44,6 @@ namespace Core.Models
         public float CellSpacingRatio { get; set; }
         public Vector3 OriginOffset { get; set; }
         public float CellSize { get; set; }
-        public bool UseHeightWidthBacking { get; private set; }
         public Color GizmosColor { get; set; } = Color.yellow;
 
         private static readonly Direction2D[] DirectionList = (Direction2D[])Enum.GetValues(typeof(Direction2D));
@@ -63,41 +61,17 @@ namespace Core.Models
             { Direction2D.LeftDown,   new Vector2Int(-1,  1) }
         };
 
-        public void InitSize(int width, int height, bool useHeightWidthBacking = true)
+        public void InitSize(int width, int height)
         {
             _width = width;
             _height = height;
-            UseHeightWidthBacking = useHeightWidthBacking;
+            _gridArray = new T[_width, _height];
             this.RecalculateCellSize();
         }
+        public void SetData(Vector2Int pos, T value) => SetInternal(pos, value);
 
-        public void InitData(T gridItemData)
-        {
-            _gridArray = UseHeightWidthBacking ? new T[_height, _width] : new T[_width, _height];
-            
-            for (var x = 0; x < _width; x++)
-            {
-                for (var y = 0; y < _height; y++)
-                {
-                    var pos = new Vector2Int(x, y);
-                    SetInternal(pos, gridItemData);
-                }
-            }
-        }
-
-        private T GetInternal(Vector2Int pos) => UseHeightWidthBacking ? _gridArray[pos.y, pos.x] : _gridArray[pos.x, pos.y];
-
-        private void SetInternal(Vector2Int pos, T value)
-        {
-            if (UseHeightWidthBacking)
-            {
-                _gridArray[pos.y, pos.x] = value;
-            }
-            else
-            {
-                _gridArray[pos.x, pos.y] = value;
-            }
-        }
+        private T GetInternal(Vector2Int pos) => _gridArray[pos.x, pos.y];
+        private void SetInternal(Vector2Int pos, T value) => _gridArray[pos.x, pos.y] = value;
 
         public T GetGridObject(Vector2Int pos)
         {
