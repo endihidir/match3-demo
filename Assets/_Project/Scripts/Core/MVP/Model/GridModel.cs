@@ -19,7 +19,8 @@ namespace Core.Models
         float CellSize { get; set; }
         bool UseHeightWidthBacking { get; }
 
-        void Initialize(T[,] gridItemData, bool useHeightWidthBacking = true);
+        void InitSize(int width, int height, bool useHeightWidthBacking = true);
+        void InitData(T gridItemData);
         T GetGridObject(Vector2Int gridPos);
         void SetGridObject(Vector2Int gridPos, T item);
 
@@ -62,15 +63,16 @@ namespace Core.Models
             { Direction2D.LeftDown,   new Vector2Int(-1,  1) }
         };
 
-        public void Initialize(T[,] gridItemData, bool useHeightWidthBacking = true)
+        public void InitSize(int width, int height, bool useHeightWidthBacking = true)
         {
+            _width = width;
+            _height = height;
             UseHeightWidthBacking = useHeightWidthBacking;
-            
-            _width = gridItemData.GetLength(0);
-            _height = gridItemData.GetLength(1);
-            
             this.RecalculateCellSize();
-            
+        }
+
+        public void InitData(T gridItemData)
+        {
             _gridArray = UseHeightWidthBacking ? new T[_height, _width] : new T[_width, _height];
             
             for (var x = 0; x < _width; x++)
@@ -78,15 +80,12 @@ namespace Core.Models
                 for (var y = 0; y < _height; y++)
                 {
                     var pos = new Vector2Int(x, y);
-                    SetInternal(pos, gridItemData[x, y]);
+                    SetInternal(pos, gridItemData);
                 }
             }
         }
 
-        private T GetInternal(Vector2Int pos)
-        {
-            return UseHeightWidthBacking ? _gridArray[pos.y, pos.x] : _gridArray[pos.x, pos.y];
-        }
+        private T GetInternal(Vector2Int pos) => UseHeightWidthBacking ? _gridArray[pos.y, pos.x] : _gridArray[pos.x, pos.y];
 
         private void SetInternal(Vector2Int pos, T value)
         {
