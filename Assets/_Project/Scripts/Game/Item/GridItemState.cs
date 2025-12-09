@@ -27,14 +27,14 @@ namespace Core.Item
         public SpriteRenderer SpriteRenderer { get; private set; }
         public IItemAnimation ItemAnimation { get; private set; }
         
-        private IItemSpriteProvider ItemSpriteProvider { get; }
+        private IItemVisualProvider ItemVisualProvider { get; }
         private IItemAnimationFactory ItemAnimationFactory { get; }
         
         public GridItemState(ItemBehaviourData itemBehaviourData)
         {
             Transform = itemBehaviourData.itemObject.Transform;
             SpriteRenderer = itemBehaviourData.itemObject.SpriteRenderer;
-            ItemSpriteProvider = itemBehaviourData.itemSpriteProvider;
+            ItemVisualProvider = itemBehaviourData.itemVisualProvider;
             ItemAnimationFactory = itemBehaviourData.itemAnimationFactory;
         }
         
@@ -53,9 +53,9 @@ namespace Core.Item
             TypeId = typeId;
             var typeData = new GridObjectTypeData(ItemKind, TypeId);
             
-            var sprite = ItemSpriteProvider.GetSprite(itemKind, typeId);
+            var sprite = ItemVisualProvider.GetSprite(itemKind, typeId);
             SetSprite(sprite);
-            var sizeMultiplier = ItemSpriteProvider.GetSizeMultiplier(itemKind, typeId);
+            var sizeMultiplier = ItemVisualProvider.GetSizeMultiplier(itemKind, typeId);
             SetSpriteSize(sizeMultiplier);
       
             ItemAnimationFactory.Release(ItemAnimation);
@@ -90,6 +90,6 @@ namespace Core.Item
     {
         public IGridItemObject itemObject;
         public IItemAnimationFactory itemAnimationFactory;
-        public IItemSpriteProvider itemSpriteProvider;
+        public IItemVisualProvider itemVisualProvider;
     }
 }

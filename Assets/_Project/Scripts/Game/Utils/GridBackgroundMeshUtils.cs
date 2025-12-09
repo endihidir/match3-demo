@@ -36,9 +36,9 @@ namespace Core.Utils
 
             for (int i = 0; i < model.Height * model.Width; i++)
             {
-                var gridPos = CoordinateUtils.ToPos(i, model.Width);
-                var x = gridPos.x;
-                var y = gridPos.y;
+                var coordinate = CoordinateUtils.ToCoordinate(i, model.Width);
+                var x = coordinate.x;
+                var y = coordinate.y;
             
                 var visualY = model.Height - 1 - y;
                 var y0 = (visualY * cellSize) - halfH;

@@ -135,8 +135,8 @@ namespace Core.Extensions
 
             for (int i = 0; i < cellCount; i++)
             {
-                var pos = CoordinateUtils.ToPos(i, model.Width);
-                var center = model.GridToWorld(pos, cam);
+                var coordinate = CoordinateUtils.ToCoordinate(i, model.Width);
+                var center = model.GridToWorld(coordinate, cam);
                 var half= model.CellSize * 0.5f;
                 
                 var topLeft     = new Vector3(center.x - half, center.y + half, center.z);

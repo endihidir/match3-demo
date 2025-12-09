@@ -43,7 +43,7 @@ namespace Core.Presenters
             
             for (int i = 0; i < _model.Width * _model.Height; i++)
             {
-                var coordinate = CoordinateUtils.ToPos(i, _model.Width);
+                var coordinate = CoordinateUtils.ToCoordinate(i, _model.Width);
                 
                 var x = coordinate.x;
                 var y = coordinate.y;

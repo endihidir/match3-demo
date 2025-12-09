@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Core.Config
 {
     //[CreateAssetMenu(fileName = "ItemConfigContainer", menuName = "Match3/ItemConfigContainer", order = 0)]
-    public class ItemConfigContainer : ScriptableObject, IItemSpriteProvider
+    public class ItemConfigContainer : ScriptableObject, IItemVisualProvider
     {
         [field: SerializeField, Required] public ItemAnimationConfig DefaultAnimationConfigs { get; private set; }
         [field: SerializeField] private BaseItemConfig[] ItemConfigs { get; set; }
@@ -48,7 +48,7 @@ namespace Core.Config
         };
     }
     
-    public interface IItemSpriteProvider
+    public interface IItemVisualProvider
     {
         Sprite GetSprite(GridItemKind kind, int typeId);
         float GetSizeMultiplier(GridItemKind kind, int typeId);
