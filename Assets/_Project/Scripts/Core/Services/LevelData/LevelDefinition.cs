@@ -22,19 +22,15 @@ namespace Core.Level
             Goals = goals;
         }
 
-        public override string ToString()
-        {
-            return $"LevelNumber:{LevelNumber}, MoveLimit:{MoveCount}, GridSize:{GridSize}, Goals:{Goals.Count}";
-        }
+        public override string ToString() => $"LevelNumber:{LevelNumber}, MoveCount:{MoveCount}, GridSize:{GridSize}, Goals:{Goals.Count}";
     }
     
     [Serializable]
-    public class GridObjectTypeData
+    public struct GridObjectTypeData
     {
         public GridItemKind gridItemKind;
         public int typeId;
-
-        public GridObjectTypeData() { }
+        
         public GridObjectTypeData(GridItemKind gridItemKind, int typeId)
         {
             this.gridItemKind = gridItemKind;

@@ -8,6 +8,8 @@ namespace Core.Context
 {
     public class GridViewContext : ManagedViewContext
     {
+        [SerializeField] private Transform _pivotPoint;
+        
         [SerializeField] private MeshFilter _boardMeshFilter;
         
         protected override async UniTask Initialize()
@@ -18,7 +20,7 @@ namespace Core.Context
 
             if (modelResolved && presenterResolved)
             {
-                match3GridPresenter.Initialize(match3GridModel, _boardMeshFilter);
+                match3GridPresenter.Initialize(match3GridModel, _boardMeshFilter, _pivotPoint);
             }
             
             await UniTask.CompletedTask;

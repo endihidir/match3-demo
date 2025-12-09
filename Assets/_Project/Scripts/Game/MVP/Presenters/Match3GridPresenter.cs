@@ -10,7 +10,7 @@ namespace Core.Presenters
 {
     public interface IMatch3GridPresenter
     {
-        IMatch3GridPresenter Initialize(IMatch3GridModel model, MeshFilter meshFilter);
+        IMatch3GridPresenter Initialize(IMatch3GridModel model, MeshFilter meshFilter, Transform pivot);
         void Refresh();
     }
     
@@ -27,62 +27,39 @@ namespace Core.Presenters
             _gridItemFactory = gridItemFactory;
         }
         
-        public IMatch3GridPresenter Initialize(IMatch3GridModel model, MeshFilter meshFilter)
+        public IMatch3GridPresenter Initialize(IMatch3GridModel model, MeshFilter meshFilter, Transform pivot)
         {
             _cam = Camera.main;
             _model = model;
             _model.ScreenSidePaddingRatio = 5f;
+            _model.Initialize(_levelDefinition.GridSize);
             
-            var width  = _levelDefinition.GridSize.x;
-            var height = _levelDefinition.GridSize.y;
+            var yOffset = pivot.position.y + (_model.Height * _model.CellSize * 0.5f);
+            var originOffsetY = _model.GetTopY(_cam) - yOffset;
+            _model.OriginOffset = new Vector3(0, originOffsetY, 0);
             
-            _model.InitSize(width, height);
+            var active = new bool[_model.Width, _model.Height];
+            var cellSize = new Vector2(_model.CellSize, _model.CellSize);
             
-            var itemSize = new Vector2(_model.CellSize, _model.CellSize) * .75f;
-            
-            var active = new bool[width, height];
-
-            for (int i = 0; i < height * width; i++)
+            for (int i = 0; i < _model.Width * _model.Height; i++)
             {
-                var gridPos = CoordinateUtils.ToPos(i, width);
-                var x = gridPos.x;
-                var y = gridPos.y;
+                var coordinate = CoordinateUtils.ToPos(i, _model.Width);
+                
+                var x = coordinate.x;
+                var y = coordinate.y;
+                
                 var typeData = _levelDefinition.GridObjectTypes[x, y];
                 active[x, y] = typeData.gridItemKind != GridItemKind.Regular || typeData.typeId != 0;
-            }
-            
-            const float offset = 2f;
-           
-            meshFilter.transform.localPosition = new Vector3(0, -offset, -0.3f);
-            
-            _model.BuildGridWithHoles(meshFilter,.25f,1f,20,(x, y) => active[x, y]);
-            
-            var bgTop = meshFilter.mesh.bounds.max.y;
-            
-            var originOffsetY = _model.GetTopY(_cam) - bgTop;
-      
-            _model.OriginOffset = new Vector3(0, originOffsetY + offset, 0);
-            
-            for (int i = 0; i < height * width; i++)
-            {
-                var gridPos = CoordinateUtils.ToPos(i, width);
-                
-                var x = gridPos.x;
-                var y = gridPos.y;
-                
                 if (!active[x, y]) continue;
                 
-                var typeData = _levelDefinition.GridObjectTypes[x, y];
-                var item = _gridItemFactory.GetItem(typeData.gridItemKind, typeData.typeId, gridPos);
+                var item = _gridItemFactory.GetItem(typeData.gridItemKind, typeData.typeId, coordinate, cellSize);
                 var itemState = item.State;
-                
-                itemState.SetSize(itemSize);
-                
-                var worldPos = _model.GridToWorld(gridPos, _cam);
+                var worldPos = _model.GridToWorld(coordinate, _cam);
                 itemState.Transform.position = worldPos;
-                
-                _model.SetData(gridPos, itemState);
+                _model.SetData(coordinate, itemState);
             }
+            
+            _model.BuildGridWithHoles(meshFilter,.25f,1f,20,(x, y) => active[x, y]);
 
             return this;
         }

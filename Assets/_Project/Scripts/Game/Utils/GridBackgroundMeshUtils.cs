@@ -218,16 +218,14 @@ namespace Core.Utils
 
             bool IsEmpty(int gx, int gy)
             {
-                if (gx < 0 || gx >= model.Width || gy < 0 || gy >= model.Height)
-                    return true;
+                if (gx < 0 || gx >= model.Width || gy < 0 || gy >= model.Height) return true;
 
                 return isCellActive != null && !isCellActive(gx, gy);
             }
 
             bool IsHoleCell(int gx, int gy)
             {
-                if (gx < 0 || gx >= model.Width || gy < 0 || gy >= model.Height)
-                    return false;
+                if (gx < 0 || gx >= model.Width || gy < 0 || gy >= model.Height) return false;
 
                 return isCellActive != null && !isCellActive(gx, gy);
             }

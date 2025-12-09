@@ -23,6 +23,8 @@ namespace Core.Level
         bo,
         s,
         v,
-        t
+        t,
+        ro_v,
+        ro_h
     }
 }

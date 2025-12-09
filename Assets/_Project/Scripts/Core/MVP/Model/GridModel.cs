@@ -18,13 +18,12 @@ namespace Core.Models
         Color GizmosColor { get; set; }
         float CellSize { get; set; }
 
-        void InitSize(int width, int height);
+        void Initialize(Vector2Int size);
         void SetData(Vector2Int pos, T value);
         T GetGridObject(Vector2Int gridPos);
         void SetGridObject(Vector2Int gridPos, T item);
 
         bool IsInRange(Vector2Int pos);
-
         bool TryGetNeighbor(Vector2Int pos, Direction2D direction2D, out T neighbour);
         bool TryGetNeighbors(Vector2Int pos, out T[] neighbours);
         bool TryGetNeighborsNonAlloc(Vector2Int pos, Span<T> resultBuffer, out int count);
@@ -61,15 +60,14 @@ namespace Core.Models
             { Direction2D.LeftDown,   new Vector2Int(-1,  1) }
         };
 
-        public void InitSize(int width, int height)
+        public void Initialize(Vector2Int size)
         {
-            _width = width;
-            _height = height;
+            _width = size.x;
+            _height = size.y;
             _gridArray = new T[_width, _height];
             this.RecalculateCellSize();
         }
         public void SetData(Vector2Int pos, T value) => SetInternal(pos, value);
-
         private T GetInternal(Vector2Int pos) => _gridArray[pos.x, pos.y];
         private void SetInternal(Vector2Int pos, T value) => _gridArray[pos.x, pos.y] = value;
 

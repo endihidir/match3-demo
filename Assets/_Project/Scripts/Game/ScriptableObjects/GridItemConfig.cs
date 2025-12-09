@@ -30,7 +30,15 @@ namespace Core.Config
             GridItemKind.Obstacle => GetConfig<ObstacleItemConfig>().GetSprite((ObstacleType)typeId),
             _ => null
         };
-        
+
+        public float GetSizeMultiplier(GridItemKind kind, int typeId) => kind switch
+        {
+            GridItemKind.Regular => GetConfig<ItemConfig>().GetSizeMultiplier((ItemType)typeId),
+            GridItemKind.Booster => GetConfig<BoosterItemConfig>().GetSizeMultiplier((BoosterType)typeId),
+            GridItemKind.Obstacle => GetConfig<ObstacleItemConfig>().GetSizeMultiplier((ObstacleType)typeId),
+            _ => 1f
+        };
+
         public ItemAnimationConfig GetAnimationConfig(GridItemKind kind, int typeId) => kind switch
         {
             GridItemKind.Regular => GetConfig<ItemConfig>().GetAnimationConfig((ItemType)typeId),
@@ -43,5 +51,6 @@ namespace Core.Config
     public interface IItemSpriteProvider
     {
         Sprite GetSprite(GridItemKind kind, int typeId);
+        float GetSizeMultiplier(GridItemKind kind, int typeId);
     }
 }

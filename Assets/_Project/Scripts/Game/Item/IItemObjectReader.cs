@@ -4,7 +4,7 @@ namespace Core.Item
 {
     public interface IItemObjectReader
     {
-        Vector2Int GridPos { get; }
+        Vector2Int Coordinate { get; }
         SpriteRenderer SpriteRenderer { get; }
         Transform Transform { get; }
     }
