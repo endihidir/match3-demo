@@ -9,62 +9,13 @@ namespace Core.Utils
         private const int BoosterOffset = 100;
         private const int ObstacleOffset = 200;
         
-        public static Enum Decode(int code)
+        public static Enum Decode(int code) => code switch
         {
-            if (code == 0)
-            {
-                return ItemType.None;
-            }
-
-            if (code < BoosterOffset)
-            {
-                return (ItemType)code;
-            }
-
-            if (code < ObstacleOffset)
-            {
-                return (BoosterType)(code - BoosterOffset);
-            }
-
-            return (ObstacleType)(code - ObstacleOffset);
-        }
-        
-        public static int Encode(Enum value)
-        {
-            switch (value)
-            {
-                case ItemType itemType:
-                    return (int)itemType;
-
-                case BoosterType boosterType:
-                    return BoosterOffset + (int)boosterType;
-
-                case ObstacleType obstacleType:
-                    return ObstacleOffset + (int)obstacleType;
-
-                default:
-                    return 0;
-            }
-        }
-        
-        public static int EncodeJson(JsonGridObjectType value)
-        {
-            return value switch
-            {
-                JsonGridObjectType.r  => Encode(ItemType.Red),
-                JsonGridObjectType.g  => Encode(ItemType.Green),
-                JsonGridObjectType.b  => Encode(ItemType.Blue),
-                JsonGridObjectType.y  => Encode(ItemType.Yellow),
-
-                JsonGridObjectType.bo => Encode(ObstacleType.Box),
-                JsonGridObjectType.s  => Encode(ObstacleType.Stone),
-                JsonGridObjectType.v  => Encode(ObstacleType.Vase),
-
-                JsonGridObjectType.t  => Encode(BoosterType.Bomb),
-                JsonGridObjectType.empty => Encode(ItemType.None),
-                _ => 0
-            };
-        }
+            0 => ItemType.None,
+            < BoosterOffset => (ItemType)code,
+            < ObstacleOffset => (BoosterType)(code - BoosterOffset),
+            _ => (ObstacleType)(code - ObstacleOffset)
+        };
         
         public static JsonGridObjectType DecodeJson(int code)
         {
@@ -88,8 +39,10 @@ namespace Core.Utils
 
                 BoosterType boosterType => boosterType switch
                 {
-                    BoosterType.Bomb => JsonGridObjectType.t,
-                    _                => JsonGridObjectType.rand
+                    BoosterType.Bomb             => JsonGridObjectType.t,
+                    BoosterType.RocketHorizontal => JsonGridObjectType.ro_h,
+                    BoosterType.RocketVertical   => JsonGridObjectType.ro_v,
+                    _                            => JsonGridObjectType.rand
                 },
 
                 ObstacleType obstacleType => obstacleType switch
@@ -103,5 +56,31 @@ namespace Core.Utils
                 _ => JsonGridObjectType.rand
             };
         }
+
+        public static int Encode(Enum value) => value switch
+        {
+            ItemType itemType => (int)itemType,
+            BoosterType boosterType => BoosterOffset + (int)boosterType,
+            ObstacleType obstacleType => ObstacleOffset + (int)obstacleType,
+            _ => 0
+        };
+
+        public static int EncodeJson(JsonGridObjectType value) => value switch
+        {
+            JsonGridObjectType.r  => Encode(ItemType.Red),
+            JsonGridObjectType.g  => Encode(ItemType.Green),
+            JsonGridObjectType.b  => Encode(ItemType.Blue),
+            JsonGridObjectType.y  => Encode(ItemType.Yellow),
+
+            JsonGridObjectType.bo => Encode(ObstacleType.Box),
+            JsonGridObjectType.s  => Encode(ObstacleType.Stone),
+            JsonGridObjectType.v  => Encode(ObstacleType.Vase),
+
+            JsonGridObjectType.t     => Encode(BoosterType.Bomb),
+            JsonGridObjectType.ro_h  => Encode(BoosterType.RocketHorizontal),
+            JsonGridObjectType.ro_v  => Encode(BoosterType.RocketVertical),
+            JsonGridObjectType.empty => Encode(ItemType.None),
+            _ => 0
+        };
     }
 }

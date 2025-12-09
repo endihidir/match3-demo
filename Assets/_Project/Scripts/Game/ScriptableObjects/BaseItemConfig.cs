@@ -36,6 +36,20 @@ namespace Core.Config
             return canGet ? configData.icon : null;
         }
         
+        public float GetSizeMultiplier(TEnum type)
+        {
+            var canGet = TryGetData(type, out var configData);
+
+            switch (canGet)
+            {
+                case false:
+                    EditorLogger.LogWarning($"{type.ToString()} data is missing!");
+                    break;
+            }
+            
+            return canGet ? configData.spriteSizeMultiplier : 1f;
+        }
+        
         public ItemAnimationConfig GetAnimationConfig(TEnum type)
         {
             var canGet = TryGetData(type, out var configData);
@@ -61,6 +75,7 @@ namespace Core.Config
     public abstract class BaseItemConfigData
     {
         public Sprite icon;
+        public float spriteSizeMultiplier = 1f;
         public bool overrideAnimation;
         [ShowIf(nameof(overrideAnimation)), AllowNesting]
         public ItemAnimationConfig animationConfig;

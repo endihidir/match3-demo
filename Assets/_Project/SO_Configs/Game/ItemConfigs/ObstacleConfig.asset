@@ -17,15 +17,18 @@ MonoBehaviour:
     - Key: 1
       Value:
         icon: {fileID: 21300000, guid: 6528b59110dffbd4c93f3812a59d8a8e, type: 3}
-        obstacleEffectConfig: {fileID: 11400000, guid: 5462b51e63c72b14cbd8096be3331777,
-          type: 2}
+        spriteSizeMultiplier: 0.8
+        overrideAnimation: 0
+        animationConfig: {fileID: 0}
     - Key: 2
       Value:
         icon: {fileID: 21300000, guid: f1284f1fe9eb2a545b2ef886c61ba241, type: 3}
-        obstacleEffectConfig: {fileID: 11400000, guid: e65a4656680a9d44ab8965781a0334f6,
-          type: 2}
+        spriteSizeMultiplier: 0.8
+        overrideAnimation: 0
+        animationConfig: {fileID: 0}
     - Key: 3
       Value:
         icon: {fileID: 0}
-        obstacleEffectConfig: {fileID: 0}
-  <ObstacleEffectConfig>k__BackingField: {fileID: 0}
+        spriteSizeMultiplier: 0.8
+        overrideAnimation: 0
+        animationConfig: {fileID: 0}

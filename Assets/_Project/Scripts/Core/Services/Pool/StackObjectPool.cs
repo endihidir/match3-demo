@@ -63,7 +63,7 @@ namespace Core.Pool
             }
         }
 
-        protected abstract TBase CreateInstance(TData data);
+        protected abstract TBase CreateInstance(TData animationEntity);
 
         protected virtual void OnGet(TBase item)
         {

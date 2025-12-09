@@ -1,5 +1,6 @@
 using Core.Config;
 using Core.Extensions;
+using Core.Item.Factories;
 using Core.Level;
 using Core.Models;
 using Cysharp.Threading.Tasks;
@@ -28,10 +29,10 @@ namespace Core.Item
         
         public GridObjectTypeData GridObjectTypeData { get; }
         public bool IsInProgress => _shakeTween.IsActive() || _shiftTween.IsActive();
-        public ItemAnimation(IItemObjectReader objectReader, GridObjectTypeData typeData)
+        public ItemAnimation(AnimationEntity animationEntity)
         {
-            _objectReader = objectReader;
-            GridObjectTypeData = typeData;
+            _objectReader = animationEntity.objectReader;
+            GridObjectTypeData = animationEntity.gridObjectType;
         }
 
         public void Initialize(ItemAnimationConfig itemAnimationConfig) => _animationConfig = itemAnimationConfig;
@@ -48,7 +49,7 @@ namespace Core.Item
 
         public virtual Tween Shift(IGridModel<IGridItemState> gridModel)
         {
-            var worldPos = gridModel.GridToWorld(_objectReader.GridPos);
+            var worldPos = gridModel.GridToWorld(_objectReader.Coordinate);
             
             var shiftSettings = _animationConfig.ShiftSettings;
 

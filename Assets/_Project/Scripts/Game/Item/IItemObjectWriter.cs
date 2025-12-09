@@ -4,7 +4,7 @@ namespace Core.Item
 {
     public interface IItemObjectWriter
     {
-        void SetGridPos(Vector2Int gridPos);
-        void SetSize(Vector2 size);
+        void SetCoordinate(Vector2Int coordinate);
+        void SetCellSize(Vector2 size);
     }
 }

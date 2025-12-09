@@ -47,9 +47,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <SpriteRenderer>k__BackingField: {fileID: 5331621357745402249}
   <State>k__BackingField:
-    <GridPos>k__BackingField: {x: 0, y: 0}
+    <Coordinate>k__BackingField: {x: 0, y: 0}
     <ItemKind>k__BackingField: 0
     <TypeId>k__BackingField: 0
+    <CellSize>k__BackingField: {x: 0, y: 0}
 --- !u!1 &4759215270928394382
 GameObject:
   m_ObjectHideFlags: 0
@@ -102,7 +103,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: 82a59921acb95bb47a09b32e4dbe51cf, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

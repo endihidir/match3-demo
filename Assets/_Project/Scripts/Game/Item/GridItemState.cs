@@ -10,17 +10,18 @@ namespace Core.Item
     public interface IGridItemState : IItemTypeReader, IItemTypeWriter, IItemObjectReader, IItemObjectWriter
     {
         IItemAnimation ItemAnimation { get; }
-        void Initialize(Vector2Int gridPos, GridItemKind itemKind, int typeId);
-        void Initialize(Vector2Int gridPos, GridObjectTypeData typeData) => Initialize(gridPos, typeData.gridItemKind, typeData.typeId);
+        void Initialize(Vector2Int gridPos, Vector2 cellSize, GridItemKind itemKind, int typeId);
+        void Initialize(Vector2Int gridPos, Vector2 cellSize, GridObjectTypeData typeData) => Initialize(gridPos, cellSize, typeData.gridItemKind, typeData.typeId);
         void Dispose();
     }
     
     [Serializable]
     public class GridItemState : IGridItemState
     {
-        [field: SerializeField, ReadOnly, AllowNesting] public Vector2Int GridPos { get; private set; }
+        [field: SerializeField, ReadOnly, AllowNesting] public Vector2Int Coordinate { get; private set; }
         [field: SerializeField, ReadOnly, AllowNesting] public GridItemKind ItemKind { get; private set; }
         [field: SerializeField, ReadOnly, AllowNesting] public int TypeId { get; private set; }
+        [field: SerializeField, ReadOnly, AllowNesting] public Vector2 CellSize { get; private set; }
         
         public Transform Transform { get; private set; }
         public SpriteRenderer SpriteRenderer { get; private set; }
@@ -28,9 +29,7 @@ namespace Core.Item
         
         private IItemSpriteProvider ItemSpriteProvider { get; }
         private IItemAnimationFactory ItemAnimationFactory { get; }
-
-        private GridObjectTypeData _typeData;
-
+        
         public GridItemState(ItemBehaviourData itemBehaviourData)
         {
             Transform = itemBehaviourData.itemObject.Transform;
@@ -39,30 +38,34 @@ namespace Core.Item
             ItemAnimationFactory = itemBehaviourData.itemAnimationFactory;
         }
         
-        public void Initialize(Vector2Int gridPos, GridItemKind itemKind, int typeId)
+        public void Initialize(Vector2Int gridPos, Vector2 cellSize, GridItemKind itemKind, int typeId)
         {
-            SetGridPos(gridPos);
+            SetCoordinate(gridPos);
+            SetCellSize(cellSize);
             ApplyItem(itemKind, typeId);
         }
         
-        public void SetGridPos(Vector2Int gridPos) => GridPos = gridPos;
+        public void SetCoordinate(Vector2Int coordinate) => Coordinate = coordinate;
+        public void SetCellSize(Vector2 size) => CellSize = size;
         public void ApplyItem(GridItemKind itemKind,  int typeId)
         {
             ItemKind = itemKind;
             TypeId = typeId;
-            _typeData = new GridObjectTypeData(ItemKind, typeId);
+            var typeData = new GridObjectTypeData(ItemKind, TypeId);
             
             var sprite = ItemSpriteProvider.GetSprite(itemKind, typeId);
             SetSprite(sprite);
+            var sizeMultiplier = ItemSpriteProvider.GetSizeMultiplier(itemKind, typeId);
+            SetSpriteSize(sizeMultiplier);
       
             ItemAnimationFactory.Release(ItemAnimation);
-            var animationEntity = new AnimationEntity { objectReader = this, gridObjectType = _typeData };
+            var animationEntity = new AnimationEntity { objectReader = this, gridObjectType = typeData };
             ItemAnimation = ItemAnimationFactory.Get(animationEntity);
         }
         
         public void Dispose()
         {
-            GridPos = default;
+            Coordinate = default;
             ItemKind = GridItemKind.None;
             TypeId = 0;
             SetSprite(null);
@@ -76,10 +79,10 @@ namespace Core.Item
             SpriteRenderer.sortingOrder = sortOrder;
         }
 
-        public void SetSize(Vector2 size)
+        private void SetSpriteSize(float sizeMultiplier)
         {
             if(!SpriteRenderer) return;
-            SpriteRenderer.size = size;
+            SpriteRenderer.size = CellSize * sizeMultiplier;
         }
     }
 

@@ -21,7 +21,7 @@ namespace Core.Item.Factories
             Initialize();
         }
 
-        protected override IItemAnimation CreateInstance(AnimationEntity data) => new ItemAnimation(data.objectReader, data.gridObjectType);
+        protected override IItemAnimation CreateInstance(AnimationEntity animationEntity) => new ItemAnimation(animationEntity);
 
         protected override void OnGet(IItemAnimation item)
         {

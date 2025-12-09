@@ -7,10 +7,10 @@ namespace Core.Item.Factories
 {
     public interface IGridItemFactory
     {
-        GridItemObject GetItem(GridItemKind itemKind, int typeId, Vector2Int gridPos);
-        GridItemObject GetItem(ItemType type, Vector2Int gridPos) => GetItem(GridItemKind.Regular, (int)type, gridPos);
-        GridItemObject GetItem(BoosterType type, Vector2Int gridPos) => GetItem(GridItemKind.Booster, (int)type, gridPos);
-        GridItemObject GetItem(ObstacleType type, Vector2Int gridPos) => GetItem(GridItemKind.Obstacle, (int)type, gridPos);
+        GridItemObject GetItem(GridItemKind itemKind, int typeId, Vector2Int coordinate, Vector2 cellSize);
+        GridItemObject GetItem(ItemType type, Vector2Int gridPos, Vector2 size) => GetItem(GridItemKind.Regular, (int)type, gridPos, size);
+        GridItemObject GetItem(BoosterType type, Vector2Int gridPos, Vector2 size) => GetItem(GridItemKind.Booster, (int)type, gridPos, size);
+        GridItemObject GetItem(ObstacleType type, Vector2Int gridPos, Vector2 size) => GetItem(GridItemKind.Obstacle, (int)type, gridPos, size);
         void ReleaseItem(GridItemObject item);
         void ReleaseItem(Transform item);
         void ReleaseItem(GameObject item) => ReleaseItem(item.transform);
@@ -31,7 +31,7 @@ namespace Core.Item.Factories
             _itemSpriteProvider = gameConfigContainer.ItemConfigContainer;
         }
         
-        public GridItemObject GetItem(GridItemKind itemKind, int typeId, Vector2Int gridPos)
+        public GridItemObject GetItem(GridItemKind itemKind, int typeId, Vector2Int coordinate, Vector2 cellSize)
         {
             var itemObject = _objectPoolService.GetObject<GridItemObject>();
 
@@ -48,7 +48,7 @@ namespace Core.Item.Factories
         
             itemObject.BindState(gridItemState);
          
-            gridItemState.Initialize(gridPos, itemKind, typeId);
+            gridItemState.Initialize(coordinate, cellSize, itemKind, typeId);
 
             return itemObject;
         }
