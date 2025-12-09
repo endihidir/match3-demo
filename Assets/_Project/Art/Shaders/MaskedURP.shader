@@ -1,9 +1,10 @@
-Shader "Custom/SpriteMaskedURP"
+Shader "Custom/MaskedURP_2D"
 {
     Properties
     {
         _BaseColor ("Color", Color) = (1,1,1,1)
-        _MainTex ("Sprite Texture", 2D) = "white" {}
+        _MainTex ("Texture", 2D) = "white" {}
+        [Toggle] _ZWrite ("ZWrite", Float) = 0
     }
 
     SubShader
@@ -17,7 +18,7 @@ Shader "Custom/SpriteMaskedURP"
 
         Pass
         {
-            Name "SpriteMasked2D"
+            Name "Masked2D"
             Tags { "LightMode"="Universal2D" }
             
             Stencil
@@ -28,7 +29,7 @@ Shader "Custom/SpriteMaskedURP"
             }
 
             Cull Off
-            ZWrite Off
+            ZWrite [_ZWrite]
             ZTest LEqual
 
             Blend SrcAlpha OneMinusSrcAlpha

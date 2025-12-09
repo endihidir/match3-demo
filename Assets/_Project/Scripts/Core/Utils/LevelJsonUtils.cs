@@ -55,9 +55,9 @@ namespace Core.Utils
 
             for (var index = 0; index < expectedLength; index++)
             {
-                var pos = CoordinateUtils.ToPos(index, width);
-                var col = pos.x;
-                var row = pos.y;
+                var coordinate = CoordinateUtils.ToCoordinate(index, width);
+                var col = coordinate.x;
+                var row = coordinate.y;
 
                 GridObjectTypeData cellData;
 

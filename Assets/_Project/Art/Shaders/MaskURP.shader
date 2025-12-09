@@ -1,4 +1,4 @@
-Shader "Custom/BoardMaskURP"
+Shader "Custom/MaskURP"
 {
     Properties
     {

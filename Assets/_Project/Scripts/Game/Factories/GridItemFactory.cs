@@ -22,13 +22,13 @@ namespace Core.Item.Factories
     {
         private readonly IObjectPoolService _objectPoolService;
         private readonly IItemAnimationFactory _itemAnimationFactory;
-        private readonly IItemSpriteProvider _itemSpriteProvider;
+        private readonly IItemVisualProvider _ıtemVisualProvider;
         
         public GridItemFactory(IObjectPoolService objectPoolService, IItemAnimationFactory itemAnimationFactory, GameConfigContainer gameConfigContainer)
         {
             _objectPoolService = objectPoolService;
             _itemAnimationFactory = itemAnimationFactory;
-            _itemSpriteProvider = gameConfigContainer.ItemConfigContainer;
+            _ıtemVisualProvider = gameConfigContainer.ItemConfigContainer;
         }
         
         public GridItemObject GetItem(GridItemKind itemKind, int typeId, Vector2Int coordinate, Vector2 cellSize)
@@ -41,7 +41,7 @@ namespace Core.Item.Factories
             {
                 itemObject = itemObject,
                 itemAnimationFactory = _itemAnimationFactory,
-                itemSpriteProvider = _itemSpriteProvider
+                itemVisualProvider = _ıtemVisualProvider
             };
             
             var gridItemState = new GridItemState(behaviourData);
