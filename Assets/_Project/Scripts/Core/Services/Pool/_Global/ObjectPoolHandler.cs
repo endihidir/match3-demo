@@ -8,7 +8,7 @@ using Object = UnityEngine.Object;
 
 namespace Core.Pool
 {
-    public sealed class PoolObjectGroup
+    public sealed class ObjectPoolHandler
     {
         private GameObject _prefab;
         
@@ -24,7 +24,7 @@ namespace Core.Pool
         public Queue<IPooledObject> Pool { get; } = new();
         public bool IsLazy { get; private set; }
 
-        public PoolObjectGroup Initialize(GameObject prefab, Transform rootParent, int poolCount, bool isLazy = true, bool isUnique = false)
+        public ObjectPoolHandler Initialize(GameObject prefab, Transform rootParent, int poolCount, bool isLazy = true, bool isUnique = false)
         {
             _prefab = prefab;
              
@@ -43,7 +43,7 @@ namespace Core.Pool
             return this;
         }
 
-        public PoolObjectGroup CreatePool()
+        public ObjectPoolHandler CreatePool()
         {
             for (int i = 0; i < _poolCount; i++)
             {

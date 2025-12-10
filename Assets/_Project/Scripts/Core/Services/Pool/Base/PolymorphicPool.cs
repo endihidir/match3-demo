@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Core.Pool
 {
-    public abstract class TypeStackPool<TBase, TData> where TBase : class where TData : struct
+    public abstract class PolymorphicPool<TBase, TData> where TBase : class where TData : struct
     {
         private readonly Dictionary<Type, Stack<TBase>> _stacks = new();
 

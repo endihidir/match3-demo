@@ -16,9 +16,9 @@ namespace Core.Pool
         
         private Transform _pooledObjectsParent;
         
-        private readonly IDictionary<int, PoolObjectGroup> _pooledObjectGroupsWithID = new Dictionary<int, PoolObjectGroup>();
+        private readonly IDictionary<int, ObjectPoolHandler> _idPoolHandlers = new Dictionary<int, ObjectPoolHandler>();
         
-        private IDictionary<Type, PoolObjectGroup> _pooledGroupsWithType = new Dictionary<Type, PoolObjectGroup>();
+        private IDictionary<Type, ObjectPoolHandler> _typePoolHandlers = new Dictionary<Type, ObjectPoolHandler>();
         public ObjectPoolService(AppConfigContainer gameDataHolderSo) => _poolServiceConfig = gameDataHolderSo.poolServiceConfig;
 
         public void Initialize()
@@ -36,17 +36,17 @@ namespace Core.Pool
         {
             var key = prefab.GetInstanceID();
             
-            if (_pooledObjectGroupsWithID.TryGetValue(key, out var poolObjectGroup))
+            if (_idPoolHandlers.TryGetValue(key, out var objectPoolHandler))
             {
-                var pooledObject = poolObjectGroup.GetObject<T>(show, 0f, 0f, onComplete);
+                var pooledObject = objectPoolHandler.GetObject<T>(show, 0f, 0f, onComplete);
                 
                 return pooledObject;
             }
             else
             {
-                poolObjectGroup = CreateNewGroup(prefab, poolCount);
+                objectPoolHandler = CreateNewHandler(prefab, poolCount);
                 
-                var pooledObject = poolObjectGroup.GetObject<T>(show, 0f, 0f, onComplete);
+                var pooledObject = objectPoolHandler.GetObject<T>(show, 0f, 0f, onComplete);
 
                 return pooledObject;
             }
@@ -56,17 +56,17 @@ namespace Core.Pool
         {
             var key = typeof(T);
 
-            if (_pooledGroupsWithType.TryGetValue(key, out var poolObjectGroup))
+            if (_typePoolHandlers.TryGetValue(key, out var objectPoolHandler))
             {
-                var pooledObject = poolObjectGroup.GetObject<T>(show, duration, delay, onComplete);
+                var pooledObject = objectPoolHandler.GetObject<T>(show, duration, delay, onComplete);
                 
                 return pooledObject;
             }
             else
             {
-                poolObjectGroup = CreateNewGroup<T>();
+                objectPoolHandler = CreateNewHandler<T>();
                 
-                var pooledObject = poolObjectGroup.GetObject<T>(show, duration, delay, onComplete);
+                var pooledObject = objectPoolHandler.GetObject<T>(show, duration, delay, onComplete);
 
                 return pooledObject;
             }
@@ -82,16 +82,16 @@ namespace Core.Pool
                 return;
             }
 
-            if (!_pooledObjectGroupsWithID.TryGetValue(pooledObject.PoolKey, out var group))
+            if (!_idPoolHandlers.TryGetValue(pooledObject.PoolKey, out var objectPoolHandler))
             {
-                if (!_pooledGroupsWithType.TryGetValue(pooledObject.GetType(), out group))
+                if (!_typePoolHandlers.TryGetValue(pooledObject.GetType(), out objectPoolHandler))
                 {
-                    EditorLogger.LogError($"[{GetType().Name}] Return failed: no group for '{objectRef.name}' ({objectRef.GetType().Name}).");
+                    EditorLogger.LogError($"[{GetType().Name}] Return failed: no handler for '{objectRef.name}' ({objectRef.GetType().Name}).");
                     return;
                 }
             }
             
-            group.ReturnObject(pooledObject, duration, delay, onComplete);
+            objectPoolHandler.ReturnObject(pooledObject, duration, delay, onComplete);
         }
         
         public void ReturnAllObjectsOfType<T>(float duration, float delay, Action onComplete = null) where T : Component, IPooledObject
@@ -121,15 +121,15 @@ namespace Core.Pool
         {
             var key = typeof(T);
 
-            if (!_pooledGroupsWithType.TryGetValue(key, out var poolObjectGroup))
+            if (!_typePoolHandlers.TryGetValue(key, out var objectPoolHandler))
             {
                 EditorLogger.LogError($"You can not remove pool because {key} does not exist in the list of prefabs.");
                 return;
             }
 
-            poolObjectGroup.ClearAll<T>();
+            objectPoolHandler.ClearAll<T>();
             
-            _pooledGroupsWithType.Remove(key);
+            _typePoolHandlers.Remove(key);
         }
 
         private void CacheAllPooledObjects()
@@ -150,19 +150,19 @@ namespace Core.Pool
                 
                 var key = pooledObjects.GetType();
                 
-                if (_pooledGroupsWithType.ContainsKey(key)) continue;
+                if (_typePoolHandlers.ContainsKey(key)) continue;
                 
-                var poolObjectGroup = new PoolObjectGroup();
+                var objectPoolHandler = new ObjectPoolHandler();
                 
-                poolObjectGroup.Initialize(poolAssetConfig.poolObject, _pooledObjectsParent, poolAssetConfig.GetSize(), poolAssetConfig.isLazy);
+                objectPoolHandler.Initialize(poolAssetConfig.poolObject, _pooledObjectsParent, poolAssetConfig.GetSize(), poolAssetConfig.isLazy);
                 
-                _pooledGroupsWithType.Add(key, poolObjectGroup);
+                _typePoolHandlers.Add(key, objectPoolHandler);
             }
         }
         
         private void CreateAllCachedPooledObjects()
         {
-            var nonLazyPooledObjects = _pooledGroupsWithType.Where(poolData => !poolData.Value.IsLazy).ToDictionary(x=> x.Key,y => y.Value);
+            var nonLazyPooledObjects = _typePoolHandlers.Where(poolData => !poolData.Value.IsLazy).ToDictionary(x=> x.Key,y => y.Value);
 
             foreach (var keyValuePair in nonLazyPooledObjects)
             {
@@ -170,24 +170,24 @@ namespace Core.Pool
             }
         }
         
-        private PoolObjectGroup CreateNewGroup<T>(T obj, int poolCount) where T : Component
+        private ObjectPoolHandler CreateNewHandler<T>(T obj, int poolCount) where T : Component
         {
-            var poolObjectGroup = new PoolObjectGroup();
+            var objectPoolHandler = new ObjectPoolHandler();
             
             var pooledObject = obj.GetOrAddComponent<PooledObject>();
             
             pooledObject.PoolKey = obj.GetInstanceID();
 
-            poolObjectGroup.Initialize(obj.gameObject, _pooledObjectsParent, poolCount).CreatePool();
+            objectPoolHandler.Initialize(obj.gameObject, _pooledObjectsParent, poolCount).CreatePool();
                         
-            _pooledObjectGroupsWithID.Add(pooledObject.PoolKey, poolObjectGroup);
+            _idPoolHandlers.Add(pooledObject.PoolKey, objectPoolHandler);
             
-            return poolObjectGroup;
+            return objectPoolHandler;
         }
 
-        private PoolObjectGroup CreateNewGroup<T>()
+        private ObjectPoolHandler CreateNewHandler<T>()
         {
-            var poolObjectGroup = new PoolObjectGroup();
+            var objectPoolHandler = new ObjectPoolHandler();
             
             var type = typeof(T);
         
@@ -201,27 +201,27 @@ namespace Core.Pool
                 return null;
             }
         
-            poolObjectGroup.Initialize(poolAssetConfig.poolObject, _pooledObjectsParent, poolAssetConfig.GetSize(), poolAssetConfig.isLazy, poolAssetConfig.isUnique)
-                           .CreatePool();
+            objectPoolHandler.Initialize(poolAssetConfig.poolObject, _pooledObjectsParent, poolAssetConfig.GetSize(), poolAssetConfig.isLazy, poolAssetConfig.isUnique)
+                             .CreatePool();
             
-            _pooledGroupsWithType.Add(type, poolObjectGroup);
+            _typePoolHandlers.Add(type, objectPoolHandler);
             
-            return poolObjectGroup;
+            return objectPoolHandler;
         }
         
         public void Dispose()
         {
-            foreach (var keyValuePair in _pooledGroupsWithType)
+            foreach (var keyValuePair in _typePoolHandlers)
             {
                 keyValuePair.Value?.Dispose();
             }
             
-            foreach (var keyValuePair in _pooledObjectGroupsWithID)
+            foreach (var keyValuePair in _idPoolHandlers)
             {
                 keyValuePair.Value?.Dispose();
             }
            
-            _pooledGroupsWithType = null;
+            _typePoolHandlers = null;
         }
     }
 }

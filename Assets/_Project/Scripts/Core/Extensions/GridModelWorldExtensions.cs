@@ -6,32 +6,30 @@ namespace Core.Extensions
 {
     public static class GridModelWorldExtensions
     {
-        public static void RecalculateCellSize<T>(this IGridModel<T> model, Camera camera = null) where T : class
+        public static void RecalculateCellSize<T>(this IGridModel<T> model, float minCellSize = 0f, float maxCellSize = float.MaxValue, Camera camera = null) where T : class
         {
             var cam = camera ? camera : Camera.main;
-            
             if (!cam) return;
-            
-            var screenWidth = GetScreenWidth(model, cam);
-            var screenHeight= GetScreenHeight(model, cam);
 
-            var borderOffsetW= screenWidth  * (model.ScreenSidePaddingRatio / 100f);
-            var gridOffsetW = screenWidth  * (model.CellSpacingRatio / 100f);
-            var gridOffsetH= screenHeight * (model.CellSpacingRatio / 100f);
+            var screenWidth  = GetScreenWidth(model, cam);
+            var screenHeight = GetScreenHeight(model, cam);
+
+            var borderOffsetW = screenWidth  * (model.ScreenSidePaddingRatio / 100f);
+            var gridOffsetW   = screenWidth  * (model.CellSpacingRatio       / 100f);
+            var gridOffsetH   = screenHeight * (model.CellSpacingRatio       / 100f);
 
             var cellSizeW = (screenWidth - borderOffsetW - (gridOffsetW * (model.Width - 1))) / model.Width;
-            var totalGridHeight = (cellSizeW * model.Height) + (gridOffsetH * (model.Height - 1));
-            
-            var maxWorldHeight = screenHeight * 0.9f;
 
-            if (totalGridHeight > maxWorldHeight)
-            {
-                model.CellSize = (maxWorldHeight - (gridOffsetH * (model.Height - 1))) / model.Height;
-            }
-            else
-            {
-                model.CellSize = cellSizeW;
-            }
+            var totalGridHeight = (cellSizeW * model.Height) + (gridOffsetH * (model.Height - 1));
+            var maxWorldHeight  = screenHeight * 0.9f;
+
+            float cellSize = totalGridHeight > maxWorldHeight
+                ? (maxWorldHeight - (gridOffsetH * (model.Height - 1))) / model.Height
+                : cellSizeW;
+            
+            cellSize = Mathf.Clamp(cellSize, minCellSize, maxCellSize);
+
+            model.CellSize = cellSize;
         }
 
         public static Vector3 GridToWorld<T>(this IGridModel<T> model, Vector2Int pos, Camera camera = null) where T : class

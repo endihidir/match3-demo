@@ -2,9 +2,10 @@ using System.Collections.Generic;
 
 namespace Core.Pool
 {
-    public abstract class StackObjectPool<TBase, TData> where TBase : class where TData : struct
+    public abstract class SinglePool<TBase, TData> where TBase : class where TData : struct
     {
         private Stack<TBase> _stack;
+        
         private int _maxSize;
 
         public int Count => _stack.Count;
@@ -63,20 +64,9 @@ namespace Core.Pool
             }
         }
 
-        protected abstract TBase CreateInstance(TData animationEntity);
-
-        protected virtual void OnGet(TBase item)
-        {
-            
-        }
-
-        protected virtual void OnRelease(TBase item)
-        {
-        }
-
-        protected virtual void OnDestroy(TBase item)
-        {
-            
-        }
+        protected abstract TBase CreateInstance(TData itemAnimationData);
+        protected virtual void OnGet(TBase item) { }
+        protected virtual void OnRelease(TBase item) { }
+        protected virtual void OnDestroy(TBase item) { }
     }
 }

@@ -29,10 +29,10 @@ namespace Core.Item
         
         public GridObjectTypeData GridObjectTypeData { get; }
         public bool IsInProgress => _shakeTween.IsActive() || _shiftTween.IsActive();
-        public ItemAnimation(AnimationEntity animationEntity)
+        public ItemAnimation(ItemAnimationData ıtemAnimationData)
         {
-            _objectReader = animationEntity.objectReader;
-            GridObjectTypeData = animationEntity.gridObjectType;
+            _objectReader = ıtemAnimationData.objectReader;
+            GridObjectTypeData = ıtemAnimationData.gridObjectType;
         }
 
         public void Initialize(ItemAnimationConfig itemAnimationConfig) => _animationConfig = itemAnimationConfig;

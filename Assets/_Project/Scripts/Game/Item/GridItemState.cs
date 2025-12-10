@@ -27,15 +27,15 @@ namespace Core.Item
         public SpriteRenderer SpriteRenderer { get; private set; }
         public IItemAnimation ItemAnimation { get; private set; }
         
-        private IItemVisualProvider ItemVisualProvider { get; }
+        private IItemVisualConfig ItemVisualConfig { get; }
         private IItemAnimationFactory ItemAnimationFactory { get; }
         
-        public GridItemState(ItemBehaviourData itemBehaviourData)
+        public GridItemState(ItemStateData stateData)
         {
-            Transform = itemBehaviourData.itemObject.Transform;
-            SpriteRenderer = itemBehaviourData.itemObject.SpriteRenderer;
-            ItemVisualProvider = itemBehaviourData.itemVisualProvider;
-            ItemAnimationFactory = itemBehaviourData.itemAnimationFactory;
+            Transform = stateData.itemObject.Transform;
+            SpriteRenderer = stateData.itemObject.SpriteRenderer;
+            ItemVisualConfig = stateData.itemVisualConfig;
+            ItemAnimationFactory = stateData.itemAnimationFactory;
         }
         
         public void Initialize(Vector2Int gridPos, Vector2 cellSize, GridItemKind itemKind, int typeId)
@@ -53,13 +53,13 @@ namespace Core.Item
             TypeId = typeId;
             var typeData = new GridObjectTypeData(ItemKind, TypeId);
             
-            var sprite = ItemVisualProvider.GetSprite(itemKind, typeId);
+            var sprite = ItemVisualConfig.GetSprite(itemKind, typeId);
             SetSprite(sprite);
-            var sizeMultiplier = ItemVisualProvider.GetSizeMultiplier(itemKind, typeId);
+            var sizeMultiplier = ItemVisualConfig.GetSizeMultiplier(itemKind, typeId);
             SetSpriteSize(sizeMultiplier);
       
             ItemAnimationFactory.Release(ItemAnimation);
-            var animationEntity = new AnimationEntity { objectReader = this, gridObjectType = typeData };
+            var animationEntity = new ItemAnimationData { objectReader = this, gridObjectType = typeData };
             ItemAnimation = ItemAnimationFactory.Get(animationEntity);
         }
         
@@ -86,10 +86,10 @@ namespace Core.Item
         }
     }
 
-    public struct ItemBehaviourData
+    public struct ItemStateData
     {
         public IGridItemObject itemObject;
         public IItemAnimationFactory itemAnimationFactory;
-        public IItemVisualProvider itemVisualProvider;
+        public IItemVisualConfig itemVisualConfig;
     }
 }

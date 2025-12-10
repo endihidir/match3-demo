@@ -18,7 +18,7 @@ namespace Core.Models
         Color GizmosColor { get; set; }
         float CellSize { get; set; }
 
-        void Initialize(Vector2Int size);
+        void Initialize(Vector2Int size, float minCellSize = 0, float maxCellSize = float.MaxValue);
         void SetData(Vector2Int pos, T value);
         T GetGridObject(Vector2Int gridPos);
         void SetGridObject(Vector2Int gridPos, T item);
@@ -60,12 +60,12 @@ namespace Core.Models
             { Direction2D.LeftDown,   new Vector2Int(-1,  1) }
         };
 
-        public void Initialize(Vector2Int size)
+        public void Initialize(Vector2Int size, float minCellSize = 0, float maxCellSize = float.MaxValue)
         {
             _width = size.x;
             _height = size.y;
             _gridArray = new T[_width, _height];
-            this.RecalculateCellSize();
+            this.RecalculateCellSize(minCellSize, maxCellSize);
         }
         public void SetData(Vector2Int pos, T value) => SetInternal(pos, value);
         private T GetInternal(Vector2Int pos) => _gridArray[pos.x, pos.y];
