@@ -32,13 +32,13 @@ namespace Core.Presenters
             _cam = Camera.main;
             _model = model;
             _model.ScreenSidePaddingRatio = 5f;
-            _model.Initialize(_levelDefinition.GridSize);
+            _model.Initialize(_levelDefinition.GridSize, maxCellSize: 3f);
+            _model.FillActiveStatus(_levelDefinition.GridObjectTypes);
             
             var yOffset = pivot.position.y + (_model.Height * _model.CellSize * 0.5f);
             var originOffsetY = _model.GetTopY(_cam) - yOffset;
             _model.OriginOffset = new Vector3(0, originOffsetY, 0);
             
-            var active = new bool[_model.Width, _model.Height];
             var cellSize = new Vector2(_model.CellSize, _model.CellSize);
             
             for (int i = 0; i < _model.Width * _model.Height; i++)
@@ -48,10 +48,9 @@ namespace Core.Presenters
                 var x = coordinate.x;
                 var y = coordinate.y;
                 
-                var typeData = _levelDefinition.GridObjectTypes[x, y];
-                active[x, y] = typeData.gridItemKind != GridItemKind.Regular || typeData.typeId != 0;
-                if (!active[x, y]) continue;
+                if (!_model.ActiveData[x, y]) continue;
                 
+                var typeData = _levelDefinition.GridObjectTypes[x, y];
                 var item = _gridItemFactory.GetItem(typeData.gridItemKind, typeData.typeId, coordinate, cellSize);
                 var itemState = item.State;
                 var worldPos = _model.GridToWorld(coordinate, _cam);
@@ -59,8 +58,7 @@ namespace Core.Presenters
                 _model.SetData(coordinate, itemState);
             }
             
-            _model.BuildGridWithHoles(meshFilter,.25f,1f,20,(x, y) => active[x, y]);
-
+            _model.BuildGridMesh(meshFilter,.25f,1f,20,(x, y) => _model.ActiveData[x, y]);
             return this;
         }
 

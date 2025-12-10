@@ -7,12 +7,12 @@ namespace Core.Item.Factories
 {
     public interface IItemAnimationFactory
     {
-        IItemAnimation Get(AnimationEntity data);
+        IItemAnimation Get(ItemAnimationData data);
         void Release(IItemAnimation item);
         void Clear();
     }
     
-    public class ItemAnimationFactory : StackObjectPool<IItemAnimation, AnimationEntity>, IItemAnimationFactory
+    public class ItemAnimationFactory : SinglePool<IItemAnimation, ItemAnimationData>, IItemAnimationFactory
     {
         private readonly ItemConfigContainer _itemConfigContainer;
         public ItemAnimationFactory(GameConfigContainer gameConfigContainer)
@@ -21,7 +21,7 @@ namespace Core.Item.Factories
             Initialize();
         }
 
-        protected override IItemAnimation CreateInstance(AnimationEntity animationEntity) => new ItemAnimation(animationEntity);
+        protected override IItemAnimation CreateInstance(ItemAnimationData itemAnimationData) => new ItemAnimation(itemAnimationData);
 
         protected override void OnGet(IItemAnimation item)
         {
@@ -49,7 +49,7 @@ namespace Core.Item.Factories
         }
     }
 
-    public struct AnimationEntity
+    public struct ItemAnimationData
     {
         public IItemObjectReader objectReader;
         public GridObjectTypeData gridObjectType;

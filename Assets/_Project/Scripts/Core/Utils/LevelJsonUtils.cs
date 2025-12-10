@@ -35,7 +35,7 @@ namespace Core.Utils
         {
             return new LevelContentData
             {
-                gridObjectTypes = new GridObjectTypeData[levelJson.grid_height, levelJson.grid_width],
+                gridObjectTypes = new GridObjectTypeData[levelJson.grid_width, levelJson.grid_height],
                 levelGoals = new List<LevelGoal>()
             };
         }

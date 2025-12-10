@@ -12,7 +12,7 @@ namespace Core.Utils
         /// Submesh 0 = inner cell quads
         /// Submesh 1 = outer frame segments + corners
         /// </summary>
-        public static void BuildGridWithHoles<T>(this IGridModel<T> model, MeshFilter meshFilter, float frameThickness = 0.1f, float cornerSmoothness = 0f, int cornerSegments = 6, Func<int, int, bool> isCellActive = null) where T : class
+        public static void BuildGridMesh<T>(this IGridModel<T> model, MeshFilter meshFilter, float frameThickness = 0.1f, float cornerSmoothness = 0f, int cornerSegments = 6, Func<int, int, bool> isCellActive = null) where T : class
         {
             if (!meshFilter || frameThickness <= 0f) return;
 
@@ -140,13 +140,18 @@ namespace Core.Utils
             {
                 var nx1 = gx + dx1;
                 var ny1 = gy + dy1;
+
                 var nx2 = gx + dx2;
                 var ny2 = gy + dy2;
-
+                
                 if (!IsEmpty(nx1, ny1) || !IsEmpty(nx2, ny2)) return;
-
-                var innerCornerFlag = IsHoleCell(nx1, ny1) && IsHoleCell(nx2, ny2);
-                AddCorner(tris, innerCorner, dirX, dirY, innerCornerFlag);
+                
+                var diagX = gx + dx1 + dx2;
+                var diagY = gy + dy1 + dy2;
+                
+                if (!IsEmpty(diagX, diagY)) return;
+                
+                AddCorner(tris, innerCorner, dirX, dirY);
             }
 
             /// <summary>
@@ -154,25 +159,18 @@ namespace Core.Utils
             /// innerCorner = cell corner on the board surface.
             /// dirX, dirY = outward directions along each edge from that corner.
             /// </summary>
-            void AddCorner(List<int> tris, Vector3 innerCorner, Vector3 dirX, Vector3 dirY, bool innerCornerFlag)
+            void AddCorner(List<int> tris, Vector3 innerCorner, Vector3 dirX, Vector3 dirY)
             {
                 if (useRounded)
-                {
-                    AddRoundedCorner(tris, innerCorner, dirX, dirY, innerCornerFlag);
-                }
+                    AddRoundedCorner(tris, innerCorner, dirX, dirY);
                 else
-                {
-                    AddSquareCorner(tris, innerCorner, dirX, dirY, innerCornerFlag);
-                }
+                    AddSquareCorner(tris, innerCorner, dirX, dirY);
             }
 
-            void AddSquareCorner(List<int> tris, Vector3 innerCorner, Vector3 dirX, Vector3 dirY, bool innerCornerFlag)
+            void AddSquareCorner(List<int> tris, Vector3 innerCorner, Vector3 dirX, Vector3 dirY)
             {
-                var exDir = innerCornerFlag ? -dirX.normalized : dirX.normalized;
-                var eyDir = innerCornerFlag ? -dirY.normalized : dirY.normalized;
-
-                var ex = exDir * frameThickness;
-                var ey = eyDir * frameThickness;
+                var ex = dirX.normalized * frameThickness;
+                var ey = dirY.normalized * frameThickness;
 
                 var vBase = vertices.Count;
 
@@ -184,13 +182,13 @@ namespace Core.Utils
                 AddQuad(tris, vBase, vBase + 1, vBase + 2, vBase + 3);
             }
 
-            void AddRoundedCorner(List<int> tris, Vector3 center, Vector3 dirX, Vector3 dirY, bool innerCornerFlag)
+            void AddRoundedCorner(List<int> tris, Vector3 center, Vector3 dirX, Vector3 dirY)
             {
                 var r = frameThickness * cornerSmoothness;
                 if (r <= 0f) return;
 
-                var dx = innerCornerFlag ? -dirX.normalized : dirX.normalized;
-                var dy = innerCornerFlag ? -dirY.normalized : dirY.normalized;
+                var dx = dirX.normalized;
+                var dy = dirY.normalized;
 
                 var centerIndex = vertices.Count;
                 AddVertex(center, Vector2.zero);
@@ -219,13 +217,6 @@ namespace Core.Utils
             bool IsEmpty(int gx, int gy)
             {
                 if (gx < 0 || gx >= model.Width || gy < 0 || gy >= model.Height) return true;
-
-                return isCellActive != null && !isCellActive(gx, gy);
-            }
-
-            bool IsHoleCell(int gx, int gy)
-            {
-                if (gx < 0 || gx >= model.Width || gy < 0 || gy >= model.Height) return false;
 
                 return isCellActive != null && !isCellActive(gx, gy);
             }
