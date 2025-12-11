@@ -1,9 +1,9 @@
-using System;
 using Core.Bootstrapper;
 using Core.Configs;
 using Core.Item.Factories;
 using Core.Models;
 using Core.Presenters;
+using Core.Views;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -21,12 +21,14 @@ namespace Core.LifetimeScopes
             builder.RegisterEntryPoint<GameBootstrapper>();
             
             builder.Register<GridItemFactory>(Lifetime.Scoped).As<IGridItemFactory>();
-            
             builder.Register<ItemAnimationFactory>(Lifetime.Scoped).As<IItemAnimationFactory>();
             
-            builder.Register<Match3GridModel>(Lifetime.Scoped).As<IMatch3GridModel>();
+            builder.Register<LevelGoalModel>(Lifetime.Scoped).As<ILevelGoalModel>();
+            builder.Register<GridModel>(Lifetime.Scoped).As<IGridModel>();
             
-            builder.Register<Match3GridPresenter>(Lifetime.Scoped).As<IMatch3GridPresenter>();
+            builder.Register<GridView>(Lifetime.Scoped).As<IGridView>();
+            
+            builder.Register<GridPresenter>(Lifetime.Scoped).As<IGridPresenter>();
         }
 
         private void Start()

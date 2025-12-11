@@ -17,24 +17,24 @@ MonoBehaviour:
     - Key: 1
       Value:
         icon: {fileID: 21300000, guid: 714434f083d633140a41e8101ec09313, type: 3}
-        spriteSizeMultiplier: 0.75
+        spriteSizeMultiplier: 0.7
         overrideAnimation: 0
         animationConfig: {fileID: 0}
     - Key: 2
       Value:
         icon: {fileID: 21300000, guid: 499846c952225eb4ba64fdcd5af77679, type: 3}
-        spriteSizeMultiplier: 0.75
+        spriteSizeMultiplier: 0.7
         overrideAnimation: 0
         animationConfig: {fileID: 0}
     - Key: 3
       Value:
         icon: {fileID: 21300000, guid: fc844722a03dbed46b10e4eb36964d16, type: 3}
-        spriteSizeMultiplier: 0.75
+        spriteSizeMultiplier: 0.7
         overrideAnimation: 0
         animationConfig: {fileID: 0}
     - Key: 4
       Value:
         icon: {fileID: 21300000, guid: 3e20fb662d86e5645b868401253a29a5, type: 3}
-        spriteSizeMultiplier: 0.75
+        spriteSizeMultiplier: 0.7
         overrideAnimation: 0
         animationConfig: {fileID: 0}

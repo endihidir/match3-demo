@@ -1,6 +1,5 @@
 using System;
 using Core.Models;
-using Core.MVPContext.Interfaces;
 using Core.SceneService;
 using Core.Views;
 using Cysharp.Threading.Tasks;
@@ -9,7 +8,7 @@ using VContainer.Unity;
 
 namespace Core.Presenters
 {
-    public interface ISceneTransitionPresenter : IPresenter
+    public interface ISceneTransitionPresenter
     {
         ISceneTransitionPresenter Initialize(ISceneTransitionModel model, ISceneTransitionView view);
     }

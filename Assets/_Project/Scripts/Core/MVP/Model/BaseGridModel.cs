@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
 using Core.Extensions;
-using Core.MVPContext.Interfaces;
 using UnityEngine;
 
 namespace Core.Models
 {
-    public interface IGridModel<T> : IModel where T : class
+    public interface IBaseGridModel<T> where T : class
     {
         int Width { get; }
         int Height { get; }
@@ -29,7 +28,7 @@ namespace Core.Models
         bool TryGetNeighborsNonAlloc(Vector2Int pos, Span<T> resultBuffer, out int count);
     }
     
-    public class GridModel<T> : IGridModel<T> where T : class
+    public class BaseGridModel<T> : IBaseGridModel<T> where T : class
     {
         private int _width, _height;
         

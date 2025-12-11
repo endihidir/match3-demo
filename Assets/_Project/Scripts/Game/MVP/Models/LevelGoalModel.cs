@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Core.Item;
 using Core.Level;
-using Core.MVPContext.Interfaces;
 using UnityEngine;
 
 namespace Core.Models
 {
-    public interface ILevelGoalModel : IModel
+    public interface ILevelGoalModel
     {
         event Action OnAllGoalsComplete;
         event Action OnMoveCountsFinished;

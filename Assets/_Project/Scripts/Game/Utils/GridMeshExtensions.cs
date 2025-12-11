@@ -12,7 +12,7 @@ namespace Core.Utils
         /// Submesh 0 = inner cell quads
         /// Submesh 1 = pipe-style frame along board borders and holes
         /// </summary>
-        public static void BuildGridMeshPipeFrame<T>(this IGridModel<T> model, MeshFilter meshFilter, float frameThickness = 0.1f, float cornerSmoothness = 0f, int cornerSegments = 8, float frameOffset = 0f, Func<int, int, bool> isCellActive = null) where T : class
+        public static void BuildGridMeshPipeFrame<T>(this IBaseGridModel<T> model, MeshFilter meshFilter, float frameThickness = 0.1f, float cornerSmoothness = 0f, int cornerSegments = 8, float frameOffset = 0f, Func<int, int, bool> isCellActive = null) where T : class
         {
             if (!meshFilter || frameThickness <= 0f) return;
 
@@ -115,7 +115,7 @@ namespace Core.Utils
             }
         }
 
-        private static List<List<Vector3>> BuildFramePaths<T>(IGridModel<T> model, Func<int, int, bool> isCellActive) where T : class
+        private static List<List<Vector3>> BuildFramePaths<T>(IBaseGridModel<T> model, Func<int, int, bool> isCellActive) where T : class
         {
             var result = new List<List<Vector3>>();
 
@@ -476,14 +476,13 @@ namespace Core.Utils
 
             return result;
         }
-
         
         /// <summary>
         /// Generates a mesh for the Match-3 board with holes (inactive cells).
         /// Submesh 0 = inner cell quads
         /// Submesh 1 = outer frame segments + corners
         /// </summary>
-        public static void BuildGridMeshLegacyFrame<T>(this IGridModel<T> model, MeshFilter meshFilter, float frameThickness = 0.1f, float cornerSmoothness = 0f, int cornerSegments = 6, Func<int, int, bool> isCellActive = null) where T : class
+        public static void BuildGridMeshLegacyFrame<T>(this IBaseGridModel<T> model, MeshFilter meshFilter, float frameThickness = 0.1f, float cornerSmoothness = 0f, int cornerSegments = 6, Func<int, int, bool> isCellActive = null) where T : class
         {
             if (!meshFilter || frameThickness <= 0f) return;
 
