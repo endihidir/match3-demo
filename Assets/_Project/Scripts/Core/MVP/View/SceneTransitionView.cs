@@ -1,5 +1,4 @@
 using System;
-using Core.MVPContext.Interfaces;
 using Core.UI;
 using Cysharp.Threading.Tasks;
 using TMPro;
@@ -8,7 +7,7 @@ using UnityEngine.UI;
 
 namespace Core.Views
 {
-    public interface ISceneTransitionView : IView
+    public interface ISceneTransitionView
     {
         ISceneTransitionView Initialize(IFadeAnimationView fadeAnimationView, ProgressBarUI progressBarUI, GameObject[] toggleObjects);
         UniTask EnableAsync(float duration = 0f, float delay = 0f, Action onComplete = null);

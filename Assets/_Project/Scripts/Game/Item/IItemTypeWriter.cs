@@ -4,10 +4,10 @@ namespace Core.Item
 {
     public interface IItemTypeWriter
     {
-        void ApplyItem(GridItemKind itemKind, int typeId);
-        void ApplyItem(ItemType type) => ApplyItem(GridItemKind.Regular, (int)type);
-        void ApplyItem(BoosterType type) => ApplyItem(GridItemKind.Booster, (int)type);
-        void ApplyItem(ObstacleType type) => ApplyItem(GridItemKind.Obstacle, (int)type);
-        void ApplyItem(GridObjectTypeData data) => ApplyItem(data.gridItemKind, data.typeId);
+        void UpdateItemType(GridItemKind itemKind, int typeId);
+        void UpdateItemType(ItemType type) => UpdateItemType(GridItemKind.Regular, (int)type);
+        void UpdateItemType(BoosterType type) => UpdateItemType(GridItemKind.Booster, (int)type);
+        void UpdateItemType(ObstacleType type) => UpdateItemType(GridItemKind.Obstacle, (int)type);
+        void UpdateItemType(GridObjectTypeData data) => UpdateItemType(data.gridItemKind, data.typeId);
     }
 }

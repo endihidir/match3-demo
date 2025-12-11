@@ -1,4 +1,3 @@
-using Core.MVPContext.Interfaces;
 using Core.UI;
 using TMPro;
 using UnityEngine.UI;
@@ -6,7 +5,7 @@ using ButtonClickedEvent = UnityEngine.UI.Button.ButtonClickedEvent;
 
 namespace Core.Views
 {
-    public interface IPlayButtonView : IView
+    public interface IPlayButtonView
     {
         IPlayButtonView Initialize(PlayButtonUI playButtonUI);
         public ButtonClickedEvent ClickedEvent { get; }

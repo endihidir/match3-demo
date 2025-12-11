@@ -131,8 +131,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 195934560}
+  - component: {fileID: 195934561}
   m_Layer: 0
-  m_Name: Grid
+  m_Name: GridView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -154,6 +155,21 @@ Transform:
   - {fileID: 875223618}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &195934561
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 195934559}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 615351179788f4241b0c25f655a8b4d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <Cam>k__BackingField: {fileID: 671010485}
+  <GridRoot>k__BackingField: {fileID: 195934560}
+  <GridMeshFilter>k__BackingField: {fileID: 875223620}
 --- !u!1 &262796440
 GameObject:
   m_ObjectHideFlags: 0
@@ -608,8 +624,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7049c12925c4aaea10dc70d15a322c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _pivotPoint: {fileID: 195934560}
-  _boardMeshFilter: {fileID: 875223620}
+  <GridView>k__BackingField: {fileID: 195934561}
 --- !u!1 &1185596158
 GameObject:
   m_ObjectHideFlags: 0

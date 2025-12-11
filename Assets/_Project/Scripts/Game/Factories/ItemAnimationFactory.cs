@@ -51,7 +51,7 @@ namespace Core.Item.Factories
 
     public struct ItemAnimationData
     {
-        public IItemObjectReader objectReader;
+        public IItemObjectReader itemObjectReader;
         public GridObjectTypeData gridObjectType;
     }
 }

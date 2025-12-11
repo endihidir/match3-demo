@@ -1,5 +1,6 @@
 using Core.Models;
 using Core.Presenters;
+using Core.Views;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using VContainer;
@@ -8,19 +9,17 @@ namespace Core.Context
 {
     public class GridViewContext : ManagedViewContext
     {
-        [SerializeField] private Transform _pivotPoint;
-        
-        [SerializeField] private MeshFilter _boardMeshFilter;
+        [field: SerializeField] private GridView GridView { get; set; }
         
         protected override async UniTask Initialize()
         {
-            var modelResolved = ObjectResolver.TryResolve<IMatch3GridModel>(out var match3GridModel);
+            var modelResolved = ObjectResolver.TryResolve<IGridModel>(out var gridModel);
 
-            var presenterResolved = ObjectResolver.TryResolve<IMatch3GridPresenter>(out var match3GridPresenter);
+            var presenterResolved = ObjectResolver.TryResolve<IGridPresenter>(out var gridPresenter);
 
             if (modelResolved && presenterResolved)
             {
-                match3GridPresenter.Initialize(match3GridModel, _boardMeshFilter, _pivotPoint);
+                gridPresenter.Initialize(gridModel, GridView);
             }
             
             await UniTask.CompletedTask;

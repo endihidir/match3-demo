@@ -1,12 +1,11 @@
 using System;
 using Core.Level;
-using Core.MVPContext.Interfaces;
 using Core.SaveSystem;
 using UnityEngine;
 
 namespace Core.Models
 {
-    public interface ILevelProgressReadModel : IModel
+    public interface ILevelProgressReadModel
     {
         event Action OnProgressChanged;
         int CurrentLevelIndex { get; }
@@ -14,7 +13,7 @@ namespace Core.Models
         int MaxLevel { get; }
     }
 
-    public interface ILevelProgressWriteModel : IModel
+    public interface ILevelProgressWriteModel
     {
         void SetLevel(int levelIndex);
         void AdvanceLevel();

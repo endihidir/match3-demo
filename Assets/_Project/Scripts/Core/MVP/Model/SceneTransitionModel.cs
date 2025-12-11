@@ -1,10 +1,9 @@
-using Core.MVPContext.Interfaces;
 using Core.SceneService;
 using UnityEngine;
 
 namespace Core.Models
 {
-    public interface ISceneTransitionModel : IModel
+    public interface ISceneTransitionModel
     {
         float FillAmount { get; }
         float TargetRatio { get; }

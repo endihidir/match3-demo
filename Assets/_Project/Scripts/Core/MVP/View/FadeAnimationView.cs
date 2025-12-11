@@ -1,5 +1,4 @@
 using System;
-using Core.MVPContext.Interfaces;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
@@ -7,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Core.Views
 {
-    public interface IFadeAnimationView : IView, IDisposable
+    public interface IFadeAnimationView : IDisposable
     {
         IFadeAnimationView Initialize(Graphic graphic);
         IFadeAnimationView Initialize(CanvasGroup canvasGroup);

@@ -6,7 +6,7 @@ namespace Core.Extensions
 {
     public static class GridModelWorldExtensions
     {
-        public static void RecalculateCellSize<T>(this IGridModel<T> model, float minCellSize = 0f, float maxCellSize = float.MaxValue, Camera camera = null) where T : class
+        public static void RecalculateCellSize<T>(this IBaseGridModel<T> model, float minCellSize = 0f, float maxCellSize = float.MaxValue, Camera camera = null) where T : class
         {
             var cam = camera ? camera : Camera.main;
             if (!cam) return;
@@ -32,7 +32,7 @@ namespace Core.Extensions
             model.CellSize = cellSize;
         }
 
-        public static Vector3 GridToWorld<T>(this IGridModel<T> model, Vector2Int pos, Camera camera = null) where T : class
+        public static Vector3 GridToWorld<T>(this IBaseGridModel<T> model, Vector2Int pos, Camera camera = null) where T : class
         {
             var cam = camera ? camera : Camera.main;
             
@@ -53,7 +53,7 @@ namespace Core.Extensions
             return new Vector3(x, y, 0f);
         }
         
-        public static Vector2Int WorldToGrid<T>(this IGridModel<T> model, Vector3 worldPos, bool clamp = true, Camera camera = null) where T : class
+        public static Vector2Int WorldToGrid<T>(this IBaseGridModel<T> model, Vector3 worldPos, bool clamp = true, Camera camera = null) where T : class
         {
             var cam = camera ? camera : Camera.main;
             
@@ -95,7 +95,7 @@ namespace Core.Extensions
             return position;
         }
 
-        public static bool TryGetGridObjectFromMousePosition<T>(this IGridModel<T> model, out T obj, Camera camera = null) where T : class
+        public static bool TryGetGridObjectFromMousePosition<T>(this IBaseGridModel<T> model, out T obj, Camera camera = null) where T : class
         {
             var cam = camera ? camera : Camera.main;
             
@@ -119,7 +119,7 @@ namespace Core.Extensions
             return obj != null;
         }
 
-        public static void DrawGrid<T>(this IGridModel<T> model, Camera camera = null) where T : class
+        public static void DrawGrid<T>(this IBaseGridModel<T> model, Camera camera = null) where T : class
         {
             if (!model.DrawGizmos) return;
 
@@ -149,37 +149,37 @@ namespace Core.Extensions
             }
         }
 
-        public static float GetScreenWidth<T>(this IGridModel<T> model, Camera cam) where T : class
+        public static float GetScreenWidth<T>(this IBaseGridModel<T> model, Camera cam) where T : class
         {
             return Mathf.Abs(GetLeftX(model, cam) - GetRightX(model, cam));
         }
 
-        public static float GetScreenHeight<T>(this IGridModel<T> model, Camera cam) where T : class
+        public static float GetScreenHeight<T>(this IBaseGridModel<T> model, Camera cam) where T : class
         {
             return Mathf.Abs(GetTopY(model, cam) - GetBottomY(model, cam));
         }
 
-        public static float GetRightX<T>(this IGridModel<T> model, Camera cam) where T : class
+        public static float GetRightX<T>(this IBaseGridModel<T> model, Camera cam) where T : class
         {
             return GetOriginPos(model, cam, Vector3.right).x;
         }
 
-        public static float GetTopY<T>(this IGridModel<T> model, Camera cam) where T : class
+        public static float GetTopY<T>(this IBaseGridModel<T> model, Camera cam) where T : class
         {
             return GetOriginPos(model, cam, Vector3.up).y;
         }
 
-        public static float GetLeftX<T>(this IGridModel<T> model, Camera cam) where T : class
+        public static float GetLeftX<T>(this IBaseGridModel<T> model, Camera cam) where T : class
         {
             return GetOriginPos(model, cam, Vector3.zero).x;
         }
 
-        public static float GetBottomY<T>(this IGridModel<T> model, Camera cam) where T : class
+        public static float GetBottomY<T>(this IBaseGridModel<T> model, Camera cam) where T : class
         {
             return GetOriginPos(model, cam, Vector3.zero).y;
         }
 
-        public static Vector3 GetOriginPos<T>(this IGridModel<T> model, Camera cam, Vector3 origin) where T : class
+        public static Vector3 GetOriginPos<T>(this IBaseGridModel<T> model, Camera cam, Vector3 origin) where T : class
         {
             return cam.ViewportToWorldPoint(origin.With(z: cam.nearClipPlane)) + new Vector3(model.OriginOffset.x, -model.OriginOffset.y, 0f);
         }

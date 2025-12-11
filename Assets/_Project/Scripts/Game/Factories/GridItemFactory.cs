@@ -1,5 +1,6 @@
 using Core.Config;
 using Core.Configs;
+using Core.Level;
 using Core.Pool;
 using UnityEngine;
 
@@ -7,7 +8,8 @@ namespace Core.Item.Factories
 {
     public interface IGridItemFactory
     {
-        GridItemObject GetItem(GridItemKind itemKind, int typeId, Vector2Int coordinate, Vector2 cellSize);
+        GridItemObject GetItem(GridObjectTypeData typeData, Vector2Int coordinate, Vector2 cellSize);
+        GridItemObject GetItem(GridItemKind itemKind, int typeId, Vector2Int coordinate, Vector2 cellSize) => GetItem(new GridObjectTypeData(itemKind, typeId), coordinate, cellSize);
         GridItemObject GetItem(ItemType type, Vector2Int gridPos, Vector2 size) => GetItem(GridItemKind.Regular, (int)type, gridPos, size);
         GridItemObject GetItem(BoosterType type, Vector2Int gridPos, Vector2 size) => GetItem(GridItemKind.Booster, (int)type, gridPos, size);
         GridItemObject GetItem(ObstacleType type, Vector2Int gridPos, Vector2 size) => GetItem(GridItemKind.Obstacle, (int)type, gridPos, size);
@@ -22,34 +24,33 @@ namespace Core.Item.Factories
     {
         private readonly IObjectPoolService _objectPoolService;
         private readonly IItemAnimationFactory _itemAnimationFactory;
-        private readonly IItemVisualConfig _ıtemVisualConfig;
-        
+        private readonly IItemVisualConfig _itemVisualConfig;
+
         public GridItemFactory(IObjectPoolService objectPoolService, IItemAnimationFactory itemAnimationFactory, GameConfigContainer gameConfigContainer)
         {
             _objectPoolService = objectPoolService;
             _itemAnimationFactory = itemAnimationFactory;
-            _ıtemVisualConfig = gameConfigContainer.ItemConfigContainer;
+            _itemVisualConfig = gameConfigContainer.ItemConfigContainer;
         }
         
-        public GridItemObject GetItem(GridItemKind itemKind, int typeId, Vector2Int coordinate, Vector2 cellSize)
+        public GridItemObject GetItem(GridObjectTypeData typeData, Vector2Int coordinate, Vector2 cellSize)
         {
             var itemObject = _objectPoolService.GetObject<GridItemObject>();
-
+            
             itemObject.ResetState();
             
-            var behaviourData = new ItemStateData()
+            var animationData = new ItemAnimationData
             {
-                itemObject = itemObject,
-                itemAnimationFactory = _itemAnimationFactory,
-                itemVisualConfig = _ıtemVisualConfig
+                itemObjectReader = itemObject,
+                gridObjectType = typeData
             };
             
-            var gridItemState = new GridItemState(behaviourData);
-        
-            itemObject.BindState(gridItemState);
-         
-            gridItemState.Initialize(coordinate, cellSize, itemKind, typeId);
-
+            var animation = _itemAnimationFactory.Get(animationData);
+            
+            itemObject.Initialize(typeData.gridItemKind, typeData.typeId, coordinate, cellSize)
+                      .ApplyVisual(_itemVisualConfig)
+                      .BindAnimation(animation);
+   
             return itemObject;
         }
 

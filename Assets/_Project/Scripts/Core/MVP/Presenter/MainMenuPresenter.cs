@@ -1,14 +1,13 @@
 using System;
 using Core.Generated;
 using Core.Models;
-using Core.MVPContext.Interfaces;
 using Core.SceneService;
 using Core.Views;
 using Cysharp.Threading.Tasks;
 
 namespace Core.Presenters
 {
-    public interface IMainMenuPresenter : IPresenter, IDisposable
+    public interface IMainMenuPresenter : IDisposable
     {
         IMainMenuPresenter Initialize(IPlayButtonView playButtonView);
     }
