@@ -1,4 +1,4 @@
-Shader "Custom/MaskURP"
+Shader "Custom/MaskURP_3D"
 {
     Properties
     {
@@ -17,8 +17,8 @@ Shader "Custom/MaskURP"
 
         Pass
         {
-            Name "BoardMask2D"
-            Tags { "LightMode"="Universal2D" }
+            Name "BoardMask3D"
+            Tags { "LightMode"="SRPDefaultUnlit" }
             
             Stencil
             {
