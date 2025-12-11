@@ -1,4 +1,4 @@
-Shader "Custom/MaskedURP_2D"
+Shader "Custom/MaskedURP_3D"
 {
     Properties
     {
@@ -18,8 +18,8 @@ Shader "Custom/MaskedURP_2D"
 
         Pass
         {
-            Name "Masked2D"
-            Tags { "LightMode"="Universal2D" }
+            Name "Masked3D"
+            Tags { "LightMode"="SRPDefaultUnlit" }
             
             Stencil
             {
@@ -66,14 +66,14 @@ Shader "Custom/MaskedURP_2D"
                 Varyings OUT;
                 OUT.positionHCS = TransformObjectToHClip(IN.positionOS.xyz);
                 OUT.uv = IN.uv;
-                OUT.color = IN.color * _BaseColor;
+                OUT.color = IN.color; // vertex color
                 return OUT;
             }
 
             half4 frag (Varyings IN) : SV_Target
             {
                 half4 texCol = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uv);
-                return texCol * IN.color;
+                return texCol * IN.color * _BaseColor;
             }
             ENDHLSL
         }
