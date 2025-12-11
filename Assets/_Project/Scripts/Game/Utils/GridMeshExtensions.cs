@@ -6,13 +6,447 @@ using UnityEngine;
 namespace Core.Utils
 {
     public static class GridMeshExtensions
-    {
-           /// <summary>
+    { 
+        /// <summary>
+        /// Generates a mesh for the Match-3 board with holes (inactive cells).
+        /// Submesh 0 = inner cell quads
+        /// Submesh 1 = pipe-style frame along board borders and holes
+        /// </summary>
+        public static void BuildGridMeshPipeFrame<T>(this IGridModel<T> model, MeshFilter meshFilter, float frameThickness = 0.1f, float cornerSmoothness = 0f, int cornerSegments = 8, Func<int, int, bool> isCellActive = null) where T : class
+        {
+            if (!meshFilter || frameThickness <= 0f) return;
+
+            var mesh = new Mesh { name = "GridWithHolesMesh" };
+
+            var cellSize = model.CellSize;
+            var w = model.Width * cellSize;
+            var h = model.Height * cellSize;
+
+            var halfW = w * 0.5f;
+            var halfH = h * 0.5f;
+
+            var vertices = new List<Vector3>();
+            var uvs = new List<Vector2>();
+            var normals = new List<Vector3>();
+            var innerTris = new List<int>();
+            var frameTris = new List<int>();
+
+            if (isCellActive == null)
+            {
+                isCellActive = (x, y) => true;
+            }
+
+            // ---------- INNER CELL QUADS (SUBMESH 0) ----------
+
+            for (int i = 0; i < model.Height * model.Width; i++)
+            {
+                var coordinate = CoordinateUtils.ToCoordinate(i, model.Width);
+                var x = coordinate.x;
+                var y = coordinate.y;
+
+                var visualY = model.Height - 1 - y;
+                var y0 = (visualY * cellSize) - halfH;
+                var y1 = y0 + cellSize;
+
+                if (!isCellActive(x, y)) continue;
+
+                var x0 = (x * cellSize) - halfW;
+                var x1 = x0 + cellSize;
+
+                var baseIndex = vertices.Count;
+
+                AddVertexBoard(new Vector3(x0, y0, 0f), new Vector2(x, y));
+                AddVertexBoard(new Vector3(x1, y0, 0f), new Vector2(x + 1, y));
+                AddVertexBoard(new Vector3(x1, y1, 0f), new Vector2(x + 1, y + 1));
+                AddVertexBoard(new Vector3(x0, y1, 0f), new Vector2(x, y + 1));
+
+                AddQuad(innerTris, baseIndex, baseIndex + 1, baseIndex + 2, baseIndex + 3);
+            }
+
+            // ---------- FRAME PATHS + PIPE BORDER (SUBMESH 1) ----------
+
+            var rectPaths = BuildFramePaths(model, isCellActive);
+
+            foreach (var rectPath in rectPaths)
+            {
+                var closedRect = CloneClosed(rectPath);
+
+                List<Vector3> path;
+
+                if (cornerSmoothness > 0f && cornerSegments > 0)
+                {
+                    var radius = frameThickness * cornerSmoothness;
+                    path = BuildRoundedPath(closedRect, radius, cornerSegments);
+                }
+                else
+                {
+                    path = closedRect;
+                }
+
+                AddPipeMesh(path, frameThickness, cornerSegments, vertices, uvs, normals, frameTris);
+            }
+
+            mesh.SetVertices(vertices);
+            mesh.SetNormals(normals);
+            mesh.SetUVs(0, uvs);
+            mesh.subMeshCount = 2;
+            mesh.SetTriangles(innerTris, 0);
+            mesh.SetTriangles(frameTris, 1);
+            mesh.RecalculateBounds();
+            meshFilter.sharedMesh = mesh;
+            return;
+
+            void AddVertexBoard(Vector3 v, Vector2 uv)
+            {
+                vertices.Add(v);
+                uvs.Add(uv);
+                normals.Add(Vector3.back);
+            }
+
+            void AddQuad(List<int> tris, int v0, int v1, int v2, int v3)
+            {
+                tris.Add(v0); tris.Add(v1); tris.Add(v2);
+                tris.Add(v0); tris.Add(v2); tris.Add(v3);
+            }
+        }
+
+        private static List<List<Vector3>> BuildFramePaths<T>(IGridModel<T> model, Func<int, int, bool> isCellActive) where T : class
+        {
+            var result = new List<List<Vector3>>();
+
+            var width = model.Width;
+            var height = model.Height;
+            var cellSize = model.CellSize;
+
+            if (width <= 0 || height <= 0 || cellSize <= 0f) return result;
+
+            var w = width * cellSize;
+            var h = height * cellSize;
+            var halfW = w * 0.5f;
+            var halfH = h * 0.5f;
+
+            var active = new bool[width, height];
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    active[x, y] = isCellActive(x, y);
+                }
+            }
+
+            bool IsActive(int x, int y)
+            {
+                if (x < 0 || x >= width || y < 0 || y >= height) return false;
+                return active[x, y];
+            }
+
+            var edges = new HashSet<Edge>();
+            var neighbors = new Dictionary<Vector2Int, List<Vector2Int>>();
+
+            void AddEdge(Vector2Int c0, Vector2Int c1)
+            {
+                var e = new Edge(c0, c1);
+                if (!edges.Add(e)) return;
+
+                if (!neighbors.TryGetValue(c0, out var list0))
+                {
+                    list0 = new List<Vector2Int>();
+                    neighbors[c0] = list0;
+                }
+                list0.Add(c1);
+
+                if (!neighbors.TryGetValue(c1, out var list1))
+                {
+                    list1 = new List<Vector2Int>();
+                    neighbors[c1] = list1;
+                }
+                list1.Add(c0);
+            }
+            
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (!IsActive(x, y)) continue;
+
+                    if (!IsActive(x, y - 1)) AddEdge(new Vector2Int(x, y),     new Vector2Int(x + 1, y));     // top
+                    if (!IsActive(x, y + 1)) AddEdge(new Vector2Int(x, y + 1), new Vector2Int(x + 1, y + 1)); // bottom
+                    if (!IsActive(x - 1, y)) AddEdge(new Vector2Int(x, y),     new Vector2Int(x, y + 1));     // left
+                    if (!IsActive(x + 1, y)) AddEdge(new Vector2Int(x + 1, y), new Vector2Int(x + 1, y + 1)); // right
+                }
+            }
+
+            if (edges.Count == 0) return result;
+
+            var used = new HashSet<Edge>();
+
+            foreach (var startEdge in edges)
+            {
+                if (used.Contains(startEdge)) continue;
+
+                var loopCorners = new List<Vector2Int>();
+                var start = startEdge.A;
+                var current = start;
+                var prev = startEdge.B;
+
+                loopCorners.Add(start);
+                used.Add(startEdge);
+
+                while (true)
+                {
+                    if (!neighbors.TryGetValue(current, out var nextList) || nextList.Count == 0) break;
+
+                    Vector2Int next;
+                    if (nextList.Count == 1) next = nextList[0];
+                    else next = nextList[0] == prev ? nextList[1] : nextList[0];
+
+                    var e = new Edge(current, next);
+                    if (!used.Add(e)) break;
+
+                    prev = current;
+                    current = next;
+
+                    loopCorners.Add(current);
+                    if (current == start) break;
+                }
+
+                if (loopCorners.Count < 3) continue;
+
+                var loopWorld = new List<Vector3>(loopCorners.Count);
+                for (int i = 0; i < loopCorners.Count; i++)
+                {
+                    var c = loopCorners[i];
+                    var wx = c.x * cellSize - halfW;
+                    var wy = halfH - c.y * cellSize;
+                    loopWorld.Add(new Vector3(wx, wy, 0f));
+                }
+
+                result.Add(loopWorld);
+            }
+
+            return result;
+        }
+        
+        private readonly struct Edge : IEquatable<Edge>
+        {
+            public readonly Vector2Int A;
+            public readonly Vector2Int B;
+
+            public Edge(Vector2Int a, Vector2Int b)
+            {
+                if (a.x < b.x || (a.x == b.x && a.y <= b.y))
+                {
+                    A = a;
+                    B = b;
+                }
+                else
+                {
+                    A = b;
+                    B = a;
+                }
+            }
+
+            public bool Equals(Edge other) => A.Equals(other.A) && B.Equals(other.B);
+            public override bool Equals(object obj) => obj is Edge other && Equals(other);
+            public override int GetHashCode()
+            {
+                unchecked { return (A.GetHashCode() * 397) ^ B.GetHashCode(); }
+            }
+        }
+
+        private static List<Vector3> CloneClosed(List<Vector3> src)
+        {
+            var result = new List<Vector3>(src);
+            if (result.Count == 0) return result;
+
+            if ((result[0] - result[^1]).sqrMagnitude > 1e-6f)
+            {
+                result.Add(result[0]);
+            }
+
+            return result;
+        }
+
+        private static List<Vector3> BuildRoundedPath(List<Vector3> closedLoop, float radius, int cornerSegments)
+        {
+            var result = new List<Vector3>();
+
+            if (closedLoop == null || closedLoop.Count < 4 || radius <= 0f || cornerSegments < 1) return closedLoop;
+            
+            var n = closedLoop.Count - 1;
+            
+            float area = 0f;
+            for (int i = 0; i < n; i++)
+            {
+                var p0 = closedLoop[i];
+                var p1 = closedLoop[(i + 1) % n];
+                area += (p0.x * p1.y - p1.x * p0.y);
+            }
+            var isCCW = area > 0f;
+
+            const float eps = 1e-4f;
+
+            for (int i = 0; i < n; i++)
+            {
+                var prev = closedLoop[(i - 1 + n) % n];
+                var curr = closedLoop[i];
+                var next = closedLoop[(i + 1) % n];
+
+                var vIn = curr - prev;
+                var vOut = next - curr;
+
+                var lenIn = vIn.magnitude;
+                var lenOut = vOut.magnitude;
+
+                if (lenIn < 1e-6f || lenOut < 1e-6f) continue;
+
+                var dirIn = vIn / lenIn;
+                var dirOut = vOut / lenOut;
+
+                var crossZ = Vector3.Cross(dirIn, dirOut).z;
+                
+                if (Mathf.Abs(crossZ) < eps)
+                {
+                    if (result.Count == 0 || (result[^1] - curr).sqrMagnitude > 1e-6f)
+                        result.Add(curr);
+                    
+                    continue;
+                }
+                
+                var isConvex = isCCW ? crossZ > 0f : crossZ < 0f;
+
+                if (!isConvex)
+                {
+                    if (result.Count == 0 || (result[result.Count - 1] - curr).sqrMagnitude > 1e-6f)
+                        result.Add(curr);
+                    
+                    continue;
+                }
+                
+                var r = Mathf.Min(radius, lenIn * 0.5f, lenOut * 0.5f);
+
+                var pIn = curr - dirIn * r;
+                var pOut = curr + dirOut * r;
+
+                var center = curr + (-dirIn + dirOut) * r;
+
+                var fromDir = (pIn - center).normalized;
+                var toDir = (pOut - center).normalized;
+
+                var fromAngle = Mathf.Atan2(fromDir.y, fromDir.x);
+                var toAngle = Mathf.Atan2(toDir.y, toDir.x);
+
+                var delta = Mathf.DeltaAngle(fromAngle * Mathf.Rad2Deg, toAngle * Mathf.Rad2Deg) * Mathf.Deg2Rad;
+                if (delta < 0f) delta += 2f * Mathf.PI;
+
+                if (result.Count == 0 || (result[result.Count - 1] - pIn).sqrMagnitude > 1e-6f)
+                    result.Add(pIn);
+
+                for (int s = 1; s < cornerSegments; s++)
+                {
+                    var t = s / (float)cornerSegments;
+                    var ang = fromAngle + delta * t;
+                    var dir = new Vector3(Mathf.Cos(ang), Mathf.Sin(ang), 0f);
+                    var p = center + dir * r;
+                    result.Add(p);
+                }
+
+                result.Add(pOut);
+            }
+
+            if (result.Count > 0 &&
+                (result[0] - result[^1]).sqrMagnitude > 1e-6f)
+            {
+                result.Add(result[0]);
+            }
+
+            return result;
+        }
+        
+        private static void AddPipeMesh(List<Vector3> path, float thickness, int cornerSegments, List<Vector3> vertices, List<Vector2> uvs, List<Vector3> normals, List<int> tris)
+        {
+            if (path == null || path.Count < 2) return;
+
+            float half = thickness * 0.5f;
+            cornerSegments = Mathf.Max(1, cornerSegments);
+
+            var pts = CloneClosed(path);
+            int n = pts.Count;
+            
+            List<Vector3> left = new List<Vector3>();
+            List<Vector3> right = new List<Vector3>();
+
+            for (int i = 0; i < n; i++)
+            {
+                Vector3 pPrev = pts[(i - 1 + n) % n];
+                Vector3 pNow  = pts[i];
+                Vector3 pNext = pts[(i + 1) % n];
+
+                Vector2 vA = (new Vector2(pNow.x - pPrev.x, pNow.y - pPrev.y)).normalized;
+                Vector2 vB = (new Vector2(pNext.x - pNow.x, pNext.y - pNow.y)).normalized;
+
+                if (vA.sqrMagnitude < 1e-6f) vA = vB;
+                if (vB.sqrMagnitude < 1e-6f) vB = vA;
+
+                Vector2 nA = new Vector2(-vA.y, vA.x);
+                Vector2 nB = new Vector2(-vB.y, vB.x);
+
+                float angle = Mathf.Acos(Mathf.Clamp(Vector2.Dot(nA, nB), -1f, 1f));
+                
+                if (angle < 0.01f)
+                {
+                    Vector2 m = (nA + nB).normalized * half;
+                    AddJoinPoint(pNow, m);
+                    continue;
+                }
+                
+                for (int s = 0; s <= cornerSegments; s++)
+                {
+                    float t = s / (float)cornerSegments;
+                    Vector2 m = Vector2.Lerp(nA, nB, t).normalized * half;
+                    AddJoinPoint(pNow, m);
+                }
+            }
+
+            void AddJoinPoint(Vector3 p, Vector2 normal2D)
+            {
+                Vector3 n3 = new Vector3(normal2D.x, normal2D.y, 0f);
+                left.Add(p + n3);
+                right.Add(p - n3);
+            }
+            
+            int baseIndex = vertices.Count;
+
+            for (int i = 0; i < left.Count; i++)
+            {
+                vertices.Add(left[i]);
+                vertices.Add(right[i]);
+
+                uvs.Add(new Vector2(0, i));
+                uvs.Add(new Vector2(1, i));
+
+                normals.Add(Vector3.back);
+                normals.Add(Vector3.back);
+            }
+
+            for (int i = 0; i < left.Count - 1; i++)
+            {
+                int i0 = baseIndex + i * 2;
+                int i1 = i0 + 1;
+                int i2 = i0 + 2;
+                int i3 = i0 + 3;
+
+                tris.Add(i0); tris.Add(i2); tris.Add(i1);
+                tris.Add(i1); tris.Add(i2); tris.Add(i3);
+            }
+        }
+        
+        /// <summary>
         /// Generates a mesh for the Match-3 board with holes (inactive cells).
         /// Submesh 0 = inner cell quads
         /// Submesh 1 = outer frame segments + corners
         /// </summary>
-        public static void BuildGridMesh<T>(this IGridModel<T> model, MeshFilter meshFilter, float frameThickness = 0.1f, float cornerSmoothness = 0f, int cornerSegments = 6, Func<int, int, bool> isCellActive = null) where T : class
+        public static void BuildGridMeshLegacyFrame<T>(this IGridModel<T> model, MeshFilter meshFilter, float frameThickness = 0.1f, float cornerSmoothness = 0f, int cornerSegments = 6, Func<int, int, bool> isCellActive = null) where T : class
         {
             if (!meshFilter || frameThickness <= 0f) return;
 
@@ -221,449 +655,5 @@ namespace Core.Utils
                 return isCellActive != null && !isCellActive(gx, gy);
             }
         }
-         /// <summary>
-        /// Generates a mesh for the Match-3 board with holes (inactive cells).
-        /// Submesh 0 = inner cell quads
-        /// Submesh 1 = pipe-style frame along board borders and holes
-        /// </summary>
-        public static void BuildGridMeshV2<T>(this IGridModel<T> model, MeshFilter meshFilter, float frameThickness = 0.1f, float cornerSmoothness = 0f, int cornerSegments = 8, Func<int, int, bool> isCellActive = null) where T : class
-        {
-            if (!meshFilter || frameThickness <= 0f) return;
-
-            var mesh = new Mesh { name = "GridWithHolesMesh" };
-
-            var cellSize = model.CellSize;
-            var w = model.Width * cellSize;
-            var h = model.Height * cellSize;
-
-            var halfW = w * 0.5f;
-            var halfH = h * 0.5f;
-
-            var vertices = new List<Vector3>();
-            var uvs = new List<Vector2>();
-            var normals = new List<Vector3>();
-            var innerTris = new List<int>();
-            var frameTris = new List<int>();
-
-            if (isCellActive == null)
-            {
-                isCellActive = (x, y) => true;
-            }
-
-            // ---------- INNER CELL QUADS (SUBMESH 0) ----------
-
-            for (int i = 0; i < model.Height * model.Width; i++)
-            {
-                var coordinate = CoordinateUtils.ToCoordinate(i, model.Width);
-                var x = coordinate.x;
-                var y = coordinate.y;
-
-                var visualY = model.Height - 1 - y;
-                var y0 = (visualY * cellSize) - halfH;
-                var y1 = y0 + cellSize;
-
-                if (!isCellActive(x, y)) continue;
-
-                var x0 = (x * cellSize) - halfW;
-                var x1 = x0 + cellSize;
-
-                var baseIndex = vertices.Count;
-
-                AddVertexBoard(new Vector3(x0, y0, 0f), new Vector2(x, y));
-                AddVertexBoard(new Vector3(x1, y0, 0f), new Vector2(x + 1, y));
-                AddVertexBoard(new Vector3(x1, y1, 0f), new Vector2(x + 1, y + 1));
-                AddVertexBoard(new Vector3(x0, y1, 0f), new Vector2(x, y + 1));
-
-                AddQuad(innerTris, baseIndex, baseIndex + 1, baseIndex + 2, baseIndex + 3);
-            }
-
-            // ---------- FRAME PATHS + PIPE BORDER (SUBMESH 1) ----------
-
-            var rectPaths = BuildFramePaths(model, isCellActive);
-            var circleSegments = Mathf.Max(3, cornerSegments);
-
-            foreach (var rectPath in rectPaths)
-            {
-                var closedRect = CloneClosed(rectPath);
-
-                List<Vector3> path;
-
-                if (cornerSmoothness > 0f && cornerSegments > 0)
-                {
-                    var radius = frameThickness * cornerSmoothness;
-                    path = BuildRoundedPath(closedRect, radius, cornerSegments);
-                }
-                else
-                {
-                    path = closedRect;
-                }
-
-                AddPipeMesh(path, frameThickness * 0.5f, circleSegments, vertices, uvs, normals, frameTris);
-            }
-
-            mesh.SetVertices(vertices);
-            mesh.SetNormals(normals);
-            mesh.SetUVs(0, uvs);
-            mesh.subMeshCount = 2;
-            mesh.SetTriangles(innerTris, 0);
-            mesh.SetTriangles(frameTris, 1);
-            mesh.RecalculateBounds();
-            meshFilter.sharedMesh = mesh;
-            return;
-
-            void AddVertexBoard(Vector3 v, Vector2 uv)
-            {
-                vertices.Add(v);
-                uvs.Add(uv);
-                normals.Add(Vector3.back);
-            }
-
-            void AddQuad(List<int> tris, int v0, int v1, int v2, int v3)
-            {
-                tris.Add(v0); tris.Add(v1); tris.Add(v2);
-                tris.Add(v0); tris.Add(v2); tris.Add(v3);
-            }
-        }
-
-        // ---------- FRAME PATH (RECTILINEAR LOOPS) ----------
-
-        private struct Edge : IEquatable<Edge>
-        {
-            public readonly Vector2Int A;
-            public readonly Vector2Int B;
-
-            public Edge(Vector2Int a, Vector2Int b)
-            {
-                if (a.x < b.x || (a.x == b.x && a.y <= b.y))
-                {
-                    A = a;
-                    B = b;
-                }
-                else
-                {
-                    A = b;
-                    B = a;
-                }
-            }
-
-            public bool Equals(Edge other) => A.Equals(other.A) && B.Equals(other.B);
-            public override bool Equals(object obj) => obj is Edge other && Equals(other);
-            public override int GetHashCode()
-            {
-                unchecked { return (A.GetHashCode() * 397) ^ B.GetHashCode(); }
-            }
-        }
-
-        private static List<List<Vector3>> BuildFramePaths<T>(IGridModel<T> model, Func<int, int, bool> isCellActive) where T : class
-        {
-            var result = new List<List<Vector3>>();
-
-            var width = model.Width;
-            var height = model.Height;
-            var cellSize = model.CellSize;
-
-            if (width <= 0 || height <= 0 || cellSize <= 0f) return result;
-
-            var w = width * cellSize;
-            var h = height * cellSize;
-            var halfW = w * 0.5f;
-            var halfH = h * 0.5f;
-
-            var active = new bool[width, height];
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    active[x, y] = isCellActive(x, y);
-                }
-            }
-
-            bool IsActive(int x, int y)
-            {
-                if (x < 0 || x >= width || y < 0 || y >= height) return false;
-                return active[x, y];
-            }
-
-            var edges = new HashSet<Edge>();
-            var neighbors = new Dictionary<Vector2Int, List<Vector2Int>>();
-
-            void AddEdge(Vector2Int c0, Vector2Int c1)
-            {
-                var e = new Edge(c0, c1);
-                if (!edges.Add(e)) return;
-
-                if (!neighbors.TryGetValue(c0, out var list0))
-                {
-                    list0 = new List<Vector2Int>();
-                    neighbors[c0] = list0;
-                }
-                list0.Add(c1);
-
-                if (!neighbors.TryGetValue(c1, out var list1))
-                {
-                    list1 = new List<Vector2Int>();
-                    neighbors[c1] = list1;
-                }
-                list1.Add(c0);
-            }
-
-            // active–inactive sınırlarındaki edge'leri çıkar
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    if (!IsActive(x, y)) continue;
-
-                    if (!IsActive(x, y - 1)) AddEdge(new Vector2Int(x, y),     new Vector2Int(x + 1, y));     // top
-                    if (!IsActive(x, y + 1)) AddEdge(new Vector2Int(x, y + 1), new Vector2Int(x + 1, y + 1)); // bottom
-                    if (!IsActive(x - 1, y)) AddEdge(new Vector2Int(x, y),     new Vector2Int(x, y + 1));     // left
-                    if (!IsActive(x + 1, y)) AddEdge(new Vector2Int(x + 1, y), new Vector2Int(x + 1, y + 1)); // right
-                }
-            }
-
-            if (edges.Count == 0) return result;
-
-            var used = new HashSet<Edge>();
-
-            foreach (var startEdge in edges)
-            {
-                if (used.Contains(startEdge)) continue;
-
-                var loopCorners = new List<Vector2Int>();
-                var start = startEdge.A;
-                var current = start;
-                var prev = startEdge.B;
-
-                loopCorners.Add(start);
-                used.Add(startEdge);
-
-                while (true)
-                {
-                    if (!neighbors.TryGetValue(current, out var nextList) || nextList.Count == 0) break;
-
-                    Vector2Int next;
-                    if (nextList.Count == 1) next = nextList[0];
-                    else next = nextList[0] == prev ? nextList[1] : nextList[0];
-
-                    var e = new Edge(current, next);
-                    if (!used.Add(e)) break;
-
-                    prev = current;
-                    current = next;
-
-                    loopCorners.Add(current);
-                    if (current == start) break;
-                }
-
-                if (loopCorners.Count < 3) continue;
-
-                var loopWorld = new List<Vector3>(loopCorners.Count);
-                for (int i = 0; i < loopCorners.Count; i++)
-                {
-                    var c = loopCorners[i];
-                    var wx = c.x * cellSize - halfW;
-                    var wy = halfH - c.y * cellSize;
-                    loopWorld.Add(new Vector3(wx, wy, -.1f));
-                }
-
-                result.Add(loopWorld);
-            }
-
-            return result;
-        }
-
-        private static List<Vector3> CloneClosed(List<Vector3> src)
-        {
-            var result = new List<Vector3>(src);
-            if (result.Count == 0) return result;
-
-            if ((result[0] - result[result.Count - 1]).sqrMagnitude > 1e-6f)
-            {
-                result.Add(result[0]);
-            }
-
-            return result;
-        }
-
-        // ---------- RECTILINEAR → ROUNDED LOOP ----------
-
-        private static List<Vector3> BuildRoundedPath(List<Vector3> closedLoop, float radius, int cornerSegments)
-        {
-            var result = new List<Vector3>();
-
-            if (closedLoop == null || closedLoop.Count < 4 || radius <= 0f || cornerSegments < 1)
-                return closedLoop;
-
-            // last == first varsayımı
-            var n = closedLoop.Count - 1;
-
-            // Loop yönü (CCW mi CW mi?) → dış boundary vs hole ayrımı için
-            float area = 0f;
-            for (int i = 0; i < n; i++)
-            {
-                var p0 = closedLoop[i];
-                var p1 = closedLoop[(i + 1) % n];
-                area += (p0.x * p1.y - p1.x * p0.y);
-            }
-            var isCCW = area > 0f;
-
-            const float eps = 1e-4f;
-
-            for (int i = 0; i < n; i++)
-            {
-                var prev = closedLoop[(i - 1 + n) % n];
-                var curr = closedLoop[i];
-                var next = closedLoop[(i + 1) % n];
-
-                var vIn = curr - prev;
-                var vOut = next - curr;
-
-                var lenIn = vIn.magnitude;
-                var lenOut = vOut.magnitude;
-
-                if (lenIn < 1e-6f || lenOut < 1e-6f)
-                    continue;
-
-                var dirIn = vIn / lenIn;
-                var dirOut = vOut / lenOut;
-
-                var crossZ = Vector3.Cross(dirIn, dirOut).z;
-
-                // Collinear → direkt noktayı geç
-                if (Mathf.Abs(crossZ) < eps)
-                {
-                    if (result.Count == 0 || (result[result.Count - 1] - curr).sqrMagnitude > 1e-6f)
-                        result.Add(curr);
-                    continue;
-                }
-
-                // polygon yönüne göre convex mi concave mi?
-                var isConvex = isCCW ? crossZ > 0f : crossZ < 0f;
-
-                if (!isConvex)
-                {
-                    // concave köşeleri yuvarlamıyoruz (yoksa path kendi üstüne biner)
-                    if (result.Count == 0 || (result[result.Count - 1] - curr).sqrMagnitude > 1e-6f)
-                        result.Add(curr);
-                    continue;
-                }
-
-                // Convex 90° köşe
-                var r = Mathf.Min(radius, lenIn * 0.5f, lenOut * 0.5f);
-
-                var pIn = curr - dirIn * r;
-                var pOut = curr + dirOut * r;
-
-                var center = curr + (-dirIn + dirOut) * r;
-
-                var fromDir = (pIn - center).normalized;
-                var toDir = (pOut - center).normalized;
-
-                var fromAngle = Mathf.Atan2(fromDir.y, fromDir.x);
-                var toAngle = Mathf.Atan2(toDir.y, toDir.x);
-
-                var delta = Mathf.DeltaAngle(fromAngle * Mathf.Rad2Deg, toAngle * Mathf.Rad2Deg) * Mathf.Deg2Rad;
-                if (delta < 0f) delta += 2f * Mathf.PI;
-
-                if (result.Count == 0 || (result[result.Count - 1] - pIn).sqrMagnitude > 1e-6f)
-                    result.Add(pIn);
-
-                for (int s = 1; s < cornerSegments; s++)
-                {
-                    var t = s / (float)cornerSegments;
-                    var ang = fromAngle + delta * t;
-                    var dir = new Vector3(Mathf.Cos(ang), Mathf.Sin(ang), 0f);
-                    var p = center + dir * r;
-                    result.Add(p);
-                }
-
-                result.Add(pOut);
-            }
-
-            if (result.Count > 0 &&
-                (result[0] - result[result.Count - 1]).sqrMagnitude > 1e-6f)
-            {
-                result.Add(result[0]);
-            }
-
-            return result;
-        }
-
-        // ---------- 2D FRAME (SEGMENT-BAZLI QUAD STRIP) ----------
-private static void AddPipeMesh(
-    List<Vector3> path,
-    float thickness,
-    int _ /* unused */,
-    List<Vector3> vertices,
-    List<Vector2> uvs,
-    List<Vector3> normals,
-    List<int> tris)
-{
-    if (path == null || path.Count < 2) return;
-    if (thickness <= 0f) return;
-
-    // Loop kapalı değilse kapat
-    var closed = CloneClosed(path);
-    var n = closed.Count - 1; // son = ilk
-    if (n < 1) return;
-
-    float half = thickness * 0.5f;
-
-    for (int i = 0; i < n; i++)
-    {
-        var p0 = closed[i];
-        var p1 = closed[i + 1];
-
-        var dir = p1 - p0;
-        if (dir.sqrMagnitude < 1e-6f)
-            continue;
-
-        dir.Normalize();
-
-        // 2D normal: (-y, x)
-        var n2 = new Vector2(-dir.y, dir.x).normalized;
-        var n3 = new Vector3(n2.x, n2.y, 0f);
-
-        var inner0 = p0 - n3 * half;
-        var inner1 = p1 - n3 * half;
-        var outer0 = p0 + n3 * half;
-        var outer1 = p1 + n3 * half;
-
-        // Eğer BoardZ / FrameZ sabitleri kullanıyorsan burada set et:
-        // inner0.z = FrameZ;
-        // inner1.z = FrameZ;
-        // outer0.z = FrameZ;
-        // outer1.z = FrameZ;
-
-        int baseIndex = vertices.Count;
-
-        vertices.Add(inner0);
-        vertices.Add(inner1);
-        vertices.Add(outer1);
-        vertices.Add(outer0);
-
-        // Basit UV (isteğe göre değiştirebilirsin)
-        uvs.Add(new Vector2(0f, 0f));
-        uvs.Add(new Vector2(0f, 1f));
-        uvs.Add(new Vector2(1f, 1f));
-        uvs.Add(new Vector2(1f, 0f));
-
-        // Frame tamamen ekrana bakıyor → normal sabit
-        normals.Add(Vector3.back);
-        normals.Add(Vector3.back);
-        normals.Add(Vector3.back);
-        normals.Add(Vector3.back);
-
-        // Quad: inner0 - inner1 - outer1 - outer0
-        tris.Add(baseIndex + 0);
-        tris.Add(baseIndex + 1);
-        tris.Add(baseIndex + 2);
-
-        tris.Add(baseIndex + 0);
-        tris.Add(baseIndex + 2);
-        tris.Add(baseIndex + 3);
-    }
-}
-
     }
 }

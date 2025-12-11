@@ -58,7 +58,7 @@ namespace Core.Presenters
                 _model.SetData(coordinate, itemState);
             }
             
-            _model.BuildGridMesh(meshFilter,.5f,.5f,16,(x, y) => _model.ActiveData[x, y]);
+            _model.BuildGridMeshPipeFrame(meshFilter,.25f,1f,8,(x, y) => _model.ActiveData[x, y]);
             return this;
         }
 
