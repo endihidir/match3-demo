@@ -398,7 +398,7 @@ GameObject:
   - component: {fileID: 914714660}
   - component: {fileID: 914714661}
   m_Layer: 0
-  m_Name: TransitionScreenContext
+  m_Name: TransitionViewContext
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -431,11 +431,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49d6935990344907a8b4c1efe13d3b58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <ToggleObjects>k__BackingField:
-  - {fileID: 1393686377}
-  - {fileID: 1594220465}
-  <CanvasGroup>k__BackingField: {fileID: 356978612}
-  <ProgressBarUI>k__BackingField: {fileID: 1140368674}
+  <SceneTransitionView>k__BackingField: {fileID: 2045105131}
 --- !u!1 &1070107736
 GameObject:
   m_ObjectHideFlags: 0
@@ -537,7 +533,7 @@ GameObject:
   - component: {fileID: 1140368673}
   - component: {fileID: 1140368674}
   m_Layer: 5
-  m_Name: ProgressBarUI
+  m_Name: ProgressBarView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1062,6 +1058,8 @@ GameObject:
   - component: {fileID: 2045105129}
   - component: {fileID: 2045105128}
   - component: {fileID: 2045105127}
+  - component: {fileID: 2045105131}
+  - component: {fileID: 2045105132}
   m_Layer: 5
   m_Name: Canvas_Transition
   m_TagString: Untagged
@@ -1153,6 +1151,37 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &2045105131
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2045105126}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c627334c2434f5cbf947caf55560d03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <ProgressBarView>k__BackingField: {fileID: 1140368674}
+  <FadeAnimationView>k__BackingField: {fileID: 2045105132}
+  <ToggleObjects>k__BackingField:
+  - {fileID: 1594220465}
+  - {fileID: 1393686377}
+--- !u!114 &2045105132
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2045105126}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d6e5b9bafa543cb9059121566e23f3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <CanvasGroup>k__BackingField: {fileID: 356978612}
+  <Graphic>k__BackingField: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

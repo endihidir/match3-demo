@@ -1,0 +1,84 @@
+using System;
+using Cysharp.Threading.Tasks;
+using DG.Tweening;
+using NaughtyAttributes;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace Core.Views
+{
+    public interface IFadeAnimationView
+    {
+        UniTask FadeInAsync(float duration = 0f, float delay = 0f, Action onComplete = null);
+        UniTask FadeOutAsync(float duration = 0.2f, float delay = 1f, Action onComplete = null);
+    }
+    
+    public class FadeAnimationView : MonoBehaviour, IFadeAnimationView
+    {
+        [field : SerializeField, HideIf(nameof(HasGraphic))] private CanvasGroup CanvasGroup { get; set; }
+        [field : SerializeField, HideIf(nameof(HasCanvasGroup))] private Graphic Graphic { get; set; }
+        
+        private Tween _fadeTween;
+        
+        private bool HasCanvasGroup => CanvasGroup;
+        private bool HasGraphic => Graphic;
+
+        public IFadeAnimationView Initialize(Graphic graphic)
+        {
+            Graphic = graphic;
+            return this;
+        }
+        
+        public IFadeAnimationView Initialize(CanvasGroup canvasGroup)
+        {
+            CanvasGroup = canvasGroup;
+            return this;
+        }
+
+        public async UniTask FadeInAsync(float duration = 0f, float delay = 0f, Action onComplete = null)
+        {
+            _fadeTween.Kill(true);
+            
+            SetInteractable(true);
+            
+            _fadeTween = Graphic ? Graphic.DOFade(1f, duration) : CanvasGroup.DOFade(1f, duration);
+            
+            _fadeTween.SetEase(Ease.Linear).SetDelay(delay);
+            
+            await _fadeTween.AsyncWaitForCompletion();
+            
+            onComplete?.Invoke();
+        }
+
+        public async UniTask FadeOutAsync(float duration = 0.2f, float delay = 1f, Action onComplete = null)
+        {
+            _fadeTween.Kill(true);
+            
+            _fadeTween = Graphic ? Graphic.DOFade(0f, duration) : CanvasGroup.DOFade(0f, duration);
+
+            _fadeTween.SetEase(Ease.Linear).SetDelay(delay);
+            
+            await _fadeTween.AsyncWaitForCompletion();
+            
+            SetInteractable(false);
+            
+            onComplete?.Invoke();
+        }
+        
+        private void SetInteractable(bool value)
+        {
+            if (CanvasGroup)
+            {
+                CanvasGroup.interactable = value;
+                CanvasGroup.blocksRaycasts = value;
+            }
+
+            if (Graphic)
+            {
+                Graphic.raycastTarget = value;
+            }
+        }
+
+        public void Dispose() => _fadeTween.Kill();
+    }
+}

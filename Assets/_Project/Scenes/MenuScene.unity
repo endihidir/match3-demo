@@ -304,7 +304,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ec97206832b411886571da000244419, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <PlayButtonUI>k__BackingField: {fileID: 329494653}
+  <PlayButtonView>k__BackingField: {fileID: 329494653}
 --- !u!1 &541618917
 GameObject:
   m_ObjectHideFlags: 0

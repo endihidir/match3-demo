@@ -170,6 +170,8 @@ MonoBehaviour:
   <Cam>k__BackingField: {fileID: 671010485}
   <GridRoot>k__BackingField: {fileID: 195934560}
   <GridMeshFilter>k__BackingField: {fileID: 875223620}
+  <MeshSettings>k__BackingField: {fileID: 11400000, guid: 2c79f37a5e38df54e9289139439a6618,
+    type: 2}
 --- !u!1 &262796440
 GameObject:
   m_ObjectHideFlags: 0
