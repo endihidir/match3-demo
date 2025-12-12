@@ -2,6 +2,7 @@ using System;
 using Core.Generated;
 using Core.Models;
 using Core.SceneService;
+using Core.Utils;
 using Core.Views;
 using Cysharp.Threading.Tasks;
 
@@ -29,7 +30,7 @@ namespace Core.Presenters
         {
             _playButtonView = playButtonView;
             
-            playButtonView.SetText($"Level {_levelProgressReadModel.DisplayLevelNumber}");
+            _playButtonView.SetText($"Level {_levelProgressReadModel.DisplayLevelNumber}");
             
             AddListeners();
             

@@ -16,7 +16,6 @@ namespace Core.Views
         [field: SerializeField] public Camera Cam { get; private set; }
         [field: SerializeField] public Transform GridRoot { get; private set; }
         [field: SerializeField] public MeshFilter GridMeshFilter { get; private set; }
-        
         [field: SerializeField] public GridMeshSettingsConfig MeshSettings { get; private set; }
     }
 }
