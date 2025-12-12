@@ -267,6 +267,68 @@ namespace Core.Utils
 
             return result;
         }
+        
+        private static List<Vector3> TrimCorners(List<Vector3> closed, float trim)
+        {
+            if (closed == null || closed.Count < 4 || trim <= 0f) return closed;
+
+            int n = closed.Count - 1;
+            
+            float area = 0f;
+            for (int i = 0; i < n; i++)
+            {
+                var p0 = closed[i];
+                var p1 = closed[(i + 1) % n];
+                area += (p0.x * p1.y - p1.x * p0.y);
+            }
+            bool isCCW = area > 0f;
+
+            var result = new List<Vector3>(closed.Count);
+
+            for (int i = 0; i < n; i++)
+            {
+                var prev = closed[(i - 1 + n) % n];
+                var curr = closed[i];
+                var next = closed[(i + 1) % n];
+
+                var vIn = curr - prev;
+                var vOut = next - curr;
+
+                float lenIn = vIn.magnitude;
+                float lenOut = vOut.magnitude;
+
+                if (lenIn < 1e-6f || lenOut < 1e-6f)
+                {
+                    result.Add(curr);
+                    continue;
+                }
+
+                var dirIn = vIn / lenIn;
+                var dirOut = vOut / lenOut;
+                
+                float crossZ = Vector3.Cross(dirIn, dirOut).z;
+                bool isConvex = isCCW ? crossZ > 0f : crossZ < 0f;
+                
+                if (isConvex)
+                {
+                    result.Add(curr);
+                    continue;
+                }
+
+                float t = Mathf.Min(trim, lenIn * 0.45f, lenOut * 0.45f);
+
+                var pIn = curr - dirIn * t;
+                var pOut = curr + dirOut * t;
+
+                result.Add(pIn);
+                result.Add(pOut);
+            }
+
+            if (result.Count > 0)
+                result.Add(result[0]);
+
+            return result;
+        }
 
         private static List<Vector3> BuildRoundedPath(List<Vector3> closedLoop, float radius, int cornerSegments)
         {
@@ -355,8 +417,7 @@ namespace Core.Utils
                 result.Add(pOut);
             }
 
-            if (result.Count > 0 &&
-                (result[0] - result[^1]).sqrMagnitude > 1e-6f)
+            if (result.Count > 0 && (result[0] - result[^1]).sqrMagnitude > 1e-6f)
             {
                 result.Add(result[0]);
             }
@@ -372,6 +433,7 @@ namespace Core.Utils
             cornerSegments = Mathf.Max(1, cornerSegments);
 
             var pts = CloneClosed(path);
+            pts = TrimCorners(pts, half * 0.5f);
             int n = pts.Count;
             
             List<Vector3> left = new List<Vector3>();
@@ -441,7 +503,6 @@ namespace Core.Utils
                 tris.Add(i1); tris.Add(i2); tris.Add(i3);
             }
         }
-
         
         /// <summary>
         /// Generates a mesh for the Match-3 board with holes (inactive cells).

@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <FrameThickness>k__BackingField: 0.25
   <CornerSmoothness>k__BackingField: 1.4
-  <CornerSegments>k__BackingField: 32
+  <CornerSegments>k__BackingField: 16
   <MaxCellSize>k__BackingField: 3
   <ScreenSidePaddingRatio>k__BackingField: 5
