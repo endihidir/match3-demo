@@ -51,7 +51,7 @@ namespace Core.Models
             }
             
             _model.BuildGridMeshPipeFrame(_gridView.GridMeshFilter, settings.FrameThickness, settings.CornerSmoothness, 
-                                          settings.CornerSegments, (x, y) => _model.ActiveData[x, y]);
+                                          16, (x, y) => _model.ActiveData[x, y]);
             return _model;
         }
     }
