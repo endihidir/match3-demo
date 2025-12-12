@@ -6,7 +6,7 @@ namespace Core.Extensions
 {
     public static class GridModelWorldExtensions
     {
-        public static void RecalculateCellSize<T>(this IBaseGridModel<T> model, float minCellSize = 0f, float maxCellSize = float.MaxValue, Camera camera = null) where T : class
+        public static void CalculateCellSize<T>(this IBaseGridModel<T> model, float minCellSize = 0f, float maxCellSize = float.MaxValue, Camera camera = null) where T : class
         {
             var cam = camera ? camera : Camera.main;
             if (!cam) return;
