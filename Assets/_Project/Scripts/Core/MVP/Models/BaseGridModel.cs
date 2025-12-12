@@ -64,7 +64,7 @@ namespace Core.Models
             _width = size.x;
             _height = size.y;
             _gridArray = new T[_width, _height];
-            this.RecalculateCellSize(minCellSize, maxCellSize);
+            this.CalculateCellSize(minCellSize, maxCellSize);
         }
         public void SetData(Vector2Int pos, T value) => SetInternal(pos, value);
         private T GetInternal(Vector2Int pos) => _gridArray[pos.x, pos.y];
