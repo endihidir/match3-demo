@@ -29,10 +29,9 @@ namespace Core.Models
         public bool IsAllGoalsComplete => _goals.TrueForAll(x => x.Count <= 0);
         public bool IsMoveCountFinished => _moveCount <= 0;
 
-        public LevelGoalModel(ILevelDataService levelDataService, ILevelProgressReadModel levelProgressReadModel)
+        public LevelGoalModel(ILevelProgressReadModel levelProgressReadModel)
         {
-            var levelDefinition = levelDataService.LevelDefinitions[levelProgressReadModel.CurrentLevelIndex];
-            
+            var levelDefinition = levelProgressReadModel.GetLevelDefinition();
             _goals = new List<LevelGoal>(levelDefinition.Goals.Count);
             levelDefinition.Goals.ForEach(goal => _goals.Add(goal.Clone()));
 

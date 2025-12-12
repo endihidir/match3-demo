@@ -10,27 +10,25 @@ namespace Core.Presenters
 {
     public interface IMainMenuPresenter : IDisposable
     {
-        IMainMenuPresenter Initialize(IPlayButtonView playButtonView);
+        IMainMenuPresenter Initialize(IPlayButtonView playButtonView , int levelNumber);
     }
     
     public sealed class MainMenuPresenter : IMainMenuPresenter
     {
-        private readonly ILevelProgressReadModel _levelProgressReadModel;
         private readonly ISceneLoadService _sceneLoadService;
         
         private IPlayButtonView _playButtonView;
         
-        public MainMenuPresenter(ISceneLoadService sceneLoadService, ILevelProgressReadModel levelProgressReadModel)
+        public MainMenuPresenter(ISceneLoadService sceneLoadService)
         {
             _sceneLoadService = sceneLoadService;
-            _levelProgressReadModel = levelProgressReadModel;
         }
         
-        public IMainMenuPresenter Initialize(IPlayButtonView playButtonView)
+        public IMainMenuPresenter Initialize(IPlayButtonView playButtonView, int levelNumber)
         {
             _playButtonView = playButtonView;
             
-            _playButtonView.SetText($"Level {_levelProgressReadModel.DisplayLevelNumber}");
+            _playButtonView.SetText($"Level {levelNumber}");
             
             AddListeners();
             

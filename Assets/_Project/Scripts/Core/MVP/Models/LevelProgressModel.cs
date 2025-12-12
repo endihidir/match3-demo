@@ -11,6 +11,7 @@ namespace Core.Models
         int CurrentLevelIndex { get; }
         int DisplayLevelNumber { get; }
         int MaxLevel { get; }
+        LevelDefinition GetLevelDefinition();
     }
 
     public interface ILevelProgressWriteModel
@@ -29,6 +30,7 @@ namespace Core.Models
 
         private LevelProgressData _levelProgressData;
         public int MaxLevel => _levelDataService.LevelDefinitions?.Length ?? 0;
+
         public int CurrentLevelIndex => _levelProgressData.currentLevelIndex;
         public int DisplayLevelNumber
         {
@@ -123,6 +125,8 @@ namespace Core.Models
 
             RaiseChanged();
         }
+        
+        public LevelDefinition GetLevelDefinition() => _levelDataService.LevelDefinitions[CurrentLevelIndex];
 
         private void RaiseChanged()
         {

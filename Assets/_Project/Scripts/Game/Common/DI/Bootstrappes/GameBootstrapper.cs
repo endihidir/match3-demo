@@ -12,10 +12,9 @@ namespace Core.Bootstrapper
         private readonly IGridPresenter _gridPresenter;
         private readonly IGameViewContext _gameViewContext;
         
-        public GameBootstrapper(ILevelDataService levelDataService, ILevelProgressReadModel progressReadModel, IGridPresenter gridPresenter, 
-            IGameViewContext gameViewContext)
+        public GameBootstrapper(ILevelProgressReadModel progressReadModel, IGridPresenter gridPresenter, IGameViewContext gameViewContext)
         {
-            _levelDefinition = levelDataService.LevelDefinitions[progressReadModel.CurrentLevelIndex];
+            _levelDefinition = progressReadModel.GetLevelDefinition();
             _gridPresenter =  gridPresenter;
             _gameViewContext = gameViewContext;
         }
