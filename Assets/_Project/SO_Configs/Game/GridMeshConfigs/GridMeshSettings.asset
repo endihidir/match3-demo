@@ -12,9 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7da55a3cb569154894fbfe680b8edda, type: 3}
   m_Name: GridMeshSettings
   m_EditorClassIdentifier: 
-  <FrameThickness>k__BackingField: 0.2
-  <CornerSmoothness>k__BackingField: 1
-  <CornerSegments>k__BackingField: 8
-  <FrameOffset>k__BackingField: 0.1
+  <FrameThickness>k__BackingField: 0.25
+  <CornerSmoothness>k__BackingField: 1.4
+  <CornerSegments>k__BackingField: 32
   <MaxCellSize>k__BackingField: 3
   <ScreenSidePaddingRatio>k__BackingField: 5
