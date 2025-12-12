@@ -10,27 +10,30 @@ namespace Core.Presenters
 {
     public interface ISceneTransitionPresenter
     {
-        ISceneTransitionPresenter Initialize(ISceneTransitionModel model, ISceneTransitionView view);
+        ISceneTransitionPresenter Initialize(ISceneTransitionView sceneTransitionView);
     }
     public class SceneTransitionPresenter : ISceneTransitionPresenter, ITickable, IDisposable
     {
         private readonly ISceneLoadEvents _sceneLoadEvents;
-        private ISceneTransitionModel _model;
-        private ISceneTransitionView _view;
+        private readonly ISceneTransitionModel _transitionModel;
+        private ISceneTransitionView _transitionView;
         private bool _isTransitionViewEnabled = false;
-        public SceneTransitionPresenter(ISceneLoadEvents sceneLoadEvents) => _sceneLoadEvents = sceneLoadEvents;
-
-        public ISceneTransitionPresenter Initialize(ISceneTransitionModel model, ISceneTransitionView view)
+        public SceneTransitionPresenter(ISceneLoadEvents sceneLoadEvents, ISceneTransitionModel sceneTransitionTransitionModel)
         {
-            _model = model;
-            _view = view;
+            _sceneLoadEvents = sceneLoadEvents;
+            _transitionModel = sceneTransitionTransitionModel;
+        }
+
+        public ISceneTransitionPresenter Initialize(ISceneTransitionView sceneTransitionView)
+        {
+            _transitionView = sceneTransitionView;
             
             _sceneLoadEvents.OnBeforeTransition += OnBeforeTransition;
             _sceneLoadEvents.Progress.Progressed += OnTransitionProgressed;
             _sceneLoadEvents.OnBeforeTransitionOut += OnBeforeTransitionOut;
             
-            _view.SetLabelText("Loading...");
-            _view.DisableAsync(0f, .25f).Forget();
+            _transitionView.SetLabelText("Loading...");
+            _transitionView.DisableAsync(0f, .25f).Forget();
             return this;
         }
 
@@ -38,13 +41,13 @@ namespace Core.Presenters
         {
             if(!_isTransitionViewEnabled) return;
             
-            _model.UpdateData();
+            _transitionModel.UpdateData();
             
-            _view.SetFillAmount(_model.FillAmount);
+            _transitionView.SetFillAmount(_transitionModel.FillAmount);
 
-            var percentage = _model.FillAmount * 100f;
+            var percentage = _transitionModel.FillAmount * 100f;
             
-            _view.SetPercentageText(percentage.ToString("0.0") + "%");
+            _transitionView.SetPercentageText(percentage.ToString("0.0") + "%");
         }
         
         private void OnBeforeTransition(bool useTransitionView)
@@ -53,24 +56,24 @@ namespace Core.Presenters
    
             if (!_isTransitionViewEnabled) return;
 
-            _model.ResetProgress();
+            _transitionModel.ResetProgress();
             
-            _view.SetFillAmount(_model.FillAmount);
+            _transitionView.SetFillAmount(_transitionModel.FillAmount);
             
-            _view.EnableAsync().Forget();
+            _transitionView.EnableAsync().Forget();
         }
 
-        private void OnTransitionProgressed(float ratio) => _model.SetTargetRatio(ratio);
+        private void OnTransitionProgressed(float ratio) => _transitionModel.SetTargetRatio(ratio);
         private async UniTask OnBeforeTransitionOut()
         {
             if (!_isTransitionViewEnabled) return;
 
-            while (!Mathf.Approximately(_model.FillAmount, 1f))
+            while (!Mathf.Approximately(_transitionModel.FillAmount, 1f))
             {
                 await UniTask.Yield();
             }
 
-            await _view.DisableAsync(delay: 0.25f);
+            await _transitionView.DisableAsync(delay: 0.25f);
             
             _isTransitionViewEnabled = false;
         }

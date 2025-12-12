@@ -8,7 +8,7 @@ namespace Core.Models
     public interface IGridModel : IBaseGridModel<IGridItemObject>
     {
         bool[,] ActiveData { get; }
-        void FillActiveStatus(GridObjectTypeData[,] gridObjectTypeData);
+        IGridModel BuildActiveCells(GridObjectTypeData[,] gridObjectTypeData);
         void Swap(Vector2Int a, Vector2Int b);
     }
 
@@ -16,7 +16,7 @@ namespace Core.Models
     {
         public bool[,] ActiveData { get; private set; }
 
-        public void FillActiveStatus(GridObjectTypeData[,] gridObjectTypeData)
+        public IGridModel BuildActiveCells(GridObjectTypeData[,] gridObjectTypeData)
         {
             ActiveData = new bool[Width, Height];
 
@@ -31,6 +31,8 @@ namespace Core.Models
 
                 ActiveData[x, y] = typeData.gridItemKind != GridItemKind.Regular || typeData.typeId != 0;
             }
+
+            return this;
         }
 
         public void Swap(Vector2Int a, Vector2Int b)

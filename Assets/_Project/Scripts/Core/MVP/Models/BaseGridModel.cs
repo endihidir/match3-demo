@@ -11,13 +11,13 @@ namespace Core.Models
         int Height { get; }
 
         bool DrawGizmos { get; set; }
-        float ScreenSidePaddingRatio { get; set; }
-        float CellSpacingRatio { get; set; }
+        float ScreenSidePaddingRatio { get;}
+        float CellSpacingRatio { get; }
         Vector3 OriginOffset { get; set; }
         Color GizmosColor { get; set; }
         float CellSize { get; set; }
 
-        void Initialize(Vector2Int size, float minCellSize = 0, float maxCellSize = float.MaxValue);
+        IBaseGridModel<T> Initialize(Vector2Int size, float screenSidePaddingRatio, float cellSpacingRatio = 0f);
         void SetData(Vector2Int pos, T value);
         T GetGridObject(Vector2Int gridPos);
         void SetGridObject(Vector2Int gridPos, T item);
@@ -38,8 +38,8 @@ namespace Core.Models
         public int Height => _height;
 
         public bool DrawGizmos { get; set; }
-        public float ScreenSidePaddingRatio { get; set; }
-        public float CellSpacingRatio { get; set; }
+        public float ScreenSidePaddingRatio { get; private set; }
+        public float CellSpacingRatio { get; private set; }
         public Vector3 OriginOffset { get; set; }
         public float CellSize { get; set; }
         public Color GizmosColor { get; set; } = Color.yellow;
@@ -59,12 +59,14 @@ namespace Core.Models
             { Direction2D.LeftDown,   new Vector2Int(-1,  1) }
         };
 
-        public void Initialize(Vector2Int size, float minCellSize = 0, float maxCellSize = float.MaxValue)
+        public IBaseGridModel<T> Initialize(Vector2Int size, float screenSidePaddingRatio, float cellSpacingRatio = 0f)
         {
             _width = size.x;
             _height = size.y;
             _gridArray = new T[_width, _height];
-            this.CalculateCellSize(minCellSize, maxCellSize);
+            ScreenSidePaddingRatio = screenSidePaddingRatio;
+            CellSpacingRatio = cellSpacingRatio;
+            return this;
         }
         public void SetData(Vector2Int pos, T value) => SetInternal(pos, value);
         private T GetInternal(Vector2Int pos) => _gridArray[pos.x, pos.y];

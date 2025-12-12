@@ -384,9 +384,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   parentReference:
     TypeName: Core.LifetimeScopes.AppLifetimeScope
-  autoRun: 1
-  autoInjectGameObjects:
-  - {fileID: 914714659}
+  autoRun: 0
+  autoInjectGameObjects: []
 --- !u!1 &914714659
 GameObject:
   m_ObjectHideFlags: 0
@@ -398,7 +397,7 @@ GameObject:
   - component: {fileID: 914714660}
   - component: {fileID: 914714661}
   m_Layer: 0
-  m_Name: TransitionViewContext
+  m_Name: LoadingViewContext
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

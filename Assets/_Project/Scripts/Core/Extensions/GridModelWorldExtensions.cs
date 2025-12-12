@@ -6,7 +6,7 @@ namespace Core.Extensions
 {
     public static class GridModelWorldExtensions
     {
-        public static void CalculateCellSize<T>(this IBaseGridModel<T> model, float minCellSize = 0f, float maxCellSize = float.MaxValue, Camera camera = null) where T : class
+        public static void CalculateCellSize<T>(this IBaseGridModel<T> model, float maxCellSize = float.MaxValue, Camera camera = null) where T : class
         {
             var cam = camera ? camera : Camera.main;
             if (!cam) return;
@@ -23,11 +23,11 @@ namespace Core.Extensions
             var totalGridHeight = (cellSizeW * model.Height) + (gridOffsetH * (model.Height - 1));
             var maxWorldHeight  = screenHeight * 0.9f;
 
-            float cellSize = totalGridHeight > maxWorldHeight
+            var cellSize = totalGridHeight > maxWorldHeight
                 ? (maxWorldHeight - (gridOffsetH * (model.Height - 1))) / model.Height
                 : cellSizeW;
             
-            cellSize = Mathf.Clamp(cellSize, minCellSize, maxCellSize);
+            cellSize = Mathf.Clamp(cellSize, 0f, maxCellSize);
 
             model.CellSize = cellSize;
         }

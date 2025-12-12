@@ -1,32 +1,35 @@
-using Core.Item.Factories;
+using System;
 using Core.Level;
 using Core.Models;
 using Core.Views;
-using UnityEngine;
 
 namespace Core.Presenters
 {
     public interface IGridPresenter
     {
-        void Initialize(IGridModel model, IGridView view);
+        void Initialize(IGridView gridView, LevelDefinition levelDefinition);
     }
     
-    public class GridPresenter : IGridPresenter
+    public class GridPresenter : IGridPresenter, IDisposable
     {
-        private Camera _cam;
-        private IGridModel _model;
-        private readonly LevelDefinition _levelDefinition;
-        private readonly IGridItemFactory _gridItemFactory;
-        
-        public GridPresenter(ILevelDataService levelDataService, ILevelProgressReadModel progressReadModel, IGridItemFactory gridItemFactory)
+        private readonly IGridBuilder _gridBuilder;
+        private IGridModel _gridModel;
+        public GridPresenter(IGridBuilder gridBuilder) => _gridBuilder = gridBuilder;
+
+        public void Initialize(IGridView gridView, LevelDefinition levelDefinition)
         {
-            _levelDefinition = levelDataService.LevelDefinitions[progressReadModel.CurrentLevelIndex];
-            _gridItemFactory = gridItemFactory;
+            _gridModel = _gridBuilder.WithView(gridView)
+                                     .WithLevel(levelDefinition)
+                                     .Configure()
+                                     .CalculateLayout()
+                                     .PlaceItems()
+                                     .GenerateMesh()
+                                     .Build();
         }
-        
-        public void Initialize(IGridModel model, IGridView view)
+
+        public void Dispose()
         {
-            var builder = new GridBuilder(model, view, _levelDefinition, _gridItemFactory).Build();
+            
         }
     }
 }
