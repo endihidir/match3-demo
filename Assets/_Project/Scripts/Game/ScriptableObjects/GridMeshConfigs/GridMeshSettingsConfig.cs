@@ -8,7 +8,6 @@ namespace Core.Config
         [field: SerializeField] public float FrameThickness { get; private set; } = 0.25f;
         [field: SerializeField] public float CornerSmoothness { get; private set; } = 1f;
         [field: SerializeField] public int CornerSegments { get; private set; } = 8;
-        [field: SerializeField] public float FrameOffset { get; private set; } = 0.1f;
         [field: SerializeField] public float MaxCellSize { get; private set; } = 3f;
         [field: SerializeField] public float ScreenSidePaddingRatio { get; private set; } = 5f;
     }

@@ -12,7 +12,7 @@ namespace Core.Utils
         /// Submesh 0 = inner cell quads
         /// Submesh 1 = pipe-style frame along board borders and holes
         /// </summary>
-        public static void BuildGridMeshPipeFrame<T>(this IBaseGridModel<T> model, MeshFilter meshFilter, float frameThickness = 0.1f, float cornerSmoothness = 0f, int cornerSegments = 8, float frameOffset = 0f, Func<int, int, bool> isCellActive = null) where T : class
+        public static void BuildGridMeshPipeFrame<T>(this IBaseGridModel<T> model, MeshFilter meshFilter, float frameThickness = 0.1f, float cornerSmoothness = 0f, int cornerSegments = 8, Func<int, int, bool> isCellActive = null) where T : class
         {
             if (!meshFilter || frameThickness <= 0f) return;
 
@@ -82,11 +82,6 @@ namespace Core.Utils
                 {
                     path = closedRect;
                 }
-                
-                if (Mathf.Abs(frameOffset) > Mathf.Epsilon)
-                {
-                    path = OffsetLoopRadial(path, frameOffset);
-                }
 
                 AddPipeMesh(path, frameThickness, cornerSegments, vertices, uvs, normals, frameTris);
             }
@@ -98,6 +93,7 @@ namespace Core.Utils
             mesh.SetTriangles(innerTris, 0);
             mesh.SetTriangles(frameTris, 1);
             mesh.RecalculateBounds();
+            mesh.RecalculateTangents();
             meshFilter.sharedMesh = mesh;
             return;
 
@@ -445,37 +441,7 @@ namespace Core.Utils
                 tris.Add(i1); tris.Add(i2); tris.Add(i3);
             }
         }
-        
-        private static List<Vector3> OffsetLoopRadial(List<Vector3> loop, float offset)
-        {
-            if (loop == null || loop.Count == 0 || Mathf.Approximately(offset, 0f)) return loop;
-            
-            Vector3 center = Vector3.zero;
-            for (int i = 0; i < loop.Count; i++)
-            {
-                center += loop[i];
-            }
-            center /= loop.Count;
 
-            var result = new List<Vector3>(loop.Count);
-            for (int i = 0; i < loop.Count; i++)
-            {
-                var p = loop[i];
-                var dir = p - center;
-
-                if (dir.sqrMagnitude > 1e-6f)
-                {
-                    dir.Normalize();
-                    result.Add(p + dir * offset);
-                }
-                else
-                {
-                    result.Add(p);
-                }
-            }
-
-            return result;
-        }
         
         /// <summary>
         /// Generates a mesh for the Match-3 board with holes (inactive cells).
