@@ -23,12 +23,12 @@ namespace Core.Bootstrapper
         
         public void Initialize()
         {
-            var result = _gridBuilder.WithView(_gameViewContext.GridView)
-                                     .WithGridSize(_levelProvider.GetGridSize())
-                                     .WithObjectTypes(_levelProvider.GetGridObjectTypes())
-                                     .Build();
+            var gridBuildResult = _gridBuilder.WithView(_gameViewContext.GridView)
+                                              .WithGridSize(_levelProvider.GetGridSize())
+                                              .WithObjectTypes(_levelProvider.GetGridObjectTypes())
+                                              .Build();
 
-            _gridPresenter.Initialize(result.Model, result.Layout);
+            _gridPresenter.Initialize(gridBuildResult.Model, gridBuildResult.Layout);
         }
     }
 }
