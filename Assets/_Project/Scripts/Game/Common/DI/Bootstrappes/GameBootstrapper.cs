@@ -8,14 +8,14 @@ namespace Core.Bootstrapper
 {
     public class GameBootstrapper : IInitializable
     {
-        private readonly ICurrentLevelProvider _currentLevelProvider;
+        private readonly ICurrentLevelProvider _levelProvider;
         private readonly IGameViewContext _gameViewContext;
         private readonly IGridBuilder _gridBuilder;
         private readonly IGridPresenter _gridPresenter;
         
-        public GameBootstrapper(ICurrentLevelProvider currentLevelProvider, IGridBuilder gridBuilder, IGameViewContext gameViewContext, IGridPresenter gridPresenter)
+        public GameBootstrapper(ICurrentLevelProvider levelProvider, IGridBuilder gridBuilder, IGameViewContext gameViewContext, IGridPresenter gridPresenter)
         {
-            _currentLevelProvider = currentLevelProvider;
+            _levelProvider = levelProvider;
             _gameViewContext = gameViewContext;
             _gridBuilder = gridBuilder;
             _gridPresenter = gridPresenter;
@@ -24,8 +24,8 @@ namespace Core.Bootstrapper
         public void Initialize()
         {
             var result = _gridBuilder.WithView(_gameViewContext.GridView)
-                                     .WithGridSize(_currentLevelProvider.GetGridSize())
-                                     .WithObjectTypes(_currentLevelProvider.GetGridObjectTypes())
+                                     .WithGridSize(_levelProvider.GetGridSize())
+                                     .WithObjectTypes(_levelProvider.GetGridObjectTypes())
                                      .Build();
 
             _gridPresenter.Initialize(result.Model, result.Layout);
