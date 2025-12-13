@@ -21,7 +21,7 @@ namespace Core.Bootstrapper
         
         public void Initialize()
         {
-            _mainMenuPresenter.Initialize(_mainMenuViewContext.PlayButtonView, _progressReader.DisplayLevelNumber);
+            _mainMenuPresenter.InitPlayButton(_mainMenuViewContext.PlayButtonView, _progressReader.DisplayLevelNumber);
         }
 
         public void Dispose()

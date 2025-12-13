@@ -1,29 +1,35 @@
 using System;
 using Core.Models;
 using Core.Views;
+using VContainer.Unity;
 
 namespace Core.Presenters
 {
     public interface IGridPresenter
     {
-        void Initialize(IGridModel model, IGridView gridView);
+        
     }
 
-    public class GridPresenter : IGridPresenter, IDisposable
+    public class GridPresenter : IGridPresenter, IInitializable, IDisposable
     {
-        private IGridModel _gridModel;
-        private IGridView _gridView;
+        private readonly IGridModel _gridModel;
+        private readonly IGridView _gridView;
 
-        public void Initialize(IGridModel model, IGridView gridView)
+        public GridPresenter(IGridModel model, IGridView gridView)
         {
             _gridModel = model;
             _gridView = gridView;
+        }
+        
+        public void Initialize()
+        {
             
         }
-
+        
         public void Dispose()
         {
            
         }
+
     }
 }

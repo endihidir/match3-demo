@@ -1,19 +1,17 @@
 using System;
 using Core.Generated;
-using Core.Models;
 using Core.SceneService;
-using Core.Utils;
 using Core.Views;
 using Cysharp.Threading.Tasks;
 
 namespace Core.Presenters
 {
-    public interface IMainMenuPresenter : IDisposable
+    public interface IMainMenuPresenter 
     {
-        IMainMenuPresenter Initialize(IPlayButtonView playButtonView , int levelNumber);
+        IMainMenuPresenter InitPlayButton(IPlayButtonView playButtonView , int levelNumber);
     }
     
-    public sealed class MainMenuPresenter : IMainMenuPresenter
+    public sealed class MainMenuPresenter : IMainMenuPresenter, IDisposable
     {
         private readonly ISceneLoadService _sceneLoadService;
         
@@ -24,7 +22,7 @@ namespace Core.Presenters
             _sceneLoadService = sceneLoadService;
         }
         
-        public IMainMenuPresenter Initialize(IPlayButtonView playButtonView, int levelNumber)
+        public IMainMenuPresenter InitPlayButton(IPlayButtonView playButtonView, int levelNumber)
         {
             _playButtonView = playButtonView;
             

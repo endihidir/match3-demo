@@ -1,6 +1,5 @@
 using Core.Builder;
 using Core.Level;
-using Core.Presenters;
 using Core.Views;
 using VContainer.Unity;
 
@@ -11,14 +10,12 @@ namespace Core.Bootstrapper
         private readonly ICurrentLevelProvider _levelProvider;
         private readonly IGameViewContext _gameViewContext;
         private readonly IGridBuilder _gridBuilder;
-        private readonly IGridPresenter _gridPresenter;
         
-        public GameBootstrapper(ICurrentLevelProvider levelProvider, IGridBuilder gridBuilder, IGameViewContext gameViewContext, IGridPresenter gridPresenter)
+        public GameBootstrapper(ICurrentLevelProvider levelProvider, IGridBuilder gridBuilder, IGameViewContext gameViewContext)
         {
             _levelProvider = levelProvider;
             _gameViewContext = gameViewContext;
             _gridBuilder = gridBuilder;
-            _gridPresenter = gridPresenter;
         }
         
         public void Initialize()
@@ -28,7 +25,7 @@ namespace Core.Bootstrapper
                                               .WithObjectTypes(_levelProvider.GetGridObjectTypes())
                                               .Build();
 
-            _gridPresenter.Initialize(gridBuildResult.Model, gridBuildResult.GridView);
+            //TODO: Send result to handlers
         }
     }
 }

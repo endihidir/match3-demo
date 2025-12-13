@@ -85,7 +85,7 @@ namespace Core.Level
             }
             catch (Exception e)
             {
-                EditorLogger.Log("JSON error:" + e);
+                EditorLogger.LogError("JSON error:" + e);
                 throw;
             }
         }
