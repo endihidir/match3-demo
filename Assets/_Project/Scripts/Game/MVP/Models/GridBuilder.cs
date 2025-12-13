@@ -91,7 +91,7 @@ namespace Core.Builder
 
         private void PlaceItems()
         {
-            var cellSize = new Vector2(_gridView.Layout.CellSize, _gridView.Layout.CellSize);
+            var cellSize = new Vector2(_gridView.Layout.cellSize, _gridView.Layout.cellSize);
 
             for (int i = 0; i < _gridModel.Width * _gridModel.Height; i++)
             {

@@ -19,7 +19,7 @@ namespace Core.Extensions
 
             var mesh = new Mesh { name = "GridWithHolesMesh" };
 
-            var cellSize = gridLayout.CellSize;
+            var cellSize = gridLayout.cellSize;
             
             var width = size.x;
             var height = size.y;
@@ -122,7 +122,7 @@ namespace Core.Extensions
 
             var width = size.x;
             var height = size.y;
-            var cellSize = gridLayout.CellSize;
+            var cellSize = gridLayout.cellSize;
 
             if (width <= 0 || height <= 0 || cellSize <= 0f) return result;
 
@@ -520,7 +520,7 @@ namespace Core.Extensions
 
             var mesh = new Mesh { name = "GridMesh" };
 
-            var cellSize = gridLayout.CellSize;
+            var cellSize = gridLayout.cellSize;
             
             var width = size.x;
             var height = size.y;
