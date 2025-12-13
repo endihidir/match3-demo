@@ -15,10 +15,10 @@ namespace Core.Presenters
         private readonly IGridModel _gridModel;
         private readonly IGridView _gridView;
 
-        public GridPresenter(IGridModel model, IGridView gridView)
+        public GridPresenter(IGridModel model, IGameViewContext gameViewContext)
         {
             _gridModel = model;
-            _gridView = gridView;
+            _gridView = gameViewContext.GridView;
         }
         
         public void Initialize()

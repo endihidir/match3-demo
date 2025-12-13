@@ -29,7 +29,7 @@ namespace Core.LifetimeScopes
             
             builder.Register<GridBuilder>(Lifetime.Transient).As<IGridBuilder>();
             builder.Register<GridModel>(Lifetime.Scoped).As<IGridModel>();
-            builder.Register<GridPresenter>(Lifetime.Scoped).As<IGridPresenter>();
+            builder.Register<GridPresenter>(Lifetime.Scoped).As<IGridPresenter, IInitializable>();
         }
 
         private void Start()
