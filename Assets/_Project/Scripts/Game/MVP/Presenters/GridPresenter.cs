@@ -1,23 +1,23 @@
 using System;
 using Core.Models;
-using GridLayout = Core.Grid.GridLayout;
+using Core.Views;
 
 namespace Core.Presenters
 {
     public interface IGridPresenter
     {
-        void Initialize(IGridModel model, GridLayout layout);
+        void Initialize(IGridModel model, IGridView gridView);
     }
 
     public class GridPresenter : IGridPresenter, IDisposable
     {
         private IGridModel _gridModel;
-        private GridLayout _layout;
+        private IGridView _gridView;
 
-        public void Initialize(IGridModel model, GridLayout layout)
+        public void Initialize(IGridModel model, IGridView gridView)
         {
             _gridModel = model;
-            _layout = layout;
+            _gridView = gridView;
             
         }
 

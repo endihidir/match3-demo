@@ -1,11 +1,10 @@
-using Core.Grid;
+using Core.Extensions;
 using Core.Item.Factories;
 using Core.Level;
 using Core.Models;
 using Core.Utils;
 using Core.Views;
 using UnityEngine;
-using GridLayout = Core.Grid.GridLayout;
 
 namespace Core.Builder
 {
@@ -21,19 +20,15 @@ namespace Core.Builder
     {
         private readonly IGridModel _gridModel;
         private readonly IGridItemFactory _gridItemFactory;
-        private readonly IGridLayoutCalculator _layoutCalculator;
 
+        private IGridView _gridView;
         private Vector2Int _gridSize;
         private GridObjectTypeData[,] _gridObjectTypes;
-        private IGridView _gridView;
 
-        private GridLayout _gridLayout;
-
-        public GridBuilder(IGridModel gridModel, IGridItemFactory gridItemFactory, IGridLayoutCalculator layoutCalculator)
+        public GridBuilder(IGridModel gridModel, IGridItemFactory gridItemFactory)
         {
             _gridModel = gridModel;
             _gridItemFactory = gridItemFactory;
-            _layoutCalculator = layoutCalculator;
         }
 
         public IGridBuilder WithView(IGridView gridView)
@@ -84,35 +79,19 @@ namespace Core.Builder
                 return default;
             }
 
-            Configure();
-            CalculateOrigin();
-            PlaceItems();
-            GenerateMesh();
-            ResetState();
-
-            return new GridBuildResult(_gridModel, _gridLayout);
-        }
-
-        private void Configure()
-        {
-            var ls = _gridView.LayoutSettings;
             _gridModel.Initialize(_gridSize);
-            _gridLayout = _layoutCalculator.CalculateLayout(_gridSize, _gridView.Cam, ls.ScreenSidePaddingRatio, ls.CellSpacingRatio, ls.MaxCellSize);
-
             _gridModel.BuildActiveCells(_gridObjectTypes);
-        }
-
-        private void CalculateOrigin()
-        {
-            var yOffset = _gridView.GridRoot.position.y + (_gridModel.Height * _gridLayout.CellSize * 0.5f);
-            var topY = _layoutCalculator.GetTopY(_gridLayout, _gridView.Cam);
-            var originOffsetY = topY - yOffset;
-            _gridLayout.OriginOffset = new Vector3(0f, originOffsetY, 0f);
+            
+            _gridView.Initialize(_gridSize, _gridModel.ActiveData);
+            
+            PlaceItems();
+            ResetState();
+            return new GridBuildResult(_gridModel, _gridView);
         }
 
         private void PlaceItems()
         {
-            var cellSize = new Vector2(_gridLayout.CellSize, _gridLayout.CellSize);
+            var cellSize = new Vector2(_gridView.Layout.CellSize, _gridView.Layout.CellSize);
 
             for (int i = 0; i < _gridModel.Width * _gridModel.Height; i++)
             {
@@ -124,17 +103,9 @@ namespace Core.Builder
 
                 var typeData = _gridObjectTypes[x, y];
                 var item = _gridItemFactory.GetItem(typeData, coordinate, cellSize);
-                item.Transform.position = _layoutCalculator.GridToWorld(_gridLayout, _gridSize, _gridView.Cam, coordinate);
+                item.Transform.position = _gridView.GridToWorld(_gridSize, coordinate);
                 _gridModel.SetData(coordinate, item);
             }
-        }
-
-        private void GenerateMesh()
-        {
-            var ms = _gridView.MeshSettings;
-
-            _gridModel.BuildGridMeshPipeFrame(_gridLayout, _gridView.GridMeshFilter, ms.FrameThickness, ms.CornerSmoothness,
-                16, (x, y) => _gridModel.ActiveData[x, y]);
         }
 
         private void ResetState()
@@ -148,12 +119,12 @@ namespace Core.Builder
     public readonly struct GridBuildResult
     {
         public readonly IGridModel Model;
-        public readonly GridLayout Layout;
+        public readonly IGridView GridView;
 
-        public GridBuildResult(IGridModel model, GridLayout layout)
+        public GridBuildResult(IGridModel model, IGridView gridView)
         {
             Model = model;
-            Layout = layout;
+            GridView = gridView;
         }
     }
 }

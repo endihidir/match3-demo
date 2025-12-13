@@ -1,7 +1,6 @@
 using Core.Bootstrapper;
 using Core.Builder;
 using Core.Configs;
-using Core.Grid;
 using Core.Item.Factories;
 using Core.Models;
 using Core.Presenters;
@@ -28,7 +27,6 @@ namespace Core.LifetimeScopes
             builder.Register<GridItemFactory>(Lifetime.Scoped).As<IGridItemFactory>();
             builder.Register<ItemAnimationFactory>(Lifetime.Scoped).As<IItemAnimationFactory>();
             
-            builder.Register<GridLayoutCalculator>(Lifetime.Singleton).As<IGridLayoutCalculator>();
             builder.Register<GridBuilder>(Lifetime.Transient).As<IGridBuilder>();
             builder.Register<GridModel>(Lifetime.Scoped).As<IGridModel>();
             builder.Register<GridPresenter>(Lifetime.Scoped).As<IGridPresenter>();

@@ -1,4 +1,3 @@
-using Core.Grid;
 using Core.Models;
 using Core.Utils;
 using UnityEngine;
@@ -8,7 +7,7 @@ namespace Core.Extensions
 {
     public static class GridDebugExtensions
     {
-        public static void DrawGrid<T>(this IBaseGridModel<T> model, IGridLayoutCalculator calculator, GridLayout layout, Camera camera = null) where T : class
+        public static void DrawGrid<T>(this IBaseGridModel<T> model, GridLayout layout, Camera camera = null) where T : class
         {
             if (!model.DrawGizmos) return;
 
@@ -23,7 +22,7 @@ namespace Core.Extensions
             {
                 var coordinate = CoordinateUtils.ToCoordinate(i, model.Width);
 
-                var center = calculator.GridToWorld(layout, gridSize, cam, coordinate);
+                var center = layout.GridToWorld(gridSize, cam, coordinate);
 
                 var half = layout.CellSize * 0.5f;
 

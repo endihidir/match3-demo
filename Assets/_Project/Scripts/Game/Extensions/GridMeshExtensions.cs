@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Core.Models;
+using Core.Utils;
 using UnityEngine;
 using GridLayout = Core.Grid.GridLayout;
 
-namespace Core.Utils
+namespace Core.Extensions
 {
     public static class GridMeshExtensions
     { 
@@ -13,15 +13,19 @@ namespace Core.Utils
         /// Submesh 0 = inner cell quads
         /// Submesh 1 = pipe-style frame along board borders and holes
         /// </summary>
-        public static void BuildGridMeshPipeFrame<T>(this IBaseGridModel<T> model, GridLayout gridLayout, MeshFilter meshFilter, float frameThickness = 0.1f, float cornerSmoothness = 0f, int cornerSegments = 8, Func<int, int, bool> isCellActive = null) where T : class
+        public static void BuildGridMesh(this in GridLayout gridLayout, Vector2Int size, MeshFilter meshFilter, float frameThickness = 0.1f, float cornerSmoothness = 0f, int cornerSegments = 8, Func<int, int, bool> isCellActive = null)
         {
             if (!meshFilter || frameThickness <= 0f) return;
 
             var mesh = new Mesh { name = "GridWithHolesMesh" };
 
             var cellSize = gridLayout.CellSize;
-            var w = model.Width * cellSize;
-            var h = model.Height * cellSize;
+            
+            var width = size.x;
+            var height = size.y;
+            
+            var w = width * cellSize;
+            var h = height * cellSize;
 
             var halfW = w * 0.5f;
             var halfH = h * 0.5f;
@@ -39,13 +43,13 @@ namespace Core.Utils
 
             // ---------- INNER CELL QUADS (SUBMESH 0) ----------
 
-            for (int i = 0; i < model.Height * model.Width; i++)
+            for (int i = 0; i < height * width; i++)
             {
-                var coordinate = CoordinateUtils.ToCoordinate(i, model.Width);
+                var coordinate = CoordinateUtils.ToCoordinate(i, width);
                 var x = coordinate.x;
                 var y = coordinate.y;
 
-                var visualY = model.Height - 1 - y;
+                var visualY = height - 1 - y;
                 var y0 = (visualY * cellSize) - halfH;
                 var y1 = y0 + cellSize;
 
@@ -66,7 +70,7 @@ namespace Core.Utils
 
             // ---------- FRAME PATHS + PIPE BORDER (SUBMESH 1) ----------
 
-            var rectPaths = BuildFramePaths(model, gridLayout, isCellActive);
+            var rectPaths = BuildFramePaths(size, gridLayout, isCellActive);
 
             foreach (var rectPath in rectPaths)
             {
@@ -112,12 +116,12 @@ namespace Core.Utils
             }
         }
 
-        private static List<List<Vector3>> BuildFramePaths<T>(IBaseGridModel<T> model, GridLayout gridLayout, Func<int, int, bool> isCellActive) where T : class
+        private static List<List<Vector3>> BuildFramePaths(Vector2Int size, GridLayout gridLayout, Func<int, int, bool> isCellActive)
         {
             var result = new List<List<Vector3>>();
 
-            var width = model.Width;
-            var height = model.Height;
+            var width = size.x;
+            var height = size.y;
             var cellSize = gridLayout.CellSize;
 
             if (width <= 0 || height <= 0 || cellSize <= 0f) return result;
@@ -510,16 +514,19 @@ namespace Core.Utils
         /// Submesh 0 = inner cell quads
         /// Submesh 1 = outer frame segments + corners
         /// </summary>
-        public static void BuildGridMeshLegacyFrame<T>(this IBaseGridModel<T> model, GridLayout gridLayout, MeshFilter meshFilter, float frameThickness = 0.1f, float cornerSmoothness = 0f, int cornerSegments = 6, Func<int, int, bool> isCellActive = null) where T : class
+        public static void BuildGridMeshLegacy(this in GridLayout gridLayout, Vector2Int size, MeshFilter meshFilter, float frameThickness = 0.1f, float cornerSmoothness = 0f, int cornerSegments = 6, Func<int, int, bool> isCellActive = null)
         {
             if (!meshFilter || frameThickness <= 0f) return;
 
             var mesh = new Mesh { name = "GridMesh" };
 
             var cellSize = gridLayout.CellSize;
+            
+            var width = size.x;
+            var height = size.y;
 
-            var w = model.Width * cellSize;
-            var h = model.Height * cellSize;
+            var w = width * cellSize;
+            var h = height * cellSize;
 
             var halfW = w * 0.5f;
             var halfH = h * 0.5f;
@@ -532,13 +539,13 @@ namespace Core.Utils
 
             var useRounded = cornerSmoothness > 0f && cornerSegments > 0;
 
-            for (int i = 0; i < model.Height * model.Width; i++)
+            for (int i = 0; i < height * width; i++)
             {
-                var coordinate = CoordinateUtils.ToCoordinate(i, model.Width);
+                var coordinate = CoordinateUtils.ToCoordinate(i, width);
                 var x = coordinate.x;
                 var y = coordinate.y;
             
-                var visualY = model.Height - 1 - y;
+                var visualY = height - 1 - y;
                 var y0 = (visualY * cellSize) - halfH;
                 var y1 = y0 + cellSize;
                 
@@ -714,7 +721,7 @@ namespace Core.Utils
 
             bool IsEmpty(int gx, int gy)
             {
-                if (gx < 0 || gx >= model.Width || gy < 0 || gy >= model.Height) return true;
+                if (gx < 0 || gx >= width || gy < 0 || gy >= height) return true;
 
                 return isCellActive != null && !isCellActive(gx, gy);
             }
