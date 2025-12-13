@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Core.Extensions;
 using UnityEngine;
 
 namespace Core.Models
@@ -9,15 +8,12 @@ namespace Core.Models
     {
         int Width { get; }
         int Height { get; }
+        Vector2Int Size { get; }
 
         bool DrawGizmos { get; set; }
-        float ScreenSidePaddingRatio { get;}
-        float CellSpacingRatio { get; }
-        Vector3 OriginOffset { get; set; }
         Color GizmosColor { get; set; }
-        float CellSize { get; set; }
 
-        IBaseGridModel<T> Initialize(Vector2Int size, float screenSidePaddingRatio, float cellSpacingRatio = 0f);
+        IBaseGridModel<T> Initialize(Vector2Int size);
         void SetData(Vector2Int pos, T value);
         T GetGridObject(Vector2Int gridPos);
         void SetGridObject(Vector2Int gridPos, T item);
@@ -36,36 +32,31 @@ namespace Core.Models
 
         public int Width => _width;
         public int Height => _height;
-
+        public Vector2Int Size { get; private set; }
         public bool DrawGizmos { get; set; }
-        public float ScreenSidePaddingRatio { get; private set; }
-        public float CellSpacingRatio { get; private set; }
-        public Vector3 OriginOffset { get; set; }
-        public float CellSize { get; set; }
         public Color GizmosColor { get; set; } = Color.yellow;
 
         private static readonly Direction2D[] DirectionList = (Direction2D[])Enum.GetValues(typeof(Direction2D));
         
         private static readonly Dictionary<Direction2D, Vector2Int> DirectionOffsets = new()
         {
-            { Direction2D.Self,       new Vector2Int( 0,  0) },
-            { Direction2D.Right,      new Vector2Int( 1,  0) },
-            { Direction2D.Left,       new Vector2Int(-1,  0) },
-            { Direction2D.Up,         new Vector2Int( 0, -1) },
-            { Direction2D.Down,       new Vector2Int( 0,  1) },
-            { Direction2D.RightUp,    new Vector2Int( 1, -1) },
-            { Direction2D.LeftUp,     new Vector2Int(-1, -1) },
-            { Direction2D.RightDown,  new Vector2Int( 1,  1) },
-            { Direction2D.LeftDown,   new Vector2Int(-1,  1) }
+            { Direction2D.Self, new Vector2Int( 0,  0) },
+            { Direction2D.Right, new Vector2Int( 1,  0) },
+            { Direction2D.Left, new Vector2Int(-1,  0) },
+            { Direction2D.Up, new Vector2Int( 0, -1) },
+            { Direction2D.Down, new Vector2Int( 0,  1) },
+            { Direction2D.RightUp, new Vector2Int( 1, -1) },
+            { Direction2D.LeftUp, new Vector2Int(-1, -1) },
+            { Direction2D.RightDown, new Vector2Int( 1,  1) },
+            { Direction2D.LeftDown, new Vector2Int(-1,  1) }
         };
 
-        public IBaseGridModel<T> Initialize(Vector2Int size, float screenSidePaddingRatio, float cellSpacingRatio = 0f)
+        public IBaseGridModel<T> Initialize(Vector2Int size)
         {
-            _width = size.x;
-            _height = size.y;
+            Size = size;
+            _width = Size.x;
+            _height = Size.y;
             _gridArray = new T[_width, _height];
-            ScreenSidePaddingRatio = screenSidePaddingRatio;
-            CellSpacingRatio = cellSpacingRatio;
             return this;
         }
         public void SetData(Vector2Int pos, T value) => SetInternal(pos, value);

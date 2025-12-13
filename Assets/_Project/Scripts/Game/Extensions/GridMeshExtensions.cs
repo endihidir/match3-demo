@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Core.Models;
 using UnityEngine;
+using GridLayout = Core.Grid.GridLayout;
 
 namespace Core.Utils
 {
@@ -12,13 +13,13 @@ namespace Core.Utils
         /// Submesh 0 = inner cell quads
         /// Submesh 1 = pipe-style frame along board borders and holes
         /// </summary>
-        public static void BuildGridMeshPipeFrame<T>(this IBaseGridModel<T> model, MeshFilter meshFilter, float frameThickness = 0.1f, float cornerSmoothness = 0f, int cornerSegments = 8, Func<int, int, bool> isCellActive = null) where T : class
+        public static void BuildGridMeshPipeFrame<T>(this IBaseGridModel<T> model, GridLayout gridLayout, MeshFilter meshFilter, float frameThickness = 0.1f, float cornerSmoothness = 0f, int cornerSegments = 8, Func<int, int, bool> isCellActive = null) where T : class
         {
             if (!meshFilter || frameThickness <= 0f) return;
 
             var mesh = new Mesh { name = "GridWithHolesMesh" };
 
-            var cellSize = model.CellSize;
+            var cellSize = gridLayout.CellSize;
             var w = model.Width * cellSize;
             var h = model.Height * cellSize;
 
@@ -65,7 +66,7 @@ namespace Core.Utils
 
             // ---------- FRAME PATHS + PIPE BORDER (SUBMESH 1) ----------
 
-            var rectPaths = BuildFramePaths(model, isCellActive);
+            var rectPaths = BuildFramePaths(model, gridLayout, isCellActive);
 
             foreach (var rectPath in rectPaths)
             {
@@ -111,13 +112,13 @@ namespace Core.Utils
             }
         }
 
-        private static List<List<Vector3>> BuildFramePaths<T>(IBaseGridModel<T> model, Func<int, int, bool> isCellActive) where T : class
+        private static List<List<Vector3>> BuildFramePaths<T>(IBaseGridModel<T> model, GridLayout gridLayout, Func<int, int, bool> isCellActive) where T : class
         {
             var result = new List<List<Vector3>>();
 
             var width = model.Width;
             var height = model.Height;
-            var cellSize = model.CellSize;
+            var cellSize = gridLayout.CellSize;
 
             if (width <= 0 || height <= 0 || cellSize <= 0f) return result;
 
@@ -509,13 +510,13 @@ namespace Core.Utils
         /// Submesh 0 = inner cell quads
         /// Submesh 1 = outer frame segments + corners
         /// </summary>
-        public static void BuildGridMeshLegacyFrame<T>(this IBaseGridModel<T> model, MeshFilter meshFilter, float frameThickness = 0.1f, float cornerSmoothness = 0f, int cornerSegments = 6, Func<int, int, bool> isCellActive = null) where T : class
+        public static void BuildGridMeshLegacyFrame<T>(this IBaseGridModel<T> model, GridLayout gridLayout, MeshFilter meshFilter, float frameThickness = 0.1f, float cornerSmoothness = 0f, int cornerSegments = 6, Func<int, int, bool> isCellActive = null) where T : class
         {
             if (!meshFilter || frameThickness <= 0f) return;
 
             var mesh = new Mesh { name = "GridMesh" };
 
-            var cellSize = model.CellSize;
+            var cellSize = gridLayout.CellSize;
 
             var w = model.Width * cellSize;
             var h = model.Height * cellSize;

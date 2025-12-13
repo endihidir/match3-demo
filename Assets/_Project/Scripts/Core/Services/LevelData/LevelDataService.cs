@@ -8,33 +8,39 @@ using VContainer.Unity;
 
 namespace Core.Level
 {
-    public interface ILevelDataService
+    public interface ILevelDataBootState
     {
         bool IsInitialized { get; } 
-        bool ResetLevelOnLimit { get; }
-        bool UseInfiniteLevel { get; }
         UniTask WaitUntilInitializedAsync(); 
-        LevelDefinition[] LevelDefinitions { get; }
+    }
+
+    public interface ILevelSerializer
+    {
         LevelDefinition SerializeToLevelDefinition(int level);
     }
+
+    public interface ILevelDataReader
+    {
+        int MaxSize { get; }
+        int GetLevelNumber(int index);
+        int GetMoveCount(int index);
+        Vector2Int GetGridSize(int index);
+        List<LevelGoal> GetLevelGoals(int index);
+        GridObjectTypeData[,] GetGridObjectTypes(int index);
+    }
     
-    public class LevelDataService : ILevelDataService, IInitializable
+    public class LevelDataService : IInitializable, ILevelDataBootState, ILevelSerializer, ILevelDataReader
     {
         private readonly LevelDataServiceConfig _levelDataServiceConfig;
         public bool IsInitialized { get; private set; }
-        public bool ResetLevelOnLimit => true; //TODO: Get this form config
-        public bool UseInfiniteLevel => true; //TODO: Get this form config
+        public int MaxSize => LevelDefinitions?.Length ?? 0;
         public LevelDefinition[] LevelDefinitions { get; private set; }
 
         public LevelDataService(AppConfigContainer appConfigContainer)
         {
             _levelDataServiceConfig = appConfigContainer.levelDataServiceConfig;
         }
-        
-        public void Initialize()
-        {
-            Init().Forget();
-        }
+        public void Initialize() => Init().Forget();
 
         private async UniTask Init()
         {
@@ -91,5 +97,11 @@ namespace Core.Level
                 await UniTask.Yield();
             }
         }
+        
+        public int GetLevelNumber(int index) => LevelDefinitions[index].LevelNumber;
+        public int GetMoveCount(int index) => LevelDefinitions[index].MoveCount;
+        public Vector2Int GetGridSize(int index) => LevelDefinitions[index].GridSize;
+        public List<LevelGoal> GetLevelGoals(int index) => LevelDefinitions[index].Goals;
+        public GridObjectTypeData[,] GetGridObjectTypes(int index) => LevelDefinitions[index].GridObjectTypes;
     }
 }

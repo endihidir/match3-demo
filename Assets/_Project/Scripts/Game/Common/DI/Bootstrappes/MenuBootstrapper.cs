@@ -10,18 +10,18 @@ namespace Core.Bootstrapper
     {
         private readonly IMainMenuViewContext _mainMenuViewContext;
         private readonly IMainMenuPresenter _mainMenuPresenter;
-        private readonly ILevelProgressReadModel _progressReadModel;
+        private readonly ILevelProgressReader _progressReader;
         
-        public MenuBootstrapper(ILevelProgressReadModel progressReadModel, IMainMenuViewContext mainMenuViewContext, IMainMenuPresenter mainMenuPresenter)
+        public MenuBootstrapper(ILevelProgressReader progressReader, IMainMenuViewContext mainMenuViewContext, IMainMenuPresenter mainMenuPresenter)
         {
-            _progressReadModel = progressReadModel;
+            _progressReader = progressReader;
             _mainMenuViewContext = mainMenuViewContext;
             _mainMenuPresenter = mainMenuPresenter;
         }
         
         public void Initialize()
         {
-            _mainMenuPresenter.Initialize(_mainMenuViewContext.PlayButtonView, _progressReadModel.DisplayLevelNumber);
+            _mainMenuPresenter.Initialize(_mainMenuViewContext.PlayButtonView, _progressReader.DisplayLevelNumber);
         }
 
         public void Dispose()

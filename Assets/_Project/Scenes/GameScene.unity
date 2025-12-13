@@ -148,7 +148,7 @@ Transform:
   m_GameObject: {fileID: 195934559}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -2, z: 0.1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -171,6 +171,8 @@ MonoBehaviour:
   <GridRoot>k__BackingField: {fileID: 195934560}
   <GridMeshFilter>k__BackingField: {fileID: 875223620}
   <MeshSettings>k__BackingField: {fileID: 11400000, guid: 2c79f37a5e38df54e9289139439a6618,
+    type: 2}
+  <LayoutSettings>k__BackingField: {fileID: 11400000, guid: 6bb3c66aeb7bfce42a2513a510161df5,
     type: 2}
 --- !u!1 &262796440
 GameObject:

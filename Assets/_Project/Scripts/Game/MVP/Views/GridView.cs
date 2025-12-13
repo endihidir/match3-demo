@@ -9,6 +9,7 @@ namespace Core.Views
         Transform GridRoot { get; }
         MeshFilter GridMeshFilter { get; }
         GridMeshSettingsConfig MeshSettings { get; }
+        GridLayoutSettingsConfig LayoutSettings { get; }
     }
     
     public class GridView : MonoBehaviour, IGridView
@@ -17,5 +18,7 @@ namespace Core.Views
         [field: SerializeField] public Transform GridRoot { get; private set; }
         [field: SerializeField] public MeshFilter GridMeshFilter { get; private set; }
         [field: SerializeField] public GridMeshSettingsConfig MeshSettings { get; private set; }
+        
+        [field: SerializeField] public GridLayoutSettingsConfig LayoutSettings { get; private set; }
     }
 }
