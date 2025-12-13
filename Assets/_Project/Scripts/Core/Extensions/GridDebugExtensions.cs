@@ -24,7 +24,7 @@ namespace Core.Extensions
 
                 var center = layout.GridToWorld(gridSize, cam, coordinate);
 
-                var half = layout.CellSize * 0.5f;
+                var half = layout.cellSize * 0.5f;
 
                 var topLeft     = new Vector3(center.x - half, center.y + half, center.z);
                 var topRight    = new Vector3(center.x + half, center.y + half, center.z);

@@ -1,5 +1,6 @@
 using Core.Config;
 using Core.Extensions;
+using NaughtyAttributes;
 using UnityEngine;
 using GridLayout = Core.Grid.GridLayout;
 
@@ -19,7 +20,7 @@ namespace Core.Views
         [field: SerializeField] private MeshFilter GridMeshFilter { get; set; }
         [field: SerializeField] private GridMeshSettingsConfig MeshSettings { get; set; }
         [field: SerializeField] private GridLayoutSettingsConfig LayoutSettings { get; set; }
-        public GridLayout Layout { get; private set; }
+        [field: SerializeField, ReadOnly] public GridLayout Layout { get; private set; }
 
         public void Initialize(Vector2Int gridSize, bool[,] isCellActive)
         {
@@ -34,24 +35,24 @@ namespace Core.Views
             
             var layout = new GridLayout
             {
-                ScreenSidePaddingRatio = LayoutSettings.ScreenSidePaddingRatio,
-                CellSpacingRatio = LayoutSettings.CellSpacingRatio,
-                OriginOffset = Vector3.zero,
-                CellSize = 0f
+                screenSidePaddingRatio = LayoutSettings.ScreenSidePaddingRatio,
+                cellSpacingRatio = LayoutSettings.CellSpacingRatio,
+                originOffset = Vector3.zero,
+                cellSize = 0f
             };
             
             var cellSize = layout.CalculateCellSize(gridSize, Cam);
-            layout.CellSize = Mathf.Clamp(cellSize, 0f, LayoutSettings.MaxCellSize);
+            layout.cellSize = Mathf.Clamp(cellSize, 0f, LayoutSettings.MaxCellSize);
             Layout = layout;
         }
         
         private void CalculateOrigin(int gridHeight)
         {
-            var yOffset = GridRoot.position.y + (gridHeight * Layout.CellSize * 0.5f);
+            var yOffset = GridRoot.position.y + (gridHeight * Layout.cellSize * 0.5f);
             var topY = Layout.GetTopY(Cam);
             var originOffsetY = topY - yOffset;
             var layout = Layout;
-            layout.OriginOffset = new Vector3(0f, originOffsetY, 0f);
+            layout.originOffset = new Vector3(0f, originOffsetY, 0f);
             Layout = layout;
         }
 

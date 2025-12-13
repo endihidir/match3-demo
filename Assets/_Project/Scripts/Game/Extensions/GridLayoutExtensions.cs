@@ -12,9 +12,9 @@ namespace Core.Extensions
             var screenWidth  = Mathf.Abs(layout.GetLeftX(cam) - layout.GetRightX(cam));
             var screenHeight = Mathf.Abs(layout.GetTopY(cam) - layout.GetBottomY(cam));
 
-            var borderOffsetW = screenWidth  * (layout.ScreenSidePaddingRatio / 100f);
-            var gridOffsetW   = screenWidth  * (layout.CellSpacingRatio / 100f);
-            var gridOffsetH   = screenHeight * (layout.CellSpacingRatio / 100f);
+            var borderOffsetW = screenWidth  * (layout.screenSidePaddingRatio / 100f);
+            var gridOffsetW   = screenWidth  * (layout.cellSpacingRatio / 100f);
+            var gridOffsetH   = screenHeight * (layout.cellSpacingRatio / 100f);
 
             var cellSizeW = (screenWidth - borderOffsetW - (gridOffsetW * (gridSize.x - 1))) / gridSize.x;
 
@@ -33,14 +33,14 @@ namespace Core.Extensions
             var screenWidth  = Mathf.Abs(layout.GetLeftX(cam) - layout.GetRightX(cam));
             var screenHeight = Mathf.Abs(layout.GetTopY(cam) - layout.GetBottomY(cam));
 
-            var gridOffsetX = screenWidth  * (layout.CellSpacingRatio / 100f);
-            var gridOffsetY = screenHeight * (layout.CellSpacingRatio / 100f);
+            var gridOffsetX = screenWidth  * (layout.cellSpacingRatio / 100f);
+            var gridOffsetY = screenHeight * (layout.cellSpacingRatio / 100f);
 
-            var totalGridWidth = (gridSize.x * layout.CellSize) + ((gridSize.x - 1) * gridOffsetX);
+            var totalGridWidth = (gridSize.x * layout.cellSize) + ((gridSize.x - 1) * gridOffsetX);
             var leftStartX = layout.GetLeftX(cam) + ((screenWidth - totalGridWidth) * 0.5f);
 
-            var x = leftStartX + (cellCoordinate.x * (layout.CellSize + gridOffsetX)) + (layout.CellSize * 0.5f);
-            var y = layout.GetTopY(cam) - (cellCoordinate.y * (layout.CellSize + gridOffsetY)) - (layout.CellSize * 0.5f);
+            var x = leftStartX + (cellCoordinate.x * (layout.cellSize + gridOffsetX)) + (layout.cellSize * 0.5f);
+            var y = layout.GetTopY(cam) - (cellCoordinate.y * (layout.cellSize + gridOffsetY)) - (layout.cellSize * 0.5f);
 
             return new Vector3(x, y, 0f);
         }
@@ -52,19 +52,19 @@ namespace Core.Extensions
             var screenWidth  = Mathf.Abs(layout.GetLeftX(cam) - layout.GetRightX(cam));
             var screenHeight = Mathf.Abs(layout.GetTopY(cam) - layout.GetBottomY(cam));
 
-            var gridOffsetX = screenWidth  * (layout.CellSpacingRatio / 100f);
-            var gridOffsetY = screenHeight * (layout.CellSpacingRatio / 100f);
+            var gridOffsetX = screenWidth  * (layout.cellSpacingRatio / 100f);
+            var gridOffsetY = screenHeight * (layout.cellSpacingRatio / 100f);
 
-            var totalGridWidth = (gridSize.x * layout.CellSize) + ((gridSize.x - 1) * gridOffsetX);
+            var totalGridWidth = (gridSize.x * layout.cellSize) + ((gridSize.x - 1) * gridOffsetX);
             var leftStartX = layout.GetLeftX(cam) + ((screenWidth - totalGridWidth) * 0.5f);
 
             var absXFromGrid = worldPos.x - leftStartX;
             var absYFromTop  = layout.GetTopY(cam) - worldPos.y;
 
-            var dividerX = layout.CellSize + gridOffsetX;
-            var dividerY = layout.CellSize + gridOffsetY;
+            var dividerX = layout.cellSize + gridOffsetX;
+            var dividerY = layout.cellSize + gridOffsetY;
 
-            if ((absXFromGrid % dividerX) > layout.CellSize || (absYFromTop % dividerY) > layout.CellSize)
+            if ((absXFromGrid % dividerX) > layout.cellSize || (absYFromTop % dividerY) > layout.cellSize)
                 return new Vector2Int(-1, -1);
 
             var gx = Mathf.FloorToInt(absXFromGrid / dividerX);
@@ -87,7 +87,7 @@ namespace Core.Extensions
         private static Vector3 GetOriginPos(in GridLayout layout, Camera cam, Vector3 origin)
         {
             return cam.ViewportToWorldPoint(new Vector3(origin.x, origin.y, cam.nearClipPlane)) + 
-                   new Vector3(layout.OriginOffset.x, -layout.OriginOffset.y, 0f);
+                   new Vector3(layout.originOffset.x, -layout.originOffset.y, 0f);
         }
     }
 }
