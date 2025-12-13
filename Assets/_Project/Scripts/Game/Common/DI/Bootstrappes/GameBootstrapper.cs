@@ -28,7 +28,7 @@ namespace Core.Bootstrapper
                                               .WithObjectTypes(_levelProvider.GetGridObjectTypes())
                                               .Build();
 
-            _gridPresenter.Initialize(gridBuildResult.Model, gridBuildResult.Layout);
+            _gridPresenter.Initialize(gridBuildResult.Model, gridBuildResult.GridView);
         }
     }
 }
