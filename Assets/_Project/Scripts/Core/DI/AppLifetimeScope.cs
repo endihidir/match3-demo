@@ -24,9 +24,7 @@ namespace Core.LifetimeScopes
             builder.RegisterEntryPoint<AppBootstrapper>();
 
             RegisterServices(builder);
-            
             RegisterProviders(builder);
-
             RegisterGlobalModels(builder);
         }
 
