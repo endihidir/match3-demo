@@ -5,55 +5,53 @@ using UnityEngine;
 
 namespace Core.Models
 {
-    public interface ILevelProgressReadModel
+    public interface ILevelProgressReader
     {
         event Action OnProgressChanged;
         int CurrentLevelIndex { get; }
         int DisplayLevelNumber { get; }
         int MaxLevel { get; }
-        LevelDefinition GetLevelDefinition();
     }
 
-    public interface ILevelProgressWriteModel
+    public interface ILevelProgressWriter
     {
         void SetLevel(int levelIndex);
         void AdvanceLevel();
         void ResetProgress();
     }
     
-    public sealed class LevelProgressModel : ILevelProgressReadModel, ILevelProgressWriteModel
+    public sealed class LevelProgressModel : ILevelProgressReader, ILevelProgressWriter
     {
         private const string SaveKey = "level_progress";
 
         private readonly IDataPersistenceService _persistence;
-        private readonly ILevelDataService _levelDataService;
+        private readonly ILevelDataReader _levelDataReader;
 
         private LevelProgressData _levelProgressData;
-        public int MaxLevel => _levelDataService.LevelDefinitions?.Length ?? 0;
+        public int MaxLevel => _levelDataReader.MaxSize;
 
         public int CurrentLevelIndex => _levelProgressData.currentLevelIndex;
+        private bool ResetLevelOnLimit => true; //TODO: Get this form config
+        private bool UseInfiniteLevel => true; //TODO: Get this form config
+        
         public int DisplayLevelNumber
         {
             get
             {
-                if (_levelDataService.UseInfiniteLevel) return _levelProgressData.displayLevelNumber;
+                if (UseInfiniteLevel) return _levelProgressData.displayLevelNumber;
 
-                var defs = _levelDataService.LevelDefinitions;
+                var index = Mathf.Clamp(_levelProgressData.currentLevelIndex, 0, MaxLevel - 1);
                 
-                if (defs == null || defs.Length == 0) return 1;
-
-                var idx = Mathf.Clamp(_levelProgressData.currentLevelIndex, 0, defs.Length - 1);
-                
-                return defs[idx].LevelNumber;
+                return _levelDataReader.GetLevelNumber(index);
             }
         }
 
         public event Action OnProgressChanged;
 
-        public LevelProgressModel(IDataPersistenceService persistence, ILevelDataService levelDataService)
+        public LevelProgressModel(IDataPersistenceService persistence, ILevelDataReader levelDataReader)
         {
             _persistence = persistence;
-            _levelDataService = levelDataService;
+            _levelDataReader = levelDataReader;
 
             var defaultState = new LevelProgressData
             {
@@ -70,7 +68,7 @@ namespace Core.Models
         
         private void EnsureInfiniteDisplayIsValid()
         {
-            if (!_levelDataService.UseInfiniteLevel) return;
+            if (!UseInfiniteLevel) return;
 
             _levelProgressData.displayLevelNumber = Mathf.Max(_levelProgressData.displayLevelNumber, _levelProgressData.currentLevelIndex + 1);
         }
@@ -80,7 +78,7 @@ namespace Core.Models
             _levelProgressData.currentLevelIndex = MaxLevel > 0 ? Mathf.Clamp(_levelProgressData.currentLevelIndex, 0, MaxLevel - 1) 
                                                            : Mathf.Max(0, _levelProgressData.currentLevelIndex);
 
-            if (_levelDataService.UseInfiniteLevel)
+            if (UseInfiniteLevel)
                 _levelProgressData.displayLevelNumber = Mathf.Max(_levelProgressData.displayLevelNumber, 1);
         }
 
@@ -88,14 +86,14 @@ namespace Core.Models
         {
             if (MaxLevel <= 0) return;
 
-            var clamped = Mathf.Clamp(levelIndex, 0, MaxLevel - 1);
+            var index = Mathf.Clamp(levelIndex, 0, MaxLevel - 1);
             
-            if (clamped == _levelProgressData.currentLevelIndex) return;
+            if (index == _levelProgressData.currentLevelIndex) return;
 
-            _levelProgressData.currentLevelIndex = clamped;
+            _levelProgressData.currentLevelIndex = index;
 
-            if (!_levelDataService.UseInfiniteLevel)
-                _levelProgressData.displayLevelNumber = _levelDataService.LevelDefinitions[clamped].LevelNumber;
+            if (!UseInfiniteLevel)
+                _levelProgressData.displayLevelNumber = _levelDataReader.GetLevelNumber(index);
 
             RaiseChanged();
         }
@@ -106,11 +104,11 @@ namespace Core.Models
 
             var next = _levelProgressData.currentLevelIndex + 1;
             
-            next = next >= MaxLevel ? (_levelDataService.ResetLevelOnLimit ? 0 : MaxLevel - 1) : next;
+            next = next >= MaxLevel ? (ResetLevelOnLimit ? 0 : MaxLevel - 1) : next;
 
             _levelProgressData.currentLevelIndex = next;
 
-            if (_levelDataService.UseInfiniteLevel)
+            if (UseInfiniteLevel)
                 _levelProgressData.displayLevelNumber++;
 
             RaiseChanged();
@@ -120,13 +118,11 @@ namespace Core.Models
         {
             _levelProgressData.currentLevelIndex = 0;
             
-            if (_levelDataService.UseInfiniteLevel)
+            if (UseInfiniteLevel)
                 _levelProgressData.displayLevelNumber = 1;
 
             RaiseChanged();
         }
-        
-        public LevelDefinition GetLevelDefinition() => _levelDataService.LevelDefinitions[CurrentLevelIndex];
 
         private void RaiseChanged()
         {

@@ -13,7 +13,7 @@ namespace Core.Bootstrapper
         [Inject] private readonly IObjectResolver _objectResolver;
         [Inject] private readonly ISceneLoadService _sceneLoadService;
         [Inject] private readonly IObjectPoolService _objectPoolService;
-        [Inject] private readonly ILevelDataService _levelDataService;
+        [Inject] private readonly ILevelDataBootState _levelDataBootState;
         
         public void Initialize()
         {
@@ -26,7 +26,7 @@ namespace Core.Bootstrapper
 
             await _sceneLoadService.InitBootSceneAsync();
             
-            await _levelDataService.WaitUntilInitializedAsync();
+            await _levelDataBootState.WaitUntilInitializedAsync();
             
             _objectPoolService.Initialize();
             

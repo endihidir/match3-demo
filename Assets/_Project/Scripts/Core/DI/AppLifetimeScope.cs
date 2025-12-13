@@ -24,6 +24,8 @@ namespace Core.LifetimeScopes
             builder.RegisterEntryPoint<AppBootstrapper>();
 
             RegisterServices(builder);
+            
+            RegisterProviders(builder);
 
             RegisterGlobalModels(builder);
         }
@@ -32,13 +34,18 @@ namespace Core.LifetimeScopes
         {
             builder.Register<SceneLoadService>(Lifetime.Singleton).As<ISceneLoadService, ISceneLoadEvents, ISceneLoadData, ITickable>();
             builder.Register<ObjectPoolService>(Lifetime.Singleton).As<IObjectPoolService>();
-            builder.Register<LevelDataService>(Lifetime.Singleton).As<ILevelDataService, IInitializable>();
+            builder.Register<LevelDataService>(Lifetime.Singleton).As<IInitializable, ILevelDataBootState, ILevelSerializer, ILevelDataReader>();
             builder.Register<DataPersistenceService>(Lifetime.Singleton).As<IDataPersistenceService>();
         }
-        
+
+        private static void RegisterProviders(IContainerBuilder builder)
+        {
+            builder.Register<CurrentLevelProvider>(Lifetime.Singleton).As<ICurrentLevelProvider>();
+        }
+
         private static void RegisterGlobalModels(IContainerBuilder builder)
         {
-            builder.Register<LevelProgressModel>(Lifetime.Singleton).As<ILevelProgressReadModel, ILevelProgressWriteModel>();
+            builder.Register<LevelProgressModel>(Lifetime.Singleton).As<ILevelProgressReader, ILevelProgressWriter>();
         }
     }
 }

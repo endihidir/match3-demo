@@ -1,35 +1,29 @@
 using System;
-using Core.Level;
 using Core.Models;
-using Core.Views;
+using GridLayout = Core.Grid.GridLayout;
 
 namespace Core.Presenters
 {
     public interface IGridPresenter
     {
-        void Initialize(IGridView gridView, LevelDefinition levelDefinition);
+        void Initialize(IGridModel model, GridLayout layout);
     }
-    
+
     public class GridPresenter : IGridPresenter, IDisposable
     {
-        private readonly IGridBuilder _gridBuilder;
         private IGridModel _gridModel;
-        public GridPresenter(IGridBuilder gridBuilder) => _gridBuilder = gridBuilder;
+        private GridLayout _layout;
 
-        public void Initialize(IGridView gridView, LevelDefinition levelDefinition)
+        public void Initialize(IGridModel model, GridLayout layout)
         {
-            _gridModel = _gridBuilder.WithView(gridView)
-                                     .WithLevel(levelDefinition)
-                                     .Configure()
-                                     .CalculateLayout()
-                                     .PlaceItems()
-                                     .GenerateMesh()
-                                     .Build();
+            _gridModel = model;
+            _layout = layout;
+            
         }
 
         public void Dispose()
         {
-            
+           
         }
     }
 }
