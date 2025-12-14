@@ -8,7 +8,8 @@ using GridLayout = Core.Grid.GridLayout;
 namespace Core.Views
 {
     public interface IGridView
-    { 
+    {
+        Transform GridObjectsParent { get; }
         GridLayout Layout { get; }
         void Initialize(int width, int height, bool[,] isCellActive);
         Vector3 GridToWorld(Vector2Int size, Vector2Int itemCoordinate);
@@ -17,11 +18,12 @@ namespace Core.Views
     
     public class GridView : MonoBehaviour, IGridView
     {
-        [field: SerializeField] private Camera Cam { get; set; }
-        [field: SerializeField] private Transform GridRoot { get; set; }
-        [field: SerializeField] private MeshFilter GridMeshFilter { get; set; }
-        [field: SerializeField] private GridMeshSettingsConfig MeshSettings { get; set; }
-        [field: SerializeField] private GridLayoutSettingsConfig LayoutSettings { get; set; }
+        [field: SerializeField] public Camera Cam { get; private set; }
+        [field: SerializeField] public Transform GridRoot { get; private set; }
+        [field: SerializeField] public Transform GridObjectsParent { get; private set; }
+        [field: SerializeField] public MeshFilter GridMeshFilter { get; private set; }
+        [field: SerializeField] public GridMeshSettingsConfig MeshSettings { get; private set; }
+        [field: SerializeField] public GridLayoutSettingsConfig LayoutSettings { get; private set; }
         [field: SerializeField, ReadOnly] public GridLayout Layout { get; private set; }
         public event Action OnViewInitialized;
 

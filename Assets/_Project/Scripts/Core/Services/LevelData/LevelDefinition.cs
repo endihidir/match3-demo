@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Core.Item;
 using UnityEngine;
@@ -23,18 +22,5 @@ namespace Core.Level
         }
 
         public override string ToString() => $"LevelNumber:{LevelNumber}, MoveCount:{MoveCount}, GridSize:{GridSize}, Goals:{Goals.Count}";
-    }
-    
-    [Serializable]
-    public struct GridObjectTypeData
-    {
-        public GridItemKind gridItemKind;
-        public int typeId;
-        
-        public GridObjectTypeData(GridItemKind gridItemKind, int typeId)
-        {
-            this.gridItemKind = gridItemKind;
-            this.typeId = typeId;
-        }
     }
 }

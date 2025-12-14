@@ -1,6 +1,6 @@
+using System;
 using Core.Item;
 using Core.Item.Factories;
-using Core.Level;
 using Core.Utils;
 
 namespace Core.Handlers
@@ -10,7 +10,7 @@ namespace Core.Handlers
         void PopulateGridWith(GridObjectTypeData[,] gridObjectTypes, out IGridItemObject[,] itemObjects);
     }
 
-    public class GridItemFactoryHandler : IGridItemFactoryHandler
+    public class GridItemFactoryHandler : IGridItemFactoryHandler, IDisposable
     {
         private readonly IGridItemFactory _gridItemFactory;
         
@@ -33,12 +33,14 @@ namespace Core.Handlers
                 var y = coordinate.y;
                 var typeData = gridObjectTypes[x, y];
                 
-                if (typeData is { typeId: -1 }) continue;
+                if (typeData is { TypeId: -1 }) continue;
 
                 var item = _gridItemFactory.GetItem(typeData, coordinate);
                 
                 itemObjects[x, y] = item;
             }
         }
+
+        public void Dispose() => _gridItemFactory.ReleaseAllItems();
     }
 }

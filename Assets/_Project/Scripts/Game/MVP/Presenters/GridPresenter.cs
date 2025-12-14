@@ -33,6 +33,7 @@ namespace Core.Presenters
                 var worldPos = _gridView.GridToWorld(_gridModel.GridSize, item.Coordinate);
                 item.SetPosition(worldPos);
                 item.SetCellSize(_gridView.Layout.cellSize);
+                item.SetParent(_gridView.GridObjectsParent);
             }
         }
 
