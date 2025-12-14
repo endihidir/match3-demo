@@ -8,11 +8,11 @@ namespace Core.Item.Factories
 {
     public interface IGridItemFactory
     {
-        GridItemObject GetItem(GridObjectTypeData typeData, Vector2Int coordinate, Vector2 cellSize);
-        GridItemObject GetItem(GridItemKind itemKind, int typeId, Vector2Int coordinate, Vector2 cellSize) => GetItem(new GridObjectTypeData(itemKind, typeId), coordinate, cellSize);
-        GridItemObject GetItem(ItemType type, Vector2Int gridPos, Vector2 size) => GetItem(GridItemKind.Regular, (int)type, gridPos, size);
-        GridItemObject GetItem(BoosterType type, Vector2Int gridPos, Vector2 size) => GetItem(GridItemKind.Booster, (int)type, gridPos, size);
-        GridItemObject GetItem(ObstacleType type, Vector2Int gridPos, Vector2 size) => GetItem(GridItemKind.Obstacle, (int)type, gridPos, size);
+        GridItemObject GetItem(GridObjectTypeData typeData, Vector2Int coordinate);
+        GridItemObject GetItem(GridItemKind itemKind, int typeId, Vector2Int coordinate) => GetItem(new GridObjectTypeData(itemKind, typeId), coordinate);
+        GridItemObject GetItem(ItemType type, Vector2Int gridPos) => GetItem(GridItemKind.Regular, (int)type, gridPos);
+        GridItemObject GetItem(BoosterType type, Vector2Int gridPos) => GetItem(GridItemKind.Booster, (int)type, gridPos);
+        GridItemObject GetItem(ObstacleType type, Vector2Int gridPos) => GetItem(GridItemKind.Obstacle, (int)type, gridPos);
         void ReleaseItem(GridItemObject item);
         void ReleaseItem(Transform item);
         void ReleaseItem(GameObject item) => ReleaseItem(item.transform);
@@ -33,7 +33,7 @@ namespace Core.Item.Factories
             _itemVisualConfig = gameConfigContainer.ItemConfigContainer;
         }
         
-        public GridItemObject GetItem(GridObjectTypeData typeData, Vector2Int coordinate, Vector2 cellSize)
+        public GridItemObject GetItem(GridObjectTypeData typeData, Vector2Int coordinate)
         {
             var itemObject = _objectPoolService.GetObject<GridItemObject>();
             
@@ -47,8 +47,8 @@ namespace Core.Item.Factories
             
             var animation = _itemAnimationFactory.Get(animationData);
             
-            itemObject.Initialize(typeData.gridItemKind, typeData.typeId, coordinate, cellSize)
-                      .ApplyVisual(_itemVisualConfig)
+            itemObject.Initialize(typeData.gridItemKind, typeData.typeId, coordinate)
+                      .ApplyData(_itemVisualConfig)
                       .BindAnimation(animation);
    
             return itemObject;

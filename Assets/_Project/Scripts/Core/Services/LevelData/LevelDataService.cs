@@ -21,19 +21,15 @@ namespace Core.Level
 
     public interface ILevelDataReader
     {
-        int MaxSize { get; }
-        int GetLevelNumber(int index);
-        int GetMoveCount(int index);
-        Vector2Int GetGridSize(int index);
-        List<LevelGoal> GetLevelGoals(int index);
-        GridObjectTypeData[,] GetGridObjectTypes(int index);
+        int LevelSize { get; }
+        LevelDefinition GetLevelDefinition(int index);
     }
     
     public class LevelDataService : IInitializable, ILevelDataBootState, ILevelSerializer, ILevelDataReader
     {
         private readonly LevelDataServiceConfig _levelDataServiceConfig;
         public bool IsInitialized { get; private set; }
-        public int MaxSize => LevelDefinitions?.Length ?? 0;
+        public int LevelSize => LevelDefinitions?.Length ?? 0;
         public LevelDefinition[] LevelDefinitions { get; private set; }
 
         public LevelDataService(AppConfigContainer appConfigContainer)
@@ -98,10 +94,6 @@ namespace Core.Level
             }
         }
         
-        public int GetLevelNumber(int index) => LevelDefinitions[index].LevelNumber;
-        public int GetMoveCount(int index) => LevelDefinitions[index].MoveCount;
-        public Vector2Int GetGridSize(int index) => LevelDefinitions[index].GridSize;
-        public List<LevelGoal> GetLevelGoals(int index) => LevelDefinitions[index].Goals;
-        public GridObjectTypeData[,] GetGridObjectTypes(int index) => LevelDefinitions[index].GridObjectTypes;
+        public LevelDefinition GetLevelDefinition(int index) => LevelDefinitions[index];
     }
 }

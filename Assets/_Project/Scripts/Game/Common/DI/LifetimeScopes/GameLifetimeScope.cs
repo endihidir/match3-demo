@@ -1,6 +1,6 @@
 using Core.Bootstrapper;
-using Core.Builder;
 using Core.Configs;
+using Core.Handlers;
 using Core.Item.Factories;
 using Core.Models;
 using Core.Presenters;
@@ -18,17 +18,17 @@ namespace Core.LifetimeScopes
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterInstance(GameConfigContainer);
-
             builder.RegisterEntryPoint<GameBootstrapper>();
-            builder.RegisterComponentInHierarchy<GameViewContext>().As<IGameViewContext>();
             
             builder.Register<LevelGoalModel>(Lifetime.Scoped).As<ILevelGoalModel>();
             
             builder.Register<GridItemFactory>(Lifetime.Scoped).As<IGridItemFactory>();
+            builder.Register<GridItemFactoryHandler>(Lifetime.Scoped).As<IGridItemFactoryHandler>();
+            
             builder.Register<ItemAnimationFactory>(Lifetime.Scoped).As<IItemAnimationFactory>();
             
-            builder.Register<GridBuilder>(Lifetime.Transient).As<IGridBuilder>();
             builder.Register<GridModel>(Lifetime.Scoped).As<IGridModel>();
+            builder.RegisterComponentInHierarchy<GridView>().As<IGridView>();
             builder.Register<GridPresenter>(Lifetime.Scoped).As<IGridPresenter, IInitializable>();
         }
 

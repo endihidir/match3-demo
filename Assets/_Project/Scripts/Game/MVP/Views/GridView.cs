@@ -1,3 +1,4 @@
+using System;
 using Core.Config;
 using Core.Extensions;
 using NaughtyAttributes;
@@ -9,8 +10,9 @@ namespace Core.Views
     public interface IGridView
     { 
         GridLayout Layout { get; }
-        void Initialize(Vector2Int gridSize, bool[,] isCellActive);
+        void Initialize(int width, int height, bool[,] isCellActive);
         Vector3 GridToWorld(Vector2Int size, Vector2Int itemCoordinate);
+        event Action OnViewInitialized;
     }
     
     public class GridView : MonoBehaviour, IGridView
@@ -21,12 +23,15 @@ namespace Core.Views
         [field: SerializeField] private GridMeshSettingsConfig MeshSettings { get; set; }
         [field: SerializeField] private GridLayoutSettingsConfig LayoutSettings { get; set; }
         [field: SerializeField, ReadOnly] public GridLayout Layout { get; private set; }
+        public event Action OnViewInitialized;
 
-        public void Initialize(Vector2Int gridSize, bool[,] isCellActive)
+        public void Initialize(int width, int height, bool[,] isCellActive)
         {
+            var gridSize = new Vector2Int(width, height);
             CalculateCellSize(gridSize);
             CalculateOrigin(gridSize.y);
             GenerateMesh(gridSize, isCellActive);
+            OnViewInitialized?.Invoke();
         }
         
         private void CalculateCellSize(Vector2Int gridSize)
@@ -64,6 +69,6 @@ namespace Core.Views
             bool CellActive(int x, int y) => isCellActive[x, y];
         }
         
-        public Vector3 GridToWorld(Vector2Int size, Vector2Int itemCoordinate) => Layout.GridToWorld(size, Cam, itemCoordinate);
+        public Vector3 GridToWorld(Vector2Int size, Vector2Int itemCoordinate) => Layout.GridToWorld(size, itemCoordinate, Cam);
     }
 }

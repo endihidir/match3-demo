@@ -101,20 +101,26 @@ namespace Core.Utils
         {
             switch (decodedEnum)
             {
+                case GridItemKind itemKind:
+                {
+                    return new GridObjectTypeData
+                    {
+                        gridItemKind = GridItemKind.None,
+                        typeId = -1
+                    };
+                }
                 case ItemType itemType:
                     return new GridObjectTypeData
                     {
                         gridItemKind = GridItemKind.Regular,
                         typeId = (int)itemType
                     };
-
                 case BoosterType boosterType:
                     return new GridObjectTypeData
                     {
                         gridItemKind = GridItemKind.Booster,
                         typeId = (int)boosterType
                     };
-
                 case ObstacleType obstacleType:
                     IncrementObstacleCount(obstacleType, ref counts);
                     return new GridObjectTypeData
@@ -122,7 +128,6 @@ namespace Core.Utils
                         gridItemKind = GridItemKind.Obstacle,
                         typeId = (int)obstacleType
                     };
-
                 default:
                     return CreateRandomItemCell();
             }

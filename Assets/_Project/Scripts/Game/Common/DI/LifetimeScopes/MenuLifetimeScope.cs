@@ -12,7 +12,7 @@ namespace Core.LifetimeScopes
         {
             builder.RegisterEntryPoint<MenuBootstrapper>();
             
-            builder.RegisterComponentInHierarchy<MainMenuViewContext>().As<IMainMenuViewContext>();
+            builder.RegisterComponentInHierarchy<PlayButtonView>().As<IPlayButtonView>();
             builder.Register<MainMenuPresenter>(Lifetime.Scoped).As<IMainMenuPresenter>();
         }
 

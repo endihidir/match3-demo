@@ -38,7 +38,7 @@ namespace Core.LifetimeScopes
 
         private static void RegisterProviders(IContainerBuilder builder)
         {
-            builder.Register<CurrentLevelProvider>(Lifetime.Singleton).As<ICurrentLevelProvider>();
+            builder.Register<LevelDefinitionProvider>(Lifetime.Singleton).As<ILevelDefinitionProvider>();
         }
 
         private static void RegisterGlobalModels(IContainerBuilder builder)

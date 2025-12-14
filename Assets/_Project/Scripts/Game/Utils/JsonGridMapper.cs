@@ -11,54 +11,16 @@ namespace Core.Utils
         
         public static Enum Decode(int code) => code switch
         {
+            -1 => GridItemKind.None,
             0 => ItemType.None,
             < BoosterOffset => (ItemType)code,
             < ObstacleOffset => (BoosterType)(code - BoosterOffset),
             _ => (ObstacleType)(code - ObstacleOffset)
         };
-        
-        public static JsonGridObjectType DecodeJson(int code)
-        {
-            if (code == 0)
-            {
-                return JsonGridObjectType.rand;
-            }
-
-            var decoded = Decode(code);
-
-            return decoded switch
-            {
-                ItemType itemType => itemType switch
-                {
-                    ItemType.Red    => JsonGridObjectType.r,
-                    ItemType.Green  => JsonGridObjectType.g,
-                    ItemType.Blue   => JsonGridObjectType.b,
-                    ItemType.Yellow => JsonGridObjectType.y,
-                    _               => JsonGridObjectType.rand
-                },
-
-                BoosterType boosterType => boosterType switch
-                {
-                    BoosterType.Bomb             => JsonGridObjectType.t,
-                    BoosterType.RocketHorizontal => JsonGridObjectType.ro_h,
-                    BoosterType.RocketVertical   => JsonGridObjectType.ro_v,
-                    _                            => JsonGridObjectType.rand
-                },
-
-                ObstacleType obstacleType => obstacleType switch
-                {
-                    ObstacleType.Box   => JsonGridObjectType.bo,
-                    ObstacleType.Stone => JsonGridObjectType.s,
-                    ObstacleType.Vase  => JsonGridObjectType.v,
-                    _                  => JsonGridObjectType.rand
-                },
-
-                _ => JsonGridObjectType.rand
-            };
-        }
 
         public static int Encode(Enum value) => value switch
         {
+            GridItemKind.None => -1,
             ItemType itemType => (int)itemType,
             BoosterType boosterType => BoosterOffset + (int)boosterType,
             ObstacleType obstacleType => ObstacleOffset + (int)obstacleType,
@@ -79,8 +41,53 @@ namespace Core.Utils
             JsonGridObjectType.t     => Encode(BoosterType.Bomb),
             JsonGridObjectType.ro_h  => Encode(BoosterType.RocketHorizontal),
             JsonGridObjectType.ro_v  => Encode(BoosterType.RocketVertical),
-            JsonGridObjectType.empty => Encode(ItemType.None),
+            JsonGridObjectType.empty => Encode(GridItemKind.None),
             _ => 0
         };
+        
+        public static JsonGridObjectType DecodeJson(int code)
+        {
+            switch (code)
+            {
+                case -1:
+                    return JsonGridObjectType.empty;
+                case 0:
+                    return JsonGridObjectType.rand;
+                default:
+                {
+                    var decoded = Decode(code);
+
+                    return decoded switch
+                    {
+                        ItemType itemType => itemType switch
+                        {
+                            ItemType.Red    => JsonGridObjectType.r,
+                            ItemType.Green  => JsonGridObjectType.g,
+                            ItemType.Blue   => JsonGridObjectType.b,
+                            ItemType.Yellow => JsonGridObjectType.y,
+                            _               => JsonGridObjectType.rand
+                        },
+
+                        BoosterType boosterType => boosterType switch
+                        {
+                            BoosterType.Bomb             => JsonGridObjectType.t,
+                            BoosterType.RocketHorizontal => JsonGridObjectType.ro_h,
+                            BoosterType.RocketVertical   => JsonGridObjectType.ro_v,
+                            _                            => JsonGridObjectType.rand
+                        },
+
+                        ObstacleType obstacleType => obstacleType switch
+                        {
+                            ObstacleType.Box   => JsonGridObjectType.bo,
+                            ObstacleType.Stone => JsonGridObjectType.s,
+                            ObstacleType.Vase  => JsonGridObjectType.v,
+                            _                  => JsonGridObjectType.rand
+                        },
+
+                        _ => JsonGridObjectType.rand
+                    };
+                }
+            }
+        }
     }
 }

@@ -1,27 +1,24 @@
 using System;
-using Core.Models;
+using Core.Level;
 using Core.Presenters;
-using Core.Views;
 using VContainer.Unity;
 
 namespace Core.Bootstrapper
 {
     public class MenuBootstrapper : IInitializable, IDisposable
     {
-        private readonly IMainMenuViewContext _mainMenuViewContext;
         private readonly IMainMenuPresenter _mainMenuPresenter;
-        private readonly ILevelProgressReader _progressReader;
+        private readonly ILevelDefinitionProvider _levelDefinitionProvider;
         
-        public MenuBootstrapper(ILevelProgressReader progressReader, IMainMenuViewContext mainMenuViewContext, IMainMenuPresenter mainMenuPresenter)
+        public MenuBootstrapper(ILevelDefinitionProvider levelDefinitionProvider, IMainMenuPresenter mainMenuPresenter)
         {
-            _progressReader = progressReader;
-            _mainMenuViewContext = mainMenuViewContext;
+            _levelDefinitionProvider = levelDefinitionProvider;
             _mainMenuPresenter = mainMenuPresenter;
         }
         
         public void Initialize()
         {
-            _mainMenuPresenter.InitPlayButton(_mainMenuViewContext.PlayButtonView, _progressReader.DisplayLevelNumber);
+            _mainMenuPresenter.InitPlayButton(_levelDefinitionProvider.GetLevelNumber());
         }
 
         public void Dispose()

@@ -29,13 +29,13 @@ namespace Core.Models
         public bool IsAllGoalsComplete => _goals.TrueForAll(x => x.Count <= 0);
         public bool IsMoveCountFinished => _moveCount <= 0;
 
-        public LevelGoalModel(ICurrentLevelProvider currentLevelProvider)
+        public LevelGoalModel(ILevelDefinitionProvider levelDefinitionProvider)
         {
-            var levelGoals = currentLevelProvider.GetLevelGoals();
+            var levelGoals = levelDefinitionProvider.GetLevelGoals();
             _goals = new List<LevelGoal>(levelGoals.Count);
             levelGoals.ForEach(goal => _goals.Add(goal.Clone()));
 
-            _moveCount = currentLevelProvider.GetMoveCount();
+            _moveCount = levelDefinitionProvider.GetMoveCount();
             
             _wasAllGoalsComplete = false;
             _wasMoveCountFinished = false;
