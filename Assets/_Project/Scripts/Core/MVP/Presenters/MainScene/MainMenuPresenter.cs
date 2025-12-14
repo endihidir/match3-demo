@@ -8,24 +8,22 @@ namespace Core.Presenters
 {
     public interface IMainMenuPresenter 
     {
-        IMainMenuPresenter InitPlayButton(IPlayButtonView playButtonView , int levelNumber);
+        IMainMenuPresenter InitPlayButton(int levelNumber);
     }
     
     public sealed class MainMenuPresenter : IMainMenuPresenter, IDisposable
     {
         private readonly ISceneLoadService _sceneLoadService;
+        private readonly IPlayButtonView _playButtonView;
         
-        private IPlayButtonView _playButtonView;
-        
-        public MainMenuPresenter(ISceneLoadService sceneLoadService)
+        public MainMenuPresenter(ISceneLoadService sceneLoadService, IPlayButtonView playButtonView)
         {
             _sceneLoadService = sceneLoadService;
+            _playButtonView = playButtonView;
         }
         
-        public IMainMenuPresenter InitPlayButton(IPlayButtonView playButtonView, int levelNumber)
+        public IMainMenuPresenter InitPlayButton(int levelNumber)
         {
-            _playButtonView = playButtonView;
-            
             _playButtonView.SetText($"Level {levelNumber}");
             
             AddListeners();

@@ -10,7 +10,6 @@ namespace Core.Models
         event Action OnProgressChanged;
         int CurrentLevelIndex { get; }
         int DisplayLevelNumber { get; }
-        int MaxLevel { get; }
     }
 
     public interface ILevelProgressWriter
@@ -28,26 +27,11 @@ namespace Core.Models
         private readonly ILevelDataReader _levelDataReader;
 
         private LevelProgressData _levelProgressData;
-        public int MaxLevel => _levelDataReader.MaxSize;
-
+        public int MaxLevel => _levelDataReader.LevelSize;
         public int CurrentLevelIndex => _levelProgressData.currentLevelIndex;
+        public int DisplayLevelNumber => _levelProgressData.displayLevelNumber;
         private bool ResetLevelOnLimit => true; //TODO: Get this form config
-        private bool UseInfiniteLevel => true; //TODO: Get this form config
-        
-        public int DisplayLevelNumber
-        {
-            get
-            {
-                if (UseInfiniteLevel) return _levelProgressData.displayLevelNumber;
-
-                var index = Mathf.Clamp(_levelProgressData.currentLevelIndex, 0, MaxLevel - 1);
-                
-                return _levelDataReader.GetLevelNumber(index);
-            }
-        }
-
         public event Action OnProgressChanged;
-
         public LevelProgressModel(IDataPersistenceService persistence, ILevelDataReader levelDataReader)
         {
             _persistence = persistence;
@@ -61,25 +45,7 @@ namespace Core.Models
             
             _levelProgressData = _persistence.LoadFromJson(SaveKey, defaultState);
             
-            Clamp();
-            
-            EnsureInfiniteDisplayIsValid();
-        }
-        
-        private void EnsureInfiniteDisplayIsValid()
-        {
-            if (!UseInfiniteLevel) return;
-
-            _levelProgressData.displayLevelNumber = Mathf.Max(_levelProgressData.displayLevelNumber, _levelProgressData.currentLevelIndex + 1);
-        }
-
-        private void Clamp()
-        {
-            _levelProgressData.currentLevelIndex = MaxLevel > 0 ? Mathf.Clamp(_levelProgressData.currentLevelIndex, 0, MaxLevel - 1) 
-                                                           : Mathf.Max(0, _levelProgressData.currentLevelIndex);
-
-            if (UseInfiniteLevel)
-                _levelProgressData.displayLevelNumber = Mathf.Max(_levelProgressData.displayLevelNumber, 1);
+            _levelProgressData.currentLevelIndex = Mathf.Clamp(_levelProgressData.currentLevelIndex, 0, MaxLevel - 1);
         }
 
         public void SetLevel(int levelIndex)
@@ -91,10 +57,7 @@ namespace Core.Models
             if (index == _levelProgressData.currentLevelIndex) return;
 
             _levelProgressData.currentLevelIndex = index;
-
-            if (!UseInfiniteLevel)
-                _levelProgressData.displayLevelNumber = _levelDataReader.GetLevelNumber(index);
-
+            
             RaiseChanged();
         }
 
@@ -105,30 +68,25 @@ namespace Core.Models
             var next = _levelProgressData.currentLevelIndex + 1;
             
             next = next >= MaxLevel ? (ResetLevelOnLimit ? 0 : MaxLevel - 1) : next;
-
+            
             _levelProgressData.currentLevelIndex = next;
-
-            if (UseInfiniteLevel)
-                _levelProgressData.displayLevelNumber++;
-
+            
+            _levelProgressData.displayLevelNumber++;
+            
             RaiseChanged();
         }
 
         public void ResetProgress()
         {
             _levelProgressData.currentLevelIndex = 0;
-            
-            if (UseInfiniteLevel)
-                _levelProgressData.displayLevelNumber = 1;
-
+            _levelProgressData.displayLevelNumber = 1;
             RaiseChanged();
         }
 
         private void RaiseChanged()
         {
-            OnProgressChanged?.Invoke();
-            
             _persistence.SaveToJson(SaveKey, _levelProgressData);
+            OnProgressChanged?.Invoke();
         }
 
         [Serializable]

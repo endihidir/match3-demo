@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Core.Utils;
 using UnityEngine;
 
 namespace Core.Models
@@ -8,13 +9,14 @@ namespace Core.Models
     {
         int Width { get; }
         int Height { get; }
-        Vector2Int Size { get; }
-
+        Vector2Int GridSize { get; }
         bool DrawGizmos { get; set; }
         Color GizmosColor { get; set; }
-
-        IBaseGridModel<T> Initialize(Vector2Int size);
-        void SetData(Vector2Int pos, T value);
+        event Action<T> OnGridObjectInitialized;
+        event Action<T> OnUpdateCellData;
+        event Action OnModelInitialized;
+        
+        IBaseGridModel<T> Initialize(T[,] value, int width, int height, out bool[,] activeCells);
         T GetGridObject(Vector2Int gridPos);
         void SetGridObject(Vector2Int gridPos, T item);
 
@@ -24,17 +26,19 @@ namespace Core.Models
         bool TryGetNeighborsNonAlloc(Vector2Int pos, Span<T> resultBuffer, out int count);
     }
     
-    public class BaseGridModel<T> : IBaseGridModel<T> where T : class
+    public abstract class BaseGridModel<T> : IBaseGridModel<T> where T : class
     {
-        private int _width, _height;
-        
         private T[,] _gridArray;
+        public int Width { get; private set; }
+        public int Height { get; private set; }
+        public Vector2Int GridSize { get; private set; }
 
-        public int Width => _width;
-        public int Height => _height;
-        public Vector2Int Size { get; private set; }
         public bool DrawGizmos { get; set; }
         public Color GizmosColor { get; set; } = Color.yellow;
+    
+        public event Action<T> OnGridObjectInitialized;
+        public event Action<T> OnUpdateCellData;
+        public event Action OnModelInitialized;
 
         private static readonly Direction2D[] DirectionList = (Direction2D[])Enum.GetValues(typeof(Direction2D));
         
@@ -50,19 +54,36 @@ namespace Core.Models
             { Direction2D.RightDown, new Vector2Int( 1,  1) },
             { Direction2D.LeftDown, new Vector2Int(-1,  1) }
         };
-
-        public IBaseGridModel<T> Initialize(Vector2Int size)
+        
+        public IBaseGridModel<T> Initialize(T[,] value, int width, int height, out bool[,] activeCells)
         {
-            Size = size;
-            _width = Size.x;
-            _height = Size.y;
-            _gridArray = new T[_width, _height];
+            _gridArray = new T[width, height];
+            Width = width;
+            Height = height;
+            GridSize = new Vector2Int(width, height);
+            activeCells = new bool[width, height];
+            
+            for (int i = 0; i < Width * Height; i++)
+            {
+                var coordinate = CoordinateUtils.ToCoordinate(i, Width);
+                var x = coordinate.x;
+                var y = coordinate.y;
+                
+                SetInternal(coordinate, value[x, y], false);
+                var gridObject = GetInternal(coordinate);
+                if (gridObject == null) continue;
+                
+                activeCells[x, y] = true;
+                OnGridObjectInitialized?.Invoke(gridObject);
+            }
+            
+            OnInitialize();
+            OnModelInitialized?.Invoke();
             return this;
         }
-        public void SetData(Vector2Int pos, T value) => SetInternal(pos, value);
-        private T GetInternal(Vector2Int pos) => _gridArray[pos.x, pos.y];
-        private void SetInternal(Vector2Int pos, T value) => _gridArray[pos.x, pos.y] = value;
 
+        protected abstract void OnInitialize();
+        
         public T GetGridObject(Vector2Int pos)
         {
             if (!IsInRange(pos)) return null;
@@ -142,6 +163,12 @@ namespace Core.Models
         }
         
         public bool IsInRange(Vector2Int pos) => pos is { x: >= 0, y: >= 0 } && pos.x < Width && pos.y < Height;
+        private T GetInternal(Vector2Int pos) => _gridArray[pos.x, pos.y];
+        private void SetInternal(Vector2Int pos, T value, bool raiseEvent = true)
+        {
+            _gridArray[pos.x, pos.y] = value;
+            if (raiseEvent) OnUpdateCellData?.Invoke(value);
+        }
     }
     
     public enum Direction2D

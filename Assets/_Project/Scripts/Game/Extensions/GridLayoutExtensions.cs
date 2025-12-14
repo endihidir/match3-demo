@@ -26,7 +26,7 @@ namespace Core.Extensions
             return cellSize;
         }
         
-        public static Vector3 GridToWorld(this in GridLayout layout, Vector2Int gridSize, Camera cam, Vector2Int cellCoordinate)
+        public static Vector3 GridToWorld(this in GridLayout layout, Vector2Int gridSize, Vector2Int cellCoordinate, Camera cam)
         {
             if (!cam) return Vector3.zero;
 
@@ -45,7 +45,7 @@ namespace Core.Extensions
             return new Vector3(x, y, 0f);
         }
 
-        public static Vector2Int WorldToGrid(this in GridLayout layout, Vector2Int gridSize, Camera cam, Vector3 worldPos, bool clamp = true)
+        public static Vector2Int WorldToGrid(this in GridLayout layout, Vector2Int gridSize, Vector3 worldPos, Camera cam, bool clamp = true)
         {
             if (!cam) return new Vector2Int(-1, -1);
 

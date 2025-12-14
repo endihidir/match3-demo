@@ -16,13 +16,13 @@ namespace Core.Extensions
 
             Gizmos.color = model.GizmosColor;
 
-            var gridSize = model.Size;
+            var gridSize = model.GridSize;
 
             for (int i = 0; i < model.Width * model.Height; i++)
             {
                 var coordinate = CoordinateUtils.ToCoordinate(i, model.Width);
 
-                var center = layout.GridToWorld(gridSize, cam, coordinate);
+                var center = layout.GridToWorld(gridSize, coordinate, cam);
 
                 var half = layout.cellSize * 0.5f;
 
