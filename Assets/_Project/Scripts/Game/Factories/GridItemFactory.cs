@@ -1,6 +1,5 @@
 using Core.Config;
 using Core.Configs;
-using Core.Level;
 using Core.Pool;
 using UnityEngine;
 
@@ -8,7 +7,7 @@ namespace Core.Item.Factories
 {
     public interface IGridItemFactory
     {
-        GridItemObject GetItem(GridObjectTypeData typeData, Vector2Int coordinate);
+        GridItemObject GetItem(GridObjectTypeData gridObjectTypeData, Vector2Int coordinate);
         GridItemObject GetItem(GridItemKind itemKind, int typeId, Vector2Int coordinate) => GetItem(new GridObjectTypeData(itemKind, typeId), coordinate);
         GridItemObject GetItem(ItemType type, Vector2Int gridPos) => GetItem(GridItemKind.Regular, (int)type, gridPos);
         GridItemObject GetItem(BoosterType type, Vector2Int gridPos) => GetItem(GridItemKind.Booster, (int)type, gridPos);
@@ -33,7 +32,7 @@ namespace Core.Item.Factories
             _itemVisualConfig = gameConfigContainer.ItemConfigContainer;
         }
         
-        public GridItemObject GetItem(GridObjectTypeData typeData, Vector2Int coordinate)
+        public GridItemObject GetItem(GridObjectTypeData gridObjectTypeData, Vector2Int coordinate)
         {
             var itemObject = _objectPoolService.GetObject<GridItemObject>();
             
@@ -42,12 +41,12 @@ namespace Core.Item.Factories
             var animationData = new ItemAnimationData
             {
                 itemObjectReader = itemObject,
-                gridObjectType = typeData
+                gridObjectType = gridObjectTypeData
             };
             
             var animation = _itemAnimationFactory.Get(animationData);
             
-            itemObject.Initialize(typeData.gridItemKind, typeData.typeId, coordinate)
+            itemObject.Initialize(gridObjectTypeData, coordinate)
                       .ApplyData(_itemVisualConfig)
                       .BindAnimation(animation);
    

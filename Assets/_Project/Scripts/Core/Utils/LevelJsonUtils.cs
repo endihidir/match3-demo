@@ -102,32 +102,14 @@ namespace Core.Utils
             switch (decodedEnum)
             {
                 case GridItemKind itemKind:
-                {
-                    return new GridObjectTypeData
-                    {
-                        gridItemKind = GridItemKind.None,
-                        typeId = -1
-                    };
-                }
+                    return new GridObjectTypeData(GridItemKind.None, -1);
                 case ItemType itemType:
-                    return new GridObjectTypeData
-                    {
-                        gridItemKind = GridItemKind.Regular,
-                        typeId = (int)itemType
-                    };
+                    return new GridObjectTypeData(GridItemKind.Regular, (int)itemType);
                 case BoosterType boosterType:
-                    return new GridObjectTypeData
-                    {
-                        gridItemKind = GridItemKind.Booster,
-                        typeId = (int)boosterType
-                    };
+                    return new GridObjectTypeData(GridItemKind.Booster, (int)boosterType);
                 case ObstacleType obstacleType:
                     IncrementObstacleCount(obstacleType, ref counts);
-                    return new GridObjectTypeData
-                    {
-                        gridItemKind = GridItemKind.Obstacle,
-                        typeId = (int)obstacleType
-                    };
+                    return new GridObjectTypeData(GridItemKind.Obstacle, (int)obstacleType);
                 default:
                     return CreateRandomItemCell();
             }
@@ -152,12 +134,7 @@ namespace Core.Utils
         private static GridObjectTypeData CreateRandomItemCell()
         {
             var randomItem = GetRandomEnumValue<ItemType>();
-
-            return new GridObjectTypeData
-            {
-                gridItemKind = GridItemKind.Regular,
-                typeId = (int)randomItem
-            };
+            return new GridObjectTypeData(GridItemKind.Booster, (int)randomItem);
         }
 
         private static T GetRandomEnumValue<T>() where T : Enum

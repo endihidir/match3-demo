@@ -1,6 +1,5 @@
 using Core.Config;
 using Core.Configs;
-using Core.Level;
 using Core.Pool;
 
 namespace Core.Item.Factories
@@ -44,7 +43,7 @@ namespace Core.Item.Factories
 
         private ItemAnimationConfig GetConfig(GridObjectTypeData gridObjectTypeData)
         {
-            var animationConfig = _itemConfigContainer.GetAnimationConfig(gridObjectTypeData.gridItemKind, gridObjectTypeData.typeId);
+            var animationConfig = _itemConfigContainer.GetAnimationConfig(gridObjectTypeData);
             return animationConfig ? animationConfig : _itemConfigContainer.DefaultAnimationConfigs;
         }
     }

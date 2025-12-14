@@ -23,34 +23,34 @@ namespace Core.Config
             return null;
         }
         
-        public Sprite GetSprite(GridItemKind kind, int typeId) => kind switch
+        public Sprite GetSprite(GridObjectTypeData typeData) => typeData.ItemKind switch
         {
-            GridItemKind.Regular => GetConfig<ItemConfig>().GetSprite((ItemType)typeId),
-            GridItemKind.Booster => GetConfig<BoosterItemConfig>().GetSprite((BoosterType)typeId),
-            GridItemKind.Obstacle => GetConfig<ObstacleItemConfig>().GetSprite((ObstacleType)typeId),
+            GridItemKind.Regular => GetConfig<ItemConfig>().GetSprite((ItemType)typeData.TypeId),
+            GridItemKind.Booster => GetConfig<BoosterItemConfig>().GetSprite((BoosterType)typeData.TypeId),
+            GridItemKind.Obstacle => GetConfig<ObstacleItemConfig>().GetSprite((ObstacleType)typeData.TypeId),
             _ => null
         };
 
-        public float GetSizeMultiplier(GridItemKind kind, int typeId) => kind switch
+        public float GetSizeMultiplier(GridObjectTypeData typeData) => typeData.ItemKind switch
         {
-            GridItemKind.Regular => GetConfig<ItemConfig>().GetSizeMultiplier((ItemType)typeId),
-            GridItemKind.Booster => GetConfig<BoosterItemConfig>().GetSizeMultiplier((BoosterType)typeId),
-            GridItemKind.Obstacle => GetConfig<ObstacleItemConfig>().GetSizeMultiplier((ObstacleType)typeId),
+            GridItemKind.Regular => GetConfig<ItemConfig>().GetSizeMultiplier((ItemType)typeData.TypeId),
+            GridItemKind.Booster => GetConfig<BoosterItemConfig>().GetSizeMultiplier((BoosterType)typeData.TypeId),
+            GridItemKind.Obstacle => GetConfig<ObstacleItemConfig>().GetSizeMultiplier((ObstacleType)typeData.TypeId),
             _ => 1f
         };
 
-        public ItemAnimationConfig GetAnimationConfig(GridItemKind kind, int typeId) => kind switch
+        public ItemAnimationConfig GetAnimationConfig(GridObjectTypeData typeData) => typeData.ItemKind switch
         {
-            GridItemKind.Regular => GetConfig<ItemConfig>().GetAnimationConfig((ItemType)typeId),
-            GridItemKind.Booster => GetConfig<BoosterItemConfig>().GetAnimationConfig((BoosterType)typeId),
-            GridItemKind.Obstacle => GetConfig<ObstacleItemConfig>().GetAnimationConfig((ObstacleType)typeId),
+            GridItemKind.Regular => GetConfig<ItemConfig>().GetAnimationConfig((ItemType)typeData.TypeId),
+            GridItemKind.Booster => GetConfig<BoosterItemConfig>().GetAnimationConfig((BoosterType)typeData.TypeId),
+            GridItemKind.Obstacle => GetConfig<ObstacleItemConfig>().GetAnimationConfig((ObstacleType)typeData.TypeId),
             _ => null
         };
     }
     
     public interface IItemVisualConfig
     {
-        Sprite GetSprite(GridItemKind kind, int typeId);
-        float GetSizeMultiplier(GridItemKind kind, int typeId);
+        Sprite GetSprite(GridObjectTypeData typeData);
+        float GetSizeMultiplier(GridObjectTypeData typeData);
     }
 }
