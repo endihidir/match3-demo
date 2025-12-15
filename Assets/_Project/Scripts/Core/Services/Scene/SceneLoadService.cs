@@ -13,20 +13,18 @@ using VContainer.Unity;
 
 namespace Core.SceneService
 {
-    public interface ISceneLoadEvents
+    public interface ISceneLoadContext
     {
-        event Action<bool> OnBeforeTransition;
+        event Action OnLoadStart;
         event Action OnScenesUnload; 
+        event Action OnScenesLoad; 
+        event Action OnScenesActivate; 
+        event Func<UniTask>  OnTransitionOut; 
+        event Action OnLoadComplete;
         ProgressHandler Progress { get; }
-        event Action OnBeforeScenesActivate; 
-        event Func<UniTask>  OnBeforeTransitionOut; 
-        event Action OnTransitionComplete;
-    }
-
-    public interface ISceneLoadData
-    {
         SceneGroupType CurrentSceneGroupType { get; }
         float ProgressSpeed { get; }
+        bool IsTransitionViewActivated { get; }
     }
     
     public interface ISceneLoadService
@@ -37,18 +35,20 @@ namespace Core.SceneService
         UniTask LoadSceneGroupAsync(SceneGroupType groupType, bool useTransitionView = false, bool reloadDupScenes = false);
     }
 
-    public class SceneLoadService : ISceneLoadService, ISceneLoadEvents, ISceneLoadData, ITickable
+    public class SceneLoadService : ISceneLoadService, ISceneLoadContext, ITickable
     {
         private readonly SceneLoadServiceConfig _sceneLoadConfig;
         private readonly AsyncOperationHandleGroup _handleGroup;
         private readonly AsyncOperationGroup _operationGroup;
         private readonly string _firstSceneName;
-        public event Action<bool> OnBeforeTransition;
+        public event Action OnLoadStart;
         public event Action OnScenesUnload;
-        public event Action OnBeforeScenesActivate;
-        public event Func<UniTask> OnBeforeTransitionOut;
-        public event Action OnTransitionComplete;
+        public event Action OnScenesLoad;
+        public event Action OnScenesActivate;
+        public event Func<UniTask> OnTransitionOut;
+        public event Action OnLoadComplete;
         public SceneGroupType CurrentSceneGroupType { get; private set; }
+        public bool IsTransitionViewActivated { get; private set; }
         public ProgressHandler Progress { get; }
         public float ProgressSpeed { get; }
         private string ActiveSceneName => SceneManager.GetActiveScene().name;
@@ -86,8 +86,10 @@ namespace Core.SceneService
 
         public async UniTask LoadSceneGroupAsync(SceneGroupType groupType, bool useTransitionView = false, bool reloadDupScenes = false)
         {
-            OnBeforeTransition?.Invoke(useTransitionView);
-
+            IsTransitionViewActivated = useTransitionView;
+            
+            OnLoadStart?.Invoke();
+            
             var sceneCount = SceneManager.sceneCount;
           
             var loadedScenes = new List<string>();
@@ -132,21 +134,23 @@ namespace Core.SceneService
                 await UniTask.Delay(100);
             }
             
-            OnBeforeScenesActivate?.Invoke();
+            OnScenesLoad?.Invoke();
             
             if (_sceneLoadConfig.TryGetActiveSceneBy(sceneId, out var activeScene) && activeScene.IsValid())
             {
                 SceneManager.SetActiveScene(activeScene);
             }
+            
+            OnScenesActivate?.Invoke();
 
             Progress?.Report(1f);
             
-            if (OnBeforeTransitionOut != null)
+            if (IsTransitionViewActivated && OnTransitionOut != null)
             {
-                await OnBeforeTransitionOut.Invoke();
+                await OnTransitionOut.Invoke();
             }
             
-            OnTransitionComplete?.Invoke();
+            OnLoadComplete?.Invoke();
             
             CurrentSceneGroupType = groupType;
         }

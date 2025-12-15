@@ -5,6 +5,10 @@ Shader "Custom/MaskedURP_3D"
         _BaseColor ("Color", Color) = (1,1,1,1)
         _MainTex ("Texture", 2D) = "white" {}
         [Toggle] _ZWrite ("ZWrite", Float) = 0
+
+        // 3 = Equal, 8 = Always (Unity CompareFunction enum)
+        [Enum(Equal,3, Always,8)] _StencilComp ("Stencil Comp", Float) = 3
+        _StencilRef ("Stencil Ref", Float) = 1
     }
 
     SubShader
@@ -20,18 +24,17 @@ Shader "Custom/MaskedURP_3D"
         {
             Name "Masked3D"
             Tags { "LightMode"="SRPDefaultUnlit" }
-            
+
             Stencil
             {
-                Ref 1
-                Comp Equal
+                Ref [_StencilRef]
+                Comp [_StencilComp]
                 Pass Keep
             }
 
             Cull Off
             ZWrite [_ZWrite]
             ZTest LEqual
-
             Blend SrcAlpha OneMinusSrcAlpha
 
             HLSLPROGRAM
@@ -66,7 +69,7 @@ Shader "Custom/MaskedURP_3D"
                 Varyings OUT;
                 OUT.positionHCS = TransformObjectToHClip(IN.positionOS.xyz);
                 OUT.uv = IN.uv;
-                OUT.color = IN.color; // vertex color
+                OUT.color = IN.color;
                 return OUT;
             }
 

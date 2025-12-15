@@ -1,0 +1,11 @@
+namespace Core.Item
+{
+    public enum ItemType
+    {
+        None = 0,
+        Red = 1,
+        Blue = 2,
+        Green = 3,
+        Yellow = 4
+    }
+}

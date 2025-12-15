@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3523fac44e14a08a2943003d725ee4a, type: 3}
+  m_Name: BoosterConfig
+  m_EditorClassIdentifier: 
+  <Configs>k__BackingField:
+    _serializedList:
+    - Key: 1
+      Value: {fileID: 11400000, guid: 6d91b16f90346d144abb630688e324cd, type: 2}
+    - Key: 2
+      Value: {fileID: 11400000, guid: 630a673feab73ce48a07c7c51562f2a5, type: 2}
+    - Key: 3
+      Value: {fileID: 11400000, guid: 03dab0afef9b1334292f34018b1cd44a, type: 2}

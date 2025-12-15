@@ -19,12 +19,12 @@ namespace Core.SaveSystem
     }
     public class DataPersistenceService : IDataPersistenceService
     {
-        private const string DIRECTORY_NAME = "JsonData";
+        private const string DIRECTORY_NAME = "GameData";
 
 #if UNITY_EDITOR
-        private static string DirectoryPath => $"{Application.dataPath}/{DIRECTORY_NAME}";
+        private static string DirectoryPath => $"{Application.dataPath}/{DIRECTORY_NAME}[EditorOnly]";
 #else
-        private static string DirectoryPath => $"{Application.persistentDataPath}/{DirectoryName}";
+        private static string DirectoryPath => $"{Application.persistentDataPath}/{DIRECTORY_NAME}";
 #endif
         
         public void Initialize() { }
@@ -40,8 +40,7 @@ namespace Core.SaveSystem
             File.WriteAllText(filePath, jsonData);
 
 #if UNITY_EDITOR
-            if(!Application.isPlaying)
-                AssetDatabase.Refresh();
+            AssetDatabase.Refresh();
 #endif
         }
 
@@ -107,8 +106,7 @@ namespace Core.SaveSystem
             }
             
 #if UNITY_EDITOR
-            if(!Application.isPlaying)
-                AssetDatabase.Refresh();
+            AssetDatabase.Refresh();
 #endif
         }
         

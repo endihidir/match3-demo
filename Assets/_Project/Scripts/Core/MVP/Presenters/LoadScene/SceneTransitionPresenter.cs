@@ -14,13 +14,13 @@ namespace Core.Presenters
     }
     public class SceneTransitionPresenter : ISceneTransitionPresenter, ITickable, IDisposable
     {
-        private readonly ISceneLoadEvents _sceneLoadEvents;
+        private readonly ISceneLoadContext _sceneLoadContext;
         private readonly ISceneTransitionModel _transitionModel;
         private ISceneTransitionView _transitionView;
         private bool _isTransitionViewEnabled = false;
-        public SceneTransitionPresenter(ISceneLoadEvents sceneLoadEvents, ISceneTransitionModel sceneTransitionTransitionModel)
+        public SceneTransitionPresenter(ISceneLoadContext sceneLoadContext, ISceneTransitionModel sceneTransitionTransitionModel)
         {
-            _sceneLoadEvents = sceneLoadEvents;
+            _sceneLoadContext = sceneLoadContext;
             _transitionModel = sceneTransitionTransitionModel;
         }
 
@@ -28,9 +28,9 @@ namespace Core.Presenters
         {
             _transitionView = sceneTransitionView;
             
-            _sceneLoadEvents.OnBeforeTransition += OnBeforeTransition;
-            _sceneLoadEvents.Progress.Progressed += OnTransitionProgressed;
-            _sceneLoadEvents.OnBeforeTransitionOut += OnBeforeTransitionOut;
+            _sceneLoadContext.OnLoadStart += OnBeforeTransition;
+            _sceneLoadContext.Progress.Progressed += OnTransitionProgressed;
+            _sceneLoadContext.OnTransitionOut += OnBeforeTransitionOut;
             
             _transitionView.SetLabelText("Loading...");
             _transitionView.DisableAsync(0f, .25f).Forget();
@@ -50,10 +50,10 @@ namespace Core.Presenters
             _transitionView.SetPercentageText(percentage.ToString("0.0") + "%");
         }
         
-        private void OnBeforeTransition(bool useTransitionView)
+        private void OnBeforeTransition()
         {
-            _isTransitionViewEnabled = useTransitionView;
-   
+            _isTransitionViewEnabled = _sceneLoadContext.IsTransitionViewActivated;
+            
             if (!_isTransitionViewEnabled) return;
 
             _transitionModel.ResetProgress();
@@ -80,9 +80,9 @@ namespace Core.Presenters
         
         public void Dispose()
         {
-            _sceneLoadEvents.OnBeforeTransition -= OnBeforeTransition;
-            _sceneLoadEvents.Progress.Progressed -= OnTransitionProgressed;
-            _sceneLoadEvents.OnBeforeTransitionOut -= OnBeforeTransitionOut;
+            _sceneLoadContext.OnLoadStart -= OnBeforeTransition;
+            _sceneLoadContext.Progress.Progressed -= OnTransitionProgressed;
+            _sceneLoadContext.OnTransitionOut -= OnBeforeTransitionOut;
         }
     }
 }
