@@ -18,11 +18,17 @@ namespace Core.Configs
         [ShowIf(nameof(IsAddressable))]
         public string addressablesLabel;
 
+        [Header("Initial Board Randomization")]
+        [Tooltip("Prevents automatic matches on level start by re-rolling only randomly generated cells.")]
         public bool preventInitialMatches;
+
+        [Tooltip("Uses a deterministic random seed so the same level always starts with the same random layout.")]
         public bool useSeededPattern;
+
+        [Tooltip("Optional seed override. Set to 0 to use level-based seed.")]
         public int seedOverride = 0;
         
-        public string GetResourcePath(int level) => resourcesFolder + level.ToString(fileNameFormat);
+        public string GetResourcePath(int level) => resourcesFolder + "/" + level.ToString(fileNameFormat);
         private bool IsAddressable => sourceType == LevelSourceType.Addressables;
         private bool IsResources => sourceType == LevelSourceType.Resources;
     }
