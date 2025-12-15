@@ -16,3 +16,6 @@ MonoBehaviour:
   resourcesFolder: Levels
   fileNameFormat: level_{0}
   addressablesLabel: 
+  preventInitialMatches: 1
+  useSeededPattern: 1
+  seedOverride: 0
