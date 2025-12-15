@@ -17,6 +17,10 @@ namespace Core.Configs
         [Header("Addressables Settings")]
         [ShowIf(nameof(IsAddressable))]
         public string addressablesLabel;
+
+        public bool preventInitialMatches;
+        public bool useSeededPattern;
+        public int seedOverride = 0;
         
         public string GetResourcePath(int level) => resourcesFolder + level.ToString(fileNameFormat);
         private bool IsAddressable => sourceType == LevelSourceType.Addressables;

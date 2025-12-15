@@ -61,9 +61,13 @@ namespace Core.Level
             
             var list = new List<LevelDefinition>(assets.Length);
 
+            var preventInitialMatches = _levelDataServiceConfig.preventInitialMatches;
+            var useSeededPattern  = _levelDataServiceConfig.useSeededPattern;
+            var seedOverride = _levelDataServiceConfig.seedOverride;
+            
             foreach (var asset in assets)
             {
-                var levelDefinition = LevelJsonUtils.ParseToLevelDefinition(asset);
+                var levelDefinition = LevelJsonRuntimeUtils.ParseToLevelDefinition(asset, preventInitialMatches, useSeededPattern, seedOverride);
                 list.Add(levelDefinition);
             }
             
@@ -76,8 +80,11 @@ namespace Core.Level
         {
             try
             {
+                var preventInitialMatches = _levelDataServiceConfig.preventInitialMatches;
+                var useSeededPattern  = _levelDataServiceConfig.useSeededPattern;
+                var seedOverride = _levelDataServiceConfig.seedOverride;
                 var jsonFile = Resources.Load<TextAsset>(_levelDataServiceConfig.GetResourcePath(level));
-                return LevelJsonUtils.ParseToLevelDefinition(jsonFile);
+                return LevelJsonRuntimeUtils.ParseToLevelDefinition(jsonFile, preventInitialMatches, useSeededPattern, seedOverride);
             }
             catch (Exception e)
             {
