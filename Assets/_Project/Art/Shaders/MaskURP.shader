@@ -4,6 +4,7 @@ Shader "Custom/MaskURP_3D"
     {
         _BaseColor ("Color", Color) = (1,1,1,1)
         _MainTex ("Texture", 2D) = "white" {}
+        _StencilRef ("Stencil Ref", Float) = 1
     }
 
     SubShader
@@ -19,10 +20,10 @@ Shader "Custom/MaskURP_3D"
         {
             Name "BoardMask3D"
             Tags { "LightMode"="SRPDefaultUnlit" }
-            
+
             Stencil
             {
-                Ref 1
+                Ref [_StencilRef]
                 Comp Always
                 Pass Replace
             }

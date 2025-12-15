@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85d1cd021bdc484e81ee8f2723d6df97, type: 3}
+  m_Name: ItemObjectPool
+  m_EditorClassIdentifier: 
+  <PoolSize>k__BackingField: 24
+  poolObject: {fileID: 530523186251299296, guid: 5d7fc2ae2e8e3d64fb8d408070049a58,
+    type: 3}
+  isLazy: 1
+  isUnique: 0

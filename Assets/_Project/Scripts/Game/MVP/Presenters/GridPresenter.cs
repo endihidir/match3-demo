@@ -2,6 +2,7 @@ using System;
 using Core.Models;
 using Core.Utils;
 using Core.Views;
+using UnityEngine;
 using VContainer.Unity;
 
 namespace Core.Presenters
@@ -23,7 +24,9 @@ namespace Core.Presenters
             _gridView.OnViewInitialized += OnViewInit;
         }
         
-        private void OnViewInit()
+        private void OnViewInit() => PlaceGridItems();
+
+        private void PlaceGridItems()
         {
             for (int i = 0; i < _gridModel.Width * _gridModel.Height; i++)
             {
@@ -32,7 +35,7 @@ namespace Core.Presenters
                 if(item == null) continue;
                 var worldPos = _gridView.GridToWorld(_gridModel.GridSize, item.Coordinate);
                 item.SetPosition(worldPos);
-                item.SetCellSize(_gridView.Layout.cellSize);
+                item.SetCellSize(Vector2.one * _gridView.Layout.cellSize);
                 item.SetParent(_gridView.GridObjectsParent);
             }
         }

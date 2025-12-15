@@ -7,14 +7,15 @@ namespace Core.Item.Factories
 {
     public interface IGridItemFactory
     {
-        GridItemObject GetItem(GridObjectTypeData gridObjectTypeData, Vector2Int coordinate);
-        GridItemObject GetItem(GridItemKind itemKind, int typeId, Vector2Int coordinate) => GetItem(new GridObjectTypeData(itemKind, typeId), coordinate);
-        GridItemObject GetItem(ItemType type, Vector2Int gridPos) => GetItem(GridItemKind.Regular, (int)type, gridPos);
-        GridItemObject GetItem(BoosterType type, Vector2Int gridPos) => GetItem(GridItemKind.Booster, (int)type, gridPos);
-        GridItemObject GetItem(ObstacleType type, Vector2Int gridPos) => GetItem(GridItemKind.Obstacle, (int)type, gridPos);
-        void ReleaseItem(GridItemObject item);
+        T GetItem<T>(GridObjectTypeData gridObjectTypeData, Vector2Int coordinate) where T : BaseItemObject;
+        T GetItem<T>(GridItemKind itemKind, int typeId, Vector2Int coordinate) where T : BaseItemObject => GetItem<T>(new GridObjectTypeData(itemKind, typeId), coordinate);
+        BaseItemObject GetItem(ItemType type, Vector2Int gridPos) => GetItem<ItemObject>(GridItemKind.Regular, (int)type, gridPos);
+        BaseItemObject GetItem(BoosterType type, Vector2Int gridPos) => GetItem<BoosterObject>(GridItemKind.Booster, (int)type, gridPos);
+        BaseItemObject GetItem(ObstacleType type, Vector2Int gridPos) => GetItem<ObstacleObject>(GridItemKind.Obstacle, (int)type, gridPos);
+        void ReleaseItem(BaseItemObject item);
         void ReleaseItem(Transform item);
         void ReleaseItem(GameObject item) => ReleaseItem(item.transform);
+        void ReleaseAllItemsOfType<T>() where T : BaseItemObject;
         void ReleaseAllItems();
         void RemoveItemPool();
     }
@@ -22,40 +23,30 @@ namespace Core.Item.Factories
     public class GridItemFactory : IGridItemFactory
     {
         private readonly IObjectPoolService _objectPoolService;
-        private readonly IItemAnimationFactory _itemAnimationFactory;
-        private readonly IItemVisualConfig _itemVisualConfig;
+        private readonly ItemConfigContainer _itemConfigContainer;
 
-        public GridItemFactory(IObjectPoolService objectPoolService, IItemAnimationFactory itemAnimationFactory, GameConfigContainer gameConfigContainer)
+        public GridItemFactory(IObjectPoolService objectPoolService, GameConfigContainer gameConfigContainer)
         {
             _objectPoolService = objectPoolService;
-            _itemAnimationFactory = itemAnimationFactory;
-            _itemVisualConfig = gameConfigContainer.ItemConfigContainer;
+            _itemConfigContainer = gameConfigContainer.ItemConfigContainer;
         }
         
-        public GridItemObject GetItem(GridObjectTypeData gridObjectTypeData, Vector2Int coordinate)
+        public T GetItem<T>(GridObjectTypeData gridObjectTypeData, Vector2Int coordinate) where T : BaseItemObject
         {
-            var itemObject = _objectPoolService.GetObject<GridItemObject>();
+            var itemObject = _objectPoolService.GetObject<T>();
             
             itemObject.ResetState();
-            
-            var animationData = new ItemAnimationData
-            {
-                itemObjectReader = itemObject,
-                gridObjectType = gridObjectTypeData
-            };
-            
-            var animation = _itemAnimationFactory.Get(animationData);
-            
+
             itemObject.Initialize(gridObjectTypeData, coordinate)
-                      .ApplyData(_itemVisualConfig)
-                      .BindAnimation(animation);
+                      .ApplyData(_itemConfigContainer.GetConfig(gridObjectTypeData));
    
             return itemObject;
         }
 
-        public void ReleaseItem(GridItemObject item) => _objectPoolService.ReturnObject(item);
+        public void ReleaseItem(BaseItemObject item) => _objectPoolService.ReturnObject(item);
         public void ReleaseItem(Transform item) => _objectPoolService.ReturnObject(item);
-        public void ReleaseAllItems() => _objectPoolService.ReturnAllObjectsOfType<GridItemObject>();
-        public void RemoveItemPool() => _objectPoolService.RemovePool<GridItemObject>();
+        public void ReleaseAllItemsOfType<T>() where T : BaseItemObject => _objectPoolService.ReturnAllObjectsOfType<T>();
+        public void ReleaseAllItems() => _objectPoolService.ReturnAllObjectsOfType<BaseItemObject>();
+        public void RemoveItemPool() => _objectPoolService.RemovePool<BaseItemObject>();
     }
 }

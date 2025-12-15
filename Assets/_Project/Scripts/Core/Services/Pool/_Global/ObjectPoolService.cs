@@ -82,9 +82,14 @@ namespace Core.Pool
                 return;
             }
 
-            if (!_idPoolHandlers.TryGetValue(pooledObject.PoolKey, out var objectPoolHandler))
+            if (pooledObject == null) return;
+
+            var idKey = pooledObject.PoolKey;
+            var typeKey = pooledObject.GetType();
+            
+            if (!_idPoolHandlers.TryGetValue(idKey, out var objectPoolHandler))
             {
-                if (!_typePoolHandlers.TryGetValue(pooledObject.GetType(), out objectPoolHandler))
+                if (!_typePoolHandlers.TryGetValue(typeKey, out objectPoolHandler))
                 {
                     EditorLogger.LogError($"[{GetType().Name}] Return failed: no handler for '{objectRef.name}' ({objectRef.GetType().Name}).");
                     return;
@@ -220,8 +225,9 @@ namespace Core.Pool
             {
                 keyValuePair.Value?.Dispose();
             }
-           
-            _typePoolHandlers = null;
+            
+            _idPoolHandlers?.Clear();
+            _typePoolHandlers?.Clear();
         }
     }
 }

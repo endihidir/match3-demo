@@ -67,7 +67,7 @@ namespace Editor
 
             if (!_config)
             {
-                EditorGUILayout.HelpBox("LevelDataServiceConfig is not assigned. I don't know where to save JSON files.", MessageType.Warning);
+                EditorGUILayout.HelpBox("LevelDataServiceConfig is not assigned. I will use LevelsRoot asset location (if it exists) to save JSON files.", MessageType.Info);
             }
             else if (_config.sourceType != LevelSourceType.Resources)
             {
@@ -140,9 +140,9 @@ namespace Editor
 
         private void DrawCreateOrOverrideButton()
         {
-            if (_config == null || _config.sourceType != LevelSourceType.Resources)
+            if (_config != null && _config.sourceType != LevelSourceType.Resources)
             {
-                EditorGUILayout.HelpBox("Assign a LevelDataServiceConfig with sourceType = Resources before creating or overriding a level.", MessageType.Warning);
+                EditorGUILayout.HelpBox("Currently only LevelSourceType.Resources is supported. (We can add Addressables support later.)", MessageType.Info);
                 return;
             }
 
@@ -186,8 +186,8 @@ namespace Editor
 
         private void InitializeGrid()
         {
-            _config = Resources.Load<LevelDataServiceConfig>("Game/Configs/LevelDataServiceConfig");
-            
+            _config = Resources.Load<LevelDataServiceConfig>("Configs/LevelDataServiceConfig");
+
             _gridObjects = new JsonGridObjectType[_gridHeight, _gridWidth];
 
             for (int y = 0; y < _gridHeight; y++)
@@ -242,12 +242,6 @@ namespace Editor
 
         private void LoadLevelFromFile()
         {
-            if (!_config)
-            {
-                EditorLogger.LogError("LevelDataServiceConfig is not assigned.");
-                return;
-            }
-
             var path = GetLevelFilePath(_levelNumber);
 
             if (!File.Exists(path))
@@ -268,7 +262,7 @@ namespace Editor
             _gridWidth = levelJson.grid_width;
             _gridHeight = levelJson.grid_height;
             _moveCount = levelJson.move_count;
-            
+
             _gridObjects = LevelJsonUtils.ToEditorGrid(levelJson);
 
             EditorLogger.Log($"Level {_levelNumber} loaded from {path}");
@@ -277,10 +271,6 @@ namespace Editor
         private void SaveOrOverrideLevel()
         {
             var path = GetLevelFilePath(_levelNumber);
-            EnsureFolderExists(path);
-            
-            /*var levelJson = LevelJsonUtility.ConvertToLevelJson(_levelNumber, _gridWidth, _gridHeight, _moveCount, _gridObjects);
-            var json = JsonUtility.ToJson(levelJson, true);*/
 
             var json = LevelJsonUtils.BuildPrettyPrintedJson(_levelNumber, _gridWidth, _gridHeight, _moveCount, _gridObjects);
 
@@ -302,25 +292,62 @@ namespace Editor
 
         private string GetLevelFilePath(int levelNumber)
         {
-            string fileName;
-            var defaultFolder = Path.Combine(Application.dataPath, "_Project/Resources", "Levels");
+            var folderPath = ResolveLevelsFolderForWrite();
+            var fileName = ResolveLevelFileName(levelNumber);
 
-            if (!_config)
+            var fullPath = Path.Combine(folderPath, fileName + ".json");
+            EnsureFolderExists(fullPath);
+
+            return fullPath;
+        }
+
+        private string ResolveLevelFileName(int levelNumber)
+        {
+            var fileNameFormat = (!_config || string.IsNullOrEmpty(_config.fileNameFormat))
+                ? "level_{0:00}"
+                : _config.fileNameFormat;
+
+            return string.Format(fileNameFormat, levelNumber);
+        }
+
+        private string ResolveLevelsFolderForWrite()
+        {
+            var levelsRootPath = TryGetLevelsRootFolderAssetPath();
+            if (!string.IsNullOrEmpty(levelsRootPath))
             {
-                Directory.CreateDirectory(defaultFolder);
+                return levelsRootPath;
+            }
+            
+            if (_config && !string.IsNullOrEmpty(_config.resourcesFolder))
+            {
+                var p = _config.resourcesFolder.Replace("\\", "/");
+                
+                if (!p.StartsWith("Assets/"))
+                {
+                    p = Path.Combine("Assets", p).Replace("\\", "/");
+                }
 
-                fileName = $"level_{levelNumber:00}";
-                return Path.Combine(defaultFolder, fileName + ".json");
+                return p;
             }
 
-            var resourcesFolderName = string.IsNullOrEmpty(_config.resourcesFolder) ? "_Project/Resources/Game/Levels" : _config.resourcesFolder;
+            return Path.Combine("Assets", "_Project", "Resources", "Levels");
+        }
 
-            var fileNameFormat = string.IsNullOrEmpty(_config.fileNameFormat) ? "level_{0:00}" : _config.fileNameFormat;
+        private string TryGetLevelsRootFolderAssetPath()
+        {
+            var guids = AssetDatabase.FindAssets("t:LevelsRoot");
+            if (guids == null || guids.Length == 0)
+            {
+                return null;
+            }
 
-            fileName = string.Format(fileNameFormat, levelNumber);
+            var assetPath = AssetDatabase.GUIDToAssetPath(guids[0]);
+            if (string.IsNullOrEmpty(assetPath))
+            {
+                return null;
+            }
 
-            var folderPath = Path.Combine(Application.dataPath, "_Project/Resources", resourcesFolderName);
-            return Path.Combine(folderPath, fileName + ".json");
+            return Path.GetDirectoryName(assetPath)?.Replace("\\", "/");
         }
 
         private void EnsureFolderExists(string fullPath)
