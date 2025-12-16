@@ -1,5 +1,6 @@
 using System;
 using Core.Models;
+using Core.Utils;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -27,6 +28,7 @@ namespace Core.Services
             _actions.Board.Press.started += OnPressStarted;
             _actions.Board.Press.canceled += OnPressCanceled;
             _actions.Board.Position.performed += OnPositionPerformed;
+            EditorLogger.Log("Input Service Enabled");
         }
 
         private void OnPositionPerformed(InputAction.CallbackContext ctx)
@@ -69,6 +71,7 @@ namespace Core.Services
             _actions.Board.Press.canceled -= OnPressCanceled;
             _actions.Board.Position.performed -= OnPositionPerformed;
             _actions.Disable();
+            EditorLogger.Log("Input Service Disabled");
         }
 
         public void Dispose()
