@@ -2,7 +2,9 @@ using System;
 using Core.Models;
 using Core.Utils;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using VContainer.Unity;
 
 namespace Core.Services
 {
@@ -13,7 +15,7 @@ namespace Core.Services
         void Disable();
     }
 
-    public class InputService : IInputService, IDisposable
+    public class InputService : IInputService, ITickable, IDisposable
     {
         private const float SWIPE_THRESHOLD = 30f;
         private readonly InputActions _actions = new();
@@ -21,6 +23,13 @@ namespace Core.Services
 
         private Vector2 _startPos;
         private Vector2 _lastPos;
+
+        private bool _isPointerOverUI;
+
+        public InputService()
+        {
+            Input.multiTouchEnabled = false;
+        }
 
         public void Enable()
         {
@@ -44,8 +53,12 @@ namespace Core.Services
 
         private void OnPressCanceled(InputAction.CallbackContext ctx)
         {
+            if(_isPointerOverUI) return;
+            
             var endPos = _actions.Board.Position.ReadValue<Vector2>();
+            
             var dir = GetSwipeDirection(_startPos, endPos, SWIPE_THRESHOLD);
+            
             OnInput?.Invoke(_startPos, dir);
         }
 
@@ -78,5 +91,20 @@ namespace Core.Services
         {
             Disable();
         }
+        
+        private static bool GetPointerOverUI()
+        {
+            if (!EventSystem.current) return false;
+            if (EventSystem.current.IsPointerOverGameObject()) return true;
+
+            if (Touchscreen.current == null) return false;
+            var touch = Touchscreen.current.primaryTouch;
+            if (!touch.press.isPressed) return false;
+            
+            var touchId = touch.touchId.ReadValue();
+            return EventSystem.current.IsPointerOverGameObject(touchId);
+        }
+
+        public void Tick() => _isPointerOverUI = GetPointerOverUI();
     }
 }
