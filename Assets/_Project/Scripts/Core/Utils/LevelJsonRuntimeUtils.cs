@@ -60,7 +60,7 @@ namespace Core.Utils
 
             for (var index = 0; index < expectedLength; index++)
             {
-                var coordinate = CoordinateUtils.ToCoordinate(index, width);
+                var coordinate = GridIndexUtil.ToCoord(index, width);
                 var col = coordinate.x;
                 var row = coordinate.y;
 

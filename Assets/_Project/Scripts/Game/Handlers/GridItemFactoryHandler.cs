@@ -3,7 +3,6 @@ using Core.Item;
 using Core.Item.Factories;
 using Core.SceneService;
 using Core.Utils;
-using UnityEngine;
 
 namespace Core.Handlers
 {
@@ -33,24 +32,24 @@ namespace Core.Handlers
 
             for (int i = 0; i < width * height; i++)
             {
-                var coordinate = CoordinateUtils.ToCoordinate(i, width);
+                var coordinate = GridIndexUtil.ToCoord(i, width);
                 var x = coordinate.x;
                 var y = coordinate.y;
                 var typeData = gridObjectTypes[x, y];
                 
                 if (typeData is { TypeId: -1 }) continue;
 
-                var item = GetItem(typeData, coordinate);
+                var item = GetItem(typeData);
                 
                 itemObjects[x, y] = item;
             }
         }
 
-        private BaseItemObject GetItem(GridObjectTypeData gridObjectTypeData, Vector2Int coordinate) => gridObjectTypeData.ItemKind switch
+        private BaseItemObject GetItem(GridObjectTypeData gridObjectTypeData) => gridObjectTypeData.ItemKind switch
         {
-            GridItemKind.Regular => _gridItemFactory.GetItem<ItemObject>(gridObjectTypeData, coordinate),
-            GridItemKind.Booster => _gridItemFactory.GetItem<BoosterObject>(gridObjectTypeData, coordinate),
-            GridItemKind.Obstacle => _gridItemFactory.GetItem<ObstacleObject>(gridObjectTypeData, coordinate),
+            GridItemKind.Regular => _gridItemFactory.GetItem<ItemObject>(gridObjectTypeData),
+            GridItemKind.Booster => _gridItemFactory.GetItem<BoosterObject>(gridObjectTypeData),
+            GridItemKind.Obstacle => _gridItemFactory.GetItem<ObstacleObject>(gridObjectTypeData),
             _ => null
         };
         

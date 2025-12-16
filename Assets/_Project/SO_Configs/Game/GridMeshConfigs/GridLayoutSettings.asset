@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 132b5bcdc5214146bb46d93d32f7b7e1, type: 3}
   m_Name: GridLayoutSettings
   m_EditorClassIdentifier: 
-  <MaxCellSize>k__BackingField: 3.5
+  <MaxCellSize>k__BackingField: 3
   <ScreenSidePaddingRatio>k__BackingField: 2
   <CellSpacingRatio>k__BackingField: 0

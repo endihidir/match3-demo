@@ -3,16 +3,11 @@ using Core.Models;
 using Core.Utils;
 using Core.Views;
 using UnityEngine;
-using VContainer.Unity;
+using IInitializable = VContainer.Unity.IInitializable;
 
 namespace Core.Presenters
 {
-    public interface IGridPresenter
-    {
-        
-    }
-
-    public class GridPresenter : IGridPresenter, IInitializable, IDisposable
+    public class GridPresenter : IInitializable, IDisposable
     {
         private readonly IGridModel _gridModel;
         private readonly IGridView _gridView;
@@ -30,12 +25,13 @@ namespace Core.Presenters
         {
             for (int i = 0; i < _gridModel.Width * _gridModel.Height; i++)
             {
-                var coordinate = CoordinateUtils.ToCoordinate(i, _gridModel.Width);
+                var coordinate = GridIndexUtil.ToCoord(i, _gridModel.Width);
                 var item = _gridModel.GetGridObject(coordinate);
-                if(item == null) continue;
-                var worldPos = _gridView.GridToWorld(_gridModel.GridSize, item.Coordinate);
+                if(!item) continue;
+                
+                var worldPos = _gridView.GridToWorld(coordinate);
                 item.SetPosition(worldPos);
-                item.SetCellSize(Vector2.one * _gridView.Layout.cellSize);
+                item.SetCellSize(Vector2.one * _gridView.GetCellSize());
                 item.SetParent(_gridView.GridObjectsParent);
             }
         }

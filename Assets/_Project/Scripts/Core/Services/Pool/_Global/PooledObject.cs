@@ -8,17 +8,22 @@ namespace Core.Pool
         public int PoolKey { get; set; }
         public virtual bool IsActive => gameObject.activeInHierarchy;
 
-        public virtual void Activate(float duration = 0f, float delay = 0f, Action onComplete = null)
+        public void Activate(float duration = 0f, float delay = 0f, Action onComplete = null)
         {
             gameObject.SetActive(true);
             onComplete?.Invoke();
+            OnActivate();
         }
 
-        public virtual void Deactivate(float duration = 0f, float delay = 0f, Action onComplete = null)
+        public void Deactivate(float duration = 0f, float delay = 0f, Action onComplete = null)
         {
             gameObject.SetActive(false);
             onComplete?.Invoke();
+            OnDeactivate();
         }
+        
+        protected virtual void OnActivate(){}
+        protected virtual void OnDeactivate(){}
     }
     
     public interface IPooledObject

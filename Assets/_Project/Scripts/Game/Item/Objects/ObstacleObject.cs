@@ -1,12 +1,14 @@
+using System;
 using Core.Config;
 using NaughtyAttributes;
 using UnityEngine;
 
 namespace Core.Item
 {
-    public class ObstacleObject : BaseItemObject
+    public class ObstacleObject : BaseItemObject, IDamageableItem
     {
         [field: SerializeField, ReadOnly] public ObstacleType ObstacleType { get; private set; }
+        [field: SerializeField, ReadOnly] public int Life { get; private set; }
 
         protected override void OnInitialize(int typeId)
         {
@@ -19,10 +21,27 @@ namespace Core.Item
             
             if (baseItemConfigData is ObstacleConfigData obstacleConfigData)
             {
-                
+                Life = obstacleConfigData.Life;
             }
         }
+        public void TakeDamage(int damage, Action onLifeFinished)
+        {
+            if (Life <= 0) return;
+            Life -= damage;
+            Life = Mathf.Max(0, Life);
+            onLifeFinished?.Invoke();
+        }
+        
+        protected override void OnDeactivate()
+        {
+            base.OnDeactivate();
+            ObstacleType = ObstacleType.None;
+            Life = 0;
+        }
+    }
 
-        public override string ToString() => $"X: {Coordinate.x}, Y: {Coordinate.y}, Type: {ObstacleType}";
+    public interface IDamageableItem
+    {
+        public void TakeDamage(int damage, Action onLifeFinished);
     }
 }

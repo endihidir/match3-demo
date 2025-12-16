@@ -6,5 +6,6 @@ namespace Core.Config
     {
         public Sprite icon;
         public Vector2 spriteSizeMultiplier = Vector2.one;
+        public bool isStationary;
     }
 }

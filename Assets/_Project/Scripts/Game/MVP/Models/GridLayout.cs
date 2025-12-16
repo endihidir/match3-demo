@@ -8,7 +8,7 @@ namespace Core.Grid
     {
         public float cellSize;
         public Vector3 originOffset;
-        public float screenSidePaddingRatio;
-        public float cellSpacingRatio;
+        [HideInInspector] public float screenSidePaddingRatio;
+        [HideInInspector] public float cellSpacingRatio;
     }
 }

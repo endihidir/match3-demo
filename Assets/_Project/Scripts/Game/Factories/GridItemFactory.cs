@@ -7,11 +7,11 @@ namespace Core.Item.Factories
 {
     public interface IGridItemFactory
     {
-        T GetItem<T>(GridObjectTypeData gridObjectTypeData, Vector2Int coordinate) where T : BaseItemObject;
-        T GetItem<T>(GridItemKind itemKind, int typeId, Vector2Int coordinate) where T : BaseItemObject => GetItem<T>(new GridObjectTypeData(itemKind, typeId), coordinate);
-        BaseItemObject GetItem(ItemType type, Vector2Int gridPos) => GetItem<ItemObject>(GridItemKind.Regular, (int)type, gridPos);
-        BaseItemObject GetItem(BoosterType type, Vector2Int gridPos) => GetItem<BoosterObject>(GridItemKind.Booster, (int)type, gridPos);
-        BaseItemObject GetItem(ObstacleType type, Vector2Int gridPos) => GetItem<ObstacleObject>(GridItemKind.Obstacle, (int)type, gridPos);
+        T GetItem<T>(GridObjectTypeData gridObjectTypeData) where T : BaseItemObject;
+        T GetItem<T>(GridItemKind itemKind, int typeId) where T : BaseItemObject => GetItem<T>(new GridObjectTypeData(itemKind, typeId));
+        BaseItemObject GetItem(ItemType type) => GetItem<ItemObject>(GridItemKind.Regular, (int)type);
+        BaseItemObject GetItem(BoosterType type) => GetItem<BoosterObject>(GridItemKind.Booster, (int)type);
+        BaseItemObject GetItem(ObstacleType type) => GetItem<ObstacleObject>(GridItemKind.Obstacle, (int)type);
         void ReleaseItem(BaseItemObject item);
         void ReleaseItem(Transform item);
         void ReleaseItem(GameObject item) => ReleaseItem(item.transform);
@@ -31,15 +31,17 @@ namespace Core.Item.Factories
             _itemConfigContainer = gameConfigContainer.ItemConfigContainer;
         }
         
-        public T GetItem<T>(GridObjectTypeData gridObjectTypeData, Vector2Int coordinate) where T : BaseItemObject
+        public T GetItem<T>(GridObjectTypeData gridObjectTypeData) where T : BaseItemObject
         {
             var itemObject = _objectPoolService.GetObject<T>();
             
             itemObject.ResetState();
 
-            itemObject.Initialize(gridObjectTypeData, coordinate)
-                      .ApplyData(_itemConfigContainer.GetConfig(gridObjectTypeData));
-   
+            var configData = _itemConfigContainer.GetConfigData(gridObjectTypeData);
+            
+            itemObject.Initialize(gridObjectTypeData)
+                      .ApplyData(configData);
+            
             return itemObject;
         }
 

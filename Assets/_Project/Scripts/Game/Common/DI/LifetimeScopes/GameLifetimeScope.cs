@@ -27,7 +27,7 @@ namespace Core.LifetimeScopes
             
             builder.Register<GridModel>(Lifetime.Scoped).As<IGridModel>();
             builder.RegisterComponentInHierarchy<GridView>().As<IGridView>();
-            builder.Register<GridPresenter>(Lifetime.Scoped).As<IGridPresenter, IInitializable>();
+            builder.Register<GridPresenter>(Lifetime.Scoped).As<IInitializable>();
         }
 
         private void Start()

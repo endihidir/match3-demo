@@ -10,8 +10,6 @@ namespace Core.Models
         int Width { get; }
         int Height { get; }
         Vector2Int GridSize { get; }
-        bool DrawGizmos { get; set; }
-        Color GizmosColor { get; set; }
         event Action<T> OnGridObjectInitialized;
         event Action<T> OnUpdateCellData;
         event Action OnModelInitialized;
@@ -32,10 +30,7 @@ namespace Core.Models
         public int Width { get; private set; }
         public int Height { get; private set; }
         public Vector2Int GridSize { get; private set; }
-
-        public bool DrawGizmos { get; set; }
-        public Color GizmosColor { get; set; } = Color.yellow;
-    
+        
         public event Action<T> OnGridObjectInitialized;
         public event Action<T> OnUpdateCellData;
         public event Action OnModelInitialized;
@@ -65,7 +60,7 @@ namespace Core.Models
             
             for (int i = 0; i < Width * Height; i++)
             {
-                var coordinate = CoordinateUtils.ToCoordinate(i, Width);
+                var coordinate = GridIndexUtil.ToCoord(i, Width);
                 var x = coordinate.x;
                 var y = coordinate.y;
                 
