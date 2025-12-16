@@ -58,6 +58,8 @@ namespace Core.Item
         
         public void ResetState()
         {
+            SetPosition(Vector3.zero);
+            ItemAnimation?.Dispose();
             SpriteRenderer.sprite = null;
             CellSize = Vector2.zero;
             CellSizeMultiplier = Vector2.zero;

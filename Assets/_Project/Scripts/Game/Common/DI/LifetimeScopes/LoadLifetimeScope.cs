@@ -1,8 +1,7 @@
-using System;
 using Core.Bootstrapper;
-using Core.Context;
 using Core.Models;
 using Core.Presenters;
+using Core.Views;
 using VContainer;
 using VContainer.Unity;
 
@@ -14,9 +13,9 @@ namespace Core.LifetimeScopes
         {
             builder.RegisterEntryPoint<LoadingBootstrapper>();
             
-            builder.RegisterComponentInHierarchy<LoadingViewContext>().As<ILoadingViewContext>();
             builder.Register<SceneTransitionModel>(Lifetime.Scoped).As<ISceneTransitionModel>();
-            builder.Register<SceneTransitionPresenter>(Lifetime.Scoped).As<ISceneTransitionPresenter, ITickable>();
+            builder.RegisterComponentInHierarchy<SceneTransitionView>().As<ISceneTransitionView>();
+            builder.Register<SceneTransitionPresenter>(Lifetime.Scoped).As<IInitializable, ITickable>();
         }
 
         private void Start() => Build();

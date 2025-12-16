@@ -15,6 +15,7 @@ namespace Core.Models
         event Action OnModelInitialized;
         
         IBaseGridModel<T> Initialize(T[,] value, int width, int height, out bool[,] activeCells);
+        bool TryGetGridObject(Vector2Int pos, out T gridObject);
         T GetGridObject(Vector2Int gridPos);
         void SetGridObject(Vector2Int gridPos, T item);
 
@@ -76,8 +77,19 @@ namespace Core.Models
             OnModelInitialized?.Invoke();
             return this;
         }
-
         protected abstract void OnInitialize();
+
+        public bool TryGetGridObject(Vector2Int pos, out T gridObject)
+        {
+            if (!IsInRange(pos))
+            {
+                gridObject = null;
+                return false;
+            }
+            
+            gridObject = GetInternal(pos);
+            return true;
+        }
         
         public T GetGridObject(Vector2Int pos)
         {

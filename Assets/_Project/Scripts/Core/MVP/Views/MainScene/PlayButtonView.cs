@@ -8,7 +8,7 @@ namespace Core.Views
     public interface IPlayButtonView
     {
         public ButtonClickedEvent ClickedEvent { get; }
-        void SetText(string text);
+        void SetLevelNumber(int levelNumber);
         void EnableButton(bool value);
     }
     public class PlayButtonView : MonoBehaviour, IPlayButtonView
@@ -19,6 +19,6 @@ namespace Core.Views
         public ButtonClickedEvent ClickedEvent => Button.onClick;
         
         public void EnableButton(bool value) => Button.interactable = value;
-        public void SetText(string text) => Label?.SetText(text);
+        public void SetLevelNumber(int levelNumber) => Label?.SetText($"Level {levelNumber}");
     }
 }

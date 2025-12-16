@@ -71,8 +71,8 @@ namespace Core.Level
                 list.Add(levelDefinition);
             }
             
-            list.Sort((a, b) => a.LevelNumber.CompareTo(b.LevelNumber));
-
+            list.Sort(static (a, b) => a.LevelNumber.CompareTo(b.LevelNumber));
+            
             LevelDefinitions = list.ToArray();
         }
         

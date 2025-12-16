@@ -386,51 +386,6 @@ MonoBehaviour:
     TypeName: Core.LifetimeScopes.AppLifetimeScope
   autoRun: 0
   autoInjectGameObjects: []
---- !u!1 &914714659
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 914714660}
-  - component: {fileID: 914714661}
-  m_Layer: 0
-  m_Name: LoadingViewContext
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &914714660
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 914714659}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &914714661
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 914714659}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 49d6935990344907a8b4c1efe13d3b58, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  <SceneTransitionView>k__BackingField: {fileID: 2045105131}
 --- !u!1 &1070107736
 GameObject:
   m_ObjectHideFlags: 0
@@ -1187,5 +1142,4 @@ SceneRoots:
   m_Roots:
   - {fileID: 1393686381}
   - {fileID: 886726367}
-  - {fileID: 914714660}
   - {fileID: 2045105130}

@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 
 namespace Core.Config
@@ -7,5 +8,6 @@ namespace Core.Config
     {
         public float duration = 0.25f;
         public float delay = 0f;
+        public Ease ease = Ease.Linear;
     }
 }

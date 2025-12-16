@@ -4,6 +4,7 @@ using Core.Handlers;
 using Core.Item.Factories;
 using Core.Models;
 using Core.Presenters;
+using Core.Services;
 using Core.Views;
 using UnityEngine;
 using VContainer;
@@ -20,6 +21,7 @@ namespace Core.LifetimeScopes
             builder.RegisterInstance(GameConfigContainer);
             builder.RegisterEntryPoint<GameBootstrapper>();
             
+            builder.Register<InputService>(Lifetime.Scoped).As<IInputService>();
             builder.Register<LevelGoalModel>(Lifetime.Scoped).As<ILevelGoalModel>();
             
             builder.Register<GridItemFactory>(Lifetime.Scoped).As<IGridItemFactory>();

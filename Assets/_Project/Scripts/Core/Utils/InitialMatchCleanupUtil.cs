@@ -13,26 +13,26 @@ namespace Core.Utils
             {
                 found = false;
 
-                for (int y = 0; y < height; y++)
+                for (int i = 0; i < width * height; i++)
                 {
-                    for (int x = 0; x < width; x++)
+                    var coord = GridIndexUtil.ToCoord(i, width);
+                    var x = coord.x;
+                    var y = coord.y;
+            
+                    if (!randomMask[x, y]) continue;
+                    if (!IsRegularItem(grid[x, y])) continue;
+
+                    if (WouldCreateBlastGroup(grid, x, y, width, height, grid[x, y].TypeId, assumeCenterIsId: false))
                     {
-                        if (!randomMask[x, y]) continue;
-
-                        if (!IsRegularItem(grid[x, y])) continue;
-
-                        if (HasMatchAt(grid, x, y, width, height, grid[x, y].TypeId, assumeCenterIsId: false))
-                        {
-                            grid[x, y] = CreateRandomNonMatchingCell(grid, x, y, width, height, rng);
-                            found = true;
-                        }
+                        grid[x, y] = CreateRandomNonGroupingCell(grid, x, y, width, height, rng);
+                        found = true;
                     }
                 }
 
             } while (found);
         }
 
-        private static GridObjectTypeData CreateRandomNonMatchingCell(GridObjectTypeData[,] grid, int x, int y, int width, int height, Random rng)
+        private static GridObjectTypeData CreateRandomNonGroupingCell(GridObjectTypeData[,] grid, int x, int y, int width, int height, Random rng)
         {
             var ids = LevelGridRandomUtil.GetItemTypeIds();
 
@@ -43,7 +43,7 @@ namespace Core.Utils
             {
                 var id = ids[i];
 
-                if (!HasMatchAt(grid, x, y, width, height, id, assumeCenterIsId: true))
+                if (!WouldCreateBlastGroup(grid, x, y, width, height, id, assumeCenterIsId: true))
                 {
                     candidates[candidateCount] = id;
                     candidateCount++;
@@ -55,14 +55,14 @@ namespace Core.Utils
                 var pick = LevelGridRandomUtil.NextIndex(rng, candidateCount);
                 return new GridObjectTypeData(GridItemKind.Regular, candidates[pick]);
             }
-
+            
             var attempts = 0;
 
             while (true)
             {
                 var id = ids[LevelGridRandomUtil.NextIndex(rng, ids.Length)];
 
-                if (!HasMatchAt(grid, x, y, width, height, id, assumeCenterIsId: true))
+                if (!WouldCreateBlastGroup(grid, x, y, width, height, id, assumeCenterIsId: true))
                     return new GridObjectTypeData(GridItemKind.Regular, id);
 
                 attempts++;
@@ -72,19 +72,35 @@ namespace Core.Utils
             }
         }
 
-        private static bool HasMatchAt(GridObjectTypeData[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId)
+        private static bool WouldCreateBlastGroup(GridObjectTypeData[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId)
         {
-            var centerCountsAsOne = assumeCenterIsId ? 1 : (IsRegularItem(grid[x, y]) && grid[x, y].TypeId == id ? 1 : 0);
+            if (!assumeCenterIsId)
+            {
+                if (!IsRegularItem(grid[x, y])) return false;
+                if (grid[x, y].TypeId != id) return false;
+            }
+            
+            if (HasLineMatchAt(grid, x, y, width, height, id, assumeCenterIsId)) return true;
+            
+            if (Has2x2Square(grid, x, y, width, height, id, assumeCenterIsId)) return true;
+
+            return false;
+        }
+        
+        private static bool HasLineMatchAt(GridObjectTypeData[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId)
+        {
+            var center = assumeCenterIsId ? 1 : (IsRegularItem(grid[x, y]) && grid[x, y].TypeId == id ? 1 : 0);
+            if (center == 0) return false;
 
             var left = CountSame(grid, x, y, -1, 0, width, height, id);
             var right = CountSame(grid, x, y, 1, 0, width, height, id);
 
-            if (left + centerCountsAsOne + right >= 3) return true;
+            if (left + center + right >= 3) return true;
 
             var down = CountSame(grid, x, y, 0, -1, width, height, id);
             var up = CountSame(grid, x, y, 0, 1, width, height, id);
 
-            return down + centerCountsAsOne + up >= 3;
+            return down + center + up >= 3;
         }
 
         private static int CountSame(GridObjectTypeData[,] grid, int x, int y, int dx, int dy, int width, int height, int id)
@@ -111,6 +127,38 @@ namespace Core.Utils
             }
 
             return count;
+        }
+        
+        private static bool Has2x2Square(GridObjectTypeData[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId)
+        {
+            if (IsSquareAt(x, y)) return true;         // (x,y) top-left
+            if (IsSquareAt(x - 1, y)) return true;     // (x,y) top-right
+            if (IsSquareAt(x, y - 1)) return true;     // (x,y) bottom-left
+            if (IsSquareAt(x - 1, y - 1)) return true; // (x,y) bottom-right
+
+            return false;
+
+            bool IsSquareAt(int sx, int sy)
+            {
+                if (sx < 0 || sy < 0 || sx + 1 >= width || sy + 1 >= height)
+                    return false;
+
+                if (!IsCellId(sx, sy)) return false;
+                if (!IsCellId(sx + 1, sy)) return false;
+                if (!IsCellId(sx, sy + 1)) return false;
+                if (!IsCellId(sx + 1, sy + 1)) return false;
+
+                return true;
+            }
+
+            bool IsCellId(int cx, int cy)
+            {
+                if (assumeCenterIsId && cx == x && cy == y)
+                    return true;
+
+                var data = grid[cx, cy];
+                return IsRegularItem(data) && data.TypeId == id;
+            }
         }
 
         private static bool IsRegularItem(GridObjectTypeData data) => data is { ItemKind: GridItemKind.Regular, TypeId: > 0 };
