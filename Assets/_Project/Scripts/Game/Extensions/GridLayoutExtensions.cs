@@ -1,3 +1,5 @@
+using System;
+using Core.Utils;
 using UnityEngine;
 using GridLayout = Core.Grid.GridLayout;
 
@@ -77,6 +79,37 @@ namespace Core.Extensions
             }
 
             return new Vector2Int(gx, gy);
+        }
+        
+        public static void DrawGrid(this GridLayout layout, Vector2Int gridSize, Color gizmosColor, Camera camera = null, Func<int, int, bool> isCellActive = null)
+        {
+            var cam = camera ? camera : Camera.main;
+            
+            if (!cam) return;
+
+            Gizmos.color = gizmosColor;
+
+            var width = gridSize.x;
+            var height = gridSize.y;
+
+            for (int i = 0; i < width * height; i++)
+            {
+                var coordinate = GridIndexUtil.ToCoord(i, width);
+                if (isCellActive != null && !isCellActive(coordinate.x, coordinate.y)) continue;
+                
+                var center = layout.GridToWorld(gridSize, coordinate, cam);
+                var half = layout.cellSize * 0.5f;
+
+                var topLeft = new Vector3(center.x - half, center.y + half, center.z);
+                var topRight = new Vector3(center.x + half, center.y + half, center.z);
+                var bottomRight = new Vector3(center.x + half, center.y - half, center.z);
+                var bottomLeft  = new Vector3(center.x - half, center.y - half, center.z);
+
+                Gizmos.DrawLine(topLeft, topRight);
+                Gizmos.DrawLine(topRight, bottomRight);
+                Gizmos.DrawLine(bottomRight, bottomLeft);
+                Gizmos.DrawLine(bottomLeft, topLeft);
+            }
         }
 
         public static float GetTopY(this in GridLayout layout, Camera cam) => GetOriginPos(layout, cam, Vector3.up).y;

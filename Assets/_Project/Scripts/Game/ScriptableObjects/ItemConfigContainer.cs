@@ -21,7 +21,7 @@ namespace Core.Config
             return null;
         }
         
-        public BaseItemConfigData GetConfig(GridObjectTypeData typeData) => typeData.ItemKind switch
+        public BaseItemConfigData GetConfigData(GridObjectTypeData typeData) => typeData.ItemKind switch
         {
             GridItemKind.Regular => GetConfig<ItemConfig>().GetData((ItemType)typeData.TypeId),
             GridItemKind.Booster => GetConfig<BoosterItemConfig>().GetData((BoosterType)typeData.TypeId),

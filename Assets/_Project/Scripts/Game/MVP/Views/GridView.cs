@@ -7,36 +7,36 @@ using GridLayout = Core.Grid.GridLayout;
 
 namespace Core.Views
 {
-    public interface IGridView
-    {
-        Transform GridObjectsParent { get; }
-        GridLayout Layout { get; }
-        void Initialize(int width, int height, bool[,] isCellActive);
-        Vector3 GridToWorld(Vector2Int size, Vector2Int itemCoordinate);
-        event Action OnViewInitialized;
-    }
-    
     public class GridView : MonoBehaviour, IGridView
     {
+        [field: SerializeField, ReadOnly] public bool IsInitialized { get; private set; }
         [field: SerializeField] public Camera Cam { get; private set; }
         [field: SerializeField] public Transform GridRoot { get; private set; }
         [field: SerializeField] public Transform GridObjectsParent { get; private set; }
         [field: SerializeField] public MeshFilter GridMeshFilter { get; private set; }
         [field: SerializeField] public GridMeshSettingsConfig MeshSettings { get; private set; }
         [field: SerializeField] public GridLayoutSettingsConfig LayoutSettings { get; private set; }
+        [field: SerializeField] public bool DrawGridGizmos { get; private set; }
+        [field: SerializeField, ShowIf(nameof(DrawGridGizmos))] public Color GizmosColor { get; private set; } = Color.yellow;
         [field: SerializeField, ReadOnly] public GridLayout Layout { get; private set; }
         public event Action OnViewInitialized;
-
+        private Vector2Int _gridSize;
+        private bool[,] _activeCells;
+        
         public void Initialize(int width, int height, bool[,] isCellActive)
         {
-            var gridSize = new Vector2Int(width, height);
-            CalculateCellSize(gridSize);
-            CalculateOrigin(gridSize.y);
-            GenerateMesh(gridSize, isCellActive);
+            _gridSize = new Vector2Int(width, height);
+            _activeCells = isCellActive;
+            
+            CalculateCellSize();
+            CalculateOrigin();
+            GenerateMesh();
+            
             OnViewInitialized?.Invoke();
+            IsInitialized = true;
         }
-        
-        private void CalculateCellSize(Vector2Int gridSize)
+
+        private void CalculateCellSize()
         {
             if (!Cam) return;
             
@@ -48,14 +48,14 @@ namespace Core.Views
                 cellSize = 0f
             };
             
-            var cellSize = layout.CalculateCellSize(gridSize, Cam);
+            var cellSize = layout.CalculateCellSize(_gridSize, Cam);
             layout.cellSize = Mathf.Clamp(cellSize, 0f, LayoutSettings.MaxCellSize);
             Layout = layout;
         }
         
-        private void CalculateOrigin(int gridHeight)
+        private void CalculateOrigin()
         {
-            var yOffset = GridRoot.position.y + (gridHeight * Layout.cellSize * 0.5f);
+            var yOffset = GridRoot.position.y + (_gridSize.y * Layout.cellSize * 0.5f);
             var topY = Layout.GetTopY(Cam);
             var originOffsetY = topY - yOffset;
             var layout = Layout;
@@ -63,14 +63,24 @@ namespace Core.Views
             Layout = layout;
         }
 
-        private void GenerateMesh(Vector2Int size, bool[,] isCellActive)
+        private void GenerateMesh()
         {
             var ms = MeshSettings;
-            Layout.BuildGridMesh(size, GridMeshFilter, ms.FrameThickness, ms.CornerSmoothness,16, CellActive);
-            return;
-            bool CellActive(int x, int y) => isCellActive[x, y];
+            Layout.BuildGridMesh(_gridSize, GridMeshFilter, ms.FrameThickness, ms.CornerSmoothness, 16, IsCellActive);
         }
+        public Vector3 GridToWorld(Vector2Int itemCoordinate) => Layout.GridToWorld(_gridSize, itemCoordinate, Cam);
+        public Vector2Int WorldToGrid(Vector3 worldPosition) => Layout.WorldToGrid(_gridSize, worldPosition, Cam);
+        public float GetCellSize() => Layout.cellSize;
+
+#if UNITY_EDITOR
+        private void OnDrawGizmos()
+        {
+            if(!IsInitialized || !DrawGridGizmos) return;
+            
+            Layout.DrawGrid(_gridSize, GizmosColor, Cam, IsCellActive);
+        }
+#endif
         
-        public Vector3 GridToWorld(Vector2Int size, Vector2Int itemCoordinate) => Layout.GridToWorld(size, itemCoordinate, Cam);
+        private bool IsCellActive(int x, int y) => _activeCells[x, y];
     }
 }

@@ -45,7 +45,7 @@ namespace Core.Extensions
 
             for (int i = 0; i < height * width; i++)
             {
-                var coordinate = CoordinateUtils.ToCoordinate(i, width);
+                var coordinate = GridIndexUtil.ToCoord(i, width);
                 var x = coordinate.x;
                 var y = coordinate.y;
 
@@ -541,7 +541,7 @@ namespace Core.Extensions
 
             for (int i = 0; i < height * width; i++)
             {
-                var coordinate = CoordinateUtils.ToCoordinate(i, width);
+                var coordinate = GridIndexUtil.ToCoord(i, width);
                 var x = coordinate.x;
                 var y = coordinate.y;
             

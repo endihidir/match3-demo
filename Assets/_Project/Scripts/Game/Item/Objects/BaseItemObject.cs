@@ -1,6 +1,8 @@
-using System;
+using System.Diagnostics;
 using Core.Config;
 using Core.Pool;
+using Core.Utils;
+using Core.Views;
 using NaughtyAttributes;
 using UnityEngine;
 
@@ -8,35 +10,31 @@ namespace Core.Item
 {
     public abstract class BaseItemObject : PooledObject, IItemObject, IItemType
     {
-        [field: SerializeField] public SpriteRenderer SpriteRenderer { get; private set; }
         [field: SerializeField] public ItemAnimation ItemAnimation { get; private set; }
-        [field: SerializeField, ReadOnly] public Vector2Int Coordinate { get; private set; }
+        [field: SerializeField] public SpriteRenderer SpriteRenderer { get; private set; }
         [field: SerializeField, ReadOnly] public Vector2 CellSize { get; private set; }
-        [field: SerializeField, ReadOnly] public bool IsStatic { get; private set; }
+        [field: SerializeField, ReadOnly] public bool IsStationary { get; private set; }
         public GridObjectTypeData GridObjectType { get; private set; }
-        public Transform Transform => transform;
-        
-        private Vector2 _cellSizeMultiplier;
-        private bool _isEmpty;
-        
+        private Vector2 CellSizeMultiplier { get; set; }
         public bool IsEmpty
         {
             get => _isEmpty;
             set
             {
                 _isEmpty = value;
-                if (_isEmpty) IsStatic = false;
                 SpriteRenderer.enabled = !_isEmpty;
+                if (_isEmpty) IsStationary = false;
             }
         }
+
+        private bool _isEmpty;
         
-        public BaseItemObject Initialize(GridObjectTypeData gridObjectTypeData, Vector2Int coordinate)
+        public BaseItemObject Initialize(GridObjectTypeData gridObjectTypeData)
         {
             GridObjectType = gridObjectTypeData;
-            Coordinate = coordinate;
-            OnInitialize(GridObjectType.TypeId);
             name = ToString();
-            IsEmpty = GridObjectType.ItemKind is GridItemKind.None || gridObjectTypeData.TypeId == 0;
+            OnInitialize(GridObjectType.TypeId);
+            IsEmpty = GridObjectType.ItemKind == GridItemKind.None || GridObjectType.TypeId == 0;
             return this;
         }
         protected abstract void OnInitialize(int typeId);
@@ -45,30 +43,45 @@ namespace Core.Item
         {
             var sprite = baseItemConfigData.icon;
             SpriteRenderer.sprite = sprite;
-            _cellSizeMultiplier = baseItemConfigData.spriteSizeMultiplier;
+            CellSizeMultiplier = baseItemConfigData.spriteSizeMultiplier;
+            IsStationary = baseItemConfigData.isStationary;
         }
-        public void SetPosition(Vector3 position) => Transform.position = position;
+        
         public void SetCellSize(Vector2 cellSize)
         {
-            CellSize = cellSize * _cellSizeMultiplier;
+            CellSize = cellSize * CellSizeMultiplier;
             SpriteRenderer.size = CellSize;
         }
-        public void SetParent(Transform parent) => Transform.SetParent(parent);
-        public void UpdateTypeData(GridItemKind gridItemKind, int typeId) => GridObjectType = new GridObjectTypeData(gridItemKind, typeId);
-        public void UpdateCoordinate(Vector2Int coordinate) => Coordinate = coordinate;
+        
+        public void SetPosition(Vector3 position) => transform.position = position;
+        public void SetParent(Transform parent) => transform.SetParent(parent);
+        
         public void ResetState()
         {
-            IsEmpty = true;
-            Coordinate = default;
+            SpriteRenderer.sprite = null;
+            CellSize = Vector2.zero;
+            CellSizeMultiplier = Vector2.zero;
+            IsStationary = false;
             GridObjectType = default;
             CellSize = default;
             name = ToString();
         }
-        public override void Deactivate(float duration = 0, float delay = 0, Action onComplete = null)
+
+        protected override void OnDeactivate() => ResetState();
+        public override string ToString() => $"Type: {GridObjectType.Type}";
+
+        [Conditional("UNITY_EDITOR"), Button]
+        private void DebugCoord()
         {
-            base.Deactivate(duration, delay, onComplete);
-            ResetState();
+            var gridView = FindObjectOfType<GridView>();
+            
+            if (!gridView)
+            {
+                EditorLogger.LogError("GridView not found!");
+                return;
+            }
+            
+            EditorLogger.Log(gridView.WorldToGrid(transform.position));
         }
-        private void OnDestroy() => ResetState();
     }
 }

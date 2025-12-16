@@ -1,4 +1,3 @@
-using Core.Config;
 using NaughtyAttributes;
 using UnityEngine;
 
@@ -13,16 +12,10 @@ namespace Core.Item
             BoosterType = (BoosterType)typeId;
         }
 
-        public override void ApplyData(BaseItemConfigData baseItemConfigData)
+        protected override void OnDeactivate()
         {
-            base.ApplyData(baseItemConfigData);
-            
-            if (baseItemConfigData is BoosterConfigData boosterConfigData)
-            {
-                
-            }
+            base.OnDeactivate();
+            BoosterType = BoosterType.None;
         }
-
-        public override string ToString() => $"X: {Coordinate.x}, Y: {Coordinate.y}, Type: {BoosterType}";
     }
 }

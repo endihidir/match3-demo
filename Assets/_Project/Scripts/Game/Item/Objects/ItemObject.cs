@@ -1,4 +1,3 @@
-using Core.Config;
 using NaughtyAttributes;
 using UnityEngine;
 
@@ -11,17 +10,10 @@ namespace Core.Item
         {
             ItemType = (ItemType)typeId;
         }
-
-        public override void ApplyData(BaseItemConfigData baseItemConfigData)
+        protected override void OnDeactivate()
         {
-            base.ApplyData(baseItemConfigData);
-
-            if (baseItemConfigData is ItemConfigData itemConfigData)
-            {
-                
-            }
+            base.OnDeactivate();
+            ItemType = ItemType.None;
         }
-
-        public override string ToString() => $"X: {Coordinate.x}, Y: {Coordinate.y}, Type: {ItemType}";
     }
 }
