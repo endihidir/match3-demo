@@ -25,6 +25,7 @@ namespace Core.Presenters
         
         public void Initialize()
         {
+            
         }
 
         private void OnInputGet(Vector2 position, Direction2D direction2D)
