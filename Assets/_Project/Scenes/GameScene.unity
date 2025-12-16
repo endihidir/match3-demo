@@ -168,6 +168,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 615351179788f4241b0c25f655a8b4d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <IsInitialized>k__BackingField: 0
   <Cam>k__BackingField: {fileID: 671010485}
   <GridRoot>k__BackingField: {fileID: 195934560}
   <GridObjectsParent>k__BackingField: {fileID: 1824729426}
@@ -176,6 +177,8 @@ MonoBehaviour:
     type: 2}
   <LayoutSettings>k__BackingField: {fileID: 11400000, guid: 6bb3c66aeb7bfce42a2513a510161df5,
     type: 2}
+  <DrawGridGizmos>k__BackingField: 0
+  <GizmosColor>k__BackingField: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   <Layout>k__BackingField:
     cellSize: 0
     originOffset: {x: 0, y: 0, z: 0}

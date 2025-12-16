@@ -21,7 +21,7 @@ namespace Core.LifetimeScopes
             builder.RegisterInstance(GameConfigContainer);
             builder.RegisterEntryPoint<GameBootstrapper>();
             
-            builder.Register<InputService>(Lifetime.Scoped).As<IInputService>();
+            builder.Register<InputService>(Lifetime.Scoped).As<IInputService, ITickable>();
             builder.Register<LevelGoalModel>(Lifetime.Scoped).As<ILevelGoalModel>();
             
             builder.Register<GridItemFactory>(Lifetime.Scoped).As<IGridItemFactory>();
