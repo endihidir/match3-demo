@@ -199,7 +199,7 @@ namespace Core.SceneService
 
         public void Tick()
         {
-#if UNITY_EDITOR // FOR EDITOR TEST! Delete it!!
+#if UNITY_EDITOR
             if (!Input.GetKeyDown(KeyCode.Space)) return;
             
             if(CurrentSceneGroupType == SceneGroupType.MenuScene) return;

@@ -50,6 +50,7 @@ MonoBehaviour:
     type: 2}
   <ShiftSettingsConfig>k__BackingField: {fileID: 11400000, guid: 384fd099bf9dca546bf66b9403c6873e,
     type: 2}
+  <ItemHolder>k__BackingField: {fileID: 3218266720199594933}
 --- !u!1 &4759215270928394382
 GameObject:
   m_ObjectHideFlags: 0
@@ -144,7 +145,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3218266720199594933}
   m_Layer: 0
-  m_Name: SpriteHolder
+  m_Name: ItemHolder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

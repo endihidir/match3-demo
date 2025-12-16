@@ -62,6 +62,15 @@ namespace Core.Views
             layout.originOffset = new Vector3(0f, originOffsetY, 0f);
             Layout = layout;
         }
+        
+        public Vector2Int GetMouseToGridPos(Vector2 mousePosition)
+        {
+            var worldPosition = Cam.ScreenToWorldPoint(mousePosition);
+            
+            var pos = WorldToGrid(worldPosition);
+            
+            return pos;
+        }
 
         private void GenerateMesh()
         {

@@ -3,15 +3,11 @@ using Core.Generated;
 using Core.SceneService;
 using Core.Views;
 using Cysharp.Threading.Tasks;
+using VContainer.Unity;
 
 namespace Core.Presenters
 {
-    public interface IMainMenuPresenter 
-    {
-        IMainMenuPresenter InitPlayButton(int levelNumber);
-    }
-    
-    public sealed class MainMenuPresenter : IMainMenuPresenter, IDisposable
+    public sealed class MainMenuPresenter : IInitializable, IDisposable
     {
         private readonly ISceneLoadService _sceneLoadService;
         private readonly IPlayButtonView _playButtonView;
@@ -22,13 +18,9 @@ namespace Core.Presenters
             _playButtonView = playButtonView;
         }
         
-        public IMainMenuPresenter InitPlayButton(int levelNumber)
+        public void Initialize()
         {
-            _playButtonView.SetText($"Level {levelNumber}");
-            
             AddListeners();
-            
-            return this;
         }
 
         private void AddListeners()

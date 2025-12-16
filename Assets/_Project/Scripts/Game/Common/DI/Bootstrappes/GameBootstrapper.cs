@@ -24,8 +24,8 @@ namespace Core.Bootstrapper
         public void Initialize()
         {
             DisableInput();
-            GridSetup();
             HudSetup();
+            GridSetup();
             EnableInput();
         }
 

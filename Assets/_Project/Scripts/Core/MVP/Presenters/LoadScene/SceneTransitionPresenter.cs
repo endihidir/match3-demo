@@ -8,33 +8,27 @@ using VContainer.Unity;
 
 namespace Core.Presenters
 {
-    public interface ISceneTransitionPresenter
-    {
-        ISceneTransitionPresenter Initialize(ISceneTransitionView sceneTransitionView);
-    }
-    public class SceneTransitionPresenter : ISceneTransitionPresenter, ITickable, IDisposable
+    public class SceneTransitionPresenter : IInitializable, ITickable, IDisposable
     {
         private readonly ISceneLoadContext _sceneLoadContext;
         private readonly ISceneTransitionModel _transitionModel;
-        private ISceneTransitionView _transitionView;
+        private readonly ISceneTransitionView _transitionView;
         private bool _isTransitionViewEnabled = false;
-        public SceneTransitionPresenter(ISceneLoadContext sceneLoadContext, ISceneTransitionModel sceneTransitionTransitionModel)
+        public SceneTransitionPresenter(ISceneLoadContext sceneLoadContext, ISceneTransitionModel sceneTransitionTransitionModel, ISceneTransitionView transitionView)
         {
             _sceneLoadContext = sceneLoadContext;
             _transitionModel = sceneTransitionTransitionModel;
+            _transitionView = transitionView;
         }
 
-        public ISceneTransitionPresenter Initialize(ISceneTransitionView sceneTransitionView)
+        public void Initialize()
         {
-            _transitionView = sceneTransitionView;
-            
             _sceneLoadContext.OnLoadStart += OnBeforeTransition;
             _sceneLoadContext.Progress.Progressed += OnTransitionProgressed;
             _sceneLoadContext.OnTransitionOut += OnBeforeTransitionOut;
             
             _transitionView.SetLabelText("Loading...");
             _transitionView.DisableAsync(0f, .25f).Forget();
-            return this;
         }
 
         public void Tick()
