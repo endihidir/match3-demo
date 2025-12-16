@@ -1,25 +1,20 @@
 using Core.Handlers;
 using Core.Level;
 using Core.Models;
+using Core.Services;
 using Core.Views;
+using VContainer;
 using VContainer.Unity;
 
 namespace Core.Bootstrapper
 {
     public class GameBootstrapper : IInitializable
     {
-        private readonly ILevelDefinitionProvider _levelDefinitionProvider;
-        private readonly IGridItemFactoryHandler _gridItemFactoryHandler;
-        private readonly IGridModel _gridModel;
-        private readonly IGridView _gridView;
-        
-        public GameBootstrapper(ILevelDefinitionProvider levelDefinitionProvider, IGridItemFactoryHandler gridItemFactoryHandler, IGridModel gridModel, IGridView gridView)
-        {
-            _levelDefinitionProvider = levelDefinitionProvider;
-            _gridItemFactoryHandler = gridItemFactoryHandler;
-            _gridModel = gridModel;
-            _gridView = gridView;
-        }
+        [Inject] private readonly ILevelDefinitionProvider _levelDefinitionProvider;
+        [Inject] private readonly IGridItemFactoryHandler _gridItemFactoryHandler;
+        [Inject] private readonly IGridModel _gridModel;
+        [Inject] private readonly IGridView _gridView;
+        [Inject] private readonly IInputService _inputService;
         
         public void Initialize()
         {
@@ -29,11 +24,8 @@ namespace Core.Bootstrapper
             EnableInput();
         }
 
-        private void DisableInput()
-        {
-            
-        }
-        
+        private void DisableInput() => _inputService.Disable();
+
         private void GridSetup()
         {
             _gridItemFactoryHandler.PopulateGridWith(_levelDefinitionProvider.GetGridObjectTypes(), out var gridItemObjects);
@@ -48,9 +40,6 @@ namespace Core.Bootstrapper
             
         }
 
-        private void EnableInput()
-        {
-            
-        }
+        private void EnableInput() => _inputService.Enable();
     }
 }
