@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: Green
   m_EditorClassIdentifier: 
   icon: {fileID: 21300000, guid: fc844722a03dbed46b10e4eb36964d16, type: 3}
-  spriteSizeMultiplier: {x: 0.7, y: 0.7}
+  spriteSizeMultiplier: {x: 0.85, y: 0.85}
+  isStationary: 0

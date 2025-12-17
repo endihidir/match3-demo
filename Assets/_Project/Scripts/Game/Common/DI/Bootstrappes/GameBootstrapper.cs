@@ -8,7 +8,7 @@ using VContainer.Unity;
 
 namespace Core.Bootstrapper
 {
-    public class GameBootstrapper : IInitializable
+    public class GameBootstrapper : IPostInitializable
     {
         [Inject] private readonly ILevelDefinitionProvider _levelDefinitionProvider;
         [Inject] private readonly IGridItemFactoryHandler _gridItemFactoryHandler;
@@ -16,7 +16,7 @@ namespace Core.Bootstrapper
         [Inject] private readonly IGridView _gridView;
         [Inject] private readonly IInputService _inputService;
         
-        public void Initialize()
+        public void PostInitialize()
         {
             DisableInput();
             HudSetup();

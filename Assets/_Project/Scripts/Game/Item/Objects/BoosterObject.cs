@@ -7,15 +7,18 @@ namespace Core.Item
     {
         [field: SerializeField, ReadOnly] public BoosterType BoosterType { get; private set; }
 
-        protected override void OnInitialize(int typeId)
+        protected override void OnInitialize()
         {
-            BoosterType = (BoosterType)typeId;
+            BoosterType = (BoosterType)TypeId;
         }
 
         protected override void OnDeactivate()
         {
             base.OnDeactivate();
-            BoosterType = BoosterType.None;
+            BoosterType = (BoosterType)TypeId;
+            UpdateIdentity();
         }
+        
+        public override string ToString() => $"Type: {BoosterType}";
     }
 }

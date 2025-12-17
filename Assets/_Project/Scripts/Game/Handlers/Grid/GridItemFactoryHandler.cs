@@ -38,18 +38,16 @@ namespace Core.Handlers
                 var typeData = gridObjectTypes[x, y];
                 
                 if (typeData is { TypeId: -1 }) continue;
-
-                var item = GetItem(typeData);
                 
-                itemObjects[x, y] = item;
+                itemObjects[x, y] = GetItem(typeData);
             }
         }
 
-        private BaseItemObject GetItem(GridObjectTypeData gridObjectTypeData) => gridObjectTypeData.ItemKind switch
+        private BaseItemObject GetItem(GridObjectTypeData typeData) => typeData.ItemKind switch
         {
-            GridItemKind.Regular => _gridItemFactory.GetItem<ItemObject>(gridObjectTypeData),
-            GridItemKind.Booster => _gridItemFactory.GetItem<BoosterObject>(gridObjectTypeData),
-            GridItemKind.Obstacle => _gridItemFactory.GetItem<ObstacleObject>(gridObjectTypeData),
+            GridItemKind.Regular => _gridItemFactory.GetItem<ItemObject>(typeData),
+            GridItemKind.Booster => _gridItemFactory.GetItem<BoosterObject>(typeData),
+            GridItemKind.Obstacle => _gridItemFactory.GetItem<ObstacleObject>(typeData),
             _ => null
         };
         

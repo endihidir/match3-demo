@@ -6,14 +6,17 @@ namespace Core.Item
     public class ItemObject : BaseItemObject
     {
         [field: SerializeField, ReadOnly] public ItemType ItemType { get; private set; }
-        protected override void OnInitialize(int typeId)
+        protected override void OnInitialize()
         {
-            ItemType = (ItemType)typeId;
+            ItemType = (ItemType)TypeId;
         }
         protected override void OnDeactivate()
         {
             base.OnDeactivate();
-            ItemType = ItemType.None;
+            ItemType = (ItemType)TypeId;
+            UpdateIdentity();
         }
+
+        public override string ToString() => $"Type: {ItemType}";
     }
 }

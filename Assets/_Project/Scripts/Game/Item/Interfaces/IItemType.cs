@@ -3,6 +3,6 @@ namespace Core.Item
 {
     public interface IItemType
     {
-        GridObjectTypeData GridObjectType { get; }
+        public int TypeId { get; }
     }
 }

@@ -27,6 +27,7 @@ namespace Core.LifetimeScopes
             builder.Register<GridItemFactory>(Lifetime.Scoped).As<IGridItemFactory>();
             builder.Register<GridItemFactoryHandler>(Lifetime.Scoped).As<IGridItemFactoryHandler>();
             
+            builder.Register<GridStateHandler>(Lifetime.Scoped).As<IGridStateHandler, ITickable, IFixedTickable, ILateTickable>();
             builder.Register<GridModel>(Lifetime.Scoped).As<IGridModel>();
             builder.RegisterComponentInHierarchy<GridView>().As<IGridView>();
             builder.Register<GridPresenter>(Lifetime.Scoped).As<IInitializable>();

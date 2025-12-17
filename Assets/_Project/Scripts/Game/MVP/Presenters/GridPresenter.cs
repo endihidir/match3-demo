@@ -1,4 +1,6 @@
 using System;
+using Core.Handlers;
+using Core.Item;
 using Core.Models;
 using Core.Services;
 using Core.Utils;
@@ -13,32 +15,54 @@ namespace Core.Presenters
         private readonly IGridModel _gridModel;
         private readonly IGridView _gridView;
         private readonly IInputService _inputService;
+        private readonly IGridStateHandler _gridStateHandler;
 
-        public GridPresenter(IGridModel model, IGridView gridView, IInputService inputService)
+        public GridPresenter(IGridModel model, IGridView gridView, IInputService inputService, IGridStateHandler gridStateHandler)
         {
             _gridModel = model;
             _gridView = gridView;
             _inputService = inputService;
-            _inputService.OnInput += OnInputGet;
-            _gridView.OnViewInitialized += OnViewInit;
+            _gridStateHandler = gridStateHandler;
         }
-        
+
         public void Initialize()
         {
-            
+            _gridView.OnViewInitialized += PlaceGridItems;
+            _inputService.OnSwipe += OnSwipeGet;
         }
 
-        private void OnInputGet(Vector2 position, Direction2D direction2D)
+        private void OnSwipeGet(Vector2 screenPos, Vector2Int direction)
         {
-            var gridCoord = _gridView.GetMouseToGridPos(position);
+            var objCoordinate = _gridView.ScreenToGridCoordinate(screenPos);
 
-            if (_gridModel.TryGetGridObject(gridCoord, out var gridItem))
+            if (!_gridModel.TryGetGridObject(objCoordinate, out var gridItemObject)) return;
+            
+            if (!gridItemObject) return;
+
+            ProcessSwipe(gridItemObject, objCoordinate, direction);
+        }
+        
+        private void ProcessSwipe(BaseItemObject obj, Vector2Int coordinate, Vector2Int direction)
+        {
+            if (!CanSwap(obj, coordinate, direction, out var targetCoord))
             {
-                EditorLogger.LogError($"{gridItem} - {direction2D}");
+                obj.ItemAnimation.Shake();
+                return;
             }
+
+            _gridStateHandler.TryEnqueueSwap(coordinate, targetCoord);
         }
 
-        private void OnViewInit() => PlaceGridItems();
+        private bool IsInteractable(BaseItemObject obj)
+        {
+            if (!obj) return false;
+            if (obj.IsEmpty) return false;
+
+            var anim = obj.ItemAnimation;
+            if (anim != null && anim.IsShiftInProgress) return false;
+
+            return true;
+        }
 
         private void PlaceGridItems()
         {
@@ -46,19 +70,40 @@ namespace Core.Presenters
             {
                 var coordinate = GridIndexUtil.ToCoord(i, _gridModel.Width);
                 var item = _gridModel.GetGridObject(coordinate);
-                if(!item) continue;
-                
+                if (!item) continue;
+
                 var worldPos = _gridView.GridToWorld(coordinate);
                 item.SetPosition(worldPos);
-                item.SetCellSize(Vector2.one * _gridView.GetCellSize());
+                item.SetSpriteSize(Vector2.one * _gridView.GetCellSize());
                 item.SetParent(_gridView.GridObjectsParent);
             }
         }
         
+        private bool CanSwap(BaseItemObject source, Vector2Int sourceCoord, Vector2Int direction, out Vector2Int targetCoord)
+        {
+            targetCoord = default;
+
+            if (!IsInteractable(source)) return false;
+            
+            if (direction == Vector2Int.zero) return false;
+
+            if (!_gridModel.TryGetNeighbour(sourceCoord, direction, out var neighbour) || !neighbour)
+                return false;
+
+            if (!IsInteractable(neighbour)) return false;
+            
+            if (neighbour.IsStationary || neighbour is ObstacleObject) return false;
+            
+            if (source.IsStationary || source is ObstacleObject) return false;
+
+            targetCoord = sourceCoord + direction;
+            return true;
+        }
+
         public void Dispose()
         {
-            _inputService.OnInput -= OnInputGet;
-            _gridView.OnViewInitialized -= OnViewInit;
+            _inputService.OnSwipe -= OnSwipeGet;
+            _gridView.OnViewInitialized -= PlaceGridItems;
         }
     }
 }
