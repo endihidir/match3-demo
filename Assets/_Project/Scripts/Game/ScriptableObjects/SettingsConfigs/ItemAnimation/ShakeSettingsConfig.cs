@@ -6,7 +6,6 @@ namespace Core.Config
     public class ShakeSettingsConfig : ScriptableObject
     {
         public float duration = 0.2f;
-        public float strength = 0.5f;
-        public int vibrato = 10;
+        public float angle = 35f;
     }
 }

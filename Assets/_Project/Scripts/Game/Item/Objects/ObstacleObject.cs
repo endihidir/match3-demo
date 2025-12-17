@@ -10,9 +10,9 @@ namespace Core.Item
         [field: SerializeField, ReadOnly] public ObstacleType ObstacleType { get; private set; }
         [field: SerializeField, ReadOnly] public int Life { get; private set; }
 
-        protected override void OnInitialize(int typeId)
+        protected override void OnInitialize()
         {
-            ObstacleType = (ObstacleType)typeId;
+            ObstacleType = (ObstacleType)TypeId;
         }
 
         public override void ApplyData(BaseItemConfigData baseItemConfigData)
@@ -35,9 +35,12 @@ namespace Core.Item
         protected override void OnDeactivate()
         {
             base.OnDeactivate();
-            ObstacleType = ObstacleType.None;
+            ObstacleType = (ObstacleType)TypeId;
             Life = 0;
+            UpdateIdentity();
         }
+        
+        public override string ToString() => $"Type: {ObstacleType}";
     }
 
     public interface IDamageableItem

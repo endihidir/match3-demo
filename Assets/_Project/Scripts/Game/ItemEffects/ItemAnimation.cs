@@ -13,32 +13,40 @@ namespace Core.Item
         [field: SerializeField] private ShiftSettingsConfig ShiftSettingsConfig { get; set; }
         [field: SerializeField] private Transform ItemHolder { get; set; }
         
-        private Tween _shakeTween, _moveTween;
+        private Tween _shakeTween, _moveTween, _shiftTween;
+        public bool IsShiftInProgress => _shiftTween.IsActive();
 
         public void Shake()
         {
             var shakeSettings = ShakeSettingsConfig;
 
-            _shakeTween?.Kill();
+            _shakeTween?.Kill(true);
+            
+            var duration = shakeSettings.duration / 3f;
+            var rotAngle = shakeSettings.angle;
 
-            _shakeTween = ItemHolder.DOShakePosition(shakeSettings.duration, shakeSettings.strength)
-                                    .SetUpdate(UseUnscaledTime);
+            _shakeTween = DOTween.Sequence()
+                .Append(ItemHolder.transform.DORotate(Vector3.forward * rotAngle, duration))
+                .Append(ItemHolder.transform.DORotate(Vector3.back * rotAngle, duration))
+                .Append(ItemHolder.transform.DORotate(Vector3.zero, duration))
+                .OnComplete(() => ItemHolder.transform.localRotation = Quaternion.identity)
+                .SetUpdate(UseUnscaledTime);
         }
 
         public Tween Shift(Vector3 worldPos)
         {
             var shiftSettings = ShiftSettingsConfig;
 
-            _moveTween?.Kill();
+            _shiftTween?.Kill();
 
-            _moveTween = transform.DOMove(worldPos, shiftSettings.duration)
+            _shiftTween = transform.DOMove(worldPos, shiftSettings.duration)
                                    .SetEase(shiftSettings.ease)
                                    .SetUpdate(UseUnscaledTime);
 
-            return _moveTween;
+            return _shiftTween;
         }
 
-        public Tween PingPongMove(Vector3 targetPos, float duration, Ease ease, Action onComplete)
+        public Tween PingPongMove(Vector3 targetPos, float duration = 0.15f, Ease ease = Ease.Linear, Action onComplete = null)
         {
             _moveTween?.Kill();
                 
@@ -53,7 +61,7 @@ namespace Core.Item
             return _moveTween;
         }
 
-        public Tween Move(Vector3 worldPos, float duration, Ease ease = Ease.Linear, Action onComplete = null)
+        public Tween Move(Vector3 worldPos, float duration = 0.15f, Ease ease = Ease.Linear, Action onComplete = null)
         {
             _moveTween?.Kill();
             
@@ -85,6 +93,7 @@ namespace Core.Item
         
         public void Dispose()
         {
+            _shiftTween?.Kill();
             _moveTween?.Kill();
             _shakeTween?.Kill();
         }

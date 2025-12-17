@@ -1,5 +1,4 @@
 using System;
-using Core.Models;
 using Core.Utils;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -10,16 +9,15 @@ namespace Core.Services
 {
     public interface IInputService
     {
-        event Action<Vector2, Direction2D> OnInput;
+        event Action<Vector2, Vector2Int> OnSwipe;
         void Enable();
         void Disable();
     }
 
     public class InputService : IInputService, ITickable, IDisposable
     {
-        private const float SWIPE_THRESHOLD = 30f;
         private readonly InputActions _actions = new();
-        public event Action<Vector2, Direction2D> OnInput;
+        public event Action<Vector2, Vector2Int> OnSwipe;
 
         private Vector2 _startPos;
         private Vector2 _lastPos;
@@ -57,25 +55,27 @@ namespace Core.Services
             
             var endPos = _actions.Board.Position.ReadValue<Vector2>();
             
-            var dir = GetSwipeDirection(_startPos, endPos, SWIPE_THRESHOLD);
+            var threshold = GetSwipeThreshold();
             
-            OnInput?.Invoke(_startPos, dir);
+            var dir = GetSwipeDirection(_startPos, endPos, threshold);
+            
+            OnSwipe?.Invoke(_startPos, dir);
         }
 
-        private static Direction2D GetSwipeDirection(Vector2 start, Vector2 end, float threshold)
+        private static Vector2Int GetSwipeDirection(Vector2 start, Vector2 end, float threshold)
         {
             var delta = end - start;
 
             if (delta.sqrMagnitude < threshold * threshold)
-                return Direction2D.Self;
+                return Vector2Int.zero;
 
             var ax = Mathf.Abs(delta.x);
             var ay = Mathf.Abs(delta.y);
 
             if (ax > ay)
-                return delta.x > 0f ? Direction2D.Right : Direction2D.Left;
+                return delta.x > 0f ? Vector2Int.right : Vector2Int.left;
 
-            return delta.y > 0f ? Direction2D.Up : Direction2D.Down;
+            return delta.y > 0f ? Vector2Int.down : Vector2Int.up;
         }
 
         public void Disable()
@@ -90,6 +90,12 @@ namespace Core.Services
         public void Dispose()
         {
             Disable();
+        }
+        
+        private static float GetSwipeThreshold()
+        {
+            var minScreenSide = Mathf.Min(Screen.width, Screen.height);
+            return minScreenSide * 0.02f;
         }
         
         private static bool GetPointerOverUI()

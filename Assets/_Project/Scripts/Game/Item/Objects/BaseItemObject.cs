@@ -12,10 +12,11 @@ namespace Core.Item
     {
         [field: SerializeField] public ItemAnimation ItemAnimation { get; private set; }
         [field: SerializeField] public SpriteRenderer SpriteRenderer { get; private set; }
-        [field: SerializeField, ReadOnly] public Vector2 CellSize { get; private set; }
         [field: SerializeField, ReadOnly] public bool IsStationary { get; private set; }
-        public GridObjectTypeData GridObjectType { get; private set; }
-        private Vector2 CellSizeMultiplier { get; set; }
+        public GridObjectTypeData TypeData { get; private set; }
+        public GridItemKind ItemKind => TypeData.ItemKind;
+        public int TypeId => TypeData.TypeId;
+        private Vector2 SpriteSizeMultiplier { get; set; }
         public bool IsEmpty
         {
             get => _isEmpty;
@@ -29,51 +30,43 @@ namespace Core.Item
 
         private bool _isEmpty;
         
-        public BaseItemObject Initialize(GridObjectTypeData gridObjectTypeData)
+        public BaseItemObject Initialize(GridObjectTypeData typeData)
         {
-            GridObjectType = gridObjectTypeData;
-            name = ToString();
-            OnInitialize(GridObjectType.TypeId);
-            IsEmpty = GridObjectType.ItemKind == GridItemKind.None || GridObjectType.TypeId == 0;
+            TypeData = typeData;
+            OnInitialize();
+            UpdateIdentity();
             return this;
         }
-        protected abstract void OnInitialize(int typeId);
+        
+        protected abstract void OnInitialize();
+        protected void UpdateIdentity()
+        {
+            name = ToString();
+            IsEmpty = TypeId == 0;
+        }
         
         public virtual void ApplyData(BaseItemConfigData baseItemConfigData)
         {
-            var sprite = baseItemConfigData.icon;
-            SpriteRenderer.sprite = sprite;
-            CellSizeMultiplier = baseItemConfigData.spriteSizeMultiplier;
+            SpriteRenderer.sprite = baseItemConfigData.icon;
+            SpriteSizeMultiplier = baseItemConfigData.spriteSizeMultiplier;
             IsStationary = baseItemConfigData.isStationary;
         }
         
-        public void SetCellSize(Vector2 cellSize)
-        {
-            CellSize = cellSize * CellSizeMultiplier;
-            SpriteRenderer.size = CellSize;
-        }
-        
+        public void SetSpriteSize(Vector2 cellSize) => SpriteRenderer.size = cellSize * SpriteSizeMultiplier;
         public void SetPosition(Vector3 position) => transform.position = position;
         public void SetParent(Transform parent) => transform.SetParent(parent);
-        
-        public void ResetState()
+        protected override void OnDeactivate() => ResetItem();
+        public void ResetItem()
         {
+            TypeData = default;
             SetPosition(Vector3.zero);
             ItemAnimation?.Dispose();
             SpriteRenderer.sprite = null;
-            CellSize = Vector2.zero;
-            CellSizeMultiplier = Vector2.zero;
-            IsStationary = false;
-            GridObjectType = default;
-            CellSize = default;
-            name = ToString();
+            SpriteSizeMultiplier = Vector2.zero;
         }
 
-        protected override void OnDeactivate() => ResetState();
-        public override string ToString() => $"Type: {GridObjectType.Type}";
-
         [Conditional("UNITY_EDITOR"), Button]
-        private void DebugCoord()
+        private void LogCoordinate()
         {
             var gridView = FindObjectOfType<GridView>();
             

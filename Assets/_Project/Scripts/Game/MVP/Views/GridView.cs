@@ -32,8 +32,8 @@ namespace Core.Views
             CalculateOrigin();
             GenerateMesh();
             
-            OnViewInitialized?.Invoke();
             IsInitialized = true;
+            OnViewInitialized?.Invoke();
         }
 
         private void CalculateCellSize()
@@ -63,7 +63,7 @@ namespace Core.Views
             Layout = layout;
         }
         
-        public Vector2Int GetMouseToGridPos(Vector2 mousePosition)
+        public Vector2Int ScreenToGridCoordinate(Vector2 mousePosition)
         {
             var worldPosition = Cam.ScreenToWorldPoint(mousePosition);
             
@@ -75,7 +75,7 @@ namespace Core.Views
         private void GenerateMesh()
         {
             var ms = MeshSettings;
-            Layout.BuildGridMesh(_gridSize, GridMeshFilter, ms.FrameThickness, ms.CornerSmoothness, 16, IsCellActive);
+            Layout.BuildGridMesh(_gridSize, GridMeshFilter, ms.FrameThickness, ms.CornerSmoothness, ms.GetCornerSegments(), IsCellActive);
         }
         public Vector3 GridToWorld(Vector2Int itemCoordinate) => Layout.GridToWorld(_gridSize, itemCoordinate, Cam);
         public Vector2Int WorldToGrid(Vector3 worldPosition) => Layout.WorldToGrid(_gridSize, worldPosition, Cam);

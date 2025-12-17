@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Core.Utils;
 using UnityEngine;
 
@@ -20,6 +21,7 @@ namespace Core.Models
         void SetGridObject(Vector2Int gridPos, T item);
 
         bool IsInRange(Vector2Int pos);
+        bool TryGetNeighbour(Vector2Int pos, Vector2Int direction, out T neighbour);
         bool TryGetNeighbor(Vector2Int pos, Direction2D direction2D, out T neighbour);
         bool TryGetNeighbors(Vector2Int pos, out T[] neighbours);
         bool TryGetNeighborsNonAlloc(Vector2Int pos, Span<T> resultBuffer, out int count);
@@ -40,15 +42,28 @@ namespace Core.Models
         
         private static readonly Dictionary<Direction2D, Vector2Int> DirectionOffsets = new()
         {
-            { Direction2D.Self, new Vector2Int( 0,  0) },
-            { Direction2D.Right, new Vector2Int( 1,  0) },
-            { Direction2D.Left, new Vector2Int(-1,  0) },
-            { Direction2D.Up, new Vector2Int( 0, -1) },
-            { Direction2D.Down, new Vector2Int( 0,  1) },
-            { Direction2D.RightUp, new Vector2Int( 1, -1) },
+            { Direction2D.Self, new Vector2Int(0, 0) },
+            { Direction2D.Right, new Vector2Int(1, 0) },
+            { Direction2D.Left, new Vector2Int(-1, 0) },
+            { Direction2D.Up, new Vector2Int(0, -1) },
+            { Direction2D.Down, new Vector2Int(0, 1) },
+            { Direction2D.RightUp, new Vector2Int(1, -1) },
             { Direction2D.LeftUp, new Vector2Int(-1, -1) },
-            { Direction2D.RightDown, new Vector2Int( 1,  1) },
-            { Direction2D.LeftDown, new Vector2Int(-1,  1) }
+            { Direction2D.RightDown, new Vector2Int(1, 1) },
+            { Direction2D.LeftDown, new Vector2Int(-1, 1) }
+        };
+        
+        private static readonly List<Vector2Int> Offsets = new()
+        {
+            { new Vector2Int(0, 0) },
+            { new Vector2Int(1, 0) },
+            { new Vector2Int(-1, 0) },
+            { new Vector2Int(0, -1) },
+            { new Vector2Int(0, 1) },
+            { new Vector2Int(1, -1) },
+            { new Vector2Int(-1, -1) },
+            { new Vector2Int(1, 1) },
+            { new Vector2Int(-1, 1) }
         };
         
         public IBaseGridModel<T> Initialize(T[,] value, int width, int height, out bool[,] activeCells)
@@ -122,6 +137,21 @@ namespace Core.Models
             
             return neighbour != null;
         }
+        
+        public bool TryGetNeighbour(Vector2Int pos, Vector2Int direction, out T neighbour)
+        {
+            neighbour = null;
+
+            if (direction == Vector2Int.zero) return false;
+
+            var newPos = pos + direction;
+
+            if (!IsInRange(newPos)) return false;
+
+            neighbour = GetInternal(newPos);
+            
+            return neighbour != null;
+        }
 
         public bool TryGetNeighbors(Vector2Int pos, out T[] neighbours)
         {
@@ -135,11 +165,40 @@ namespace Core.Models
 
             foreach (var direction in DirectionList)
             {
-                if (direction == Direction2D.None) continue;
-
                 if (TryGetNeighbor(pos, direction, out var neighbour))
                 {
                     result.Add(neighbour);
+                }
+            }
+
+            neighbours = result.ToArray();
+            return neighbours.Length > 0;
+        }
+        
+        public bool TryGetNeighbors(Vector2Int pos, int range, out T[] neighbours, IReadOnlyCollection<Vector2Int> ignoredDirections = null)
+        {
+            if (!IsInRange(pos) || range <= 0)
+            {
+                neighbours = Array.Empty<T>();
+                return false;
+            }
+
+            var result = new List<T>();
+
+            foreach (var direction in Offsets)
+            {
+                if (ignoredDirections != null && ignoredDirections.Contains(direction))
+                    continue;
+
+                var currentPos = pos;
+
+                for (int i = 0; i < range; i++)
+                {
+                    if (!TryGetNeighbour(currentPos, direction, out var neighbour))
+                        break;
+
+                    result.Add(neighbour);
+                    currentPos += direction;
                 }
             }
 

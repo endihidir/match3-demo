@@ -12,6 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f94b2c0012949ccbbb4f5dd507b2278, type: 3}
   m_Name: DefaultShakeSettings
   m_EditorClassIdentifier: 
-  duration: 0.2
-  strength: 0.5
-  vibrato: 10
+  duration: 0.25
+  angle: 10

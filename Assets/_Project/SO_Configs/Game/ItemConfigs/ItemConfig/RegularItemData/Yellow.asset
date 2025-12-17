@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: Yellow
   m_EditorClassIdentifier: 
   icon: {fileID: 21300000, guid: 3e20fb662d86e5645b868401253a29a5, type: 3}
-  spriteSizeMultiplier: {x: 0.7, y: 0.7}
+  spriteSizeMultiplier: {x: 0.85, y: 0.85}
+  isStationary: 0

@@ -7,7 +7,7 @@ namespace Core.Item.Factories
 {
     public interface IGridItemFactory
     {
-        T GetItem<T>(GridObjectTypeData gridObjectTypeData) where T : BaseItemObject;
+        T GetItem<T>(GridObjectTypeData typeData) where T : BaseItemObject;
         T GetItem<T>(GridItemKind itemKind, int typeId) where T : BaseItemObject => GetItem<T>(new GridObjectTypeData(itemKind, typeId));
         BaseItemObject GetItem(ItemType type) => GetItem<ItemObject>(GridItemKind.Regular, (int)type);
         BaseItemObject GetItem(BoosterType type) => GetItem<BoosterObject>(GridItemKind.Booster, (int)type);
@@ -31,15 +31,15 @@ namespace Core.Item.Factories
             _itemConfigContainer = gameConfigContainer.ItemConfigContainer;
         }
         
-        public T GetItem<T>(GridObjectTypeData gridObjectTypeData) where T : BaseItemObject
+        public T GetItem<T>(GridObjectTypeData typeData) where T : BaseItemObject
         {
             var itemObject = _objectPoolService.GetObject<T>();
             
-            itemObject.ResetState();
+            itemObject.ResetItem();
 
-            var configData = _itemConfigContainer.GetConfigData(gridObjectTypeData);
+            var configData = _itemConfigContainer.GetConfigData(typeData);
             
-            itemObject.Initialize(gridObjectTypeData)
+            itemObject.Initialize(typeData)
                       .ApplyData(configData);
             
             return itemObject;
