@@ -21,6 +21,16 @@ namespace Core.StateMachineCore
         }
 
         public IStateMachine Register<T>(T state) where T : class, IState => Register((IState)state);
+        public IStateMachine Register<T>(T[] states) where T : class, IState
+        {
+            for (var i = 0; i < states.Length; i++)
+            {
+                var state = states[i];
+                Register((IState)state);
+            }
+            
+            return this;
+        }
 
         public bool TryGet(string id, out IState state) => _states.TryGetValue(id, out state);
 

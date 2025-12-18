@@ -1,6 +1,5 @@
 using System;
 using Core.Config;
-using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 
@@ -10,11 +9,10 @@ namespace Core.Item
     {
         [field: SerializeField] private bool UseUnscaledTime { get; set; }= true;
         [field: SerializeField] private ShakeSettingsConfig ShakeSettingsConfig { get; set; }
-        [field: SerializeField] private ShiftSettingsConfig ShiftSettingsConfig { get; set; }
         [field: SerializeField] private Transform ItemHolder { get; set; }
+        public bool IsShiftInProgress => _shiftTween.IsActive();
         
         private Tween _shakeTween, _moveTween, _shiftTween;
-        public bool IsShiftInProgress => _shiftTween.IsActive();
 
         public void Shake()
         {
@@ -33,28 +31,28 @@ namespace Core.Item
                 .SetUpdate(UseUnscaledTime);
         }
 
-        public Tween Shift(Vector3 worldPos)
+        public Tween Shift(Vector3 worldPos, float durationMultiplier = 1f, float delay = 0f)
         {
-            var shiftSettings = ShiftSettingsConfig;
-
             _shiftTween?.Kill();
-
-            _shiftTween = transform.DOMove(worldPos, shiftSettings.duration)
-                                   .SetEase(shiftSettings.ease)
-                                   .SetUpdate(UseUnscaledTime);
+            _shiftTween = transform.DOMove(worldPos, 0.15f * durationMultiplier)
+                .SetEase(Ease.Linear)
+                .SetDelay(delay)
+                .SetUpdate(UseUnscaledTime);
 
             return _shiftTween;
         }
 
         public Tween PingPongMove(Vector3 targetPos, float duration = 0.15f, Ease ease = Ease.Linear, Action onComplete = null)
         {
+            if (_shiftTween.IsActive()) return null;
+            
             _moveTween?.Kill();
                 
             var defaultPos = transform.position;
 
             _moveTween = DOTween.Sequence()
                                 .Append(transform.DOMove(targetPos, duration).SetEase(ease))
-                                .Append(transform.DOMove(defaultPos,   duration).SetEase(ease))
+                                .Append(transform.DOMove(defaultPos, duration).SetEase(ease))
                                 .SetUpdate(UseUnscaledTime)
                                 .OnComplete(() => onComplete?.Invoke());
             
@@ -63,6 +61,8 @@ namespace Core.Item
 
         public Tween Move(Vector3 worldPos, float duration = 0.15f, Ease ease = Ease.Linear, Action onComplete = null)
         {
+            if(_shiftTween.IsActive()) return null;
+            
             _moveTween?.Kill();
             
             _moveTween = transform.DOMove(worldPos, duration)
@@ -71,24 +71,6 @@ namespace Core.Item
                                   .SetUpdate(UseUnscaledTime);
 
             return _moveTween;
-        }
-
-        public async UniTask ShiftAsync(Vector3 worldPos)
-        {
-            var tween = Shift(worldPos);
-            await tween.AsyncWaitForCompletion();
-        }
-
-        public async UniTask MoveAsync(Vector3 worldPos, float duration, Ease ease, Action onComplete = null)
-        {
-            var tween = Move(worldPos, duration, ease, onComplete);
-            await tween.AsyncWaitForCompletion();
-        }
-
-        public async UniTask PingPongMoveAsync(Vector3 targetPos, float duration, Ease ease = Ease.Linear, Action onComplete = null)
-        {
-            var tween = PingPongMove(targetPos, duration, ease, onComplete);
-            await tween.AsyncWaitForCompletion();
         }
         
         public void Dispose()

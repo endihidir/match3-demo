@@ -8,37 +8,55 @@ namespace Core.Handlers
     public sealed class ExecuteMoveState : StateBase<GridContext>
     {
         public override bool NeedsExitTime => true;
-
-        protected override void OnInit() { }
-        protected override bool OnBeforeEnter() => true;
+        public bool IsExitReady { get; private set; }
+        public bool ResolveRequested { get; private set; }
 
         protected override void OnEnter()
         {
+            IsExitReady = false;
+            ResolveRequested = false;
+
             if (Context.MoveQueue.Count == 0)
             {
-                RequestExit();
+                Exit();
                 return;
             }
 
-            var move = Context.MoveQueue.Dequeue();
+            var move = Context.MoveQueue.Peek();
 
             if (move.Type != GridMoveType.Swap)
             {
-                RequestExit();
+                Context.MoveQueue.Dequeue();
+                Exit();
                 return;
             }
 
             var a = move.A;
             var b = move.B;
 
+            if (Context.MovingCells.Contains(a) || Context.MovingCells.Contains(b))
+            {
+                Exit();
+                return;
+            }
+
             var objA = Context.Model.GetGridObject(a);
             var objB = Context.Model.GetGridObject(b);
 
             if (!objA || !objB)
             {
-                RequestExit();
+                Context.MoveQueue.Dequeue();
+                Exit();
                 return;
             }
+
+            if (objA.ItemAnimation.IsShiftInProgress || objB.ItemAnimation.IsShiftInProgress)
+            {
+                Exit();
+                return;
+            }
+
+            Context.MoveQueue.Dequeue();
 
             if (objA is BoosterObject || objB is BoosterObject)
             {
@@ -62,54 +80,55 @@ namespace Core.Handlers
             PlaySwapAndCommit(objA, objB, a, b);
         }
 
-        protected override void OnUpdate(float deltaTime) { }
-        protected override void OnFixedUpdate(float deltaTime) { }
-        protected override void OnLateUpdate(float deltaTime) { }
-        protected override void OnExit() { }
-
         private void PlayPingPong(BaseItemObject objA, BaseItemObject objB, Vector2Int a, Vector2Int b)
         {
-            var aWorld = Context.View.GridToWorld(a);
-            var bWorld = Context.View.GridToWorld(b);
+            Context.MovingCells.Add(a);
+            Context.MovingCells.Add(b);
 
-            var animA = objA.ItemAnimation;
-            var animB = objB.ItemAnimation;
+            var completed = 0;
 
-            var completedCount = 0;
+            var tweenA = objA.ItemAnimation.PingPongMove(Context.View.GridToWorld(b), onComplete: OnDone);
+            var tweenB = objB.ItemAnimation.PingPongMove(Context.View.GridToWorld(a), onComplete: OnDone);
 
-            animA.PingPongMove(bWorld, onComplete: OnOneDone);
-            animB.PingPongMove(aWorld, onComplete: OnOneDone);
+            if (tweenA == null) OnDone();
+            if (tweenB == null) OnDone();
             return;
 
-            void OnOneDone()
+            void OnDone()
             {
-                completedCount++;
-                if (completedCount >= 2)
-                    RequestExit();
+                completed++;
+                if (completed < 2) return;
+
+                Context.MovingCells.Remove(a);
+                Context.MovingCells.Remove(b);
+                Exit();
             }
         }
 
         private void PlaySwapAndCommit(BaseItemObject objA, BaseItemObject objB, Vector2Int a, Vector2Int b)
         {
-            var aWorld = Context.View.GridToWorld(a);
-            var bWorld = Context.View.GridToWorld(b);
+            Context.MovingCells.Add(a);
+            Context.MovingCells.Add(b);
 
-            var animA = objA.ItemAnimation;
-            var animB = objB.ItemAnimation;
+            var completed = 0;
 
-            var completedCount = 0;
+            var tweenA = objA.ItemAnimation.Move(Context.View.GridToWorld(b), onComplete: OnDone);
+            var tweenB = objB.ItemAnimation.Move(Context.View.GridToWorld(a), onComplete: OnDone);
 
-            animA.Move(bWorld, onComplete: OnOneDone);
-            animB.Move(aWorld, onComplete: OnOneDone);
+            if (tweenA == null) OnDone();
+            if (tweenB == null) OnDone();
             return;
 
-            void OnOneDone()
+            void OnDone()
             {
-                completedCount++;
-                if (completedCount < 2) return;
+                completed++;
+                if (completed < 2) return;
 
                 Context.Model.Swap(a, b);
-                RequestExit();
+                ResolveRequested = true;
+                Context.MovingCells.Remove(a);
+                Context.MovingCells.Remove(b);
+                Exit();
             }
         }
 
@@ -118,7 +137,7 @@ namespace Core.Handlers
             var width = Context.Model.Width;
             var height = Context.Model.Height;
 
-            var grid = BuildTypeGrid(width, height);
+            var grid = Context.Model.BuildTypeDataGrid();
 
             var cellA = grid[a.x, a.y];
             var cellB = grid[b.x, b.y];
@@ -126,26 +145,21 @@ namespace Core.Handlers
             grid[a.x, a.y] = new GridObjectTypeData(cellA.ItemKind, typeB);
             grid[b.x, b.y] = new GridObjectTypeData(cellB.ItemKind, typeA);
 
-            var matchAtA = GridMatchDetectUtil.WouldCreateBlastGroup(grid, a.x, a.y, width, height, typeB, false);
-            var matchAtB = GridMatchDetectUtil.WouldCreateBlastGroup(grid, b.x, b.y, width, height, typeA, false);
-
-            return matchAtA || matchAtB;
+            return
+                GridMatchDetectUtil.WouldCreateBlastGroup(grid, a.x, a.y, width, height, typeB, false) ||
+                GridMatchDetectUtil.WouldCreateBlastGroup(grid, b.x, b.y, width, height, typeA, false);
         }
-
-        private GridObjectTypeData[,] BuildTypeGrid(int width, int height)
+        
+        protected override void OnExit()
         {
-            var grid = new GridObjectTypeData[width, height];
-
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    var obj = Context.Model.GetGridObject(new Vector2Int(x, y));
-                    grid[x, y] = obj ? obj.TypeData : default;
-                }
-            }
-
-            return grid;
+            IsExitReady = true;
+            RequestExit();
         }
+        
+        protected override void OnUpdate(float deltaTime) { }
+        protected override void OnFixedUpdate(float deltaTime) { }
+        protected override void OnLateUpdate(float deltaTime) { }
+        protected override void OnInit() { }
+        protected override bool OnBeforeEnter() => true;
     }
 }

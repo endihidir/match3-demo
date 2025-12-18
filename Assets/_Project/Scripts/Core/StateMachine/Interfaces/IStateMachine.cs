@@ -9,6 +9,7 @@ namespace Core.StateMachineCore
         bool TryGet(string id, out IState state);
 
         IStateMachine Register<T>(T state) where T : class, IState;
+        IStateMachine Register<T>(T[] states) where T : class, IState;
         bool TryGet<T>(string id, out T state) where T : class, IState;
 
         IStateMachine SetInitialState(string stateID);

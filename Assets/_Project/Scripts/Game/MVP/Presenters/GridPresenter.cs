@@ -57,10 +57,7 @@ namespace Core.Presenters
         {
             if (!obj) return false;
             if (obj.IsEmpty) return false;
-
-            var anim = obj.ItemAnimation;
-            if (anim != null && anim.IsShiftInProgress) return false;
-
+            if(obj.ItemAnimation.IsShiftInProgress) return false;
             return true;
         }
 
@@ -87,8 +84,7 @@ namespace Core.Presenters
             
             if (direction == Vector2Int.zero) return false;
 
-            if (!_gridModel.TryGetNeighbour(sourceCoord, direction, out var neighbour) || !neighbour)
-                return false;
+            if (!_gridModel.TryGetNeighbour(sourceCoord, direction, out var neighbour) || !neighbour) return false;
 
             if (!IsInteractable(neighbour)) return false;
             

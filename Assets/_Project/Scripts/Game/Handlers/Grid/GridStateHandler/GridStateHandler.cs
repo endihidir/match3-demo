@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Core.Item.Factories;
 using Core.Models;
 using Core.StateMachineCore;
 using Core.Views;
@@ -17,38 +18,37 @@ namespace Core.Handlers
         private readonly IStateMachine _stateMachine;
         private readonly GridContext _context;
 
-        private readonly AcceptMoveState _acceptMove;
-        private readonly ExecuteMoveState _executeMove;
+        private readonly AcceptMoveState _accept;
+        private readonly ExecuteMoveState _execute;
         private readonly ResolveState _resolve;
-        private readonly ShiftRefillState _shiftRefill;
+        private readonly ShiftRefillState _shift;
 
+        private readonly HashSet<Vector2Int> _movingCells = new();
         private readonly Queue<GridMove> _moveQueue = new();
 
-        public GridStateHandler(IGridModel gridModel, IGridView gridView)
+        public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory)
         {
             _stateMachine = new StateMachine();
+            _context = new GridContext(model, view, _moveQueue, _movingCells, factory);
 
-            _context = new GridContext(gridModel, gridView, _moveQueue);
-
-            _acceptMove = new AcceptMoveState().Init(_context) as AcceptMoveState;
-            _executeMove = new ExecuteMoveState().Init(_context) as ExecuteMoveState;
+            _accept = new AcceptMoveState().Init(_context) as AcceptMoveState;
+            _execute = new ExecuteMoveState().Init(_context) as ExecuteMoveState;
             _resolve = new ResolveState().Init(_context) as ResolveState;
-            _shiftRefill = new ShiftRefillState().Init(_context) as ShiftRefillState;
+            _shift = new ShiftRefillState().Init(_context) as ShiftRefillState;
+
+            var states = new StateBase<GridContext>[] { _accept, _execute, _resolve, _shift };
+            _stateMachine.Register(states);
 
             _stateMachine
-                .Register(_acceptMove)
-                .Register(_executeMove)
-                .Register(_resolve)
-                .Register(_shiftRefill);
+                .AddTransition(_accept, _execute, () => _moveQueue.Count > 0)
+                .AddTransition(_execute, _resolve, () => _execute.IsExitReady && _execute.ResolveRequested)
+                .AddTransition(_execute, _accept, () => _execute.IsExitReady && !_execute.ResolveRequested)
+                .AddTransition(_accept, _resolve, () => _context.CascadeResolveRequested && !_context.CascadeInProgress)
+                .AddTransition(_resolve, _shift, () => _resolve.IsExitReady && _context.ResolvedAnyMatch)
+                .AddTransition(_resolve, _accept, () => _resolve.IsExitReady && !_context.ResolvedAnyMatch)
+                .AddTransition(_shift, _accept, () => _shift.IsExitReady);
 
-            _stateMachine
-                .AddTransition(_acceptMove, _executeMove, () => _moveQueue.Count > 0)
-                .AddTransition(_executeMove, _resolve, () => _executeMove.IsExitReady)
-                .AddTransition(_resolve, _shiftRefill, () => _resolve.IsExitReady)
-                .AddTransition(_shiftRefill, _resolve, () => _shiftRefill.ResolveAgainRequested)
-                .AddTransition(_shiftRefill, _acceptMove, () => _shiftRefill.IsExitReady);
-
-            _stateMachine.SetInitialState(_acceptMove);
+            _stateMachine.SetInitialState(_accept);
         }
 
         public bool TryEnqueueSwap(Vector2Int a, Vector2Int b)
