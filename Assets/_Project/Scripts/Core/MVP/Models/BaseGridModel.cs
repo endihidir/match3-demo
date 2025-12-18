@@ -11,6 +11,7 @@ namespace Core.Models
         int Width { get; }
         int Height { get; }
         Vector2Int GridSize { get; }
+        bool[,] ActiveCells { get; }
         event Action<T> OnGridObjectInitialized;
         event Action<T> OnUpdateCellData;
         event Action OnModelInitialized;
@@ -33,7 +34,8 @@ namespace Core.Models
         public int Width { get; private set; }
         public int Height { get; private set; }
         public Vector2Int GridSize { get; private set; }
-        
+        public bool[,] ActiveCells { get; private set; }
+
         public event Action<T> OnGridObjectInitialized;
         public event Action<T> OnUpdateCellData;
         public event Action OnModelInitialized;
@@ -73,6 +75,7 @@ namespace Core.Models
             Height = height;
             GridSize = new Vector2Int(width, height);
             activeCells = new bool[width, height];
+            ActiveCells = activeCells;
             
             for (int i = 0; i < Width * Height; i++)
             {
