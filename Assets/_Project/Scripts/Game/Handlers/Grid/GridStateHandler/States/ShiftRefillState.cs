@@ -1,7 +1,6 @@
 using Core.Item;
 using Core.StateMachineCore;
 using Core.Utils;
-using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 
@@ -10,7 +9,6 @@ namespace Core.Handlers
     public sealed class ShiftRefillState : StateBase<GridContext>
     {
         public override bool NeedsExitTime => true;
-
         public bool IsExitReady { get; private set; }
 
         private int _pendingAnims;
@@ -30,13 +28,13 @@ namespace Core.Handlers
             }
 
             Context.CascadeInProgress = true;
-            StartShiftAndRefill().Forget();
+            StartShiftAndRefill();
 
             IsExitReady = true;
             RequestExit();
         }
 
-        private async UniTask StartShiftAndRefill()
+        private void StartShiftAndRefill()
         {
             _pendingAnims = 0;
 
@@ -172,12 +170,5 @@ namespace Core.Handlers
                     Context.Model.Height
                 );
         }
-        
-        protected override void OnInit() { }
-        protected override bool OnBeforeEnter() => true;
-        protected override void OnUpdate(float deltaTime) { }
-        protected override void OnFixedUpdate(float deltaTime) { }
-        protected override void OnLateUpdate(float deltaTime) { }
-        protected override void OnExit() { }
     }
 }
