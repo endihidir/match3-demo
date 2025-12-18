@@ -155,11 +155,5 @@ namespace Core.Handlers
             IsExitReady = true;
             RequestExit();
         }
-        
-        protected override void OnUpdate(float deltaTime) { }
-        protected override void OnFixedUpdate(float deltaTime) { }
-        protected override void OnLateUpdate(float deltaTime) { }
-        protected override void OnInit() { }
-        protected override bool OnBeforeEnter() => true;
     }
 }

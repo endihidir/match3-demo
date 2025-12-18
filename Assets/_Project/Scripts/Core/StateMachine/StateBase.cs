@@ -19,10 +19,7 @@ namespace Core.StateMachineCore
         public virtual bool NeedsExitTime => false;
         public bool IsExitReady { get; private set; }
 
-        protected StateBase()
-        {
-            StateID = GetType().ToString();
-        }
+        protected StateBase() => StateID = GetType().ToString();
 
         public IState Init(TContext context, bool showLogs = true)
         {
@@ -103,13 +100,13 @@ namespace Core.StateMachineCore
         }
 
         public virtual void RequestExit() => IsExitReady = true;
-        protected abstract void OnInit();
-        protected abstract bool OnBeforeEnter();
-        protected abstract void OnEnter();
-        protected abstract void OnUpdate(float deltaTime);
-        protected abstract void OnFixedUpdate(float deltaTime);
-        protected abstract void OnLateUpdate(float deltaTime);
-        protected abstract void OnExit();
+        protected virtual void OnInit(){}
+        protected virtual bool OnBeforeEnter() => true;
+        protected virtual void OnEnter(){}
+        protected virtual void OnUpdate(float deltaTime){}
+        protected virtual void OnFixedUpdate(float deltaTime){}
+        protected virtual void OnLateUpdate(float deltaTime){}
+        protected virtual void OnExit(){}
         
         public virtual void ClearAll()
         {
