@@ -1,6 +1,10 @@
+using System.Collections.Generic;
+using System.Linq;
 using Core.Item;
 using Core.StateMachineCore;
 using Core.Utils;
+using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using UnityEngine;
 
 namespace Core.Handlers
@@ -8,7 +12,6 @@ namespace Core.Handlers
     public sealed class ExecuteMoveState : StateBase<GridContext>
     {
         public override bool NeedsExitTime => true;
-        public bool IsExitReady { get; private set; }
         public bool ResolveRequested { get; private set; }
 
         protected override void OnEnter()
@@ -34,12 +37,6 @@ namespace Core.Handlers
             var a = move.A;
             var b = move.B;
 
-            if (Context.MovingCells.Contains(a) || Context.MovingCells.Contains(b))
-            {
-                Exit();
-                return;
-            }
-
             var objA = Context.Model.GetGridObject(a);
             var objB = Context.Model.GetGridObject(b);
 
@@ -60,76 +57,55 @@ namespace Core.Handlers
 
             if (objA is BoosterObject || objB is BoosterObject)
             {
-                PlaySwapAndCommit(objA, objB, a, b);
+                PlaySwapAndCommit(objA, objB, a, b).Forget();
                 return;
             }
 
             if (!GridMatchDetectUtil.IsRegularItem(objA.TypeData) ||
                 !GridMatchDetectUtil.IsRegularItem(objB.TypeData))
             {
-                PlayPingPong(objA, objB, a, b);
+                PlayPingPong(objA, objB, a, b).Forget();
                 return;
             }
 
             if (!WouldCreateMatchAfterSwap(a, b, objA.TypeData.TypeId, objB.TypeData.TypeId))
             {
-                PlayPingPong(objA, objB, a, b);
+                PlayPingPong(objA, objB, a, b).Forget();
                 return;
             }
 
-            PlaySwapAndCommit(objA, objB, a, b);
+            PlaySwapAndCommit(objA, objB, a, b).Forget();
         }
 
-        private void PlayPingPong(BaseItemObject objA, BaseItemObject objB, Vector2Int a, Vector2Int b)
+        private async UniTask PlayPingPong(BaseItemObject objA, BaseItemObject objB, Vector2Int a, Vector2Int b)
         {
-            Context.MovingCells.Add(a);
-            Context.MovingCells.Add(b);
+            var tasks = new List<UniTask>();
+            
+            var tweenA = objA.ItemAnimation.PingPongMove(Context.View.GridToWorld(b));
+            var tweenB = objB.ItemAnimation.PingPongMove(Context.View.GridToWorld(a));
+            
+            tasks.Add(tweenA.AsyncWaitForCompletion().AsUniTask());
+            tasks.Add(tweenB.AsyncWaitForCompletion().AsUniTask());
 
-            var completed = 0;
-
-            var tweenA = objA.ItemAnimation.PingPongMove(Context.View.GridToWorld(b), onComplete: OnDone);
-            var tweenB = objB.ItemAnimation.PingPongMove(Context.View.GridToWorld(a), onComplete: OnDone);
-
-            if (tweenA == null) OnDone();
-            if (tweenB == null) OnDone();
-            return;
-
-            void OnDone()
-            {
-                completed++;
-                if (completed < 2) return;
-
-                Context.MovingCells.Remove(a);
-                Context.MovingCells.Remove(b);
-                Exit();
-            }
+            await UniTask.WhenAll(tasks);
+            
+            Exit();
         }
 
-        private void PlaySwapAndCommit(BaseItemObject objA, BaseItemObject objB, Vector2Int a, Vector2Int b)
+        private async UniTask PlaySwapAndCommit(BaseItemObject objA, BaseItemObject objB, Vector2Int a, Vector2Int b)
         {
-            Context.MovingCells.Add(a);
-            Context.MovingCells.Add(b);
+            var tasks = new List<UniTask>();
+            var tweenA = objA.ItemAnimation.Move(Context.View.GridToWorld(b));
+            var tweenB = objB.ItemAnimation.Move(Context.View.GridToWorld(a));
 
-            var completed = 0;
+            tasks.Add(tweenA.AsyncWaitForCompletion().AsUniTask());
+            tasks.Add(tweenB.AsyncWaitForCompletion().AsUniTask());
 
-            var tweenA = objA.ItemAnimation.Move(Context.View.GridToWorld(b), onComplete: OnDone);
-            var tweenB = objB.ItemAnimation.Move(Context.View.GridToWorld(a), onComplete: OnDone);
-
-            if (tweenA == null) OnDone();
-            if (tweenB == null) OnDone();
-            return;
-
-            void OnDone()
-            {
-                completed++;
-                if (completed < 2) return;
-
-                Context.Model.Swap(a, b);
-                ResolveRequested = true;
-                Context.MovingCells.Remove(a);
-                Context.MovingCells.Remove(b);
-                Exit();
-            }
+            await UniTask.WhenAll(tasks);
+            
+            Context.Model.Swap(a, b);
+            ResolveRequested = true;
+            Exit();
         }
 
         private bool WouldCreateMatchAfterSwap(Vector2Int a, Vector2Int b, int typeA, int typeB)

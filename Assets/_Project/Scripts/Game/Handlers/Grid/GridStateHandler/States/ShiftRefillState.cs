@@ -9,7 +9,6 @@ namespace Core.Handlers
     public sealed class ShiftRefillState : StateBase<GridContext>
     {
         public override bool NeedsExitTime => true;
-        public bool IsExitReady { get; private set; }
 
         private int _pendingAnims;
 
@@ -49,7 +48,7 @@ namespace Core.Handlers
                     var dest = new Vector2Int(x, y);
 
                     if (!Context.Model.IsCellActive(dest)) continue;
-                    if (Context.Model.GetGridObject(dest) != null) continue;
+                    if (Context.Model.GetGridObject(dest)) continue;
 
                     var srcY = Context.Model.FindFallSourceY(x, y - 1);
                     if (srcY < 0) continue;
@@ -61,8 +60,6 @@ namespace Core.Handlers
                     Context.Model.SetGridObject(dest, obj);
                     Context.Model.SetGridObject(src, null);
 
-                    Context.MovingCells.Add(dest);
-
                     _pendingAnims++;
 
                     var delay = wave * WaveDelayStep;
@@ -70,21 +67,9 @@ namespace Core.Handlers
                     var durMul = 1f + dist * FallDistanceMultiplier;
 
                     var tween = obj.ItemAnimation.Shift(Context.View.GridToWorld(dest), durMul, delay);
-
-                    if (tween == null)
-                    {
-                        Context.MovingCells.Remove(dest);
-                        OnAnimDone();
-                    }
-                    else
-                    {
-                        tween.OnComplete(() =>
-                        {
-                            Context.MovingCells.Remove(dest);
-                            OnAnimDone();
-                        });
-                    }
-
+                    
+                    tween.OnComplete(OnAnimDone);
+                    
                     wave++;
                 }
 
@@ -107,7 +92,7 @@ namespace Core.Handlers
                     var pos = new Vector2Int(x, y);
 
                     if (!Context.Model.IsCellActive(pos)) continue;
-                    if (Context.Model.GetGridObject(pos) != null) continue;
+                    if (Context.Model.GetGridObject(pos)) continue;
 
                     var typeId = Context.Model.GetRandomRegularTypeId();
                     var item = Context.Factory.GetItem<ItemObject>(new GridObjectTypeData(GridItemKind.Regular, typeId));
@@ -119,7 +104,6 @@ namespace Core.Handlers
                     item.SetPosition(new Vector3(target.x, spawnY, target.z));
 
                     Context.Model.SetGridObject(pos, item);
-                    Context.MovingCells.Add(pos);
 
                     _pendingAnims++;
 
@@ -128,20 +112,8 @@ namespace Core.Handlers
 
                     var tween = item.ItemAnimation.Shift(target, durMul, wave * WaveDelayStep);
 
-                    if (tween == null)
-                    {
-                        Context.MovingCells.Remove(pos);
-                        OnAnimDone();
-                    }
-                    else
-                    {
-                        tween.OnComplete(() =>
-                        {
-                            Context.MovingCells.Remove(pos);
-                            OnAnimDone();
-                        });
-                    }
-
+                    tween.OnComplete(OnAnimDone);
+                    
                     wave++;
                 }
             }
@@ -155,7 +127,7 @@ namespace Core.Handlers
             _pendingAnims--;
             if (_pendingAnims > 0) return;
 
-            DOVirtual.DelayedCall(0.05f, FinishCascade);
+            FinishCascade();
         }
 
         private void FinishCascade()

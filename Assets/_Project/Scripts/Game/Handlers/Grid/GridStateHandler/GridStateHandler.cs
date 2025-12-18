@@ -22,14 +22,13 @@ namespace Core.Handlers
         private readonly ExecuteMoveState _execute;
         private readonly ResolveState _resolve;
         private readonly ShiftRefillState _shift;
-
-        private readonly HashSet<Vector2Int> _movingCells = new();
+        
         private readonly Queue<GridMove> _moveQueue = new();
 
         public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory)
         {
             _stateMachine = new StateMachine();
-            _context = new GridContext(model, view, _moveQueue, _movingCells, factory);
+            _context = new GridContext(model, view, _moveQueue, factory);
 
             _accept = new AcceptMoveState().Init(_context) as AcceptMoveState;
             _execute = new ExecuteMoveState().Init(_context) as ExecuteMoveState;
@@ -55,6 +54,14 @@ namespace Core.Handlers
         {
             if (a == b) return false;
             if (!_context.Model.IsInRange(a) || !_context.Model.IsInRange(b)) return false;
+
+            var objA = _context.Model.GetGridObject(a);
+            var objB = _context.Model.GetGridObject(b);
+
+            if (!objA || !objB) return false;
+
+            if (objA.ItemAnimation.IsShiftInProgress || objB.ItemAnimation.IsShiftInProgress)
+                return false;
 
             _moveQueue.Enqueue(new GridMove(GridMoveType.Swap, a, b));
             return true;

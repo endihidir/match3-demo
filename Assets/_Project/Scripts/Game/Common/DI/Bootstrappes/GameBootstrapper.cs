@@ -3,6 +3,7 @@ using Core.Level;
 using Core.Models;
 using Core.Services;
 using Core.Views;
+using DG.Tweening;
 using VContainer;
 using VContainer.Unity;
 
@@ -18,6 +19,7 @@ namespace Core.Bootstrapper
         
         public void PostInitialize()
         {
+            DOTween.SetTweensCapacity(2000, 500);
             DisableInput();
             HudSetup();
             GridSetup();

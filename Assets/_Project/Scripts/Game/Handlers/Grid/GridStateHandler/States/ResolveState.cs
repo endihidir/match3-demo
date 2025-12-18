@@ -7,7 +7,6 @@ namespace Core.Handlers
     public sealed class ResolveState : StateBase<GridContext>
     {
         public override bool NeedsExitTime => true;
-        public bool IsExitReady { get; private set; }
         protected override void OnEnter()
         {
             IsExitReady = false;
@@ -28,9 +27,6 @@ namespace Core.Handlers
                         if (!removeMask[x, y]) continue;
 
                         var pos = new Vector2Int(x, y);
-
-                        if (Context.MovingCells.Contains(pos))
-                            continue;
 
                         var obj = Context.Model.GetGridObject(pos);
                         if (!obj) continue;

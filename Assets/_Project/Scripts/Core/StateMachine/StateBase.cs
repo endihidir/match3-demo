@@ -17,7 +17,7 @@ namespace Core.StateMachineCore
         protected bool ShowLogs;
 
         public virtual bool NeedsExitTime => false;
-        public bool IsExitReady { get; private set; }
+        public bool IsExitReady { get; protected set; }
 
         protected StateBase() => StateID = GetType().ToString();
 
@@ -50,8 +50,6 @@ namespace Core.StateMachineCore
             var canActivate = OnBeforeEnter();
 
             if (!canActivate) return;
-
-            IsExitReady = !NeedsExitTime;
             
             IsActive = true;
 
@@ -93,8 +91,6 @@ namespace Core.StateMachineCore
             if(!IsActive) return;
 
             IsActive = false;
-
-            IsExitReady = false;
 
             OnExit();
         }
