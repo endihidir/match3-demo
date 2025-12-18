@@ -44,21 +44,18 @@ namespace Core.Presenters
         
         private void ProcessSwipe(BaseItemObject obj, Vector2Int coordinate, Vector2Int direction)
         {
-            if (!CanSwap(obj, coordinate, direction, out var targetCoord))
-            {
-                obj.ItemAnimation.Shake();
-                return;
-            }
+            if (!IsInteractable(obj)) return;
+            
+            if (!CanSwap(obj, coordinate, direction, out var targetCoord)) return;
 
             _gridStateHandler.TryEnqueueSwap(coordinate, targetCoord);
         }
 
-        private bool IsInteractable(BaseItemObject obj)
+        private static bool IsInteractable(BaseItemObject obj)
         {
             if (!obj) return false;
             if (obj.IsEmpty) return false;
-            if(obj.ItemAnimation.IsShiftInProgress) return false;
-            return true;
+            return !obj.ItemAnimation.IsShiftInProgress;
         }
 
         private void PlaceGridItems()
@@ -76,23 +73,22 @@ namespace Core.Presenters
             }
         }
         
-        private bool CanSwap(BaseItemObject source, Vector2Int sourceCoord, Vector2Int direction, out Vector2Int targetCoord)
+        private bool CanSwap(BaseItemObject obj, Vector2Int sourceCoord, Vector2Int direction, out Vector2Int targetCoord)
         {
             targetCoord = default;
 
-            if (!IsInteractable(source)) return false;
-            
-            if (direction == Vector2Int.zero) return false;
-
-            if (!_gridModel.TryGetNeighbour(sourceCoord, direction, out var neighbour) || !neighbour) return false;
+            if (direction == Vector2Int.zero || obj.IsStationary || obj is ObstacleObject || 
+                !_gridModel.TryGetNeighbour(sourceCoord, direction, out var neighbour) 
+                || !neighbour || neighbour.IsStationary || neighbour is ObstacleObject)
+            {
+                obj.ItemAnimation.Shake();
+                return false;
+            }
 
             if (!IsInteractable(neighbour)) return false;
             
-            if (neighbour.IsStationary || neighbour is ObstacleObject) return false;
-            
-            if (source.IsStationary || source is ObstacleObject) return false;
-
             targetCoord = sourceCoord + direction;
+            
             return true;
         }
 

@@ -42,7 +42,7 @@ namespace Core.Item
             return _shiftTween;
         }
 
-        public Tween PingPongMove(Vector3 targetPos, float duration = 0.15f, Ease ease = Ease.Linear, Action onComplete = null)
+        public Tween PingPongMove(Vector3 targetPos, float duration = 0.15f, Ease ease = Ease.Linear)
         {
             if (_shiftTween.IsActive()) return null;
             
@@ -53,13 +53,12 @@ namespace Core.Item
             _moveTween = DOTween.Sequence()
                                 .Append(transform.DOMove(targetPos, duration).SetEase(ease))
                                 .Append(transform.DOMove(defaultPos, duration).SetEase(ease))
-                                .SetUpdate(UseUnscaledTime)
-                                .OnComplete(() => onComplete?.Invoke());
+                                .SetUpdate(UseUnscaledTime);
             
             return _moveTween;
         }
 
-        public Tween Move(Vector3 worldPos, float duration = 0.15f, Ease ease = Ease.Linear, Action onComplete = null)
+        public Tween Move(Vector3 worldPos, float duration = 0.15f, Ease ease = Ease.Linear)
         {
             if(_shiftTween.IsActive()) return null;
             
@@ -67,7 +66,6 @@ namespace Core.Item
             
             _moveTween = transform.DOMove(worldPos, duration)
                                   .SetEase(ease)
-                                  .OnComplete(()=> onComplete?.Invoke())
                                   .SetUpdate(UseUnscaledTime);
 
             return _moveTween;
