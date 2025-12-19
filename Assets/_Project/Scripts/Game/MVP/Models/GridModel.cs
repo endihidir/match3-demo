@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Core.Item;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Core.Models
 {
@@ -15,7 +16,6 @@ namespace Core.Models
         bool IsCellActive(Vector2Int pos);
         int FindFallSourceY(int x, int startY);
         GridObjectTypeData[,] BuildTypeDataGrid();
-
         int GetRandomRegularTypeId();
     }
 
@@ -61,12 +61,12 @@ namespace Core.Models
         {
             if (x < 0 || x >= Width) return -1;
 
-            for (int yy = startY; yy >= 0; yy--)
+            for (int y = startY; y >= 0; y--)
             {
-                if (!ActiveCells[x, yy]) continue;
+                if (!ActiveCells[x, y]) continue;
 
-                var obj = GetGridObject(new Vector2Int(x, yy));
-                if (obj) return yy;
+                var obj = GetGridObject(new Vector2Int(x, y));
+                if (obj) return y;
             }
 
             return -1;
@@ -91,7 +91,8 @@ namespace Core.Models
         public int GetRandomRegularTypeId()
         {
             if (RegularTypeIds.Length == 1) return RegularTypeIds[0];
-            return RegularTypeIds[UnityEngine.Random.Range(0, RegularTypeIds.Length)];
+            
+            return RegularTypeIds[Random.Range(0, RegularTypeIds.Length)];
         }
 
         private static int[] BuildRegularTypeIds()

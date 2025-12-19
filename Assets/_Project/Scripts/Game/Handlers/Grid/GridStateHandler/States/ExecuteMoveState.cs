@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Core.Item;
 using Core.StateMachineCore;
 using Core.Utils;
@@ -12,13 +11,9 @@ namespace Core.Handlers
     public sealed class ExecuteMoveState : StateBase<GridContext>
     {
         public override bool NeedsExitTime => true;
-        public bool ResolveRequested { get; private set; }
 
         protected override void OnEnter()
         {
-            IsExitReady = false;
-            ResolveRequested = false;
-
             if (Context.MoveQueue.Count == 0)
             {
                 Exit();
@@ -47,7 +42,7 @@ namespace Core.Handlers
                 return;
             }
 
-            if (objA.ItemAnimation.IsShiftInProgress || objB.ItemAnimation.IsShiftInProgress)
+            if (objA.IsShiftInProgress || objB.IsShiftInProgress)
             {
                 Exit();
                 return;
@@ -62,13 +57,8 @@ namespace Core.Handlers
             }
 
             if (!GridMatchDetectUtil.IsRegularItem(objA.TypeData) ||
-                !GridMatchDetectUtil.IsRegularItem(objB.TypeData))
-            {
-                PlayPingPong(objA, objB, a, b).Forget();
-                return;
-            }
-
-            if (!WouldCreateMatchAfterSwap(a, b, objA.TypeData.TypeId, objB.TypeData.TypeId))
+                !GridMatchDetectUtil.IsRegularItem(objB.TypeData) || 
+                !WouldCreateMatchAfterSwap(a, b, objA.TypeData.TypeId, objB.TypeData.TypeId))
             {
                 PlayPingPong(objA, objB, a, b).Forget();
                 return;
@@ -104,7 +94,6 @@ namespace Core.Handlers
             await UniTask.WhenAll(tasks);
             
             Context.Model.Swap(a, b);
-            ResolveRequested = true;
             Exit();
         }
 
@@ -121,14 +110,12 @@ namespace Core.Handlers
             grid[a.x, a.y] = new GridObjectTypeData(cellA.ItemKind, typeB);
             grid[b.x, b.y] = new GridObjectTypeData(cellB.ItemKind, typeA);
 
-            return
-                GridMatchDetectUtil.WouldCreateBlastGroup(grid, a.x, a.y, width, height, typeB, false) ||
-                GridMatchDetectUtil.WouldCreateBlastGroup(grid, b.x, b.y, width, height, typeA, false);
+            return GridMatchDetectUtil.WouldCreateBlastGroup(grid, a.x, a.y, width, height, typeB, false) ||
+                   GridMatchDetectUtil.WouldCreateBlastGroup(grid, b.x, b.y, width, height, typeA, false);
         }
         
         protected override void OnExit()
         {
-            IsExitReady = true;
             RequestExit();
         }
     }

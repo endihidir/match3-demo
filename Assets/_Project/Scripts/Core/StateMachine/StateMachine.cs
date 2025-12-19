@@ -170,7 +170,7 @@ namespace Core.StateMachineCore
         }
 
         public void FixedUpdate(float deltaTime) => CurrentState?.FixedUpdate(deltaTime);
-        public void LateUpdate(float deltaTime)  => CurrentState?.LateUpdate(deltaTime);
+        public void LateUpdate(float deltaTime) => CurrentState?.LateUpdate(deltaTime);
 
         public T CurrentAs<T>() where T : class, IState => CurrentState as T;
 

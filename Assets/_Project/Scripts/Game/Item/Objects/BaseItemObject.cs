@@ -16,7 +16,6 @@ namespace Core.Item
         public GridObjectTypeData TypeData { get; private set; }
         public GridItemKind ItemKind => TypeData.ItemKind;
         public int TypeId => TypeData.TypeId;
-        private Vector2 SpriteSizeMultiplier { get; set; }
         public bool IsEmpty
         {
             get => _isEmpty;
@@ -27,7 +26,9 @@ namespace Core.Item
                 if (_isEmpty) IsStationary = false;
             }
         }
-
+        
+        public bool IsShiftInProgress => ItemAnimation.IsShiftInProgress;
+        private Vector2 SpriteSizeMultiplier { get; set; }
         private bool _isEmpty;
         
         public BaseItemObject Initialize(GridObjectTypeData typeData)
@@ -52,7 +53,7 @@ namespace Core.Item
             IsStationary = baseItemConfigData.isStationary;
         }
         
-        public void SetSpriteSize(Vector2 cellSize) => SpriteRenderer.size = cellSize * SpriteSizeMultiplier;
+        public void SetSpriteSize(float cellSize) => SpriteRenderer.size = cellSize * SpriteSizeMultiplier;
         public void SetPosition(Vector3 position) => transform.position = position;
         public void SetParent(Transform parent) => transform.SetParent(parent);
         protected override void OnDeactivate() => ResetItem();
