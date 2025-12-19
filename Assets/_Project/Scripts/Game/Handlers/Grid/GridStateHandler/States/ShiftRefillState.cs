@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Core.Item;
 using Core.Models;
 using Core.StateMachineCore;
@@ -12,8 +13,6 @@ namespace Core.Handlers
     public sealed class ShiftRefillState : StateBase<GridContext>
     {
         public override bool NeedsExitTime => true;
-
-        private int _pendingAnims;
 
         private const float ColumnYieldSeconds = 0.01f;
         private const float WaveDelayStep = 0.05f;
@@ -35,8 +34,8 @@ namespace Core.Handlers
 
         private async UniTask RunCascade()
         {
-            _pendingAnims = 0;
-
+            var tasks = new List<UniTask>();
+            
             var model = Context.Model;
             var view = Context.View;
 
@@ -49,29 +48,26 @@ namespace Core.Handlers
             {
                 await UniTask.WaitForSeconds(ColumnYieldSeconds);
 
-                int wave = 0;
-
-                ShiftColumn(model, view, x, height, ref wave);
+                ShiftColumn(model, view, x, height, tasks, out var wave);
 
                 await UniTask.WaitForSeconds(ColumnYieldSeconds);
 
-                if (!TryGetSpawnY(model, view, x, height, cellSize, out var spawnY))
-                {
-                    await UniTask.WaitForSeconds(ColumnYieldSeconds);
-                    continue;
-                }
+                if (!TryGetSpawnY(model, view, x, height, cellSize, out var spawnY)) continue;
 
-                RefillColumn(model, view, x, height, cellSize, spawnY, ref wave);
+                RefillColumn(model, view, x, height, cellSize, spawnY, wave, tasks);
 
                 await UniTask.WaitForSeconds(ColumnYieldSeconds);
             }
 
-            if (_pendingAnims == 0)
-                FinishCascade();
+            await UniTask.WhenAll(tasks);
+            
+            FinishCascade();
         }
 
-        private void ShiftColumn(IGridModel model, IGridView view, int x, int height, ref int wave)
+        private void ShiftColumn(IGridModel model, IGridView view, int x, int height, List<UniTask> tasks, out int wave)
         {
+            wave = 0;
+            
             for (int y = height - 1; y >= 0; y--)
             {
                 var dest = new Vector2Int(x, y);
@@ -93,8 +89,8 @@ namespace Core.Handlers
                 var dist = Mathf.Abs(dest.y - src.y);
                 var durMul = 1f + dist * FallDistanceMultiplier;
 
-                StartShiftAnim(obj, view.GridToWorld(dest), durMul, delay);
-
+                var tween = StartShiftAnim(obj, view.GridToWorld(dest), durMul, delay);
+                if (tween != null) tasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
                 wave++;
             }
         }
@@ -114,7 +110,7 @@ namespace Core.Handlers
             return false;
         }
 
-        private void RefillColumn(IGridModel model, IGridView view, int x, int height, float cellSize, float spawnY, ref int wave)
+        private void RefillColumn(IGridModel model, IGridView view, int x, int height, float cellSize, float spawnY, int wave, List<UniTask> tasks)
         {
             for (int y = height - 1; y >= 0; y--)
             {
@@ -138,41 +134,20 @@ namespace Core.Handlers
                 var dist = Mathf.Abs(spawnY - target.y) / cellSize;
                 var durMul = 1f + dist * FallDistanceMultiplier;
 
-                StartShiftAnim(item, target, durMul, delay);
+                var tween = StartShiftAnim(item, target, durMul, delay);
+                if (tween != null) tasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
 
                 wave++;
             }
         }
 
-        private void StartShiftAnim(BaseItemObject obj, Vector3 target, float durMul, float delay)
-        {
-            _pendingAnims++;
-
-            var tween = obj.ItemAnimation.Shift(target, durMul, delay);
-            if (tween == null)
-            {
-                OnAnimDone();
-                return;
-            }
-
-            tween.OnComplete(OnAnimDone);
-        }
-
-        private void OnAnimDone()
-        {
-            _pendingAnims--;
-            if (_pendingAnims > 0) return;
-
-            FinishCascade();
-        }
+        private static Tween StartShiftAnim(BaseItemObject obj, Vector3 target, float durMul, float delay) => obj.ItemAnimation.Shift(target, durMul, delay);
 
         private void FinishCascade()
         {
             Context.CascadeInProgress = false;
-
             var model = Context.Model;
             var grid = model.BuildTypeDataGrid();
-
             Context.CascadeResolveRequested = GridMatchDetectUtil.HasAnyRegularMatchOnBoard(grid, model.Width, model.Height);
         }
     }
