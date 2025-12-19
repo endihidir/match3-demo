@@ -8,7 +8,7 @@ namespace Core.Handlers
         public readonly Vector2Int A;
         public readonly Vector2Int B;
 
-        public GridMove(GridMoveType type, Vector2Int a, Vector2Int b)
+        public GridMove(GridMoveType type, Vector2Int a, Vector2Int b = default)
         {
             Type = type;
             A = a;

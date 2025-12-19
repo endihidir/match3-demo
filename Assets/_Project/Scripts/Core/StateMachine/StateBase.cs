@@ -51,6 +51,8 @@ namespace Core.StateMachineCore
 
             if (!canActivate) return;
             
+            IsExitReady = false;
+            
             IsActive = true;
 
             OnEnter();

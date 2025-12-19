@@ -55,7 +55,7 @@ namespace Core.Presenters
         {
             if (!obj) return false;
             if (obj.IsEmpty) return false;
-            return !obj.ItemAnimation.IsShiftInProgress;
+            return !obj.IsShiftInProgress;
         }
 
         private void PlaceGridItems()
@@ -68,7 +68,7 @@ namespace Core.Presenters
 
                 var worldPos = _gridView.GridToWorld(coordinate);
                 item.SetPosition(worldPos);
-                item.SetSpriteSize(Vector2.one * _gridView.GetCellSize());
+                item.SetSpriteSize(_gridView.GetCellSize());
                 item.SetParent(_gridView.GridObjectsParent);
             }
         }
@@ -77,7 +77,9 @@ namespace Core.Presenters
         {
             targetCoord = default;
 
-            if (direction == Vector2Int.zero || obj.IsStationary || obj is ObstacleObject || 
+            var isNotBoosterAndTap = obj is not BoosterObject && direction == Vector2Int.zero;
+
+            if (isNotBoosterAndTap || obj.IsStationary || obj is ObstacleObject || 
                 !_gridModel.TryGetNeighbour(sourceCoord, direction, out var neighbour) 
                 || !neighbour || neighbour.IsStationary || neighbour is ObstacleObject)
             {

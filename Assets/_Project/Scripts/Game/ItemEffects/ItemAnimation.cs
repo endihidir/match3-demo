@@ -1,4 +1,3 @@
-using System;
 using Core.Config;
 using DG.Tweening;
 using UnityEngine;
@@ -34,9 +33,9 @@ namespace Core.Item
         public Tween Shift(Vector3 worldPos, float durationMultiplier = 1f, float delay = 0f)
         {
             _shiftTween?.Kill();
-            _shiftTween = transform.DOMove(worldPos, 0.15f * durationMultiplier)
-                .SetEase(Ease.Linear)
-                .SetDelay(delay)
+            
+            _shiftTween = DOTween.Sequence()
+                .Append(transform.DOMove(worldPos, 0.15f * durationMultiplier).SetEase(Ease.InOutQuad).SetDelay(delay))
                 .SetUpdate(UseUnscaledTime);
 
             return _shiftTween;

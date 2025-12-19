@@ -9,8 +9,6 @@ namespace Core.Handlers
         public override bool NeedsExitTime => true;
         protected override void OnEnter()
         {
-            IsExitReady = false;
-
             Context.CascadeResolveRequested = false;
 
             var typeGrid = Context.Model.BuildTypeDataGrid();
@@ -36,8 +34,7 @@ namespace Core.Handlers
                     }
                 }
             }
-
-            IsExitReady = true;
+            
             RequestExit();
         }
     }

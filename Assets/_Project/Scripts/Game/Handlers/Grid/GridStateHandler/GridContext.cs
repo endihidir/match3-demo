@@ -16,12 +16,12 @@ namespace Core.Handlers
         public bool CascadeInProgress { get; set; }
         public bool CascadeResolveRequested { get; set; }
 
-        public GridContext(IGridModel model, IGridView view, Queue<GridMove> moveQueue, IGridItemFactory factory)
+        public GridContext(IGridModel model, IGridView view, IGridItemFactory factory, Queue<GridMove> moveQueue)
         {
             Model = model;
             View = view;
-            MoveQueue = moveQueue;
             Factory = factory;
+            MoveQueue = moveQueue;
         }
     }
 }

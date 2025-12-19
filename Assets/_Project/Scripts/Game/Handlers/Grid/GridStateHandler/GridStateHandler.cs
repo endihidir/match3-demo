@@ -28,8 +28,8 @@ namespace Core.Handlers
         public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory)
         {
             _stateMachine = new StateMachine();
-            _context = new GridContext(model, view, _moveQueue, factory);
-
+            _context = new GridContext(model, view, factory, _moveQueue);
+            
             _accept = new AcceptMoveState().Init(_context) as AcceptMoveState;
             _execute = new ExecuteMoveState().Init(_context) as ExecuteMoveState;
             _resolve = new ResolveState().Init(_context) as ResolveState;
@@ -38,14 +38,13 @@ namespace Core.Handlers
             var states = new StateBase<GridContext>[] { _accept, _execute, _resolve, _shift };
             _stateMachine.Register(states);
 
-            _stateMachine
-                .AddTransition(_accept, _execute, () => _moveQueue.Count > 0)
-                .AddTransition(_execute, _resolve, () => _execute.IsExitReady && _execute.ResolveRequested)
-                .AddTransition(_execute, _accept, () => _execute.IsExitReady && !_execute.ResolveRequested)
-                .AddTransition(_accept, _resolve, () => _context.CascadeResolveRequested && !_context.CascadeInProgress)
-                .AddTransition(_resolve, _shift, () => _resolve.IsExitReady && _context.ResolvedAnyMatch)
-                .AddTransition(_resolve, _accept, () => _resolve.IsExitReady && !_context.ResolvedAnyMatch)
-                .AddTransition(_shift, _accept, () => _shift.IsExitReady);
+            _stateMachine.AddTransition(_accept, _execute, () => _moveQueue.Count > 0)
+                         .AddTransition(_execute, _resolve, () => _execute.IsExitReady)
+                         .AddTransition(_execute, _accept, () => _execute.IsExitReady)
+                         .AddTransition(_accept, _resolve, () => _context.CascadeResolveRequested && !_context.CascadeInProgress)
+                         .AddTransition(_resolve, _shift, () => _resolve.IsExitReady && _context.ResolvedAnyMatch)
+                         .AddTransition(_resolve, _accept, () => _resolve.IsExitReady && !_context.ResolvedAnyMatch)
+                         .AddTransition(_shift, _accept, () => _shift.IsExitReady);
 
             _stateMachine.SetInitialState(_accept);
         }
@@ -60,7 +59,7 @@ namespace Core.Handlers
 
             if (!objA || !objB) return false;
 
-            if (objA.ItemAnimation.IsShiftInProgress || objB.ItemAnimation.IsShiftInProgress)
+            if (objA.IsShiftInProgress || objB.IsShiftInProgress)
                 return false;
 
             _moveQueue.Enqueue(new GridMove(GridMoveType.Swap, a, b));
