@@ -42,32 +42,6 @@ namespace Core.Models
 
         private static readonly Direction2D[] DirectionList = (Direction2D[])Enum.GetValues(typeof(Direction2D));
         
-        private static readonly Dictionary<Direction2D, Vector2Int> DirectionOffsets = new()
-        {
-            { Direction2D.Self, new Vector2Int(0, 0) },
-            { Direction2D.Right, new Vector2Int(1, 0) },
-            { Direction2D.Left, new Vector2Int(-1, 0) },
-            { Direction2D.Up, new Vector2Int(0, -1) },
-            { Direction2D.Down, new Vector2Int(0, 1) },
-            { Direction2D.RightUp, new Vector2Int(1, -1) },
-            { Direction2D.LeftUp, new Vector2Int(-1, -1) },
-            { Direction2D.RightDown, new Vector2Int(1, 1) },
-            { Direction2D.LeftDown, new Vector2Int(-1, 1) }
-        };
-        
-        private static readonly List<Vector2Int> Offsets = new()
-        {
-            { new Vector2Int(0, 0) },
-            { new Vector2Int(1, 0) },
-            { new Vector2Int(-1, 0) },
-            { new Vector2Int(0, -1) },
-            { new Vector2Int(0, 1) },
-            { new Vector2Int(1, -1) },
-            { new Vector2Int(-1, -1) },
-            { new Vector2Int(1, 1) },
-            { new Vector2Int(-1, 1) }
-        };
-        
         public IBaseGridModel<T> Initialize(T[,] value, int width, int height, out bool[,] activeCells)
         {
             _gridArray = new T[width, height];
@@ -130,7 +104,7 @@ namespace Core.Models
             if (direction2D == Direction2D.None)
                 return false;
 
-            if (!DirectionOffsets.TryGetValue(direction2D, out var offset)) return false;
+            if (!DirectionUtil.DirectionOffsets.TryGetValue(direction2D, out var offset)) return false;
 
             var newPos = new Vector2Int(pos.x + offset.x, pos.y + offset.y);
 
@@ -188,7 +162,7 @@ namespace Core.Models
 
             var result = new List<T>();
 
-            foreach (var direction in Offsets)
+            foreach (var direction in DirectionUtil.AllDirections)
             {
                 if (ignoredDirections != null && ignoredDirections.Contains(direction))
                     continue;
@@ -238,19 +212,5 @@ namespace Core.Models
             _gridArray[pos.x, pos.y] = value;
             if (raiseEvent) OnUpdateCellData?.Invoke(value);
         }
-    }
-    
-    public enum Direction2D
-    {
-        None = 0,
-        Self = 1,
-        Up = 2,
-        Down = 3,
-        Right = 4,
-        Left = 5,
-        LeftDown = 6,
-        LeftUp = 7,
-        RightUp = 8,
-        RightDown = 9
     }
 }
