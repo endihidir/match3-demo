@@ -29,7 +29,7 @@ namespace Core.Item
             if (Life <= 0) return;
             Life -= damage;
             Life = Mathf.Max(0, Life);
-            onLifeFinished?.Invoke();
+            if(Life <= 0) onLifeFinished?.Invoke();
         }
         
         protected override void OnDeactivate()

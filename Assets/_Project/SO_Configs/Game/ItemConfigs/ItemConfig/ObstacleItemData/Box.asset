@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   icon: {fileID: 21300000, guid: 6528b59110dffbd4c93f3812a59d8a8e, type: 3}
   spriteSizeMultiplier: {x: 0.9, y: 0.9}
-  isStationary: 0
-  <Life>k__BackingField: 1
+  isStationary: 1
+  <Life>k__BackingField: 2
