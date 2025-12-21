@@ -14,18 +14,20 @@ namespace Core.Handlers
         private const float FallDistanceMultiplier = 0.2f;
         private const float SpawnYOffset = 1.25f;
 
+        private readonly List<Vector2Int> _spawnCells = new();
+
         private struct MoveInfo
         {
             public BaseItemObject Item;
             public Vector3 StartWorld;
-            public Vector2Int FinalGrid;
+            public Vector2Int TargetCell;
             public bool HasSlide;
-            public Vector2Int SlideGrid;
-            public bool IsSpawn;
+            public Vector2Int SlideTargetCell;
         }
 
-        public async UniTask Execute(GridContext context, List<UniTask> tasks)
+        public async UniTask Execute(GridContext context, List<UniTask> tasks, float startDelay = 0f)
         {
+            await UniTask.WaitForSeconds(startDelay);
             var model = context.Model;
             var view = context.View;
 
@@ -34,185 +36,133 @@ namespace Core.Handlers
 
             var cellSize = view.GetCellSize();
 
-            var touched = new HashSet<BaseItemObject>(width * height);
-            var startWorld = new Dictionary<BaseItemObject, Vector3>(width * height);
-            var slideGrid = new Dictionary<BaseItemObject, Vector2Int>(width * height);
-            var isSpawn = new HashSet<BaseItemObject>(width * height);
+            var movedSet = new HashSet<BaseItemObject>(width * height);
+            var startWorldByItem = new Dictionary<BaseItemObject, Vector3>(width * height);
+            var slideStepByItem = new Dictionary<BaseItemObject, Vector2Int>(width * height);
 
-            ApplyGravityAndSlides_SetOnly(model, width, height, touched, startWorld, slideGrid);
+            SimulateGravityAndSlides(model, width, height, movedSet, startWorldByItem, slideStepByItem);
+            SpawnRefill(context, view, width, height, cellSize, movedSet, startWorldByItem);
 
-            for (int x = 0; x < width; x++)
-            {
-                if (!TryGetSpawnY(model, view, x, height, cellSize, out var spawnY)) continue;
-                RefillTopOpenSegments_SetOnly(context, x, height, cellSize, spawnY, touched, startWorld, isSpawn);
-            }
-
-            var finalGrid = BuildFinalGridMap(model, width, height, touched);
-            PlayMoves(view, width, cellSize, touched, startWorld, finalGrid, slideGrid, isSpawn, tasks);
+            var finalCellByItem = BuildFinalCellMap(model, width, height, movedSet);
+            PlayMoveAnimations(view, width, cellSize, movedSet, startWorldByItem, finalCellByItem, slideStepByItem, tasks);
 
             await UniTask.CompletedTask;
         }
 
-        private void ApplyGravityAndSlides_SetOnly(IGridModel model, int width, int height, HashSet<BaseItemObject> touched, Dictionary<BaseItemObject, Vector3> startWorld, Dictionary<BaseItemObject, Vector2Int> slideGrid)
+        private void SimulateGravityAndSlides(IGridModel model, int width, int height, HashSet<BaseItemObject> movedSet, Dictionary<BaseItemObject, Vector3> startWorldByItem, Dictionary<BaseItemObject, Vector2Int> slideStepByItem)
         {
-            var moved = true;
+            var anyMoved = true;
             var safety = width * height * 12;
 
-            while (moved && safety-- > 0)
+            while (anyMoved && safety-- > 0)
             {
-                moved = false;
+                anyMoved = false;
 
                 for (int y = height - 1; y >= 0; y--)
                 {
                     for (int x = 0; x < width; x++)
                     {
-                        var dest = new Vector2Int(x, y);
+                        var emptyCell = new Vector2Int(x, y);
 
-                        if (!model.IsCellActive(dest)) continue;
-                        if (model.GetGridObject(dest)) continue;
+                        if (!IsEmptyActiveCell(model, emptyCell)) continue;
 
-                        if (TryFindVerticalSource(model, x, y, out var vSrc))
-                        {
-                            var obj = model.GetGridObject(vSrc);
-                            if (!obj || obj.IsStationary) continue;
-
-                            Touch(obj, touched, startWorld);
-
-                            model.SetGridObject(dest, obj);
-                            model.SetGridObject(vSrc, null);
-
-                            moved = true;
-                            continue;
-                        }
-
-                        if (!TryGetBarrierYAbove(model, x, y, out var barrierY))
-                            continue;
-
-                        var topGapY = barrierY + 1;
-                        if (topGapY >= height)
-                            continue;
-
-                        if (y != topGapY)
-                            continue;
-
-                        var topGap = new Vector2Int(x, topGapY);
-
-                        if (!model.IsCellActive(topGap))
-                            continue;
-
-                        if (model.GetGridObject(topGap))
-                            continue;
-
-                        if (TrySlideOneStepFromSide_SetOnly(model, topGap, height, sideX: x + 1, srcY: barrierY, touched, startWorld, slideGrid))
-                        {
-                            moved = true;
-                            continue;
-                        }
-
-                        if (TrySlideOneStepFromSide_SetOnly(model, topGap, height, sideX: x - 1, srcY: barrierY, touched, startWorld, slideGrid))
-                        {
-                            moved = true;
-                        }
+                        if (TryFillEmptyCell(model, emptyCell, height, movedSet, startWorldByItem, slideStepByItem))
+                            anyMoved = true;
                     }
                 }
             }
         }
 
-        private void Touch(BaseItemObject obj, HashSet<BaseItemObject> touched, Dictionary<BaseItemObject, Vector3> startWorld)
+        private bool IsEmptyActiveCell(IGridModel model, Vector2Int cell)
         {
-            touched.Add(obj);
-
-            if (!startWorld.ContainsKey(obj))
-                startWorld.Add(obj, obj.transform.position);
+            if (!model.IsCellActive(cell)) return false;
+            return !model.GetGridObject(cell);
         }
 
-        private bool TrySlideOneStepFromSide_SetOnly(IGridModel model, Vector2Int target, int height, int sideX, int srcY, HashSet<BaseItemObject> touched, Dictionary<BaseItemObject, Vector3> startWorld, Dictionary<BaseItemObject, Vector2Int> slideGrid)
+        private bool TryFillEmptyCell(IGridModel model, Vector2Int emptyCell, int height, HashSet<BaseItemObject> movedSet, Dictionary<BaseItemObject, Vector3> startWorldByItem, Dictionary<BaseItemObject, Vector2Int> slideStepByItem)
         {
-            if (sideX < 0 || sideX >= model.Width)
-                return false;
+            return TryFallIntoCell(model, emptyCell, movedSet, startWorldByItem) ||
+                   TrySlideIntoTopGap(model, emptyCell, height, movedSet, startWorldByItem, slideStepByItem);
+        }
 
-            var src = new Vector2Int(sideX, srcY);
-            if (!model.IsCellActive(src))
-                return false;
+        private bool TryFallIntoCell(IGridModel model, Vector2Int emptyCell, HashSet<BaseItemObject> movedSet, Dictionary<BaseItemObject, Vector3> startWorldByItem)
+        {
+            if (!model.TryFindVerticalSource(emptyCell.x, emptyCell.y, out var sourceCell)) return false;
 
-            var obj = model.GetGridObject(src);
-            if (!obj)
-                return false;
+            var item = model.GetGridObject(sourceCell);
+            if (!item || item.IsStationary) return false;
 
-            if (obj.IsStationary)
-                return false;
+            TrackMovedItem(item, movedSet, startWorldByItem);
 
-            if (CanFallStraightDown(model, src, height))
-                return false;
-
-            Touch(obj, touched, startWorld);
-
-            model.SetGridObject(target, obj);
-            model.SetGridObject(src, null);
-
-            slideGrid[obj] = target;
+            model.SetGridObject(emptyCell, item);
+            model.SetGridObject(sourceCell, null);
 
             return true;
         }
 
-        private bool TryFindVerticalSource(IGridModel model, int x, int destY, out Vector2Int src)
+        private bool TrySlideIntoTopGap(IGridModel model, Vector2Int emptyCell, int height, HashSet<BaseItemObject> movedSet, Dictionary<BaseItemObject, Vector3> startWorldByItem, Dictionary<BaseItemObject, Vector2Int> slideStepByItem)
         {
-            for (int y = destY - 1; y >= 0; y--)
+            if (!model.TryGetBarrierYAbove(emptyCell.x, emptyCell.y, out var barrierY)) return false;
+
+            var topGapY = barrierY + 1;
+            if (topGapY >= height) return false;
+            if (emptyCell.y != topGapY) return false;
+            var topGapCell = new Vector2Int(emptyCell.x, topGapY);
+
+            if (!IsEmptyActiveCell(model, topGapCell)) return false;
+
+            return TrySlideFromSideIntoCell(model, topGapCell, emptyCell.x + 1, barrierY, movedSet, startWorldByItem, slideStepByItem) ||
+                   TrySlideFromSideIntoCell(model, topGapCell, emptyCell.x - 1, barrierY, movedSet, startWorldByItem, slideStepByItem);
+        }
+
+        private bool TrySlideFromSideIntoCell(IGridModel model, Vector2Int targetCell, int sideX, int sourceY, HashSet<BaseItemObject> movedSet, Dictionary<BaseItemObject, Vector3> startWorldByItem, Dictionary<BaseItemObject, Vector2Int> slideStepByItem)
+        {
+            if (sideX < 0 || sideX >= model.Width) return false;
+
+            var sideCell = new Vector2Int(sideX, sourceY);
+            if (!model.IsCellActive(sideCell)) return false;
+
+            var item = model.GetGridObject(sideCell);
+            if (!item) return false;
+            if (item.IsStationary) return false;
+            //if (model.CanFallStraightDown(sideCell)) return false;
+
+            TrackMovedItem(item, movedSet, startWorldByItem);
+            model.SetGridObject(targetCell, item);
+            model.SetGridObject(sideCell, null);
+            slideStepByItem[item] = targetCell;
+
+            return true;
+        }
+
+        private void TrackMovedItem(BaseItemObject item, HashSet<BaseItemObject> movedSet, Dictionary<BaseItemObject, Vector3> startWorldByItem)
+        {
+            movedSet.Add(item);
+
+            if (!startWorldByItem.ContainsKey(item))
+                startWorldByItem.Add(item, item.transform.position);
+        }
+
+        private void SpawnRefill(GridContext context, IGridView view, int width, int height, float cellSize, HashSet<BaseItemObject> movedSet, Dictionary<BaseItemObject, Vector3> startWorldByItem)
+        {
+            for (int x = 0; x < width; x++)
             {
-                var pos = new Vector2Int(x, y);
+                if (!TryGetSpawnYForColumn(context.Model, view, x, height, cellSize, out var spawnY))
+                    continue;
 
-                if (!model.IsCellActive(pos)) continue;
-
-                var obj = model.GetGridObject(pos);
-                if (!obj) continue;
-
-                if (obj.IsStationary)
-                    break;
-
-                src = pos;
-                return true;
+                SpawnTopOpenCells(context, view, x, height, cellSize, spawnY, movedSet, startWorldByItem);
             }
-
-            src = default;
-            return false;
         }
 
-        private bool TryGetBarrierYAbove(IGridModel model, int x, int destY, out int barrierY)
-        {
-            for (int y = destY - 1; y >= 0; y--)
-            {
-                var p = new Vector2Int(x, y);
-                if (!model.IsCellActive(p)) continue;
-
-                var obj = model.GetGridObject(p);
-                if (obj && obj.IsStationary)
-                {
-                    barrierY = y;
-                    return true;
-                }
-            }
-
-            barrierY = -1;
-            return false;
-        }
-
-        private bool CanFallStraightDown(IGridModel model, Vector2Int pos, int height)
-        {
-            var below = new Vector2Int(pos.x, pos.y + 1);
-            if (below.y >= height) return false;
-            if (!model.IsCellActive(below)) return false;
-
-            return !model.GetGridObject(below);
-        }
-
-        private bool TryGetSpawnY(IGridModel model, IGridView view, int x, int height, float cellSize, out float spawnY)
+        private bool TryGetSpawnYForColumn(IGridModel model, IGridView view, int x, int height, float cellSize, out float spawnY)
         {
             for (int y = 0; y < height; y++)
             {
-                var pos = new Vector2Int(x, y);
-                if (!model.IsCellActive(pos)) continue;
+                var cell = new Vector2Int(x, y);
 
-                spawnY = view.GridToWorld(pos).y + cellSize * SpawnYOffset;
+                if (!model.IsCellActive(cell)) continue;
+
+                spawnY = view.GridToWorld(cell).y + cellSize * SpawnYOffset;
                 return true;
             }
 
@@ -220,20 +170,22 @@ namespace Core.Handlers
             return false;
         }
 
-        private void RefillTopOpenSegments_SetOnly(GridContext context, int x, int height, float cellSize, float spawnY, HashSet<BaseItemObject> touched, Dictionary<BaseItemObject, Vector3> startWorld, HashSet<BaseItemObject> isSpawn)
+        private void SpawnTopOpenCells(GridContext context, IGridView view, int x, int height, float cellSize, float spawnY, HashSet<BaseItemObject> movedSet, Dictionary<BaseItemObject, Vector3> startWorldByItem)
         {
             var model = context.Model;
-            var view = context.View;
 
-            var spawnPositions = new List<Vector2Int>();
+            _spawnCells.Clear();
+
             var blockedBelow = false;
 
             for (int y = 0; y < height; y++)
             {
-                var pos = new Vector2Int(x, y);
-                if (!model.IsCellActive(pos)) continue;
+                var cell = new Vector2Int(x, y);
 
-                var existing = model.GetGridObject(pos);
+                if (!model.IsCellActive(cell)) continue;
+
+                var existing = model.GetGridObject(cell);
+
                 if (existing && existing.IsStationary)
                 {
                     blockedBelow = true;
@@ -243,124 +195,120 @@ namespace Core.Handlers
                 if (blockedBelow) continue;
                 if (existing) continue;
 
-                spawnPositions.Add(pos);
+                _spawnCells.Add(cell);
             }
 
-            for (int i = 0; i < spawnPositions.Count; i++)
+            for (int i = 0; i < _spawnCells.Count; i++)
             {
-                var pos = spawnPositions[i];
+                var cell = _spawnCells[i];
                 var item = context.Factory.GetRandomItem();
 
                 item.SetParent(view.GridObjectsParent);
                 item.SetSpriteSize(cellSize);
 
-                var target = view.GridToWorld(pos);
-                item.SetPosition(new Vector3(target.x, spawnY, target.z));
+                var targetWorld = view.GridToWorld(cell);
+                item.SetPosition(new Vector3(targetWorld.x, spawnY, targetWorld.z));
 
-                model.SetGridObject(pos, item);
-
-                Touch(item, touched, startWorld);
-                isSpawn.Add(item);
+                model.SetGridObject(cell, item);
+                TrackMovedItem(item, movedSet, startWorldByItem);
             }
         }
 
-        private Dictionary<BaseItemObject, Vector2Int> BuildFinalGridMap(IGridModel model, int width, int height, HashSet<BaseItemObject> touched)
+        private Dictionary<BaseItemObject, Vector2Int> BuildFinalCellMap(IGridModel model, int width, int height, HashSet<BaseItemObject> movedSet)
         {
-            var map = new Dictionary<BaseItemObject, Vector2Int>(touched.Count);
+            var map = new Dictionary<BaseItemObject, Vector2Int>(movedSet.Count);
 
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    var pos = new Vector2Int(x, y);
-                    if (!model.IsCellActive(pos)) continue;
-
-                    var obj = model.GetGridObject(pos);
-                    if (!obj) continue;
-
-                    if (!touched.Contains(obj)) continue;
-
-                    map.TryAdd(obj, pos);
+                    var cell = new Vector2Int(x, y);
+                    if (!model.IsCellActive(cell)) continue;
+                    var item = model.GetGridObject(cell);
+                    if (!item) continue;
+                    if (!movedSet.Contains(item)) continue;
+                    map.TryAdd(item, cell);
                 }
             }
 
             return map;
         }
 
-        private void PlayMoves(IGridView view, int width, float cellSize, HashSet<BaseItemObject> touched, Dictionary<BaseItemObject, Vector3> startWorld, Dictionary<BaseItemObject, Vector2Int> finalGrid, Dictionary<BaseItemObject, Vector2Int> slideGrid, HashSet<BaseItemObject> isSpawn, List<UniTask> tasks)
+        private void PlayMoveAnimations(IGridView view, int width, float cellSize, HashSet<BaseItemObject> movedSet, Dictionary<BaseItemObject, Vector3> startWorldByItem, Dictionary<BaseItemObject, Vector2Int> finalCellByItem, Dictionary<BaseItemObject, Vector2Int> slideStepByItem, List<UniTask> tasks)
         {
-            var byColumn = new List<MoveInfo>[width];
+            var movesByColumn = new List<MoveInfo>[width];
 
             for (int x = 0; x < width; x++)
-                byColumn[x] = new List<MoveInfo>();
+                movesByColumn[x] = new List<MoveInfo>();
 
-            foreach (var item in touched)
+            foreach (var item in movedSet)
             {
                 if (!item) continue;
-                if (!finalGrid.TryGetValue(item, out var grid)) continue;
+                if (!finalCellByItem.TryGetValue(item, out var finalCell)) continue;
 
-                if (!startWorld.TryGetValue(item, out var start))
-                    start = item.transform.position;
+                if (!startWorldByItem.TryGetValue(item, out var startWorld))
+                    startWorld = item.transform.position;
 
-                var hasSlide = slideGrid.TryGetValue(item, out var sGrid);
+                var hasSlide = slideStepByItem.TryGetValue(item, out var slideCell);
 
-                byColumn[grid.x].Add(new MoveInfo
+                movesByColumn[finalCell.x].Add(new MoveInfo
                 {
                     Item = item,
-                    StartWorld = start,
-                    FinalGrid = grid,
+                    StartWorld = startWorld,
+                    TargetCell = finalCell,
                     HasSlide = hasSlide,
-                    SlideGrid = sGrid,
-                    IsSpawn = isSpawn.Contains(item)
+                    SlideTargetCell = slideCell
                 });
             }
 
             var swipeDelay = 0f;
-            
+
             for (int x = 0; x < width; x++)
             {
-                byColumn[x].Sort((a, b) => b.FinalGrid.y.CompareTo(a.FinalGrid.y));
-                
-                var wave = 0;
+                movesByColumn[x].Sort((a, b) => b.TargetCell.y.CompareTo(a.TargetCell.y));
 
-                for (int i = 0; i < byColumn[x].Count; i++)
+                var waveIndex = 0;
+
+                for (int i = 0; i < movesByColumn[x].Count; i++)
                 {
-                    var info = byColumn[x][i];
-
-                    Tween tween;
+                    var info = movesByColumn[x][i];
 
                     if (info.HasSlide)
                     {
-                        var slideWorld = view.GridToWorld(info.SlideGrid);
-                        var finalWorld = view.GridToWorld(info.FinalGrid);
+                        var slideWorld = view.GridToWorld(info.SlideTargetCell);
+                        var finalWorld = view.GridToWorld(info.TargetCell);
 
-                        var durMul1 = 1f + 2f * FallDistanceMultiplier;
-
-                        var dist2 = Mathf.Abs(finalWorld.y - slideWorld.y) / cellSize;
-                        var durMul2 = 1f + dist2 * FallDistanceMultiplier;
+                        var slideDurationMultiplier = 1f + 2f * FallDistanceMultiplier;
+                        var fallDurationMultiplier = CalcFallDurMul(slideWorld.y, finalWorld.y, cellSize);
 
                         var seq = DOTween.Sequence();
-                        seq.Append(info.Item.ItemAnimation.Shift(slideWorld, durMul1, swipeDelay));
-                        var shift = info.Item.ItemAnimation.Shift(finalWorld, durMul2);
-                        seq.Append(shift);
-                        swipeDelay += shift.Duration() * 0.75f;
-                        tween = seq;
+                        seq.Append(info.Item.ItemAnimation.Shift(slideWorld, slideDurationMultiplier, swipeDelay));
+                        var fallTween = info.Item.ItemAnimation.Shift(finalWorld, fallDurationMultiplier, 0f);
+                        seq.Append(fallTween);
+
+                        swipeDelay += fallTween.Duration() * 0.75f;
+                        tasks.Add(seq.AsyncWaitForCompletion().AsUniTask());
                     }
                     else
                     {
-                        var finalWorld = view.GridToWorld(info.FinalGrid);
-                        var dist = Mathf.Abs(finalWorld.y - info.StartWorld.y) / cellSize;
-                        var durMul = 1f + dist * FallDistanceMultiplier;
-                        var delay = wave * WaveDelayStep;
-                        wave++;
+                        var finalWorld = view.GridToWorld(info.TargetCell);
 
-                        tween = info.Item.ItemAnimation.Shift(finalWorld, durMul, delay);
-                    }
+                        var fallDurationMultiplier = CalcFallDurMul(info.StartWorld.y, finalWorld.y, cellSize);
 
-                    if (tween != null)
+                        var delay = waveIndex * WaveDelayStep;
+                        waveIndex++;
+
+                        var tween = info.Item.ItemAnimation.Shift(finalWorld, fallDurationMultiplier, delay);
                         tasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
+                    }
                 }
             }
+        }
+
+        private float CalcFallDurMul(float fromY, float toY, float cellSize)
+        {
+            var dist = Mathf.Abs(toY - fromY) / cellSize;
+            return 1f + dist * FallDistanceMultiplier;
         }
     }
 }
