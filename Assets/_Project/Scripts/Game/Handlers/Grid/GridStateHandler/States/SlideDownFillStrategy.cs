@@ -40,7 +40,7 @@ namespace Core.Handlers
             var startWorldByItem = new Dictionary<BaseItemObject, Vector3>(width * height);
             var slideStepByItem = new Dictionary<BaseItemObject, Vector2Int>(width * height);
 
-            SimulateGravityAndSlides(model, width, height, movedSet, startWorldByItem, slideStepByItem);
+            SimulateGravityAndSlides(context, width, height, cellSize, movedSet, startWorldByItem, slideStepByItem);
             SpawnRefill(context, view, width, height, cellSize, movedSet, startWorldByItem);
 
             var finalCellByItem = BuildFinalCellMap(model, width, height, movedSet);
@@ -49,8 +49,11 @@ namespace Core.Handlers
             await UniTask.CompletedTask;
         }
 
-        private void SimulateGravityAndSlides(IGridModel model, int width, int height, HashSet<BaseItemObject> movedSet, Dictionary<BaseItemObject, Vector3> startWorldByItem, Dictionary<BaseItemObject, Vector2Int> slideStepByItem)
+        private void SimulateGravityAndSlides(GridContext context, int width, int height, float cellSize, HashSet<BaseItemObject> movedSet, Dictionary<BaseItemObject, Vector3> startWorldByItem, Dictionary<BaseItemObject, Vector2Int> slideStepByItem)
         {
+            var model = context.Model;
+            var view = context.View;
+
             var anyMoved = true;
             var safety = width * height * 12;
 
@@ -58,6 +61,7 @@ namespace Core.Handlers
             {
                 anyMoved = false;
 
+                // 1) FALL
                 for (int y = height - 1; y >= 0; y--)
                 {
                     for (int x = 0; x < width; x++)
@@ -66,23 +70,51 @@ namespace Core.Handlers
 
                         if (!IsEmptyActiveCell(model, emptyCell)) continue;
 
-                        if (TryFillEmptyCell(model, emptyCell, height, movedSet, startWorldByItem, slideStepByItem))
+                        if (TryFallIntoCell(model, emptyCell, movedSet, startWorldByItem))
                             anyMoved = true;
                     }
                 }
+
+                // 2) SLIDE
+                for (int y = height - 1; y >= 0; y--)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        var emptyCell = new Vector2Int(x, y);
+
+                        if (!IsEmptyActiveCell(model, emptyCell)) continue;
+
+                        if (TrySlideIntoTopGap(model, emptyCell, height, movedSet, startWorldByItem, slideStepByItem))
+                            anyMoved = true;
+                    }
+                }
+
+                // 3) SPAWN
+                var spawnedAny = false;
+
+                for (int x = 0; x < width; x++)
+                {
+                    if (!TryGetSpawnYForColumn(model, view, x, height, cellSize, out var spawnY))
+                        continue;
+
+                    var before = movedSet.Count;
+
+                    SpawnTopOpenCells(context, view, x, height, cellSize, spawnY, movedSet, startWorldByItem);
+
+                    if (movedSet.Count != before)
+                        spawnedAny = true;
+                }
+
+                if (spawnedAny)
+                    anyMoved = true;
             }
         }
+
 
         private bool IsEmptyActiveCell(IGridModel model, Vector2Int cell)
         {
             if (!model.IsCellActive(cell)) return false;
             return !model.GetGridObject(cell);
-        }
-
-        private bool TryFillEmptyCell(IGridModel model, Vector2Int emptyCell, int height, HashSet<BaseItemObject> movedSet, Dictionary<BaseItemObject, Vector3> startWorldByItem, Dictionary<BaseItemObject, Vector2Int> slideStepByItem)
-        {
-            return TryFallIntoCell(model, emptyCell, movedSet, startWorldByItem) ||
-                   TrySlideIntoTopGap(model, emptyCell, height, movedSet, startWorldByItem, slideStepByItem);
         }
 
         private bool TryFallIntoCell(IGridModel model, Vector2Int emptyCell, HashSet<BaseItemObject> movedSet, Dictionary<BaseItemObject, Vector3> startWorldByItem)
@@ -114,7 +146,7 @@ namespace Core.Handlers
             return TrySlideFromSideIntoCell(model, topGapCell, emptyCell.x + 1, barrierY, movedSet, startWorldByItem, slideStepByItem) ||
                    TrySlideFromSideIntoCell(model, topGapCell, emptyCell.x - 1, barrierY, movedSet, startWorldByItem, slideStepByItem);
         }
-
+        
         private bool TrySlideFromSideIntoCell(IGridModel model, Vector2Int targetCell, int sideX, int sourceY, HashSet<BaseItemObject> movedSet, Dictionary<BaseItemObject, Vector3> startWorldByItem, Dictionary<BaseItemObject, Vector2Int> slideStepByItem)
         {
             if (sideX < 0 || sideX >= model.Width) return false;
@@ -125,7 +157,7 @@ namespace Core.Handlers
             var item = model.GetGridObject(sideCell);
             if (!item) return false;
             if (item.IsStationary) return false;
-            //if (model.CanFallStraightDown(sideCell)) return false;
+            if (model.CanFallStraightDown(sideCell)) return false;
 
             TrackMovedItem(item, movedSet, startWorldByItem);
             model.SetGridObject(targetCell, item);
