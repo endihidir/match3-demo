@@ -21,7 +21,7 @@ namespace Core.Handlers
         private readonly AcceptMoveState _accept;
         private readonly ExecuteMoveState _execute;
         private readonly ResolveState _resolve;
-        private readonly GridFillState _shift;
+        private readonly FillState _fill;
         
         private readonly Queue<GridMove> _moveQueue = new();
 
@@ -33,18 +33,18 @@ namespace Core.Handlers
             _accept = new AcceptMoveState().Init(_context) as AcceptMoveState;
             _execute = new ExecuteMoveState().Init(_context) as ExecuteMoveState;
             _resolve = new ResolveState().Init(_context) as ResolveState;
-            _shift = new GridFillState().Init(_context) as GridFillState;
+            _fill = new FillState().Init(_context) as FillState;
 
-            var states = new StateBase<GridContext>[] { _accept, _execute, _resolve, _shift };
+            var states = new StateBase<GridContext>[] { _accept, _execute, _resolve, _fill };
             _stateMachine.Register(states);
 
             _stateMachine.AddTransition(_accept, _execute, () => _moveQueue.Count > 0/* && !_context.CascadeInProgress*/)
                          .AddTransition(_execute, _resolve, () => _execute.IsExitReady)
                          .AddTransition(_execute, _accept, () => _execute.IsExitReady)
                          .AddTransition(_accept, _resolve, () => _context.CascadeResolveRequested && !_context.CascadeInProgress)
-                         .AddTransition(_resolve, _shift, () => _resolve.IsExitReady && _context.ResolvedAnyMatch)
+                         .AddTransition(_resolve, _fill, () => _resolve.IsExitReady && _context.ResolvedAnyMatch)
                          .AddTransition(_resolve, _accept, () => _resolve.IsExitReady && !_context.ResolvedAnyMatch)
-                         .AddTransition(_shift, _accept, () => _shift.IsExitReady);
+                         .AddTransition(_fill, _accept, () => _fill.IsExitReady);
 
             _stateMachine.SetInitialState(_accept);
         }
