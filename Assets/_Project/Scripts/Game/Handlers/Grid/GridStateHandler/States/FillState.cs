@@ -28,10 +28,9 @@ namespace Core.Handlers
 
         private async UniTask Run()
         {
-            await UniTask.WaitForSeconds(0.02f);
             var tasks = new List<UniTask>();
             var strategy = SelectStrategy(Context.Model);
-            await strategy.Execute(Context, tasks);
+            await strategy.Execute(Context, tasks, 0.01f);
             await UniTask.WhenAll(tasks);
             FinishCascade();
         }

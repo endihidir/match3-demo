@@ -13,8 +13,9 @@ namespace Core.Handlers
         private const float FallDistanceMultiplier = 0.2f;
         private const float SpawnYOffset = 1.25f;
 
-        public async UniTask Execute(GridContext context, List<UniTask> tasks)
+        public async UniTask Execute(GridContext context, List<UniTask> tasks, float startDelay = 0f)
         {
+            await UniTask.WaitForSeconds(startDelay);
             var model = context.Model;
             var view = context.View;
 
