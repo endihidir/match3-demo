@@ -6,6 +6,7 @@ namespace Core.Models
     public interface IGridModel : IBaseGridModel<BaseItemObject>
     {
         void Swap(Vector2Int a, Vector2Int b);
+        bool HasStationaryObject();
         int FindFallSourceY(int x, int startY);
         GridObjectTypeData[,] BuildTypeDataGrid();
     }
@@ -41,6 +42,21 @@ namespace Core.Models
             }
 
             return -1;
+        }
+        
+        public bool HasStationaryObject()
+        {
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    var p = new Vector2Int(x, y);
+                    var obj = GetGridObject(p);
+                    if (obj && obj.IsStationary) return true;
+                }
+            }
+
+            return false;
         }
 
         public GridObjectTypeData[,] BuildTypeDataGrid()

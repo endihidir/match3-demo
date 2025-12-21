@@ -150,10 +150,7 @@ namespace Core.Handlers
             model.SetGridObject(target, obj);
             model.SetGridObject(src, null);
 
-            if (!slideGrid.ContainsKey(obj))
-                slideGrid.Add(obj, target);
-            else
-                slideGrid[obj] = target;
+            slideGrid[obj] = target;
 
             return true;
         }
@@ -283,8 +280,7 @@ namespace Core.Handlers
 
                     if (!touched.Contains(obj)) continue;
 
-                    if (!map.ContainsKey(obj))
-                        map.Add(obj, pos);
+                    map.TryAdd(obj, pos);
                 }
             }
 
@@ -319,11 +315,12 @@ namespace Core.Handlers
                 });
             }
 
+            var swipeDelay = 0f;
+            
             for (int x = 0; x < width; x++)
             {
                 byColumn[x].Sort((a, b) => b.FinalGrid.y.CompareTo(a.FinalGrid.y));
-
-                var slideIndex = 0;
+                
                 var wave = 0;
 
                 for (int i = 0; i < byColumn[x].Count; i++)
@@ -342,21 +339,18 @@ namespace Core.Handlers
                         var dist2 = Mathf.Abs(finalWorld.y - slideWorld.y) / cellSize;
                         var durMul2 = 1f + dist2 * FallDistanceMultiplier;
 
-                        var delay = slideIndex * (WaveDelayStep * 0.15f);
-                        slideIndex++;
-
                         var seq = DOTween.Sequence();
-                        seq.Append(info.Item.ItemAnimation.Shift(slideWorld, durMul1, delay));
-                        seq.Append(info.Item.ItemAnimation.Shift(finalWorld, durMul2, 0f));
+                        seq.Append(info.Item.ItemAnimation.Shift(slideWorld, durMul1, swipeDelay));
+                        var shift = info.Item.ItemAnimation.Shift(finalWorld, durMul2);
+                        seq.Append(shift);
+                        swipeDelay += shift.Duration() * 0.75f;
                         tween = seq;
                     }
                     else
                     {
                         var finalWorld = view.GridToWorld(info.FinalGrid);
-
                         var dist = Mathf.Abs(finalWorld.y - info.StartWorld.y) / cellSize;
                         var durMul = 1f + dist * FallDistanceMultiplier;
-
                         var delay = wave * WaveDelayStep;
                         wave++;
 
