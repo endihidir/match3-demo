@@ -118,9 +118,8 @@ namespace Core.Handlers
 
                 if (!model.IsCellActive(pos)) continue;
                 if (model.GetGridObject(pos)) continue;
-
-                var typeId = model.GetRandomRegularTypeId();
-                var item = Context.Factory.GetItem<ItemObject>(new GridObjectTypeData(GridItemKind.Regular, typeId));
+                
+                var item = Context.Factory.GetRandomItem();
 
                 item.SetParent(view.GridObjectsParent);
                 item.SetSpriteSize(cellSize);

@@ -33,17 +33,16 @@ namespace Core.Handlers
 
                         foreach (var direction in DirectionUtil.MainDirections)
                         {
-                            if (Context.Model.TryGetNeighbour(pos, direction, out var itemObject))
+                            if (!Context.Model.TryGetNeighbour(pos, direction, out var itemObject)) continue;
+                            
+                            if (itemObject is IDamageableItem damageableItem)
                             {
-                                if (itemObject is IDamageableItem damageableItem)
+                                damageableItem.TakeDamage(1, ()=>
                                 {
-                                    damageableItem.TakeDamage(1, ()=>
-                                    {
-                                        Context.Factory.ReleaseItem(itemObject);
-                                        var obstacleItemPos = pos + direction;
-                                        Context.Model.SetGridObject(obstacleItemPos, null);
-                                    });
-                                }
+                                    Context.Factory.ReleaseItem(itemObject);
+                                    var obstacleItemPos = pos + direction;
+                                    Context.Model.SetGridObject(obstacleItemPos, null);
+                                });
                             }
                         }
 

@@ -21,6 +21,7 @@ namespace Core.Models
         T GetGridObject(Vector2Int gridPos);
         void SetGridObject(Vector2Int gridPos, T item);
 
+        bool IsCellActive(Vector2Int pos);
         bool IsInRange(Vector2Int pos);
         bool TryGetNeighbour(Vector2Int pos, Vector2Int direction, out T neighbour);
         bool TryGetNeighbor(Vector2Int pos, Direction2D direction2D, out T neighbour);
@@ -205,6 +206,11 @@ namespace Core.Models
             return count > 0;
         }
         
+        public bool IsCellActive(Vector2Int pos)
+        {
+            if (!IsInRange(pos)) return false;
+            return ActiveCells[pos.x, pos.y];
+        }
         public bool IsInRange(Vector2Int pos) => pos is { x: >= 0, y: >= 0 } && pos.x < Width && pos.y < Height;
         private T GetInternal(Vector2Int pos) => _gridArray[pos.x, pos.y];
         private void SetInternal(Vector2Int pos, T value, bool raiseEvent = true)
