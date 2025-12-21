@@ -21,7 +21,7 @@ namespace Core.Handlers
         private readonly AcceptMoveState _accept;
         private readonly ExecuteMoveState _execute;
         private readonly ResolveState _resolve;
-        private readonly ShiftRefillState _shift;
+        private readonly GridFillState _shift;
         
         private readonly Queue<GridMove> _moveQueue = new();
 
@@ -33,7 +33,7 @@ namespace Core.Handlers
             _accept = new AcceptMoveState().Init(_context) as AcceptMoveState;
             _execute = new ExecuteMoveState().Init(_context) as ExecuteMoveState;
             _resolve = new ResolveState().Init(_context) as ResolveState;
-            _shift = new ShiftRefillState().Init(_context) as ShiftRefillState;
+            _shift = new GridFillState().Init(_context) as GridFillState;
 
             var states = new StateBase<GridContext>[] { _accept, _execute, _resolve, _shift };
             _stateMachine.Register(states);

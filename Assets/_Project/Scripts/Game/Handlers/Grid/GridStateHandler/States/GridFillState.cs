@@ -6,7 +6,7 @@ using Cysharp.Threading.Tasks;
 
 namespace Core.Handlers
 {
-    public sealed class ShiftRefillState : StateBase<GridContext>
+    public sealed class GridFillState : StateBase<GridContext>
     {
         public override bool NeedsExitTime => true;
         
