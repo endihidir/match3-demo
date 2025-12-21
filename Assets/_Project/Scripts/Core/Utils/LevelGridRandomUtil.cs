@@ -25,6 +25,12 @@ namespace Core.Utils
         {
             return rng?.Next(0, maxExclusive) ?? UnityEngine.Random.Range(0, maxExclusive);
         }
+        
+        public static TEnum GetRandomEnumValue<TEnum>(int firstIndex = 0) where TEnum : Enum
+        {
+            var values = (TEnum[])Enum.GetValues(typeof(TEnum));
+            return values[UnityEngine.Random.Range(firstIndex, values.Length)];
+        }
 
         private static int[] GetCachedItemTypeIds()
         {

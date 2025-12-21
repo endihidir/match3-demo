@@ -1,43 +1,20 @@
-using System;
-using System.Collections.Generic;
 using Core.Item;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace Core.Models
 {
     public interface IGridModel : IBaseGridModel<BaseItemObject>
     {
-        bool TryGet<T>(Vector2Int pos, out T value) where T : BaseItemObject;
-        T Get<T>(Vector2Int pos) where T : BaseItemObject => !TryGet<T>(pos, out var value) ? null : value;
-
         void Swap(Vector2Int a, Vector2Int b);
-
-        bool IsCellActive(Vector2Int pos);
         int FindFallSourceY(int x, int startY);
         GridObjectTypeData[,] BuildTypeDataGrid();
-        int GetRandomRegularTypeId();
     }
 
     public class GridModel : BaseGridModel<BaseItemObject>, IGridModel
     {
-        private static readonly int[] RegularTypeIds = BuildRegularTypeIds();
-
+        
         protected override void OnInitialize()
         {
-        }
-
-        public bool TryGet<T>(Vector2Int pos, out T value) where T : BaseItemObject
-        {
-            value = null;
-
-            if (!IsInRange(pos)) return false;
-
-            var obj = GetGridObject(pos);
-            if (obj is not T typed) return false;
-
-            value = typed;
-            return true;
         }
 
         public void Swap(Vector2Int a, Vector2Int b)
@@ -50,13 +27,7 @@ namespace Core.Models
             SetGridObject(a, objB);
             SetGridObject(b, objA);
         }
-
-        public bool IsCellActive(Vector2Int pos)
-        {
-            if (!IsInRange(pos)) return false;
-            return ActiveCells[pos.x, pos.y];
-        }
-
+        
         public int FindFallSourceY(int x, int startY)
         {
             if (x < 0 || x >= Width) return -1;
@@ -86,28 +57,6 @@ namespace Core.Models
             }
 
             return grid;
-        }
-
-        public int GetRandomRegularTypeId()
-        {
-            if (RegularTypeIds.Length == 1) return RegularTypeIds[0];
-            
-            return RegularTypeIds[Random.Range(0, RegularTypeIds.Length)];
-        }
-
-        private static int[] BuildRegularTypeIds()
-        {
-            var values = (ItemType[])Enum.GetValues(typeof(ItemType));
-            var list = new List<int>();
-
-            foreach (var v in values)
-            {
-                var id = (int)v;
-                if (id <= 0) continue;
-                list.Add(id);
-            }
-
-            return list.Count == 0 ? new[] { 1 } : list.ToArray();
         }
     }
 }

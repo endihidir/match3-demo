@@ -11,17 +11,19 @@ namespace Core.Handlers
         public IGridView View { get; }
         public Queue<GridMove> MoveQueue { get; }
         public IGridItemFactory Factory { get; }
+        public bool IsSimpleFillMode  { get; }
 
         public bool ResolvedAnyMatch { get; set; }
         public bool CascadeInProgress { get; set; }
         public bool CascadeResolveRequested { get; set; }
 
-        public GridContext(IGridModel model, IGridView view, IGridItemFactory factory, Queue<GridMove> moveQueue)
+        public GridContext(IGridModel model, IGridView view, IGridItemFactory factory, Queue<GridMove> moveQueue, bool isSimpleFillMode = false)
         {
             Model = model;
             View = view;
             Factory = factory;
             MoveQueue = moveQueue;
+            IsSimpleFillMode = isSimpleFillMode;
         }
     }
 }
