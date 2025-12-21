@@ -15,6 +15,7 @@ namespace Core.Handlers
         private const float SpawnYOffset = 1.25f;
 
         private readonly List<Vector2Int> _spawnCells = new();
+        private readonly HashSet<BaseItemObject> _spawnedInThisSim = new();
 
         private struct MoveInfo
         {
@@ -54,6 +55,8 @@ namespace Core.Handlers
             var model = context.Model;
             var view = context.View;
 
+            _spawnedInThisSim.Clear();
+
             var anyMoved = true;
             var safety = width * height * 12;
 
@@ -61,7 +64,6 @@ namespace Core.Handlers
             {
                 anyMoved = false;
 
-                // 1) FALL
                 for (int y = height - 1; y >= 0; y--)
                 {
                     for (int x = 0; x < width; x++)
@@ -75,7 +77,6 @@ namespace Core.Handlers
                     }
                 }
 
-                // 2) SLIDE
                 for (int y = height - 1; y >= 0; y--)
                 {
                     for (int x = 0; x < width; x++)
@@ -89,7 +90,6 @@ namespace Core.Handlers
                     }
                 }
 
-                // 3) SPAWN
                 var spawnedAny = false;
 
                 for (int x = 0; x < width; x++)
@@ -109,7 +109,6 @@ namespace Core.Handlers
                     anyMoved = true;
             }
         }
-
 
         private bool IsEmptyActiveCell(IGridModel model, Vector2Int cell)
         {
@@ -143,11 +142,25 @@ namespace Core.Handlers
 
             if (!IsEmptyActiveCell(model, topGapCell)) return false;
 
-            return TrySlideFromSideIntoCell(model, topGapCell, emptyCell.x + 1, barrierY, movedSet, startWorldByItem, slideStepByItem) ||
-                   TrySlideFromSideIntoCell(model, topGapCell, emptyCell.x - 1, barrierY, movedSet, startWorldByItem, slideStepByItem);
+            var barrierAtTop = IsBarrierAtColumnTop(model, emptyCell.x, barrierY);
+
+            return TrySlideFromSideIntoCell(model, topGapCell, emptyCell.x + 1, barrierY, barrierAtTop, movedSet, startWorldByItem, slideStepByItem) ||
+                   TrySlideFromSideIntoCell(model, topGapCell, emptyCell.x - 1, barrierY, barrierAtTop, movedSet, startWorldByItem, slideStepByItem);
         }
-        
-        private bool TrySlideFromSideIntoCell(IGridModel model, Vector2Int targetCell, int sideX, int sourceY, HashSet<BaseItemObject> movedSet, Dictionary<BaseItemObject, Vector3> startWorldByItem, Dictionary<BaseItemObject, Vector2Int> slideStepByItem)
+
+        private bool IsBarrierAtColumnTop(IGridModel model, int x, int barrierY)
+        {
+            for (int y = barrierY - 1; y >= 0; y--)
+            {
+                var cell = new Vector2Int(x, y);
+                if (!model.IsCellActive(cell)) continue;
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool TrySlideFromSideIntoCell(IGridModel model, Vector2Int targetCell, int sideX, int sourceY, bool barrierAtTop, HashSet<BaseItemObject> movedSet, Dictionary<BaseItemObject, Vector3> startWorldByItem, Dictionary<BaseItemObject, Vector2Int> slideStepByItem)
         {
             if (sideX < 0 || sideX >= model.Width) return false;
 
@@ -156,6 +169,10 @@ namespace Core.Handlers
 
             var item = model.GetGridObject(sideCell);
             if (!item) return false;
+
+            if (!barrierAtTop && _spawnedInThisSim.Contains(item))
+                return false;
+
             if (item.IsStationary) return false;
             if (model.CanFallStraightDown(sideCell)) return false;
 
@@ -208,8 +225,6 @@ namespace Core.Handlers
 
             _spawnCells.Clear();
 
-            var blockedBelow = false;
-
             for (int y = 0; y < height; y++)
             {
                 var cell = new Vector2Int(x, y);
@@ -218,14 +233,9 @@ namespace Core.Handlers
 
                 var existing = model.GetGridObject(cell);
 
-                if (existing && existing.IsStationary)
-                {
-                    blockedBelow = true;
-                    continue;
-                }
+                if (existing && existing.IsStationary) break;
 
-                if (blockedBelow) continue;
-                if (existing) continue;
+                if (existing) break;
 
                 _spawnCells.Add(cell);
             }
@@ -242,6 +252,7 @@ namespace Core.Handlers
                 item.SetPosition(new Vector3(targetWorld.x, spawnY, targetWorld.z));
 
                 model.SetGridObject(cell, item);
+                _spawnedInThisSim.Add(item);
                 TrackMovedItem(item, movedSet, startWorldByItem);
             }
         }
