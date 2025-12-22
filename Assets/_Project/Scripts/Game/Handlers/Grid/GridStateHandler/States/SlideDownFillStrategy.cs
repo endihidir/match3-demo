@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Core.Handlers
 {
-    public sealed class SlideDownFillStrategy : IGridFillStrategy
+    public sealed class SlideDownFillStrategy : IFillStrategy
     {
         private const float WaveDelayStep = 0.05f;
         private const float FallDistanceMultiplier = 0.2f;

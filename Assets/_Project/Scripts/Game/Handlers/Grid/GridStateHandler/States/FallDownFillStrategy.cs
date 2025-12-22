@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Core.Handlers
 {
-    public sealed class FallDownFillStrategy : IGridFillStrategy
+    public sealed class FallDownFillStrategy : IFillStrategy
     {
         private const float WaveDelayStep = 0.05f;
         private const float FallDistanceMultiplier = 0.2f;

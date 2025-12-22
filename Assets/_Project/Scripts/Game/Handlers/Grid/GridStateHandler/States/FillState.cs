@@ -10,8 +10,8 @@ namespace Core.Handlers
     {
         public override bool NeedsExitTime => true;
         
-        private readonly IGridFillStrategy _fall = new FallDownFillStrategy();
-        private readonly IGridFillStrategy _slide = new SlideDownFillStrategy();
+        private readonly IFillStrategy _fallStrategy = new FallDownFillStrategy();
+        private readonly IFillStrategy _slideStrategy = new SlideDownFillStrategy();
 
         protected override void OnEnter()
         {
@@ -30,12 +30,12 @@ namespace Core.Handlers
         {
             var tasks = new List<UniTask>();
             var strategy = SelectStrategy(Context.Model);
-            await strategy.Execute(Context, tasks, 0.01f);
+            await strategy.Execute(Context, tasks, 0.02f);
             await UniTask.WhenAll(tasks);
             FinishCascade();
         }
 
-        private IGridFillStrategy SelectStrategy(IGridModel model) => model.HasStationaryObject() ? _slide : _fall;
+        private IFillStrategy SelectStrategy(IGridModel model) => model.HasStationaryAndBlocking() ? _slideStrategy : _fallStrategy;
         private void FinishCascade()
         {
             Context.CascadeInProgress = false;

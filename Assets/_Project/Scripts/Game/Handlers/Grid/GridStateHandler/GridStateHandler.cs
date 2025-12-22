@@ -38,7 +38,7 @@ namespace Core.Handlers
             var states = new StateBase<GridContext>[] { _accept, _execute, _resolve, _fill };
             _stateMachine.Register(states);
 
-            _stateMachine.AddTransition(_accept, _execute, () => _moveQueue.Count > 0/* && !_context.CascadeInProgress*/)
+            _stateMachine.AddTransition(_accept, _execute, () => _moveQueue.Count > 0 && !_context.CascadeInProgress)
                          .AddTransition(_execute, _resolve, () => _execute.IsExitReady)
                          .AddTransition(_execute, _accept, () => _execute.IsExitReady)
                          .AddTransition(_accept, _resolve, () => _context.CascadeResolveRequested && !_context.CascadeInProgress)
@@ -61,6 +61,8 @@ namespace Core.Handlers
 
             if (objA.IsShiftInProgress || objB.IsShiftInProgress)
                 return false;
+
+            //if (_context.CascadeInProgress) return false;
 
             _moveQueue.Enqueue(new GridMove(GridMoveType.Swap, a, b));
             return true;
