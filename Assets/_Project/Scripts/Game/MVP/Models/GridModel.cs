@@ -6,7 +6,7 @@ namespace Core.Models
     public interface IGridModel : IBaseGridModel<BaseItemObject>
     {
         void Swap(Vector2Int a, Vector2Int b);
-        bool HasStationaryObject();
+        bool HasStationaryAndBlocking();
         int FindFallSourceY(int x, int startY);
         GridObjectTypeData[,] BuildTypeDataGrid();
 
@@ -41,20 +41,22 @@ namespace Core.Models
                 if (!ActiveCells[x, y]) continue;
 
                 var obj = GetGridObject(new Vector2Int(x, y));
+                
                 if (obj) return y;
             }
 
             return -1;
         }
 
-        public bool HasStationaryObject()
+        public bool HasStationaryAndBlocking()
         {
             for (int y = 0; y < Height; y++)
             {
                 for (int x = 0; x < Width; x++)
                 {
                     var obj = GetGridObject(new Vector2Int(x, y));
-                    if (obj && obj.IsStationary) return true;
+                    if (!obj || !obj.IsStationary) continue;
+                    if (y < Height - 1) return true;
                 }
             }
 
@@ -88,8 +90,7 @@ namespace Core.Models
                 var obj = GetGridObject(pos);
                 if (!obj) continue;
 
-                if (obj.IsStationary)
-                    break;
+                if (obj.IsStationary) break;
 
                 src = pos;
                 return true;
