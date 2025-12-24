@@ -12,6 +12,7 @@ namespace Core.Views
         Vector2Int ScreenToGridCoordinate(Vector2 mousePosition);
         Vector3 GridToWorld(Vector2Int itemCoordinate);
         Vector2Int WorldToGrid(Vector3 worldPosition);
+        Vector2Int InputDirectionToGridDirection(Vector2Int inputDirection);
         public float GetCellSize();
     }
 }

@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 803ffae681c248541bf8e86e4b94f80f, type: 3}
   m_Name: ItemConfigContainer
   m_EditorClassIdentifier: 
-  <DefaultAnimationConfigs>k__BackingField: {fileID: 11400000, guid: 62710a5cc26717f40b57c5c3a45d9fbd,
-    type: 2}
   <ItemConfigs>k__BackingField:
   - {fileID: 11400000, guid: a06a31c95e7d77a4683f121de75c8abb, type: 2}
   - {fileID: 11400000, guid: 742832dd9da827243926bb27794c6008, type: 2}
   - {fileID: 11400000, guid: 8327294c71b752e40be756f4525ff15a, type: 2}
+  <BoosterMergeConfig>k__BackingField: {fileID: 11400000, guid: cccd3d23ec1b86a4e8534d8e235742cd,
+    type: 2}

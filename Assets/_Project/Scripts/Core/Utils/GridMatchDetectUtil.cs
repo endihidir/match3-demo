@@ -1,4 +1,5 @@
 using Core.Item;
+using UnityEngine;
 
 namespace Core.Utils
 {
@@ -91,7 +92,7 @@ namespace Core.Utils
                 return IsRegularItem(data) && data.TypeId == id;
             }
         }
-        
+
         public static bool HasAnyRegularMatchOnBoard(GridObjectTypeData[,] grid, int width, int height)
         {
             for (int y = 0; y < height; y++)
@@ -108,7 +109,7 @@ namespace Core.Utils
 
             return false;
         }
-        
+
         public static bool[,] BuildMatchMask(GridObjectTypeData[,] grid, int width, int height, out bool anyMatch)
         {
             var remove = new bool[width, height];
@@ -244,7 +245,59 @@ namespace Core.Utils
                 }
             }
         }
-        
+
+        public static void GetLineLengthsAt(GridObjectTypeData[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId, out int horizontal, out int vertical)
+        {
+            var centerOk = assumeCenterIsId || (IsRegularItem(grid[x, y]) && grid[x, y].TypeId == id);
+            if (!centerOk)
+            {
+                horizontal = 0;
+                vertical = 0;
+                return;
+            }
+
+            horizontal = 1 + CountSame(-1, 0) + CountSame(1, 0);
+            vertical = 1 + CountSame(0, -1) + CountSame(0, 1);
+
+            int CountSame(int dx, int dy)
+            {
+                var count = 0;
+
+                var cx = x + dx;
+                var cy = y + dy;
+
+                while (cx >= 0 && cx < width && cy >= 0 && cy < height)
+                {
+                    var data = grid[cx, cy];
+
+                    if (!IsRegularItem(data))
+                        break;
+
+                    if (data.TypeId != id)
+                        break;
+
+                    count++;
+
+                    cx += dx;
+                    cy += dy;
+                }
+
+                return count;
+            }
+        }
+
+        public static bool HasTOrLAt(GridObjectTypeData[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId)
+        {
+            GetLineLengthsAt(grid, x, y, width, height, id, assumeCenterIsId, out var h, out var v);
+            return h >= 3 && v >= 3;
+        }
+
+        public static bool HasFiveLineAt(GridObjectTypeData[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId)
+        {
+            GetLineLengthsAt(grid, x, y, width, height, id, assumeCenterIsId, out var h, out var v);
+            return h >= 5 || v >= 5;
+        }
+
         public static bool IsRegularItem(GridObjectTypeData data) => data is { ItemKind: GridItemKind.Regular, TypeId: > 0 };
     }
 }
