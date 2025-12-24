@@ -138,7 +138,7 @@ namespace Core.Handlers
 
             if (forceBoosterCenterToB)
             {
-                Context.HasForcedBoosterSpawn = true;
+                Context.IsForcedBoosterSpawnPos = true;
                 Context.ForcedBoosterSpawnPos = b;
             }
 

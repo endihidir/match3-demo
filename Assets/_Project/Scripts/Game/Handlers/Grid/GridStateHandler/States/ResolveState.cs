@@ -254,10 +254,19 @@ namespace Core.Handlers
                 }
             }
             
-            if (Context.HasForcedBoosterSpawn)
+            if (Context.IsForcedBoosterSpawnPos)
             {
-                Context.HasForcedBoosterSpawn = false;
-                bestPos = Context.ForcedBoosterSpawnPos;
+                var forced = Context.ForcedBoosterSpawnPos;
+
+                for (int i = 0; i < cells.Count; i++)
+                {
+                    if (cells[i] == forced)
+                    {
+                        Context.IsForcedBoosterSpawnPos = false;
+                        bestPos = forced;
+                        break;
+                    }
+                }
             }
             
             if (bestPriority == 0)
