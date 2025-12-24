@@ -79,6 +79,13 @@ namespace Core.Views
         }
         public Vector3 GridToWorld(Vector2Int itemCoordinate) => Layout.GridToWorld(_gridSize, itemCoordinate, Cam);
         public Vector2Int WorldToGrid(Vector3 worldPosition) => Layout.WorldToGrid(_gridSize, worldPosition, Cam);
+        
+        public Vector2Int InputDirectionToGridDirection(Vector2Int inputDirection)
+        {
+            if (inputDirection == Vector2Int.up) return Vector2Int.down;
+            if (inputDirection == Vector2Int.down) return Vector2Int.up;
+            return inputDirection;
+        }
         public float GetCellSize() => Layout.cellSize;
 
 #if UNITY_EDITOR

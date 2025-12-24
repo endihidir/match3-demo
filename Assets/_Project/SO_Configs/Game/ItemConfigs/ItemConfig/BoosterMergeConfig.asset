@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5ff1acf36ee46a0b177f2e2bee0687c, type: 3}
+  m_Name: BoosterMergeConfig
+  m_EditorClassIdentifier: 
+  rules:
+  - <Key>k__BackingField:
+      <First>k__BackingField: 0
+      <Second>k__BackingField: 0
+    <Effects>k__BackingField:
+    - rid: 4085054570357588003
+    - rid: 4085054570357588004
+  - <Key>k__BackingField:
+      <First>k__BackingField: 0
+      <Second>k__BackingField: 1
+    <Effects>k__BackingField:
+    - rid: 4085054590207393792
+    - rid: 4085054590207393793
+  - <Key>k__BackingField:
+      <First>k__BackingField: 1
+      <Second>k__BackingField: 1
+    <Effects>k__BackingField:
+    - rid: 4085054570357588005
+  references:
+    version: 2
+    RefIds:
+    - rid: 4085054570357588003
+      type: {class: RocketHorizontalEffect, ns: Core.Config, asm: Assembly-CSharp}
+      data:
+        <DamageAmount>k__BackingField: 1
+        <LineCount>k__BackingField: 1
+    - rid: 4085054570357588004
+      type: {class: RocketVerticalEffect, ns: Core.Config, asm: Assembly-CSharp}
+      data:
+        <DamageAmount>k__BackingField: 1
+        <LineCount>k__BackingField: 1
+    - rid: 4085054570357588005
+      type: {class: BombEffect, ns: Core.Config, asm: Assembly-CSharp}
+      data:
+        <DamageAmount>k__BackingField: 1
+        <Radius>k__BackingField: 3
+    - rid: 4085054590207393792
+      type: {class: RocketHorizontalEffect, ns: Core.Config, asm: Assembly-CSharp}
+      data:
+        <DamageAmount>k__BackingField: 1
+        <LineCount>k__BackingField: 3
+    - rid: 4085054590207393793
+      type: {class: RocketVerticalEffect, ns: Core.Config, asm: Assembly-CSharp}
+      data:
+        <DamageAmount>k__BackingField: 1
+        <LineCount>k__BackingField: 3

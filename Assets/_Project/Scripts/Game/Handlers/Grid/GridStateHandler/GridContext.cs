@@ -1,7 +1,10 @@
 using System.Collections.Generic;
+using Core.Config;
+using Core.Item;
 using Core.Item.Factories;
 using Core.Models;
 using Core.Views;
+using UnityEngine;
 
 namespace Core.Handlers
 {
@@ -9,21 +12,39 @@ namespace Core.Handlers
     {
         public IGridModel Model { get; }
         public IGridView View { get; }
-        public Queue<GridMove> MoveQueue { get; }
         public IGridItemFactory Factory { get; }
-        public bool IsSimpleFillMode  { get; }
+        public ItemConfigContainer Configs { get; }
+        public Queue<GridMove> MoveQueue { get; }
 
         public bool ResolvedAnyMatch { get; set; }
         public bool CascadeInProgress { get; set; }
         public bool CascadeResolveRequested { get; set; }
 
-        public GridContext(IGridModel model, IGridView view, IGridItemFactory factory, Queue<GridMove> moveQueue, bool isSimpleFillMode = false)
+        public Vector2Int? LastSwapA { get; set; }
+        public Vector2Int? LastSwapB { get; set; }
+        public bool LastSwapWasRegularPair { get; set; }
+
+        public List<PendingEffect> PendingEffects { get; } = new();
+
+        public GridContext(IGridModel model, IGridView view, IGridItemFactory factory, ItemConfigContainer configs, Queue<GridMove> moveQueue)
         {
             Model = model;
             View = view;
             Factory = factory;
+            Configs = configs;
             MoveQueue = moveQueue;
-            IsSimpleFillMode = isSimpleFillMode;
+        }
+
+        public readonly struct PendingEffect
+        {
+            public readonly Vector2Int Origin;
+            public readonly BoosterEffectBase BoosterEffect;
+
+            public PendingEffect(Vector2Int origin, BoosterEffectBase boosterEffect)
+            {
+                Origin = origin;
+                BoosterEffect = boosterEffect;
+            }
         }
     }
 }

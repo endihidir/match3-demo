@@ -2,7 +2,7 @@ using Core.StateMachineCore;
 
 namespace Core.Handlers
 {
-    public sealed class AcceptMoveState : StateBase<GridContext>
+    public sealed class IdleState : StateBase<GridContext>
     {
 
     }

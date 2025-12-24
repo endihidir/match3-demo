@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Core.Handlers
 {
-    public sealed class ExecuteMoveState : StateBase<GridContext>
+    public sealed class ApplyInputState : StateBase<GridContext>
     {
         public override bool NeedsExitTime => true;
 
@@ -22,6 +22,12 @@ namespace Core.Handlers
 
             var move = Context.MoveQueue.Peek();
 
+            if (move.Type == GridMoveType.Tap)
+            {
+                HandleBoosterTap(move);
+                return;
+            }
+
             if (move.Type != GridMoveType.Swap)
             {
                 Context.MoveQueue.Dequeue();
@@ -29,6 +35,40 @@ namespace Core.Handlers
                 return;
             }
 
+            HandleSwap(move);
+        }
+
+        private void HandleBoosterTap(in GridMove move)
+        {
+            var a = move.A;
+
+            var obj = Context.Model.GetGridObject(a);
+            if (!obj)
+            {
+                Context.MoveQueue.Dequeue();
+                Exit();
+                return;
+            }
+
+            if (obj.IsShiftInProgress)
+            {
+                Exit();
+                return;
+            }
+
+            Context.MoveQueue.Dequeue();
+
+            if (obj is BoosterObject booster)
+            {
+                EnqueueSingleBoosterEffect(a, booster.BoosterType);
+                Context.CascadeResolveRequested = true;
+            }
+
+            Exit();
+        }
+
+        private void HandleSwap(in GridMove move)
+        {
             var a = move.A;
             var b = move.B;
 
@@ -57,7 +97,7 @@ namespace Core.Handlers
             }
 
             if (!GridMatchDetectUtil.IsRegularItem(objA.TypeData) ||
-                !GridMatchDetectUtil.IsRegularItem(objB.TypeData) || 
+                !GridMatchDetectUtil.IsRegularItem(objB.TypeData) ||
                 !WouldCreateMatchAfterSwap(a, b, objA.TypeData.TypeId, objB.TypeData.TypeId))
             {
                 PlayPingPong(objA, objB, a, b).Forget();
@@ -70,21 +110,22 @@ namespace Core.Handlers
         private async UniTask PlayPingPong(BaseItemObject objA, BaseItemObject objB, Vector2Int a, Vector2Int b)
         {
             var tasks = new List<UniTask>();
-            
+
             var tweenA = objA.ItemAnimation.PingPongMove(Context.View.GridToWorld(b));
             var tweenB = objB.ItemAnimation.PingPongMove(Context.View.GridToWorld(a));
-            
+
             tasks.Add(tweenA.AsyncWaitForCompletion().AsUniTask());
             tasks.Add(tweenB.AsyncWaitForCompletion().AsUniTask());
 
             await UniTask.WhenAll(tasks);
-            
+
             Exit();
         }
 
         private async UniTask PlaySwapAndCommit(BaseItemObject objA, BaseItemObject objB, Vector2Int a, Vector2Int b)
         {
             var tasks = new List<UniTask>();
+
             var tweenA = objA.ItemAnimation.Move(Context.View.GridToWorld(b));
             var tweenB = objB.ItemAnimation.Move(Context.View.GridToWorld(a));
 
@@ -92,9 +133,70 @@ namespace Core.Handlers
             tasks.Add(tweenB.AsyncWaitForCompletion().AsUniTask());
 
             await UniTask.WhenAll(tasks);
-            
+
             Context.Model.Swap(a, b);
+
+            AfterSwapCommitted(a, b);
+
             Exit();
+        }
+
+        private void AfterSwapCommitted(Vector2Int a, Vector2Int b)
+        {
+            var objA = Context.Model.GetGridObject(a);
+            var objB = Context.Model.GetGridObject(b);
+
+            if (objA is BoosterObject boosterA && objB is BoosterObject boosterB)
+            {
+                EnqueueMergedEffects(b, boosterA.BoosterType, boosterB.BoosterType);
+                Context.CascadeResolveRequested = true;
+                return;
+            }
+
+            if (objB is BoosterObject movedBoosterToB)
+            {
+                EnqueueSingleBoosterEffect(b, movedBoosterToB.BoosterType);
+                Context.CascadeResolveRequested = true;
+                return;
+            }
+
+            if (objA is BoosterObject movedBoosterToA)
+            {
+                EnqueueSingleBoosterEffect(a, movedBoosterToA.BoosterType);
+            }
+
+            Context.CascadeResolveRequested = true;
+        }
+
+        private void EnqueueSingleBoosterEffect(Vector2Int origin, BoosterType type)
+        {
+            var data = Context.Configs.GetBoosterData(type);
+
+            if (data == null || data.BoosterEffect == null)
+                return;
+
+            Context.PendingEffects.Add(new GridContext.PendingEffect(origin, data.BoosterEffect));
+        }
+
+        private void EnqueueMergedEffects(Vector2Int origin, BoosterType first, BoosterType second)
+        {
+            var config = Context.Configs.BoosterMergeConfig;
+
+            if (config != null && config.TryGetRule(first, second, out var rule) && rule.Effects != null)
+            {
+                for (int i = 0; i < rule.Effects.Length; i++)
+                {
+                    var e = rule.Effects[i];
+                    if (e == null) continue;
+
+                    Context.PendingEffects.Add(new GridContext.PendingEffect(origin, e));
+                }
+
+                return;
+            }
+
+            EnqueueSingleBoosterEffect(origin, first);
+            EnqueueSingleBoosterEffect(origin, second);
         }
 
         private bool WouldCreateMatchAfterSwap(Vector2Int a, Vector2Int b, int typeA, int typeB)
@@ -113,7 +215,7 @@ namespace Core.Handlers
             return GridMatchDetectUtil.WouldCreateBlastGroup(grid, a.x, a.y, width, height, typeB, false) ||
                    GridMatchDetectUtil.WouldCreateBlastGroup(grid, b.x, b.y, width, height, typeA, false);
         }
-        
+
         protected override void OnExit()
         {
             RequestExit();

@@ -18,20 +18,44 @@ namespace Core.Item
         public override void ApplyData(BaseItemConfigData baseItemConfigData)
         {
             base.ApplyData(baseItemConfigData);
-            
+
             if (baseItemConfigData is ObstacleConfigData obstacleConfigData)
             {
                 Life = obstacleConfigData.Life;
             }
         }
-        public void TakeDamage(int damage, Action onLifeFinished)
+
+        public void TakeDamage(int damage, DamageSource source, Action onLifeFinished)
         {
+            if (!CanTakeDamageFrom(source)) return;
+
             if (Life <= 0) return;
+
             Life -= damage;
             Life = Mathf.Max(0, Life);
-            if(Life <= 0) onLifeFinished?.Invoke();
+
+            if (Life <= 0)
+                onLifeFinished?.Invoke();
         }
-        
+
+        private bool CanTakeDamageFrom(DamageSource source)
+        {
+            return source switch
+            {
+                DamageSource.RegularMatch => CanTakeRegularMatchDamage(),
+                DamageSource.Booster => true,
+                _ => true
+            };
+        }
+
+        private bool CanTakeRegularMatchDamage()
+        {
+            return ObstacleType switch
+            {
+                _ => true
+            };
+        }
+
         protected override void OnDeactivate()
         {
             base.OnDeactivate();
@@ -39,12 +63,18 @@ namespace Core.Item
             Life = 0;
             UpdateIdentity();
         }
-        
+
         public override string ToString() => $"Type: {ObstacleType}";
     }
 
     public interface IDamageableItem
     {
-        public void TakeDamage(int damage, Action onLifeFinished);
+        public void TakeDamage(int damage, DamageSource source, Action onLifeFinished);
+    }
+
+    public enum DamageSource
+    {
+        RegularMatch,
+        Booster
     }
 }

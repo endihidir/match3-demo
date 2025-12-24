@@ -52,13 +52,13 @@ namespace Core.Services
         private void OnPressCanceled(InputAction.CallbackContext ctx)
         {
             if(_isPointerOverUI) return;
-            
+
             var endPos = _actions.Board.Position.ReadValue<Vector2>();
-            
+
             var threshold = GetSwipeThreshold();
-            
+
             var dir = GetSwipeDirection(_startPos, endPos, threshold);
-            
+
             OnSwipe?.Invoke(_startPos, dir);
         }
 
@@ -75,7 +75,7 @@ namespace Core.Services
             if (ax > ay)
                 return delta.x > 0f ? Vector2Int.right : Vector2Int.left;
 
-            return delta.y > 0f ? Vector2Int.down : Vector2Int.up;
+            return delta.y > 0f ? Vector2Int.up : Vector2Int.down;
         }
 
         public void Disable()
@@ -91,13 +91,13 @@ namespace Core.Services
         {
             Disable();
         }
-        
+
         private static float GetSwipeThreshold()
         {
             var minScreenSide = Mathf.Min(Screen.width, Screen.height);
             return minScreenSide * 0.02f;
         }
-        
+
         private static bool GetPointerOverUI()
         {
             if (!EventSystem.current) return false;
@@ -106,7 +106,7 @@ namespace Core.Services
             if (Touchscreen.current == null) return false;
             var touch = Touchscreen.current.primaryTouch;
             if (!touch.press.isPressed) return false;
-            
+
             var touchId = touch.touchId.ReadValue();
             return EventSystem.current.IsPointerOverGameObject(touchId);
         }
