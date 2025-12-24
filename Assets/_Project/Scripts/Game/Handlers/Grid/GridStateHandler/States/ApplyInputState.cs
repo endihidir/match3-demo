@@ -92,7 +92,7 @@ namespace Core.Handlers
 
             if (objA is BoosterObject || objB is BoosterObject)
             {
-                PlaySwapAndCommit(objA, objB, a, b).Forget();
+                PlaySwapAndCommit(objA, objB, a, b, false).Forget();
                 return;
             }
 
@@ -104,7 +104,7 @@ namespace Core.Handlers
                 return;
             }
 
-            PlaySwapAndCommit(objA, objB, a, b).Forget();
+            PlaySwapAndCommit(objA, objB, a, b, true).Forget();
         }
 
         private async UniTask PlayPingPong(BaseItemObject objA, BaseItemObject objB, Vector2Int a, Vector2Int b)
@@ -122,7 +122,7 @@ namespace Core.Handlers
             Exit();
         }
 
-        private async UniTask PlaySwapAndCommit(BaseItemObject objA, BaseItemObject objB, Vector2Int a, Vector2Int b)
+        private async UniTask PlaySwapAndCommit(BaseItemObject objA, BaseItemObject objB, Vector2Int a, Vector2Int b, bool forceBoosterCenterToB)
         {
             var tasks = new List<UniTask>();
 
@@ -135,6 +135,12 @@ namespace Core.Handlers
             await UniTask.WhenAll(tasks);
 
             Context.Model.Swap(a, b);
+
+            if (forceBoosterCenterToB)
+            {
+                Context.HasForcedBoosterSpawn = true;
+                Context.ForcedBoosterSpawnPos = b;
+            }
 
             AfterSwapCommitted(a, b);
 
@@ -172,7 +178,7 @@ namespace Core.Handlers
         {
             var data = Context.Configs.GetBoosterData(type);
 
-            if (data || data.BoosterEffect == null) return;
+            if (!data || data.BoosterEffect == null) return;
 
             Context.PendingEffects.Add(new GridContext.PendingEffect(origin, data.BoosterEffect));
         }

@@ -19,11 +19,9 @@ namespace Core.Handlers
         public bool ResolvedAnyMatch { get; set; }
         public bool CascadeInProgress { get; set; }
         public bool CascadeResolveRequested { get; set; }
-
-        public Vector2Int? LastSwapA { get; set; }
-        public Vector2Int? LastSwapB { get; set; }
-        public bool LastSwapWasRegularPair { get; set; }
-
+        
+        public bool HasForcedBoosterSpawn { get; set; }
+        public Vector2Int ForcedBoosterSpawnPos { get; set; }
         public List<PendingEffect> PendingEffects { get; } = new();
 
         public GridContext(IGridModel model, IGridView view, IGridItemFactory factory, ItemConfigContainer configs, Queue<GridMove> moveQueue)
