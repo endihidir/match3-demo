@@ -20,7 +20,7 @@ namespace Core.Handlers
         public bool CascadeInProgress { get; set; }
         public bool CascadeResolveRequested { get; set; }
         
-        public bool HasForcedBoosterSpawn { get; set; }
+        public bool IsForcedBoosterSpawnPos { get; set; }
         public Vector2Int ForcedBoosterSpawnPos { get; set; }
         public List<PendingEffect> PendingEffects { get; } = new();
 
