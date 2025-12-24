@@ -30,7 +30,7 @@ namespace Core.Handlers
         {
             var tasks = new List<UniTask>();
             var strategy = SelectStrategy(Context.Model);
-            await strategy.Execute(Context, tasks, 0.02f);
+            await strategy.Execute(Context, tasks, 0.1f);
             await UniTask.WhenAll(tasks);
             FinishCascade();
         }

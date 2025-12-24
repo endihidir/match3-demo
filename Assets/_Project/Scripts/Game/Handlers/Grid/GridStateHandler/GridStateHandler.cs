@@ -37,7 +37,7 @@ namespace Core.Handlers
             var states = new StateBase<GridContext>[] { _idleState, _applyInputState, _resolveState, _refillState };
             _stateMachine.Register(states);
 
-            _stateMachine.AddTransition(_idleState, _applyInputState, () => _moveQueue.Count > 0 && !_context.CascadeInProgress)
+            _stateMachine.AddTransition(_idleState, _applyInputState, () => _moveQueue.Count > 0 /*&& !_context.CascadeInProgress*/)
                          .AddTransition(_idleState, _resolveState, () => _context.CascadeResolveRequested && !_context.CascadeInProgress)
                          .AddTransition(_applyInputState, _resolveState, () => _applyInputState.IsExitReady)
                          .AddTransition(_applyInputState, _idleState, () => _applyInputState.IsExitReady)
