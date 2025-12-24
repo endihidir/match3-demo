@@ -172,8 +172,7 @@ namespace Core.Handlers
         {
             var data = Context.Configs.GetBoosterData(type);
 
-            if (data == null || data.BoosterEffect == null)
-                return;
+            if (data || data.BoosterEffect == null) return;
 
             Context.PendingEffects.Add(new GridContext.PendingEffect(origin, data.BoosterEffect));
         }
@@ -182,7 +181,7 @@ namespace Core.Handlers
         {
             var config = Context.Configs.BoosterMergeConfig;
 
-            if (config != null && config.TryGetRule(first, second, out var rule) && rule.Effects != null)
+            if (config && config.TryGetRule(first, second, out var rule) && rule.Effects != null)
             {
                 for (int i = 0; i < rule.Effects.Length; i++)
                 {
