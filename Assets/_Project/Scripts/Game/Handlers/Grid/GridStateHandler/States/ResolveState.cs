@@ -60,11 +60,12 @@ namespace Core.Handlers
 
             if (spawns.Count > 0)
             {
+                
+                
                 for (int i = 0; i < spawns.Count; i++)
                 {
                     var s = spawns[i];
                     if (!s.HasSpawn) continue;
-
                     await PlayMatchMergeAnimation(s);
                     SpawnBooster(s.Pos, s.Type);
                 }
@@ -208,7 +209,7 @@ namespace Core.Handlers
             var bestPriority = 0;
             var bestPos = new Vector2Int(-1, -1);
             var bestType = BoosterType.None;
-
+            
             for (int i = 0; i < cells.Count; i++)
             {
                 var c = cells[i];
@@ -252,7 +253,13 @@ namespace Core.Handlers
                     TrySet(2, c, rocket);
                 }
             }
-
+            
+            if (Context.HasForcedBoosterSpawn)
+            {
+                Context.HasForcedBoosterSpawn = false;
+                bestPos = Context.ForcedBoosterSpawnPos;
+            }
+            
             if (bestPriority == 0)
                 return default;
 
