@@ -32,18 +32,21 @@ namespace Core.Handlers
 
             var removeMask = new bool[width, height];
             var cellDamage = new int[width, height];
+            var sourceByCell = new DamageSource[width, height];
+
+            var neighborObstacleDamage = new int[width, height];
 
             var spawns = new List<BoosterSpawn>(8);
 
             if (hasMatch)
             {
-                ResolveRegularMatches(typeGrid, matchMask, removeMask, cellDamage, width, height, spawns);
+                ResolveRegularMatches(typeGrid, matchMask, removeMask, cellDamage, sourceByCell, neighborObstacleDamage, width, height, spawns);
             }
 
             var hasEffects = Context.PendingEffects != null && Context.PendingEffects.Count > 0;
             if (hasEffects)
             {
-                ApplyPendingEffects(removeMask, cellDamage, width, height);
+                ApplyPendingEffects(removeMask, cellDamage, sourceByCell, width, height);
                 Context.PendingEffects.Clear();
             }
 
@@ -62,12 +65,13 @@ namespace Core.Handlers
                     var s = spawns[i];
                     if (!s.HasSpawn) continue;
 
-                    await PlayMatchMergeAnimation(s, width, height);
+                    await PlayMatchMergeAnimation(s);
                     SpawnBooster(s.Pos, s.Type);
                 }
             }
 
-            ResolveRemoveMask(removeMask, cellDamage, width, height);
+            ResolveRemoveMask(removeMask, cellDamage, sourceByCell, width, height);
+            ApplyNeighborObstacleDamage(neighborObstacleDamage, width, height);
 
             RequestExit();
         }
@@ -80,7 +84,7 @@ namespace Core.Handlers
             public List<Vector2Int> GroupCells;
         }
 
-        private void ResolveRegularMatches(GridObjectTypeData[,] typeGrid, bool[,] matchMask, bool[,] removeMask, int[,] cellDamage, int width, int height, List<BoosterSpawn> spawns)
+        private void ResolveRegularMatches(GridObjectTypeData[,] typeGrid, bool[,] matchMask, bool[,] removeMask, int[,] cellDamage, DamageSource[,] sourceByCell, int[,] neighborObstacleDamage, int width, int height, List<BoosterSpawn> spawns)
         {
             var visited = new bool[width, height];
 
@@ -97,14 +101,19 @@ namespace Core.Handlers
                     var id = startData.TypeId;
 
                     var group = CollectGroup(matchMask, visited, typeGrid, width, height, new Vector2Int(x, y), id);
+                    if (group.Count == 0) continue;
 
                     var spawn = DecideBoosterForGroup(typeGrid, group, width, height, id);
 
                     for (int i = 0; i < group.Count; i++)
                     {
                         var c = group[i];
+
                         removeMask[c.x, c.y] = true;
+                        sourceByCell[c.x, c.y] |= DamageSource.Item;
                         cellDamage[c.x, c.y] = Mathf.Max(cellDamage[c.x, c.y], 1);
+
+                        AddNeighborObstacleDamage(neighborObstacleDamage, width, height, c);
                     }
 
                     if (spawn.HasSpawn)
@@ -113,6 +122,46 @@ namespace Core.Handlers
                         cellDamage[spawn.Pos.x, spawn.Pos.y] = 0;
                         spawns.Add(spawn);
                     }
+                }
+            }
+        }
+
+        private static void AddNeighborObstacleDamage(int[,] neighborObstacleDamage, int width, int height, Vector2Int clearedCell)
+        {
+            TryAdd(clearedCell + Vector2Int.right);
+            TryAdd(clearedCell + Vector2Int.left);
+            TryAdd(clearedCell + Vector2Int.up);
+            TryAdd(clearedCell + Vector2Int.down);
+
+            void TryAdd(Vector2Int n)
+            {
+                if (n.x < 0 || n.y < 0 || n.x >= width || n.y >= height) return;
+                neighborObstacleDamage[n.x, n.y] += 1;
+            }
+        }
+
+        private void ApplyNeighborObstacleDamage(int[,] neighborObstacleDamage, int width, int height)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    var dmg = neighborObstacleDamage[x, y];
+                    if (dmg <= 0) continue;
+
+                    var pos = new Vector2Int(x, y);
+                    if (!Context.Model.IsCellActive(pos)) continue;
+
+                    var obj = Context.Model.GetGridObject(pos);
+                    if (!obj) continue;
+
+                    if (obj is not ObstacleObject obstacle) continue;
+
+                    obstacle.TakeDamage(dmg, DamageSource.Item, () =>
+                    {
+                        Context.Factory.ReleaseItem(obstacle);
+                        Context.Model.SetGridObject(pos, null);
+                    });
                 }
             }
         }
@@ -134,6 +183,7 @@ namespace Core.Handlers
                 TryEnqueue(p + Vector2Int.left);
                 TryEnqueue(p + Vector2Int.up);
                 TryEnqueue(p + Vector2Int.down);
+                continue;
 
                 void TryEnqueue(Vector2Int n)
                 {
@@ -165,9 +215,16 @@ namespace Core.Handlers
 
                 GetLineLengthsAt(grid, c.x, c.y, width, height, id, out var h, out var v);
 
+                // if (h >= 5 || v >= 5)
+                // {
+                //     TrySet(5, c, BoosterType.Orb);
+                //     continue;
+                // }
+
                 if (h >= 5 || v >= 5)
                 {
-                    TrySet(5, c, BoosterType.Orb);
+                    var rocket = v >= h ? BoosterType.RocketHorizontal : BoosterType.RocketVertical;
+                    TrySet(5, c, rocket);
                     continue;
                 }
 
@@ -177,9 +234,15 @@ namespace Core.Handlers
                     continue;
                 }
 
+                // if (GridMatchDetectUtil.Has2x2Square(grid, c.x, c.y, width, height, id, assumeCenterIsId: false))
+                // {
+                //     TrySet(3, c, BoosterType.Fly);
+                //     continue;
+                // }
+
                 if (GridMatchDetectUtil.Has2x2Square(grid, c.x, c.y, width, height, id, assumeCenterIsId: false))
                 {
-                    TrySet(3, c, BoosterType.Fly);
+                    TrySet(3, c, BoosterType.Bomb);
                     continue;
                 }
 
@@ -192,12 +255,6 @@ namespace Core.Handlers
 
             if (bestPriority == 0)
                 return default;
-
-            if (bestType == BoosterType.Fly)
-                bestType = BoosterType.Bomb;
-
-            if (bestType == BoosterType.Orb)
-                bestType = BoosterType.RocketHorizontal;
 
             return new BoosterSpawn
             {
@@ -244,7 +301,7 @@ namespace Core.Handlers
             }
         }
 
-        private async UniTask PlayMatchMergeAnimation(BoosterSpawn spawn, int width, int height)
+        private async UniTask PlayMatchMergeAnimation(BoosterSpawn spawn)
         {
             var targetWorld = Context.View.GridToWorld(spawn.Pos);
 
@@ -257,8 +314,6 @@ namespace Core.Handlers
 
                 var obj = Context.Model.GetGridObject(c);
                 if (!obj) continue;
-
-                if (obj.IsShiftInProgress) continue;
 
                 var tween = obj.ItemAnimation.Move(targetWorld, MergeMoveDuration, MergeEase);
                 if (tween == null)
@@ -295,6 +350,10 @@ namespace Core.Handlers
 
         private void SpawnBooster(Vector2Int pos, BoosterType type)
         {
+            // Fly ve Orb asset yok, şu an spawn etmiyoruz
+            // if (type == BoosterType.Fly) type = BoosterType.Bomb;
+            // if (type == BoosterType.Orb) type = BoosterType.RocketHorizontal;
+
             var booster = Context.Factory.GetItem<BoosterObject>(GridItemKind.Booster, (int)type);
             Context.Model.SetGridObject(pos, booster);
 
@@ -302,53 +361,53 @@ namespace Core.Handlers
             booster.SetSpriteSize(Context.View.GetCellSize());
         }
 
-        private void ApplyPendingEffects(bool[,] removeMask, int[,] cellDamage, int width, int height)
+        private void ApplyPendingEffects(bool[,] removeMask, int[,] cellDamage, DamageSource[,] sourceByCell, int width, int height)
         {
             for (int i = 0; i < Context.PendingEffects.Count; i++)
             {
                 var pending = Context.PendingEffects[i];
 
                 if (Context.Model.IsInRange(pending.Origin))
+                {
                     removeMask[pending.Origin.x, pending.Origin.y] = true;
+                    sourceByCell[pending.Origin.x, pending.Origin.y] |= DamageSource.Booster;
+                }
 
-                ApplyEffect(removeMask, cellDamage, width, height, pending.Origin, pending.BoosterEffect);
+                ApplyEffect(removeMask, cellDamage, sourceByCell, width, height, pending.Origin, pending.BoosterEffect);
             }
         }
 
-        private void ApplyEffect(bool[,] removeMask, int[,] cellDamage, int width, int height, Vector2Int origin, BoosterEffectBase effect)
+        private void ApplyEffect(bool[,] removeMask, int[,] cellDamage, DamageSource[,] sourceByCell, int width, int height, Vector2Int origin, BoosterEffectBase effect)
         {
-            if (effect == null) return;
-
-            if (effect is RocketHorizontalEffect rocketH)
+            switch (effect)
             {
-                MarkRowBand(removeMask, width, height, origin.y, rocketH.LineCount);
-                ApplyDamage(cellDamage, removeMask, width, height, rocketH.DamageAmount);
-                return;
-            }
+                case RocketHorizontalEffect rocketH:
+                    MarkRowBand(removeMask, width, height, origin.y, rocketH.LineCount);
+                    MarkRowBandSource(sourceByCell, width, height, origin.y, rocketH.LineCount);
+                    ApplyDamage(cellDamage, removeMask, width, height, rocketH.DamageAmount);
+                    return;
 
-            if (effect is RocketVerticalEffect rocketV)
-            {
-                MarkColumnBand(removeMask, width, height, origin.x, rocketV.LineCount);
-                ApplyDamage(cellDamage, removeMask, width, height, rocketV.DamageAmount);
-                return;
-            }
+                case RocketVerticalEffect rocketV:
+                    MarkColumnBand(removeMask, width, height, origin.x, rocketV.LineCount);
+                    MarkColumnBandSource(sourceByCell, width, height, origin.x, rocketV.LineCount);
+                    ApplyDamage(cellDamage, removeMask, width, height, rocketV.DamageAmount);
+                    return;
 
-            if (effect is BombEffect bomb)
-            {
-                EditorLogger.Log(bomb.Radius);
-                MarkSquare(removeMask, width, height, origin, bomb.Radius);
-                ApplyDamage(cellDamage, removeMask, width, height, bomb.DamageAmount);
-                return;
-            }
+                case BombEffect bomb:
+                    MarkSquare(removeMask, width, height, origin, bomb.Radius);
+                    MarkSquareSource(sourceByCell, width, height, origin, bomb.Radius);
+                    ApplyDamage(cellDamage, removeMask, width, height, bomb.DamageAmount);
+                    return;
 
-            if (effect is FullGridRemoveEffect full)
-            {
-                MarkAll(removeMask, width, height);
-                ApplyDamage(cellDamage, removeMask, width, height, full.DamageAmount);
+                case FullGridRemoveEffect full:
+                    MarkAll(removeMask, width, height);
+                    MarkAllSource(sourceByCell, width, height);
+                    ApplyDamage(cellDamage, removeMask, width, height, full.DamageAmount);
+                    return;
             }
         }
 
-        private void ResolveRemoveMask(bool[,] removeMask, int[,] cellDamage, int width, int height)
+        private void ResolveRemoveMask(bool[,] removeMask, int[,] cellDamage, DamageSource[,] sourceByCell, int width, int height)
         {
             for (int y = 0; y < height; y++)
             {
@@ -363,10 +422,11 @@ namespace Core.Handlers
                     if (!obj) continue;
 
                     var damage = Mathf.Max(1, cellDamage[x, y]);
+                    var source = sourceByCell[x, y];
 
                     if (obj is IDamageableItem damageable)
                     {
-                        damageable.TakeDamage(damage, DamageSource.Booster, () =>
+                        damageable.TakeDamage(damage, source, () =>
                         {
                             Context.Factory.ReleaseItem(obj);
                             Context.Model.SetGridObject(pos, null);
@@ -389,6 +449,55 @@ namespace Core.Handlers
             for (int x = 0; x < width; x++)
                 if (mask[x, y])
                     cellDamage[x, y] = Mathf.Max(cellDamage[x, y], damage);
+        }
+
+        private static void MarkRowBandSource(DamageSource[,] sourceByCell, int width, int height, int centerY, int lineCount)
+        {
+            var half = Mathf.Max(0, (lineCount - 1) / 2);
+
+            for (int dy = -half; dy <= half; dy++)
+            {
+                var y = centerY + dy;
+                if (y < 0 || y >= height) continue;
+
+                for (int x = 0; x < width; x++)
+                    sourceByCell[x, y] |= DamageSource.Booster;
+            }
+        }
+
+        private static void MarkColumnBandSource(DamageSource[,] sourceByCell, int width, int height, int centerX, int lineCount)
+        {
+            var half = Mathf.Max(0, (lineCount - 1) / 2);
+
+            for (int dx = -half; dx <= half; dx++)
+            {
+                var x = centerX + dx;
+                if (x < 0 || x >= width) continue;
+
+                for (int y = 0; y < height; y++)
+                    sourceByCell[x, y] |= DamageSource.Booster;
+            }
+        }
+
+        private static void MarkSquareSource(DamageSource[,] sourceByCell, int width, int height, Vector2Int center, int radius)
+        {
+            radius = Mathf.Max(0, radius);
+
+            for (int y = center.y - radius; y <= center.y + radius; y++)
+            {
+                for (int x = center.x - radius; x <= center.x + radius; x++)
+                {
+                    if (x < 0 || y < 0 || x >= width || y >= height) continue;
+                    sourceByCell[x, y] |= DamageSource.Booster;
+                }
+            }
+        }
+
+        private static void MarkAllSource(DamageSource[,] sourceByCell, int width, int height)
+        {
+            for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
+                sourceByCell[x, y] |= DamageSource.Booster;
         }
 
         private static void MarkRowBand(bool[,] mask, int width, int height, int centerY, int lineCount)

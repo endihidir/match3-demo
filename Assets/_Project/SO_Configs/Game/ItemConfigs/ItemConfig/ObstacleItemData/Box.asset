@@ -16,3 +16,4 @@ MonoBehaviour:
   spriteSizeMultiplier: {x: 0.9, y: 0.9}
   isStationary: 1
   <Life>k__BackingField: 2
+  <DamageSource>k__BackingField: -1
