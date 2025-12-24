@@ -1,3 +1,4 @@
+using Core.Item;
 using UnityEngine;
 
 namespace Core.Config
@@ -6,5 +7,6 @@ namespace Core.Config
     public class ObstacleConfigData : BaseItemConfigData
     {
         [field: SerializeField] public int Life { get; private set; }
+        [field: SerializeField] public DamageSource DamageSource { get; private set; }
     }
 }

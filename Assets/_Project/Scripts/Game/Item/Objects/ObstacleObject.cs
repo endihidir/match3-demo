@@ -9,6 +9,7 @@ namespace Core.Item
     {
         [field: SerializeField, ReadOnly] public ObstacleType ObstacleType { get; private set; }
         [field: SerializeField, ReadOnly] public int Life { get; private set; }
+        [field: SerializeField, ReadOnly] public DamageSource DamageSource { get; private set; }
 
         protected override void OnInitialize()
         {
@@ -22,12 +23,13 @@ namespace Core.Item
             if (baseItemConfigData is ObstacleConfigData obstacleConfigData)
             {
                 Life = obstacleConfigData.Life;
+                DamageSource = obstacleConfigData.DamageSource;
             }
         }
 
         public void TakeDamage(int damage, DamageSource source, Action onLifeFinished)
         {
-            if (!CanTakeDamageFrom(source)) return;
+            if (!DamageSource.HasFlag(source)) return;
 
             if (Life <= 0) return;
 
@@ -36,24 +38,6 @@ namespace Core.Item
 
             if (Life <= 0)
                 onLifeFinished?.Invoke();
-        }
-
-        private bool CanTakeDamageFrom(DamageSource source)
-        {
-            return source switch
-            {
-                DamageSource.RegularMatch => CanTakeRegularMatchDamage(),
-                DamageSource.Booster => true,
-                _ => true
-            };
-        }
-
-        private bool CanTakeRegularMatchDamage()
-        {
-            return ObstacleType switch
-            {
-                _ => true
-            };
         }
 
         protected override void OnDeactivate()
@@ -65,16 +49,5 @@ namespace Core.Item
         }
 
         public override string ToString() => $"Type: {ObstacleType}";
-    }
-
-    public interface IDamageableItem
-    {
-        public void TakeDamage(int damage, DamageSource source, Action onLifeFinished);
-    }
-
-    public enum DamageSource
-    {
-        RegularMatch,
-        Booster
     }
 }
