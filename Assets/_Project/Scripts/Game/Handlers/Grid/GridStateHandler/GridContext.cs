@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Core.Config;
-using Core.Item;
 using Core.Item.Factories;
 using Core.Models;
 using Core.Views;
@@ -33,16 +32,16 @@ namespace Core.Handlers
             MoveQueue = moveQueue;
         }
 
-        public readonly struct PendingEffect
-        {
-            public readonly Vector2Int Origin;
-            public readonly BoosterEffectBase BoosterEffect;
+    }
+    public readonly struct PendingEffect
+    {
+        public readonly Vector2Int Origin;
+        public readonly BoosterEffectBase BoosterEffect;
 
-            public PendingEffect(Vector2Int origin, BoosterEffectBase boosterEffect)
-            {
-                Origin = origin;
-                BoosterEffect = boosterEffect;
-            }
+        public PendingEffect(Vector2Int origin, BoosterEffectBase boosterEffect)
+        {
+            Origin = origin;
+            BoosterEffect = boosterEffect;
         }
     }
 }

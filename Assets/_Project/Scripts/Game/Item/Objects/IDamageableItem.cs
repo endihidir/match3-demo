@@ -1,9 +1,14 @@
-using System;
-
 namespace Core.Item
 {
+    public enum DamageResult
+    {
+        Ignored,
+        Damaged,
+        Destroyed
+    }
+
     public interface IDamageableItem
     {
-        public void TakeDamage(int damage, DamageSource source, Action onLifeFinished);
+        public DamageResult TakeDamage(int damage, DamageSource source);
     }
 }

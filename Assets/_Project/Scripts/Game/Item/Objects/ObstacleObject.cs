@@ -1,4 +1,3 @@
-using System;
 using Core.Config;
 using NaughtyAttributes;
 using UnityEngine;
@@ -27,17 +26,12 @@ namespace Core.Item
             }
         }
 
-        public void TakeDamage(int damage, DamageSource source, Action onLifeFinished)
+        public DamageResult TakeDamage(int damage, DamageSource source)
         {
-            if (!DamageSource.HasFlag(source)) return;
-
-            if (Life <= 0) return;
-
+            if ((DamageSource & source) == 0 || Life <= 0) return DamageResult.Ignored;
             Life -= damage;
             Life = Mathf.Max(0, Life);
-
-            if (Life <= 0)
-                onLifeFinished?.Invoke();
+            return Life <= 0 ? DamageResult.Destroyed : DamageResult.Damaged;
         }
 
         protected override void OnDeactivate()
