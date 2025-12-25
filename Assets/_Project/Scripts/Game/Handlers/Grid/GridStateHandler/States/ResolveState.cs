@@ -337,6 +337,7 @@ namespace Core.Handlers
 
             booster.SetPosition(Context.View.GridToWorld(pos));
             booster.SetSpriteSize(Context.View.GetCellSize());
+            booster.SetParent(Context.View.GridObjectsParent);
         }
 
         private void ApplyPendingEffects(CellResolveData[,] cells, int width, int height)
@@ -439,63 +440,99 @@ namespace Core.Handlers
             }
         }
 
-        private void ApplyResolveData(CellResolveData[,] cells, int width, int height)
+       private void ApplyResolveData(CellResolveData[,] cells, int width, int height)
         {
-            for (int y = 0; y < height; y++)
+            var triggered = new bool[width, height];
+            var effects = new Queue<PendingEffect>(8);
+
+            var loopAgain = false;
+
+            do
             {
-                for (int x = 0; x < width; x++)
+                loopAgain = false;
+
+                for (int y = 0; y < height; y++)
                 {
-                    ref var cell = ref cells[x, y];
-
-                    var pos = new Vector2Int(x, y);
-                    if (!Context.Model.IsCellActive(pos)) continue;
-
-                    var obj = Context.Model.GetGridObject(pos);
-                    if (!obj) continue;
-
-                    var anyWork = cell.Remove || cell.ObstacleDamage > 0;
-                    if (!anyWork) continue;
-
-                    if (obj is IDamageableItem damageable)
+                    for (int x = 0; x < width; x++)
                     {
+                        ref var cell = ref cells[x, y];
+
+                        var pos = new Vector2Int(x, y);
+                        if (!Context.Model.IsCellActive(pos)) continue;
+
+                        var obj = Context.Model.GetGridObject(pos);
+                        if (!obj) continue;
+
+                        var anyWork = cell.Remove || cell.ObstacleDamage > 0;
+                        if (!anyWork) continue;
+
+                        if (obj is IDamageableItem damageable)
+                        {
+                            if (cell.Remove)
+                            {
+                                if (!triggered[x, y] && obj is ITriggerEffectSource trigger && trigger.TryBuildEffect(pos, out var effect))
+                                {
+                                    effects.Enqueue(effect);
+                                    triggered[x, y] = true;
+                                }
+
+                                while (effects.Count > 0)
+                                {
+                                    var e = effects.Dequeue();
+                                    ApplyEffect(cells, width, height, e.Origin, e.BoosterEffect);
+                                    loopAgain = true;
+                                }
+
+                                var dmg = Mathf.Max(1, cell.Damage);
+                                var src = cell.Source;
+
+                                var result = damageable.TakeDamage(dmg, src);
+                                if (result == DamageResult.Destroyed)
+                                {
+                                    Context.Factory.ReleaseItem(obj);
+                                    Context.Model.SetGridObject(pos, null);
+                                    continue;
+                                }
+                            }
+
+                            if (cell.ObstacleDamage > 0)
+                            {
+                                var dmg = Mathf.Max(1, cell.ObstacleDamage);
+                                var src = cell.ObstacleSource;
+
+                                var result = damageable.TakeDamage(dmg, src);
+                                if (result == DamageResult.Destroyed)
+                                {
+                                    Context.Factory.ReleaseItem(obj);
+                                    Context.Model.SetGridObject(pos, null);
+                                    continue;
+                                }
+                            }
+
+                            continue;
+                        }
+
                         if (cell.Remove)
                         {
-                            var dmg = Mathf.Max(1, cell.Damage);
-                            var src = cell.Source;
-
-                            var result = damageable.TakeDamage(dmg, src);
-                            if (result == DamageResult.Destroyed)
+                            if (!triggered[x, y] && obj is ITriggerEffectSource trigger && trigger.TryBuildEffect(pos, out var effect))
                             {
-                                Context.Factory.ReleaseItem(obj);
-                                Context.Model.SetGridObject(pos, null);
-                                continue;
+                                effects.Enqueue(effect);
+                                triggered[x, y] = true;
                             }
-                        }
 
-                        if (cell.ObstacleDamage > 0)
-                        {
-                            var dmg = Mathf.Max(1, cell.ObstacleDamage);
-                            var src = cell.ObstacleSource;
-
-                            var result = damageable.TakeDamage(dmg, src);
-                            if (result == DamageResult.Destroyed)
+                            while (effects.Count > 0)
                             {
-                                Context.Factory.ReleaseItem(obj);
-                                Context.Model.SetGridObject(pos, null);
-                                continue;
+                                var e = effects.Dequeue();
+                                ApplyEffect(cells, width, height, e.Origin, e.BoosterEffect);
+                                loopAgain = true;
                             }
+
+                            Context.Factory.ReleaseItem(obj);
+                            Context.Model.SetGridObject(pos, null);
                         }
-
-                        continue;
-                    }
-
-                    if (cell.Remove)
-                    {
-                        Context.Factory.ReleaseItem(obj);
-                        Context.Model.SetGridObject(pos, null);
                     }
                 }
-            }
+            } while (loopAgain);
         }
     }
 }
