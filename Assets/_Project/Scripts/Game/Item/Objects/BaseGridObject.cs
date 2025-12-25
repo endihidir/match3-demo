@@ -71,7 +71,7 @@ namespace Core.Item
         {
             var gridView = FindObjectOfType<GridView>();
             
-            if (!gridView)
+            if (!gridView && !gridView.IsInitialized)
             {
                 EditorLogger.LogError("GridView not found!");
                 return;
