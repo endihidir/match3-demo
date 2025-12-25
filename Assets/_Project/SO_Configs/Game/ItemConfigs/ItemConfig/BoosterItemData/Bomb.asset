@@ -24,4 +24,4 @@ MonoBehaviour:
       type: {class: BombEffect, ns: Core.Config, asm: Assembly-CSharp}
       data:
         <DamageAmount>k__BackingField: 1
-        <Radius>k__BackingField: 1
+        <Radius>k__BackingField: 2

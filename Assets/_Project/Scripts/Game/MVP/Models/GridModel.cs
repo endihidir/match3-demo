@@ -25,11 +25,11 @@ namespace Core.Models
         {
             if (!IsInRange(a) || !IsInRange(b)) return;
 
-            var objA = GetGridObject(a);
-            var objB = GetGridObject(b);
+            var objA = GetGridObjectFast(a.x, a.y);
+            var objB = GetGridObjectFast(b.x, b.y);
 
-            SetGridObject(a, objB);
-            SetGridObject(b, objA);
+            SetGridObjectFast(a.x, a.y, objB);
+            SetGridObjectFast(b.x, b.y, objA);
         }
 
         public int FindFallSourceY(int x, int startY)
@@ -38,10 +38,9 @@ namespace Core.Models
 
             for (int y = startY; y >= 0; y--)
             {
-                if (!ActiveCells[x, y]) continue;
+                if (!IsCellActiveFast(x, y)) continue;
 
-                var obj = GetGridObject(new Vector2Int(x, y));
-                
+                var obj = GetGridObjectFast(x, y);
                 if (obj) return y;
             }
 
@@ -54,7 +53,8 @@ namespace Core.Models
             {
                 for (int x = 0; x < Width; x++)
                 {
-                    var obj = GetGridObject(new Vector2Int(x, y));
+                    var obj = GetGridObjectFast(x, y);
+
                     if (!obj || !obj.IsStationary) continue;
                     if (y < Height - 1) return true;
                 }
@@ -71,7 +71,7 @@ namespace Core.Models
             {
                 for (int x = 0; x < Width; x++)
                 {
-                    var obj = GetGridObject(new Vector2Int(x, y));
+                    var obj = GetGridObjectFast(x, y);
                     grid[x, y] = obj ? obj.TypeData : default;
                 }
             }
@@ -79,20 +79,29 @@ namespace Core.Models
             return grid;
         }
 
-        public bool TryFindVerticalSource(int x, int destY, out Vector2Int src)
+        public bool TryFindVerticalSource(int x, int destY, out Vector2Int src) => TryScanUpForSource(x, destY, out src);
+        public bool TryGetBarrierYAbove(int x, int destY, out int barrierY) => TryScanUpForBarrier(x, destY, out barrierY);
+
+        public bool CanFallStraightDown(Vector2Int pos)
+        {
+            var below = new Vector2Int(pos.x, pos.y + 1);
+            if (!IsInRange(below)) return false;
+            if (!IsCellActiveFast(below.x, below.y)) return false;
+            return !GetGridObjectFast(below.x, below.y);
+        }
+
+        private bool TryScanUpForSource(int x, int destY, out Vector2Int src)
         {
             for (int y = destY - 1; y >= 0; y--)
             {
-                var pos = new Vector2Int(x, y);
+                if (!IsCellActiveFast(x, y)) continue;
 
-                if (!IsCellActive(pos)) continue;
-
-                var obj = GetGridObject(pos);
+                var obj = GetGridObjectFast(x, y);
                 if (!obj) continue;
 
                 if (obj.IsStationary) break;
 
-                src = pos;
+                src = new Vector2Int(x, y);
                 return true;
             }
 
@@ -100,14 +109,13 @@ namespace Core.Models
             return false;
         }
 
-        public bool TryGetBarrierYAbove(int x, int destY, out int barrierY)
+        private bool TryScanUpForBarrier(int x, int destY, out int barrierY)
         {
             for (int y = destY - 1; y >= 0; y--)
             {
-                var pos = new Vector2Int(x, y);
-                if (!IsCellActive(pos)) continue;
+                if (!IsCellActiveFast(x, y)) continue;
 
-                var obj = GetGridObject(pos);
+                var obj = GetGridObjectFast(x, y);
                 if (obj && obj.IsStationary)
                 {
                     barrierY = y;
@@ -117,15 +125,6 @@ namespace Core.Models
 
             barrierY = -1;
             return false;
-        }
-
-        public bool CanFallStraightDown(Vector2Int pos)
-        {
-            var below = new Vector2Int(pos.x, pos.y + 1);
-            if (below.y >= Height) return false;
-            if (!IsCellActive(below)) return false;
-
-            return !GetGridObject(below);
         }
     }
 }
