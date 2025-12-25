@@ -127,7 +127,7 @@ namespace Core.Handlers
                     cell.MarkRemove(DamageSource.Booster);
                 }
 
-                BoosterEffectApplyHelper.ApplyEffect(cells, width, height, pending.Origin, pending.BoosterEffect);
+                BoosterEffectApplyHelper.ApplyEffect(cells, width, height, pending.Origin, pending.boosterAction);
             }
         }
 
@@ -294,7 +294,7 @@ namespace Core.Handlers
                 while (effects.Count > 0)
                 {
                     var pendingEffect = effects.Dequeue();
-                    BoosterEffectApplyHelper.ApplyEffect(cells, width, height, pendingEffect.Origin, pendingEffect.BoosterEffect);
+                    BoosterEffectApplyHelper.ApplyEffect(cells, width, height, pendingEffect.Origin, pendingEffect.boosterAction);
                     loopAgainFlag = true;
                 }
             }

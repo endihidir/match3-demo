@@ -8,7 +8,7 @@ namespace Core.Item
     public class BoosterObject : BaseGridObject, ITriggerEffectSource
     {
         [field: SerializeField, ReadOnly] public BoosterType BoosterType { get; private set; }
-        [field: SerializeReference, ReadOnly] public BoosterEffectBase BoosterEffect { get; private set; }
+        [field: SerializeReference, ReadOnly] public BoosterActionBase BoosterAction { get; private set; }
 
         protected override void OnInitialize()
         {
@@ -28,18 +28,18 @@ namespace Core.Item
 
             if (baseItemConfigData is BoosterConfigData boosterConfigData)
             {
-                BoosterEffect = boosterConfigData.BoosterEffect;
+                BoosterAction = boosterConfigData.BoosterAction;
             }
         }
         public bool TryBuildEffect(Vector2Int origin, out PendingEffect effect)
         {
-            if (BoosterEffect == null)
+            if (BoosterAction == null)
             {
                 effect = default;
                 return false;
             }
 
-            effect = new PendingEffect(origin, BoosterEffect);
+            effect = new PendingEffect(origin, BoosterAction);
 
             return true;
         }

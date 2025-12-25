@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-[CustomPropertyDrawer(typeof(Core.Config.BoosterEffectBase), true)]
+[CustomPropertyDrawer(typeof(Core.Config.BoosterActionBase), true)]
 public sealed class BoosterEffectBaseDrawer : PropertyDrawer
 {
     private static Type[] _cachedTypes;
@@ -12,7 +12,7 @@ public sealed class BoosterEffectBaseDrawer : PropertyDrawer
     {
         if (_cachedTypes != null) return _cachedTypes;
 
-        _cachedTypes = TypeCache.GetTypesDerivedFrom<Core.Config.BoosterEffectBase>()
+        _cachedTypes = TypeCache.GetTypesDerivedFrom<Core.Config.BoosterActionBase>()
             .Where(t => !t.IsAbstract && !t.IsGenericType && t.GetConstructor(Type.EmptyTypes) != null)
             .OrderBy(t => t.Name)
             .ToArray();
