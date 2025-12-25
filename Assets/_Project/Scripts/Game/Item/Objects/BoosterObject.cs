@@ -8,7 +8,7 @@ namespace Core.Item
     public class BoosterObject : BaseItemObject, ITriggerEffectSource
     {
         [field: SerializeField, ReadOnly] public BoosterType BoosterType { get; private set; }
-        [field: SerializeField, ReadOnly] public BoosterEffectBase BoosterEffect { get; private set; }
+        [field: SerializeReference, ReadOnly] public BoosterEffectBase BoosterEffect { get; private set; }
 
         protected override void OnInitialize()
         {
