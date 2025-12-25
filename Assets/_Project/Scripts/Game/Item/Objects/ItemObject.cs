@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Core.Item
 {
-    public class ItemObject : BaseItemObject
+    public class GridObject : BaseGridObject
     {
         [field: SerializeField, ReadOnly] public ItemType ItemType { get; private set; }
         protected override void OnInitialize()

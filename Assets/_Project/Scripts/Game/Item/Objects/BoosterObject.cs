@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Core.Item
 {
-    public class BoosterObject : BaseItemObject, ITriggerEffectSource
+    public class BoosterObject : BaseGridObject, ITriggerEffectSource
     {
         [field: SerializeField, ReadOnly] public BoosterType BoosterType { get; private set; }
         [field: SerializeReference, ReadOnly] public BoosterEffectBase BoosterEffect { get; private set; }

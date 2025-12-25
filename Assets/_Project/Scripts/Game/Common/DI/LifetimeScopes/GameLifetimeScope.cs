@@ -7,6 +7,7 @@ using Core.Presenters;
 using Core.Services;
 using Core.Views;
 using UnityEngine;
+using UnityEngine.Serialization;
 using VContainer;
 using VContainer.Unity;
 
@@ -14,12 +15,12 @@ namespace Core.LifetimeScopes
 {
     public class GameLifetimeScope : LifetimeScope
     {
-        [field: SerializeField] private GameConfigContainer GameConfigContainer {get; set;}
+        [field: FormerlySerializedAs("<GameConfigContainer>k__BackingField")] [field: SerializeField] private GameplayConfigContainer GameplayConfigContainer {get; set;}
 
         protected override void Configure(IContainerBuilder builder)
         {
-            builder.RegisterInstance(GameConfigContainer);
-            builder.RegisterEntryPoint<GameBootstrapper>();
+            builder.RegisterInstance(GameplayConfigContainer);
+            builder.RegisterEntryPoint<GameplayBootstrapper>();
             
             builder.Register<InputService>(Lifetime.Scoped).As<IInputService, ITickable>();
             builder.Register<LevelGoalModel>(Lifetime.Scoped).As<ILevelGoalModel>();

@@ -3,19 +3,19 @@ using UnityEngine;
 
 namespace Core.Models
 {
-    public interface IGridModel : IBaseGridModel<BaseItemObject>
+    public interface IGridModel : IBaseGridModel<BaseGridObject>
     {
         void Swap(Vector2Int a, Vector2Int b);
         bool HasStationaryAndBlocking();
         int FindFallSourceY(int x, int startY);
-        GridObjectTypeData[,] BuildTypeDataGrid();
+        GridObjectType[,] BuildTypeDataGrid();
 
         bool TryFindVerticalSource(int x, int destY, out Vector2Int src);
         bool TryGetBarrierYAbove(int x, int destY, out int barrierY);
         bool CanFallStraightDown(Vector2Int pos);
     }
 
-    public class GridModel : BaseGridModel<BaseItemObject>, IGridModel
+    public class GridModel : BaseGridModel<BaseGridObject>, IGridModel
     {
         protected override void OnInitialize()
         {
@@ -63,16 +63,16 @@ namespace Core.Models
             return false;
         }
 
-        public GridObjectTypeData[,] BuildTypeDataGrid()
+        public GridObjectType[,] BuildTypeDataGrid()
         {
-            var grid = new GridObjectTypeData[Width, Height];
+            var grid = new GridObjectType[Width, Height];
 
             for (int y = 0; y < Height; y++)
             {
                 for (int x = 0; x < Width; x++)
                 {
                     var obj = GetGridObjectFast(x, y);
-                    grid[x, y] = obj ? obj.TypeData : default;
+                    grid[x, y] = obj ? obj.ObjectType : default;
                 }
             }
 

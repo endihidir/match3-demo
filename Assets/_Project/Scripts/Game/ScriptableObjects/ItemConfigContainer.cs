@@ -22,11 +22,11 @@ namespace Core.Config
             return null;
         }
 
-        public BaseItemConfigData GetConfigData(GridObjectTypeData typeData) => typeData.ItemKind switch
+        public BaseItemConfigData GetConfigData(GridObjectType ıd) => ıd.ItemKind switch
         {
-            GridItemKind.Regular => GetConfig<ItemConfig>().GetData((ItemType)typeData.TypeId),
-            GridItemKind.Booster => GetConfig<BoosterItemConfig>().GetData((BoosterType)typeData.TypeId),
-            GridItemKind.Obstacle => GetConfig<ObstacleItemConfig>().GetData((ObstacleType)typeData.TypeId),
+            GridItemKind.Regular => GetConfig<ItemConfig>().GetData((ItemType)ıd.TypeId),
+            GridItemKind.Booster => GetConfig<BoosterItemConfig>().GetData((BoosterType)ıd.TypeId),
+            GridItemKind.Obstacle => GetConfig<ObstacleItemConfig>().GetData((ObstacleType)ıd.TypeId),
             _ => null
         };
 

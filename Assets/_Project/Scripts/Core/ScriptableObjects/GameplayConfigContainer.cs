@@ -1,0 +1,19 @@
+using Core.Config;
+using NaughtyAttributes;
+using UnityEngine;
+using UnityEngine.Serialization;
+
+namespace Core.Configs
+{
+    //[CreateAssetMenu(fileName = "GameplayConfigContainer", menuName = "Match3/Core/GameplayConfigContainer", order = 0)]
+    public class GameplayConfigContainer : ScriptableObject
+    {
+        [field: FormerlySerializedAs("<GameBootstrapperConfig>k__BackingField")] [field: SerializeField, Required] public GameplayBootstrapperConfig GameplayBootstrapperConfig { get; private set; }
+        [field: SerializeField, Required] public ItemConfigContainer ItemConfigContainer { get; private set; }
+        
+        public void Initialize()
+        {
+            
+        }
+    }
+}
