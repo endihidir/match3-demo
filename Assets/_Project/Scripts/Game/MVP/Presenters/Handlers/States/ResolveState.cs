@@ -40,7 +40,6 @@ namespace Core.Handlers
             }
 
             await ExecuteSpawnPhase(spawns);
-            
             ApplyResolveData(cells, width, height);
 
             RequestExit();
@@ -93,7 +92,7 @@ namespace Core.Handlers
 
                     var id = startData.TypeId;
 
-                    var group = CollectGroup(matchMask, visited, typeGrid, width, height, new Vector2Int(x, y), id);
+                    var group = ResolveMarkUtil.CollectGroup(matchMask, visited, typeGrid, width, height, new Vector2Int(x, y), id);
                     if (group.Count == 0) continue;
 
                     var spawn = DecideBoosterForGroup(typeGrid, group, width, height, id);
@@ -105,7 +104,7 @@ namespace Core.Handlers
                         ref var cell = ref cells[c.x, c.y];
                         cell.AddDamage(1, DamageSource.Item);
 
-                        AddNeighborObstacleDamage(cells, width, height, c);
+                        ResolveMarkUtil.AddNeighborObstacleDamage(cells, width, height, c);
                     }
 
                     if (spawn.HasSpawn)
@@ -122,42 +121,6 @@ namespace Core.Handlers
                         }
                     }
                 }
-            }
-        }
-
-        private List<Vector2Int> CollectGroup(bool[,] matchMask, bool[,] visited, GridObjectType[,] typeGrid, int width, int height, Vector2Int start, int id)
-        {
-            var result = new List<Vector2Int>(16);
-            var q = new Queue<Vector2Int>(16);
-
-            visited[start.x, start.y] = true;
-            q.Enqueue(start);
-
-            while (q.Count > 0)
-            {
-                var p = q.Dequeue();
-                result.Add(p);
-
-                TryEnqueue(new Vector2Int(p.x - 1, p.y));
-                TryEnqueue(new Vector2Int(p.x + 1, p.y));
-                TryEnqueue(new Vector2Int(p.x, p.y - 1));
-                TryEnqueue(new Vector2Int(p.x, p.y + 1));
-            }
-
-            return result;
-
-            void TryEnqueue(Vector2Int n)
-            {
-                if (n.x < 0 || n.y < 0 || n.x >= width || n.y >= height) return;
-                if (!matchMask[n.x, n.y]) return;
-                if (visited[n.x, n.y]) return;
-
-                var d = typeGrid[n.x, n.y];
-                if (!GridMatchDetectUtil.IsRegularItem(d)) return;
-                if (d.TypeId != id) return;
-
-                visited[n.x, n.y] = true;
-                q.Enqueue(n);
             }
         }
 
@@ -225,22 +188,6 @@ namespace Core.Handlers
                 bestPriority = priority;
                 bestPos = pos;
                 bestType = type;
-            }
-        }
-
-        private void AddNeighborObstacleDamage(CellResolveData[,] cells, int width, int height, Vector2Int c)
-        {
-            MarkNeighbour(c.x - 1, c.y);
-            MarkNeighbour(c.x + 1, c.y);
-            MarkNeighbour(c.x, c.y - 1);
-            MarkNeighbour(c.x, c.y + 1);
-            return;
-
-            void MarkNeighbour(int x, int y)
-            {
-                if (x < 0 || y < 0 || x >= width || y >= height) return;
-                ref var cell = ref cells[x, y];
-                cell.AddObstacleOnlyDamage(1, DamageSource.Item);
             }
         }
 
