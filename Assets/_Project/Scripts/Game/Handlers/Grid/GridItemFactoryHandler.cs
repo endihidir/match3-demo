@@ -20,7 +20,7 @@ namespace Core.Handlers
         {
             _gridItemFactory = gridItemFactory;
             _sceneLoadContext = sceneLoadContext;
-            _sceneLoadContext.OnLoadStart += OnSceneLoadStart;
+            _sceneLoadContext.OnLoadStart += OnSceneUnload;
         }
 
         public void PopulateGridWith(GridObjectTypeData[,] gridObjectTypes, out BaseItemObject[,] itemObjects)
@@ -51,14 +51,14 @@ namespace Core.Handlers
             _ => null
         };
         
-        private void OnSceneLoadStart()
+        private void OnSceneUnload()
         {
             _gridItemFactory.ReleaseAllItems();
         }
 
         public void Dispose()
         {
-            _sceneLoadContext.OnLoadStart -= OnSceneLoadStart;
+            _sceneLoadContext.OnLoadStart -= OnSceneUnload;
         }
     }
 }

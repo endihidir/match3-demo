@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Core.Utils;
 using UnityEngine;
 
@@ -61,9 +60,10 @@ namespace Core.Models
                 var x = coordinate.x;
                 var y = coordinate.y;
 
-                SetInternal(coordinate, value[x, y], false);
+                var gridObject = value[x, y];
 
-                var gridObject = GetInternal(coordinate);
+                SetInternal(coordinate, gridObject, false);
+
                 if (gridObject == null) continue;
 
                 activeCells[x, y] = true;
@@ -123,16 +123,18 @@ namespace Core.Models
                 return false;
             }
 
-            var result = new List<T>(8);
+            var buffer = new T[8];
+            var span = buffer.AsSpan();
 
-            foreach (var direction in DirectionLookup.AllDirections)
+            if (!TryGetNeighboursNonAlloc(pos, span, out var count) || count == 0)
             {
-                if (!TryGetNeighbour(pos, direction, out var neighbour)) continue;
-                result.Add(neighbour);
+                neighbours = Array.Empty<T>();
+                return false;
             }
 
-            neighbours = result.ToArray();
-            return neighbours.Length > 0;
+            neighbours = new T[count];
+            Array.Copy(buffer, neighbours, count);
+            return true;
         }
 
         public bool TryGetNeighboursNonAlloc(Vector2Int pos, Span<T> resultBuffer, out int count)
@@ -160,6 +162,17 @@ namespace Core.Models
         }
 
         public bool IsInRange(Vector2Int pos) => pos is { x: >= 0, y: >= 0 } && pos.x < Width && pos.y < Height;
+
+        protected T GetGridObjectFast(int x, int y) => _gridArray[x, y];
+        protected void SetGridObjectFast(int x, int y, T value, bool raiseEvent = true)
+        {
+            _gridArray[x, y] = value;
+
+            if (raiseEvent)
+                OnUpdateCellData?.Invoke(value);
+        }
+
+        protected bool IsCellActiveFast(int x, int y) => ActiveCells[x, y];
 
         private T GetInternal(Vector2Int pos) => _gridArray[pos.x, pos.y];
 
