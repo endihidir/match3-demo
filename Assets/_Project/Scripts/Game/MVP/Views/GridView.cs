@@ -10,6 +10,7 @@ namespace Core.Views
     public class GridView : MonoBehaviour, IGridView
     {
         [field: SerializeField, ReadOnly] public bool IsInitialized { get; private set; }
+        [field: SerializeField, ReadOnly] public GridLayout Layout { get; private set; }
         [field: SerializeField] public Camera Cam { get; private set; }
         [field: SerializeField] public Transform GridRoot { get; private set; }
         [field: SerializeField] public Transform GridObjectsParent { get; private set; }
@@ -18,7 +19,6 @@ namespace Core.Views
         [field: SerializeField] public GridLayoutSettingsConfig LayoutSettings { get; private set; }
         [field: SerializeField] public bool DrawGridGizmos { get; private set; }
         [field: SerializeField, ShowIf(nameof(DrawGridGizmos))] public Color GizmosColor { get; private set; } = Color.yellow;
-        [field: SerializeField, ReadOnly] public GridLayout Layout { get; private set; }
         public event Action OnViewInitialized;
         private Vector2Int _gridSize;
         private bool[,] _activeCells;
