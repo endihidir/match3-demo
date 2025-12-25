@@ -82,6 +82,14 @@ namespace Core.Handlers
             public Vector2Int Pos;
             public BoosterType Type;
             public List<Vector2Int> GroupCells;
+
+            public BoosterSpawn(bool hasSpawn, Vector2Int pos, BoosterType type, List<Vector2Int> groupCells)
+            {
+                HasSpawn = hasSpawn;
+                Pos = pos;
+                Type = type;
+                GroupCells = groupCells;
+            }
         }
 
         private void ResolveRegularMatches(GridObjectTypeData[,] typeGrid, bool[,] matchMask, bool[,] removeMask, int[,] cellDamage, DamageSource[,] sourceByCell, int[,] neighborObstacleDamage, int width, int height, List<BoosterSpawn> spawns)
@@ -179,35 +187,32 @@ namespace Core.Handlers
                 var c = cells[i];
 
                 GridMatchDetectUtil.GetLineLengthsAt(grid, c.x, c.y, width, height, id, assumeCenterIsId: true, out var h, out var v);
-
-                // if (h >= 5 || v >= 5)
-                // {
-                //     TrySet(5, c, BoosterType.Orb);
-                //     continue;
-                // }
-
+                
                 if (h >= 5 || v >= 5)
                 {
                     var rocket = v >= h ? BoosterType.RocketHorizontal : BoosterType.RocketVertical;
+
                     TrySet(5, c, rocket);
                     continue;
                 }
 
+                // T / L
                 if (h >= 3 && v >= 3)
                 {
                     TrySet(4, c, BoosterType.Bomb);
                     continue;
                 }
-
+                
                 if (GridMatchDetectUtil.Has2x2Square(grid, c.x, c.y, width, height, id, assumeCenterIsId: true))
                 {
                     TrySet(3, c, BoosterType.Bomb);
                     continue;
                 }
-
+                
                 if (h >= 4 || v >= 4)
                 {
                     var rocket = v >= h ? BoosterType.RocketHorizontal : BoosterType.RocketVertical;
+
                     TrySet(2, c, rocket);
                 }
             }
@@ -227,16 +232,7 @@ namespace Core.Handlers
                 }
             }
 
-            if (bestPriority == 0)
-                return default;
-
-            return new BoosterSpawn
-            {
-                HasSpawn = true,
-                Pos = bestPos,
-                Type = bestType,
-                GroupCells = cells
-            };
+            return bestPriority == 0 ? default : new BoosterSpawn(true,  bestPos, bestType, cells);
 
             void TrySet(int priority, Vector2Int pos, BoosterType type)
             {
@@ -247,13 +243,14 @@ namespace Core.Handlers
                 bestType = type;
             }
         }
-
+        
         private static void AddNeighborObstacleDamage(int[,] neighborObstacleDamage, int width, int height, Vector2Int c)
         {
             MarkNeighbour(c.x - 1, c.y);
             MarkNeighbour(c.x + 1, c.y);
             MarkNeighbour(c.x, c.y - 1);
             MarkNeighbour(c.x, c.y + 1);
+            return;
 
             void MarkNeighbour(int x, int y)
             {

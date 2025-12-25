@@ -21,44 +21,17 @@ namespace Core.Utils
 
         public static bool HasLineMatchAt(GridObjectTypeData[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId)
         {
-            var center = assumeCenterIsId ? 1 : (IsRegularItem(grid[x, y]) && grid[x, y].TypeId == id ? 1 : 0);
-            if (center == 0) return false;
+            if (!IsCenterOk(grid, x, y, id, assumeCenterIsId)) return false;
 
-            var left = CountSame(-1, 0);
-            var right = CountSame(1, 0);
+            var left = CountSame(grid, x, y, width, height, id, -1, 0);
+            var right = CountSame(grid, x, y, width, height, id, 1, 0);
 
-            if (left + center + right >= 3) return true;
+            if (left + 1 + right >= 3) return true;
 
-            var down = CountSame(0, -1);
-            var up = CountSame(0, 1);
+            var down = CountSame(grid, x, y, width, height, id, 0, -1);
+            var up = CountSame(grid, x, y, width, height, id, 0, 1);
 
-            return down + center + up >= 3;
-
-            int CountSame(int dx, int dy)
-            {
-                var count = 0;
-
-                var cx = x + dx;
-                var cy = y + dy;
-
-                while (cx >= 0 && cx < width && cy >= 0 && cy < height)
-                {
-                    var data = grid[cx, cy];
-
-                    if (!IsRegularItem(data))
-                        break;
-
-                    if (data.TypeId != id)
-                        break;
-
-                    count++;
-
-                    cx += dx;
-                    cy += dy;
-                }
-
-                return count;
-            }
+            return down + 1 + up >= 3;
         }
 
         public static bool Has2x2Square(GridObjectTypeData[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId)
@@ -72,8 +45,8 @@ namespace Core.Utils
 
             bool IsSquareAt(int sx, int sy)
             {
-                if (sx < 0 || sy < 0 || sx + 1 >= width || sy + 1 >= height)
-                    return false;
+                if (!IsInRange(sx, sy, width, height)) return false;
+                if (!IsInRange(sx + 1, sy + 1, width, height)) return false;
 
                 if (!IsCellId(sx, sy)) return false;
                 if (!IsCellId(sx + 1, sy)) return false;
@@ -168,7 +141,7 @@ namespace Core.Utils
             int x = startX;
             int y = startY;
 
-            while (x >= 0 && x < width && y >= 0 && y < height)
+            while (IsInRange(x, y, width, height))
             {
                 if (!IsRegularItem(grid[x, y]))
                 {
@@ -186,7 +159,7 @@ namespace Core.Utils
                 int nx = x + dx;
                 int ny = y + dy;
 
-                while (nx >= 0 && nx < width && ny >= 0 && ny < height)
+                while (IsInRange(nx, ny, width, height))
                 {
                     var next = grid[nx, ny];
                     if (!IsRegularItem(next) || next.TypeId != id)
@@ -248,56 +221,53 @@ namespace Core.Utils
 
         public static void GetLineLengthsAt(GridObjectTypeData[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId, out int horizontal, out int vertical)
         {
-            var centerOk = assumeCenterIsId || (IsRegularItem(grid[x, y]) && grid[x, y].TypeId == id);
-            if (!centerOk)
+            if (!IsCenterOk(grid, x, y, id, assumeCenterIsId))
             {
                 horizontal = 0;
                 vertical = 0;
                 return;
             }
 
-            horizontal = 1 + CountSame(-1, 0) + CountSame(1, 0);
-            vertical = 1 + CountSame(0, -1) + CountSame(0, 1);
-
-            int CountSame(int dx, int dy)
-            {
-                var count = 0;
-
-                var cx = x + dx;
-                var cy = y + dy;
-
-                while (cx >= 0 && cx < width && cy >= 0 && cy < height)
-                {
-                    var data = grid[cx, cy];
-
-                    if (!IsRegularItem(data))
-                        break;
-
-                    if (data.TypeId != id)
-                        break;
-
-                    count++;
-
-                    cx += dx;
-                    cy += dy;
-                }
-
-                return count;
-            }
-        }
-
-        public static bool HasTOrLAt(GridObjectTypeData[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId)
-        {
-            GetLineLengthsAt(grid, x, y, width, height, id, assumeCenterIsId, out var h, out var v);
-            return h >= 3 && v >= 3;
-        }
-
-        public static bool HasFiveLineAt(GridObjectTypeData[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId)
-        {
-            GetLineLengthsAt(grid, x, y, width, height, id, assumeCenterIsId, out var h, out var v);
-            return h >= 5 || v >= 5;
+            horizontal = 1 + CountSame(grid, x, y, width, height, id, -1, 0) + CountSame(grid, x, y, width, height, id, 1, 0);
+            vertical = 1 + CountSame(grid, x, y, width, height, id, 0, -1) + CountSame(grid, x, y, width, height, id, 0, 1);
         }
 
         public static bool IsRegularItem(GridObjectTypeData data) => data is { ItemKind: GridItemKind.Regular, TypeId: > 0 };
+
+        public static bool IsInRange(int x, int y, int width, int height) => x >= 0 && y >= 0 && x < width && y < height;
+
+        private static bool IsCenterOk(GridObjectTypeData[,] grid, int x, int y, int id, bool assumeCenterIsId)
+        {
+            if (assumeCenterIsId) return true;
+
+            var data = grid[x, y];
+            return IsRegularItem(data) && data.TypeId == id;
+        }
+
+        private static int CountSame(GridObjectTypeData[,] grid, int x, int y, int width, int height, int id, int dx, int dy)
+        {
+            var count = 0;
+
+            var cx = x + dx;
+            var cy = y + dy;
+
+            while (IsInRange(cx, cy, width, height))
+            {
+                var data = grid[cx, cy];
+
+                if (!IsRegularItem(data))
+                    break;
+
+                if (data.TypeId != id)
+                    break;
+
+                count++;
+
+                cx += dx;
+                cy += dy;
+            }
+
+            return count;
+        }
     }
 }
