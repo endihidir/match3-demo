@@ -5,7 +5,7 @@ namespace Core.Utils
 {
     public static class InitialMatchCleanupUtil
     {
-        public static void RemoveInitialMatches(GridObjectTypeData[,] grid, bool[,] randomMask, int width, int height, Random rng)
+        public static void RemoveInitialMatches(GridObjectType[,] grid, bool[,] randomMask, int width, int height, Random rng)
         {
             bool found;
 
@@ -32,7 +32,7 @@ namespace Core.Utils
             } while (found);
         }
 
-        private static GridObjectTypeData CreateRandomNonGroupingCell(GridObjectTypeData[,] grid, int x, int y, int width, int height, Random rng)
+        private static GridObjectType CreateRandomNonGroupingCell(GridObjectType[,] grid, int x, int y, int width, int height, Random rng)
         {
             var ids = LevelGridRandomUtil.GetItemTypeIds();
 
@@ -53,7 +53,7 @@ namespace Core.Utils
             if (candidateCount > 0)
             {
                 var pick = LevelGridRandomUtil.NextIndex(rng, candidateCount);
-                return new GridObjectTypeData(GridItemKind.Regular, candidates[pick]);
+                return new GridObjectType(GridItemKind.Regular, candidates[pick]);
             }
             
             var attempts = 0;
@@ -63,12 +63,12 @@ namespace Core.Utils
                 var id = ids[LevelGridRandomUtil.NextIndex(rng, ids.Length)];
 
                 if (!GridMatchDetectUtil.WouldCreateBlastGroup(grid, x, y, width, height, id, assumeCenterIsId: true))
-                    return new GridObjectTypeData(GridItemKind.Regular, id);
+                    return new GridObjectType(GridItemKind.Regular, id);
 
                 attempts++;
 
                 if (attempts > 64)
-                    return new GridObjectTypeData(GridItemKind.Regular, id);
+                    return new GridObjectType(GridItemKind.Regular, id);
             }
         }
     }

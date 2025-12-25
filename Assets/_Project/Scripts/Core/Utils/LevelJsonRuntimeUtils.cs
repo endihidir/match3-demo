@@ -23,7 +23,7 @@ namespace Core.Utils
             return new LevelDefinition(levelJson.level_number, levelJson.move_count, levelContent.gridObjectTypes, levelContent.levelGoals);
         }
         
-        public static LevelContentData ProcessLevelJson(LevelJson levelJson, bool preventInitialMatches = true, bool useSeededPattern = false, int seedOverride = 0)
+        public static LevelContent ProcessLevelJson(LevelJson levelJson, bool preventInitialMatches = true, bool useSeededPattern = false, int seedOverride = 0)
         {
             var rng = LevelGridRandomUtil.CreateRng(levelJson.level_number, useSeededPattern, seedOverride);
 
@@ -41,16 +41,16 @@ namespace Core.Utils
             return boardData;
         }
 
-        private static LevelContentData CreateEmptyBoard(LevelJson levelJson)
+        private static LevelContent CreateEmptyBoard(LevelJson levelJson)
         {
-            return new LevelContentData
+            return new LevelContent
             {
-                gridObjectTypes = new GridObjectTypeData[levelJson.grid_width, levelJson.grid_height],
+                gridObjectTypes = new GridObjectType[levelJson.grid_width, levelJson.grid_height],
                 levelGoals = new List<LevelGoal>()
             };
         }
 
-        private static ObstacleCounts FillGridAndCountObstacles(LevelJson levelJson, GridObjectTypeData[,] grid, bool[,] randomMask, Random rng)
+        private static ObstacleCounts FillGridAndCountObstacles(LevelJson levelJson, GridObjectType[,] grid, bool[,] randomMask, Random rng)
         {
             var counts = new ObstacleCounts();
 
@@ -64,7 +64,7 @@ namespace Core.Utils
                 var col = coordinate.x;
                 var row = coordinate.y;
 
-                GridObjectTypeData cellData;
+                GridObjectType cellData;
                 var isRandomOrigin = false;
 
                 if (levelJson.grid != null && index < levelJson.grid.Length)
@@ -89,7 +89,7 @@ namespace Core.Utils
             return counts;
         }
 
-        private static GridObjectTypeData DecodeCell(string typeStr, ref ObstacleCounts counts, Random rng)
+        private static GridObjectType DecodeCell(string typeStr, ref ObstacleCounts counts, Random rng)
         {
             if (!Enum.TryParse(typeStr, out JsonGridObjectType jsonType))
             {
@@ -102,29 +102,29 @@ namespace Core.Utils
             if (encoded == 0 && jsonType == JsonGridObjectType.rand)
             {
                 var id = LevelGridRandomUtil.GetRandomItemTypeId(rng);
-                return new GridObjectTypeData(GridItemKind.Regular, id);
+                return new GridObjectType(GridItemKind.Regular, id);
             }
 
             var decodedEnum = JsonGridMapper.Decode(encoded);
             return CreateFromEnum(decodedEnum, ref counts, rng);
         }
 
-        private static GridObjectTypeData CreateFromEnum(Enum decodedEnum, ref ObstacleCounts counts, Random rng)
+        private static GridObjectType CreateFromEnum(Enum decodedEnum, ref ObstacleCounts counts, Random rng)
         {
             switch (decodedEnum)
             {
                 case ItemType itemType:
-                    return new GridObjectTypeData(GridItemKind.Regular, (int)itemType);
+                    return new GridObjectType(GridItemKind.Regular, (int)itemType);
 
                 case BoosterType boosterType:
-                    return new GridObjectTypeData(GridItemKind.Booster, (int)boosterType);
+                    return new GridObjectType(GridItemKind.Booster, (int)boosterType);
 
                 case ObstacleType obstacleType:
                     IncrementObstacleCount(obstacleType, ref counts);
-                    return new GridObjectTypeData(GridItemKind.Obstacle, (int)obstacleType);
+                    return new GridObjectType(GridItemKind.Obstacle, (int)obstacleType);
 
                 case GridItemKind.None:
-                    return new GridObjectTypeData(GridItemKind.None, -1);
+                    return new GridObjectType(GridItemKind.None, -1);
 
                 default:
                     return CreateRandomItemCell(rng);
@@ -147,10 +147,10 @@ namespace Core.Utils
             }
         }
 
-        private static GridObjectTypeData CreateRandomItemCell(Random rng)
+        private static GridObjectType CreateRandomItemCell(Random rng)
         {
             var id = LevelGridRandomUtil.GetRandomItemTypeId(rng);
-            return new GridObjectTypeData(GridItemKind.Regular, id);
+            return new GridObjectType(GridItemKind.Regular, id);
         }
 
         private static List<LevelGoal> CreateLevelGoals(ObstacleCounts counts)

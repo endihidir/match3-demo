@@ -1,6 +1,6 @@
 using System;
+using Core.Extensions;
 using Core.Item;
-using Core.Utils;
 using UnityEngine;
 
 namespace Core.Config

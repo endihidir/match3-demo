@@ -1,11 +1,10 @@
 using Core.Item;
-using UnityEngine;
 
 namespace Core.Utils
 {
     public static class GridMatchDetectUtil
     {
-        public static bool WouldCreateBlastGroup(GridObjectTypeData[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId)
+        public static bool WouldCreateBlastGroup(GridObjectType[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId)
         {
             if (!assumeCenterIsId)
             {
@@ -19,7 +18,7 @@ namespace Core.Utils
             return false;
         }
 
-        public static bool HasLineMatchAt(GridObjectTypeData[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId)
+        public static bool HasLineMatchAt(GridObjectType[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId)
         {
             if (!IsCenterOk(grid, x, y, id, assumeCenterIsId)) return false;
 
@@ -34,7 +33,7 @@ namespace Core.Utils
             return down + 1 + up >= 3;
         }
 
-        public static bool Has2x2Square(GridObjectTypeData[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId)
+        public static bool Has2x2Square(GridObjectType[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId)
         {
             if (IsSquareAt(x, y)) return true;
             if (IsSquareAt(x - 1, y)) return true;
@@ -66,7 +65,7 @@ namespace Core.Utils
             }
         }
 
-        public static bool HasAnyRegularMatchOnBoard(GridObjectTypeData[,] grid, int width, int height)
+        public static bool HasAnyRegularMatchOnBoard(GridObjectType[,] grid, int width, int height)
         {
             for (int y = 0; y < height; y++)
             {
@@ -83,7 +82,7 @@ namespace Core.Utils
             return false;
         }
 
-        public static bool[,] BuildMatchMask(GridObjectTypeData[,] grid, int width, int height, out bool anyMatch)
+        public static bool[,] BuildMatchMask(GridObjectType[,] grid, int width, int height, out bool anyMatch)
         {
             var remove = new bool[width, height];
             anyMatch = false;
@@ -109,7 +108,7 @@ namespace Core.Utils
             return remove;
         }
 
-        public static bool[,] BuildMatchMaskFast(GridObjectTypeData[,] grid, int width, int height, out bool anyMatch)
+        public static bool[,] BuildMatchMaskFast(GridObjectType[,] grid, int width, int height, out bool anyMatch)
         {
             var remove = new bool[width, height];
             var any = false;
@@ -122,7 +121,7 @@ namespace Core.Utils
             return remove;
         }
 
-        private static void ScanRuns(GridObjectTypeData[,] grid, bool[,] remove, int width, int height, int dx, int dy, ref bool any)
+        private static void ScanRuns(GridObjectType[,] grid, bool[,] remove, int width, int height, int dx, int dy, ref bool any)
         {
             if (dx == 1)
             {
@@ -136,7 +135,7 @@ namespace Core.Utils
             }
         }
 
-        private static void ScanLine(GridObjectTypeData[,] grid, bool[,] remove, int width, int height, int startX, int startY, int dx, int dy, ref bool any)
+        private static void ScanLine(GridObjectType[,] grid, bool[,] remove, int width, int height, int startX, int startY, int dx, int dy, ref bool any)
         {
             int x = startX;
             int y = startY;
@@ -190,7 +189,7 @@ namespace Core.Utils
             }
         }
 
-        private static void ScanSquares(GridObjectTypeData[,] grid, bool[,] remove, int width, int height, ref bool any)
+        private static void ScanSquares(GridObjectType[,] grid, bool[,] remove, int width, int height, ref bool any)
         {
             for (int y = 0; y < height - 1; y++)
             {
@@ -219,7 +218,7 @@ namespace Core.Utils
             }
         }
 
-        public static void GetLineLengthsAt(GridObjectTypeData[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId, out int horizontal, out int vertical)
+        public static void GetLineLengthsAt(GridObjectType[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId, out int horizontal, out int vertical)
         {
             if (!IsCenterOk(grid, x, y, id, assumeCenterIsId))
             {
@@ -232,11 +231,11 @@ namespace Core.Utils
             vertical = 1 + CountSame(grid, x, y, width, height, id, 0, -1) + CountSame(grid, x, y, width, height, id, 0, 1);
         }
 
-        public static bool IsRegularItem(GridObjectTypeData data) => data is { ItemKind: GridItemKind.Regular, TypeId: > 0 };
+        public static bool IsRegularItem(GridObjectType data) => data is { ItemKind: GridItemKind.Regular, TypeId: > 0 };
 
         public static bool IsInRange(int x, int y, int width, int height) => x >= 0 && y >= 0 && x < width && y < height;
 
-        private static bool IsCenterOk(GridObjectTypeData[,] grid, int x, int y, int id, bool assumeCenterIsId)
+        private static bool IsCenterOk(GridObjectType[,] grid, int x, int y, int id, bool assumeCenterIsId)
         {
             if (assumeCenterIsId) return true;
 
@@ -244,7 +243,7 @@ namespace Core.Utils
             return IsRegularItem(data) && data.TypeId == id;
         }
 
-        private static int CountSame(GridObjectTypeData[,] grid, int x, int y, int width, int height, int id, int dx, int dy)
+        private static int CountSame(GridObjectType[,] grid, int x, int y, int width, int height, int id, int dx, int dy)
         {
             var count = 0;
 
