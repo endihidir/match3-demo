@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Core.Utils
 {
-    public static class BoosterEffectRangeApplier
+    public static class BoosterEffectApplyHelper
     {
         public static void ApplyEffect(CellResolveData[,] cells, int width, int height, Vector2Int origin, BoosterEffectBase effect)
         {
@@ -25,6 +25,14 @@ namespace Core.Utils
 
                 case FullGridRemoveEffect full:
                     ApplyAllDamage(cells, width, height, full.DamageAmount, DamageSource.Booster);
+                    return;
+                
+                case OrbEffect orbEffect:
+                    // NOT SUPPORTED YET!
+                    return;
+                
+                case FlyEffect flyEffect:
+                    // NOT SUPPORTED YET!
                     return;
             }
         }

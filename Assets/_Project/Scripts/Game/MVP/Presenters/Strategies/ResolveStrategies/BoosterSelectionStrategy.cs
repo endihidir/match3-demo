@@ -14,7 +14,7 @@ namespace Core.Handlers
             _context = context;
         }
 
-        public BoosterSpawn Decide(GridObjectType[,] grid, List<Vector2Int> cells, int width, int height, int id)
+        public BoosterSpawnResult Decide(GridObjectType[,] grid, List<Vector2Int> cells, int width, int height, int id)
         {
             var bestPriority = 0;
             var bestPos = new Vector2Int(-1, -1);
@@ -22,35 +22,34 @@ namespace Core.Handlers
 
             for (int i = 0; i < cells.Count; i++)
             {
-                var c = cells[i];
+                var coord = cells[i];
 
-                GridMatchDetectUtil.GetLineLengthsAt(grid, c.x, c.y, width, height, id, assumeCenterIsId: true, out var h, out var v);
+                GridMatchDetectUtil.GetLineLengthsAt(grid, coord.x, coord.y, width, height, id, assumeCenterIsId: true, out var h, out var v);
 
                 if (h >= 5 || v >= 5)
                 {
                     var rocket = v >= h ? BoosterType.RocketHorizontal : BoosterType.RocketVertical;
 
-                    TrySet(5, c, rocket);
+                    TrySet(5, coord, rocket);
                     continue;
                 }
 
                 if (h >= 3 && v >= 3)
                 {
-                    TrySet(4, c, BoosterType.Bomb);
+                    TrySet(4, coord, BoosterType.Bomb);
                     continue;
                 }
 
-                if (GridMatchDetectUtil.Has2x2Square(grid, c.x, c.y, width, height, id, assumeCenterIsId: true))
+                if (GridMatchDetectUtil.Has2x2Square(grid, coord.x, coord.y, width, height, id, assumeCenterIsId: true))
                 {
-                    TrySet(3, c, BoosterType.Bomb);
+                    TrySet(3, coord, BoosterType.Bomb);
                     continue;
                 }
 
                 if (h >= 4 || v >= 4)
                 {
                     var rocket = v >= h ? BoosterType.RocketHorizontal : BoosterType.RocketVertical;
-
-                    TrySet(2, c, rocket);
+                    TrySet(2, coord, rocket);
                 }
             }
 
@@ -69,7 +68,7 @@ namespace Core.Handlers
                 }
             }
 
-            return bestPriority == 0 ? default : new BoosterSpawn(true, bestPos, bestType, cells);
+            return bestPriority == 0 ? default : new BoosterSpawnResult(true, bestPos, bestType, cells);
 
             void TrySet(int priority, Vector2Int pos, BoosterType type)
             {

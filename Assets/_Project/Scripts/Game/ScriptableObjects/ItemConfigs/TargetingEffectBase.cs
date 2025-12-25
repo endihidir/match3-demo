@@ -6,7 +6,7 @@ namespace Core.Config
     [Serializable]
     public abstract class TargetingEffectBase : BoosterEffectBase
     { 
-        [field: SerializeReference] public BoosterEffectBase[] Payload { get; private set; }
+        [field: SerializeReference] public BoosterEffectBase[] Payloads { get; private set; }
         [field: SerializeField] public TargetSelectionMode SelectionMode { get; private set; }
         [field: SerializeField,] public int DamageAmount { get; private set; }
     }

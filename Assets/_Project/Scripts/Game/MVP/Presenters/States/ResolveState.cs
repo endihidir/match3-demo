@@ -42,7 +42,7 @@ namespace Core.Handlers
             var matchMask = GridMatchDetectUtil.BuildMatchMaskFast(typeGrid, width, height, out var hasMatch);
 
             var cells = new CellResolveData[width, height];
-            var spawns = new List<BoosterSpawn>(8);
+            var spawns = new List<BoosterSpawnResult>(8);
 
             if (hasMatch)
             {
@@ -80,7 +80,7 @@ namespace Core.Handlers
             RequestExit();
         }
 
-        private void ResolveMatches(GridObjectType[,] typeGrid, bool[,] matchMask, CellResolveData[,] cells, int width, int height, List<BoosterSpawn> spawns)
+        private void ResolveMatches(GridObjectType[,] typeGrid, bool[,] matchMask, CellResolveData[,] cells, int width, int height, List<BoosterSpawnResult> spawns)
         {
             var visited = new bool[width, height];
 
@@ -96,7 +96,7 @@ namespace Core.Handlers
                     var handler = FindHandler(startData);
                     if (handler == null) continue;
 
-                    var group = ResolveMarkUtil.CollectGroup(matchMask, visited, typeGrid, width, height, new Vector2Int(x, y), startData.TypeId);
+                    var group = ResolveMarkHelper.CollectGroup(matchMask, visited, typeGrid, width, height, new Vector2Int(x, y), startData.TypeId);
                     if (group.Count == 0) continue;
 
                     handler.Handle(Context, typeGrid, group, width, height, cells, spawns);
@@ -114,8 +114,8 @@ namespace Core.Handlers
 
             return null;
         }
-        
-        public void ApplyPendingEffects(CellResolveData[,] cells, int width, int height)
+
+        private void ApplyPendingEffects(CellResolveData[,] cells, int width, int height)
         {
             for (int i = 0; i < Context.PendingEffects.Count; i++)
             {
@@ -127,20 +127,20 @@ namespace Core.Handlers
                     cell.MarkRemove(DamageSource.Booster);
                 }
 
-                BoosterEffectRangeApplier.ApplyEffect(cells, width, height, pending.Origin, pending.BoosterEffect);
+                BoosterEffectApplyHelper.ApplyEffect(cells, width, height, pending.Origin, pending.BoosterEffect);
             }
         }
 
-        private async UniTask PlayMatchMergeAnimation(BoosterSpawn spawn)
+        private async UniTask PlayMatchMergeAnimation(BoosterSpawnResult spawnResult)
         {
-            var targetWorld = Context.View.GridToWorld(spawn.Pos);
+            var targetWorld = Context.View.GridToWorld(spawnResult.Pos);
 
-            var tasks = new List<UniTask>(spawn.GroupCells.Count);
+            var tasks = new List<UniTask>(spawnResult.GroupCells.Count);
 
-            for (int i = 0; i < spawn.GroupCells.Count; i++)
+            for (int i = 0; i < spawnResult.GroupCells.Count; i++)
             {
-                var c = spawn.GroupCells[i];
-                if (c == spawn.Pos) continue;
+                var c = spawnResult.GroupCells[i];
+                if (c == spawnResult.Pos) continue;
 
                 var obj = Context.Model.GetGridObject(c);
                 if (!obj) continue;
@@ -158,10 +158,10 @@ namespace Core.Handlers
             if (tasks.Count > 0)
                 await UniTask.WhenAll(tasks);
 
-            for (int i = 0; i < spawn.GroupCells.Count; i++)
+            for (int i = 0; i < spawnResult.GroupCells.Count; i++)
             {
-                var c = spawn.GroupCells[i];
-                if (c == spawn.Pos) continue;
+                var c = spawnResult.GroupCells[i];
+                if (c == spawnResult.Pos) continue;
 
                 var obj = Context.Model.GetGridObject(c);
                 if (!obj) continue;
@@ -170,11 +170,11 @@ namespace Core.Handlers
                 Context.Model.SetGridObject(c, null);
             }
 
-            var targetObj = Context.Model.GetGridObject(spawn.Pos);
+            var targetObj = Context.Model.GetGridObject(spawnResult.Pos);
             if (targetObj)
             {
                 Context.Factory.ReleaseItem(targetObj);
-                Context.Model.SetGridObject(spawn.Pos, null);
+                Context.Model.SetGridObject(spawnResult.Pos, null);
             }
         }
 
@@ -234,7 +234,7 @@ namespace Core.Handlers
                 }
 
                 obj = Context.Model.GetGridObject(pos);
-                return obj != null;
+                return obj;
             }
 
             bool HasAnyWork(in CellResolveData cell)
@@ -266,12 +266,10 @@ namespace Core.Handlers
 
             void ProcessNonDamageableCell(int x, int y, Vector2Int pos, BaseGridObject obj, ref CellResolveData cell, ref bool loopAgainFlag)
             {
-                if (!cell.Remove)
-                    return;
+                if (!cell.Remove) return;
 
                 EnqueueTriggerIfNeeded(x, y, pos, obj);
                 FlushEffects(ref loopAgainFlag);
-
                 DestroyAt(pos, obj);
             }
 
@@ -282,8 +280,7 @@ namespace Core.Handlers
 
             void EnqueueTriggerIfNeeded(int x, int y, Vector2Int pos, BaseGridObject obj)
             {
-                if (triggered[x, y])
-                    return;
+                if (triggered[x, y]) return;
 
                 if (obj is ITriggerEffectSource trigger && trigger.TryBuildEffect(pos, out var effect))
                 {
@@ -296,8 +293,8 @@ namespace Core.Handlers
             {
                 while (effects.Count > 0)
                 {
-                    var e = effects.Dequeue();
-                    BoosterEffectRangeApplier.ApplyEffect(cells, width, height, e.Origin, e.BoosterEffect);
+                    var pendingEffect = effects.Dequeue();
+                    BoosterEffectApplyHelper.ApplyEffect(cells, width, height, pendingEffect.Origin, pendingEffect.BoosterEffect);
                     loopAgainFlag = true;
                 }
             }

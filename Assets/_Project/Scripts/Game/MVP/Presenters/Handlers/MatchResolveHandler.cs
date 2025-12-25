@@ -20,7 +20,8 @@ namespace Core.Handlers
 
         public bool CanHandle(GridObjectType startData) => GridMatchDetectUtil.IsRegularItem(startData);
 
-        public void Handle(GridStateContext context, GridObjectType[,] typeGrid, List<Vector2Int> group, int width, int height, CellResolveData[,] cells, List<BoosterSpawn> spawns)
+        public void Handle(GridStateContext context, GridObjectType[,] typeGrid, List<Vector2Int> group, int width, int height, CellResolveData[,] cells, 
+            List<BoosterSpawnResult> spawns)
         {
             if (group == null || group.Count == 0) return;
 
