@@ -7,31 +7,31 @@ namespace Core.Utils
 {
     public static class BoosterEffectApplyHelper
     {
-        public static void ApplyEffect(CellResolveData[,] cells, int width, int height, Vector2Int origin, BoosterEffectBase effect)
+        public static void ApplyEffect(CellResolveData[,] cells, int width, int height, Vector2Int origin, BoosterActionBase action)
         {
-            switch (effect)
+            switch (action)
             {
-                case RocketHorizontalEffect rocketH:
+                case RocketHorizontalAction rocketH:
                     ApplyRowBandDamage(cells, width, height, origin.y, rocketH.LineCount, rocketH.DamageAmount, DamageSource.Booster);
                     return;
 
-                case RocketVerticalEffect rocketV:
+                case RocketVerticalAction rocketV:
                     ApplyColumnBandDamage(cells, width, height, origin.x, rocketV.LineCount, rocketV.DamageAmount, DamageSource.Booster);
                     return;
 
-                case BombEffect bomb:
+                case BombAction bomb:
                     ApplySquareDamage(cells, width, height, origin, bomb.Radius, bomb.DamageAmount, DamageSource.Booster);
                     return;
 
-                case FullGridRemoveEffect full:
+                case FullGridRemoveAction full:
                     ApplyAllDamage(cells, width, height, full.DamageAmount, DamageSource.Booster);
                     return;
                 
-                case OrbEffect orbEffect:
+                case OrbAction orbEffect:
                     // NOT SUPPORTED YET!
                     return;
                 
-                case FlyEffect flyEffect:
+                case FlyAction flyEffect:
                     // NOT SUPPORTED YET!
                     return;
             }

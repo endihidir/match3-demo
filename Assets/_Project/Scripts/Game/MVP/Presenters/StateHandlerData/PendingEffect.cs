@@ -6,12 +6,12 @@ namespace Core.Handlers
     public readonly struct PendingEffect
     {
         public readonly Vector2Int Origin;
-        public readonly BoosterEffectBase BoosterEffect;
+        public readonly BoosterActionBase boosterAction;
 
-        public PendingEffect(Vector2Int origin, BoosterEffectBase boosterEffect)
+        public PendingEffect(Vector2Int origin, BoosterActionBase boosterAction)
         {
             Origin = origin;
-            BoosterEffect = boosterEffect;
+            this.boosterAction = boosterAction;
         }
     }
 }

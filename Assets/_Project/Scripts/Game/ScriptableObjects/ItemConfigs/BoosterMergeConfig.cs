@@ -30,10 +30,10 @@ namespace Core.Config
         public struct MergeRule
         {
             [field: SerializeField] public BoosterMergeKey Key { get; private set; }
-            [field: SerializeReference] public BoosterEffectBase[] Effects { get; private set; }
+            [field: SerializeReference] public BoosterActionBase[] Actions { get; private set; }
         }
     }
     
     [Serializable]
-    public abstract class BoosterEffectBase { }
+    public abstract class BoosterActionBase { }
 }

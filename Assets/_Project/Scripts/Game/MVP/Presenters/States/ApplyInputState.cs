@@ -177,29 +177,29 @@ namespace Core.Handlers
 
         private void EnqueueSingleBoosterEffect(Vector2Int origin, BoosterObject booster)
         {
-            if (!booster || booster.BoosterEffect == null) return;
+            if (!booster || booster.BoosterAction == null) return;
 
-            Context.PendingEffects.Add(new PendingEffect(origin, booster.BoosterEffect));
+            Context.PendingEffects.Add(new PendingEffect(origin, booster.BoosterAction));
         }
 
         private void EnqueueSingleBoosterEffect(Vector2Int origin, BoosterType type)
         {
             var data = Context.Configs.GetBoosterData(type);
 
-            if (!data || data.BoosterEffect == null) return;
+            if (!data || data.BoosterAction == null) return;
 
-            Context.PendingEffects.Add(new PendingEffect(origin, data.BoosterEffect));
+            Context.PendingEffects.Add(new PendingEffect(origin, data.BoosterAction));
         }
 
         private void EnqueueMergedEffects(Vector2Int origin, BoosterType first, BoosterType second)
         {
             var config = Context.Configs.BoosterMergeConfig;
 
-            if (config && config.TryGetRule(first, second, out var rule) && rule.Effects != null)
+            if (config && config.TryGetRule(first, second, out var rule) && rule.Actions != null)
             {
-                for (int i = 0; i < rule.Effects.Length; i++)
+                for (int i = 0; i < rule.Actions.Length; i++)
                 {
-                    var boosterEffectBase = rule.Effects[i];
+                    var boosterEffectBase = rule.Actions[i];
                     if (boosterEffectBase == null) continue;
 
                     Context.PendingEffects.Add(new PendingEffect(origin, boosterEffectBase));

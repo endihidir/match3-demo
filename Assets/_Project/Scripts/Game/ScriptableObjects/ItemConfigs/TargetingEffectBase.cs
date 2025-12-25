@@ -4,15 +4,15 @@ using UnityEngine;
 namespace Core.Config
 {
     [Serializable]
-    public abstract class TargetingEffectBase : BoosterEffectBase
+    public abstract class TargetingActionBase : BoosterActionBase
     { 
-        [field: SerializeReference] public BoosterEffectBase[] Payloads { get; private set; }
+        [field: SerializeReference] public BoosterActionBase[] Payloads { get; private set; }
         [field: SerializeField] public TargetSelectionMode SelectionMode { get; private set; }
         [field: SerializeField,] public int DamageAmount { get; private set; }
     }
     
     [Serializable]
-    public class FlyEffect : TargetingEffectBase
+    public class FlyAction : TargetingActionBase
     {
         [field: SerializeField] public int StartRange { get; private set; } = 1;
         [field: SerializeField] public int StartDamage { get; private set; } = 1;
@@ -20,7 +20,7 @@ namespace Core.Config
     }
     
     [Serializable]
-    public class OrbEffect : TargetingEffectBase
+    public class OrbAction : TargetingActionBase
     {
         [field: SerializeField] public int PickCount { get; private set; }
     }
