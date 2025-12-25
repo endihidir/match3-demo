@@ -16,51 +16,6 @@ namespace Core.Handlers
         private const float MergeMoveDuration = 0.12f;
         private const Ease MergeEase = Ease.InOutQuad;
 
-        private struct CellResolveData
-        {
-            public bool Remove;
-            public int Damage;
-            public DamageSource Source;
-
-            public int ObstacleDamage;
-            public DamageSource ObstacleSource;
-
-            public void MarkRemove(DamageSource source)
-            {
-                Remove = true;
-                Source |= source;
-            }
-
-            public void AddDamage(int damage, DamageSource source)
-            {
-                Remove = true;
-                Damage = Mathf.Max(Damage, damage);
-                Source |= source;
-            }
-
-            public void AddObstacleOnlyDamage(int damage, DamageSource source)
-            {
-                ObstacleDamage = Mathf.Max(ObstacleDamage, damage);
-                ObstacleSource |= source;
-            }
-        }
-        
-        private struct BoosterSpawn
-        {
-            public readonly bool HasSpawn;
-            public readonly Vector2Int Pos;
-            public readonly BoosterType Type;
-            public readonly List<Vector2Int> GroupCells;
-
-            public BoosterSpawn(bool hasSpawn, Vector2Int pos, BoosterType type, List<Vector2Int> groupCells)
-            {
-                HasSpawn = hasSpawn;
-                Pos = pos;
-                Type = type;
-                GroupCells = groupCells;
-            }
-        }
-
         protected override void OnEnter()
         {
             Context.CascadeResolveRequested = false;
@@ -78,6 +33,21 @@ namespace Core.Handlers
             var cells = new CellResolveData[width, height];
             var spawns = new List<BoosterSpawn>(8);
 
+            ExecuteMarkPhase(typeGrid, matchMask, cells, width, height, spawns, hasMatch);
+            if (!Context.ResolvedAnyMatch)
+            {
+                RequestExit();
+                return;
+            }
+
+            await ExecuteSpawnPhase(spawns);
+            ExecuteApplyPhase(cells, width, height);
+
+            RequestExit();
+        }
+
+        private void ExecuteMarkPhase(GridObjectType[,] typeGrid, bool[,] matchMask, CellResolveData[,] cells, int width, int height, List<BoosterSpawn> spawns, bool hasMatch)
+        {
             if (hasMatch)
             {
                 ResolveRegularMatches(typeGrid, matchMask, cells, width, height, spawns);
@@ -91,27 +61,25 @@ namespace Core.Handlers
             }
 
             Context.ResolvedAnyMatch = hasMatch || hasEffects;
+        }
 
-            if (!Context.ResolvedAnyMatch)
+        private async UniTask ExecuteSpawnPhase(List<BoosterSpawn> spawns)
+        {
+            if (spawns.Count == 0) return;
+
+            for (int i = 0; i < spawns.Count; i++)
             {
-                RequestExit();
-                return;
+                var s = spawns[i];
+                if (!s.HasSpawn) continue;
+
+                await PlayMatchMergeAnimation(s);
+                SpawnBooster(s.Pos, s.Type);
             }
+        }
 
-            if (spawns.Count > 0)
-            {
-                for (int i = 0; i < spawns.Count; i++)
-                {
-                    var s = spawns[i];
-                    if (!s.HasSpawn) continue;
-
-                    await PlayMatchMergeAnimation(s);
-                    SpawnBooster(s.Pos, s.Type);
-                }
-            }
-
+        private void ExecuteApplyPhase(CellResolveData[,] cells, int width, int height)
+        {
             ApplyResolveData(cells, width, height);
-            RequestExit();
         }
 
         private void ResolveRegularMatches(GridObjectType[,] typeGrid, bool[,] matchMask, CellResolveData[,] cells, int width, int height, List<BoosterSpawn> spawns)
@@ -208,7 +176,7 @@ namespace Core.Handlers
             {
                 var c = cells[i];
 
-                GridMatchDetectUtil.GetLineLengthsAt(grid, c.x, c.y, width, height, id, assumeCenterIsId: true, out var h, out var v);
+                GridMatchDetectUtil.GetLineLengthsAt(grid, c.x, c.y, width, height, id, true, out var h, out var v);
 
                 if (h >= 5 || v >= 5)
                 {
@@ -224,7 +192,7 @@ namespace Core.Handlers
                     continue;
                 }
 
-                if (GridMatchDetectUtil.Has2x2Square(grid, c.x, c.y, width, height, id, assumeCenterIsId: true))
+                if (GridMatchDetectUtil.Has2x2Square(grid, c.x, c.y, width, height, id, true))
                 {
                     TrySet(3, c, BoosterType.Bomb);
                     continue;
@@ -232,9 +200,7 @@ namespace Core.Handlers
 
                 if (h >= 4 || v >= 4)
                 {
-                    var rocket = v >= h
-                        ? BoosterType.RocketHorizontal
-                        : BoosterType.RocketVertical;
+                    var rocket = v >= h ? BoosterType.RocketHorizontal : BoosterType.RocketVertical;
 
                     TrySet(2, c, rocket);
                 }
@@ -440,7 +406,7 @@ namespace Core.Handlers
             }
         }
 
-       private void ApplyResolveData(CellResolveData[,] cells, int width, int height)
+        private void ApplyResolveData(CellResolveData[,] cells, int width, int height)
         {
             var triggered = new bool[width, height];
             var effects = new Queue<PendingEffect>(8);
@@ -532,7 +498,8 @@ namespace Core.Handlers
                         }
                     }
                 }
-            } while (loopAgain);
+            }
+            while (loopAgain);
         }
     }
 }
