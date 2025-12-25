@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Core.Utils
 {
-    public static class ResolveEffectApplyUtil
+    public static class BoosterEffectRangeApplier
     {
         public static void ApplyEffect(CellResolveData[,] cells, int width, int height, Vector2Int origin, BoosterEffectBase effect)
         {
