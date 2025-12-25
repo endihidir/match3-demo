@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Core.Config;
 using Core.Item;
 using Core.StateMachineCore;
 using Core.Utils;
@@ -41,7 +40,8 @@ namespace Core.Handlers
             }
 
             await ExecuteSpawnPhase(spawns);
-            ExecuteApplyPhase(cells, width, height);
+            
+            ApplyResolveData(cells, width, height);
 
             RequestExit();
         }
@@ -75,11 +75,6 @@ namespace Core.Handlers
                 await PlayMatchMergeAnimation(s);
                 SpawnBooster(s.Pos, s.Type);
             }
-        }
-
-        private void ExecuteApplyPhase(CellResolveData[,] cells, int width, int height)
-        {
-            ApplyResolveData(cells, width, height);
         }
 
         private void ResolveRegularMatches(GridObjectType[,] typeGrid, bool[,] matchMask, CellResolveData[,] cells, int width, int height, List<BoosterSpawn> spawns)
@@ -130,7 +125,7 @@ namespace Core.Handlers
             }
         }
 
-        private static List<Vector2Int> CollectGroup(bool[,] matchMask, bool[,] visited, GridObjectType[,] typeGrid, int width, int height, Vector2Int start, int id)
+        private List<Vector2Int> CollectGroup(bool[,] matchMask, bool[,] visited, GridObjectType[,] typeGrid, int width, int height, Vector2Int start, int id)
         {
             var result = new List<Vector2Int>(16);
             var q = new Queue<Vector2Int>(16);
@@ -233,7 +228,7 @@ namespace Core.Handlers
             }
         }
 
-        private static void AddNeighborObstacleDamage(CellResolveData[,] cells, int width, int height, Vector2Int c)
+        private void AddNeighborObstacleDamage(CellResolveData[,] cells, int width, int height, Vector2Int c)
         {
             MarkNeighbour(c.x - 1, c.y);
             MarkNeighbour(c.x + 1, c.y);
@@ -318,91 +313,7 @@ namespace Core.Handlers
                     cell.MarkRemove(DamageSource.Booster);
                 }
 
-                ApplyEffect(cells, width, height, pending.Origin, pending.BoosterEffect);
-            }
-        }
-
-        private void ApplyEffect(CellResolveData[,] cells, int width, int height, Vector2Int origin, BoosterEffectBase effect)
-        {
-            switch (effect)
-            {
-                case RocketHorizontalEffect rocketH:
-                    ApplyRowBandDamage(cells, width, height, origin.y, rocketH.LineCount, rocketH.DamageAmount, DamageSource.Booster);
-                    return;
-
-                case RocketVerticalEffect rocketV:
-                    ApplyColumnBandDamage(cells, width, height, origin.x, rocketV.LineCount, rocketV.DamageAmount, DamageSource.Booster);
-                    return;
-
-                case BombEffect bomb:
-                    ApplySquareDamage(cells, width, height, origin, bomb.Radius, bomb.DamageAmount, DamageSource.Booster);
-                    return;
-
-                case FullGridRemoveEffect full:
-                    ApplyAllDamage(cells, width, height, full.DamageAmount, DamageSource.Booster);
-                    return;
-            }
-        }
-
-        private static void ApplyRowBandDamage(CellResolveData[,] cells, int width, int height, int centerY, int lineCount, int damage, DamageSource source)
-        {
-            var half = Mathf.Max(0, (lineCount - 1) / 2);
-
-            for (int dy = -half; dy <= half; dy++)
-            {
-                var y = centerY + dy;
-                if (y < 0 || y >= height) continue;
-
-                for (int x = 0; x < width; x++)
-                {
-                    ref var cell = ref cells[x, y];
-                    cell.AddDamage(damage, source);
-                }
-            }
-        }
-
-        private static void ApplyColumnBandDamage(CellResolveData[,] cells, int width, int height, int centerX, int lineCount, int damage, DamageSource source)
-        {
-            var half = Mathf.Max(0, (lineCount - 1) / 2);
-
-            for (int dx = -half; dx <= half; dx++)
-            {
-                var x = centerX + dx;
-                if (x < 0 || x >= width) continue;
-
-                for (int y = 0; y < height; y++)
-                {
-                    ref var cell = ref cells[x, y];
-                    cell.AddDamage(damage, source);
-                }
-            }
-        }
-
-        private static void ApplySquareDamage(CellResolveData[,] cells, int width, int height, Vector2Int center, int radius, int damage, DamageSource source)
-        {
-            radius = Mathf.Max(0, radius);
-
-            for (int y = center.y - radius; y <= center.y + radius; y++)
-            {
-                for (int x = center.x - radius; x <= center.x + radius; x++)
-                {
-                    if (x < 0 || y < 0 || x >= width || y >= height) continue;
-
-                    ref var cell = ref cells[x, y];
-                    cell.AddDamage(damage, source);
-                }
-            }
-        }
-
-        private static void ApplyAllDamage(CellResolveData[,] cells, int width, int height, int damage, DamageSource source)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    ref var cell = ref cells[x, y];
-                    cell.AddDamage(damage, source);
-                }
+                ResolveEffectApplyUtil.ApplyEffect(cells, width, height, pending.Origin, pending.BoosterEffect);
             }
         }
 
@@ -445,7 +356,7 @@ namespace Core.Handlers
                                 while (effects.Count > 0)
                                 {
                                     var e = effects.Dequeue();
-                                    ApplyEffect(cells, width, height, e.Origin, e.BoosterEffect);
+                                    ResolveEffectApplyUtil.ApplyEffect(cells, width, height, e.Origin, e.BoosterEffect);
                                     loopAgain = true;
                                 }
 
@@ -489,7 +400,7 @@ namespace Core.Handlers
                             while (effects.Count > 0)
                             {
                                 var e = effects.Dequeue();
-                                ApplyEffect(cells, width, height, e.Origin, e.BoosterEffect);
+                                ResolveEffectApplyUtil.ApplyEffect(cells, width, height, e.Origin, e.BoosterEffect);
                                 loopAgain = true;
                             }
 
