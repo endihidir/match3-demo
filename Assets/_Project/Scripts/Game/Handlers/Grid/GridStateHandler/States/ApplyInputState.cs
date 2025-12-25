@@ -180,7 +180,7 @@ namespace Core.Handlers
 
             if (!data || data.BoosterEffect == null) return;
 
-            Context.PendingEffects.Add(new GridContext.PendingEffect(origin, data.BoosterEffect));
+            Context.PendingEffects.Add(new PendingEffect(origin, data.BoosterEffect));
         }
 
         private void EnqueueMergedEffects(Vector2Int origin, BoosterType first, BoosterType second)
@@ -194,7 +194,7 @@ namespace Core.Handlers
                     var e = rule.Effects[i];
                     if (e == null) continue;
 
-                    Context.PendingEffects.Add(new GridContext.PendingEffect(origin, e));
+                    Context.PendingEffects.Add(new PendingEffect(origin, e));
                 }
 
                 return;
