@@ -60,7 +60,7 @@ namespace Core.Handlers
 
             if (obj is BoosterObject booster)
             {
-                EnqueueSingleBoosterEffect(a, booster.BoosterType);
+                EnqueueSingleBoosterEffect(a, booster);
                 Context.CascadeResolveRequested = true;
             }
 
@@ -161,17 +161,24 @@ namespace Core.Handlers
 
             if (objB is BoosterObject movedBoosterToB)
             {
-                EnqueueSingleBoosterEffect(b, movedBoosterToB.BoosterType);
+                EnqueueSingleBoosterEffect(b, movedBoosterToB);
                 Context.CascadeResolveRequested = true;
                 return;
             }
 
             if (objA is BoosterObject movedBoosterToA)
             {
-                EnqueueSingleBoosterEffect(a, movedBoosterToA.BoosterType);
+                EnqueueSingleBoosterEffect(a, movedBoosterToA);
             }
 
             Context.CascadeResolveRequested = true;
+        }
+
+        private void EnqueueSingleBoosterEffect(Vector2Int origin, BoosterObject booster)
+        {
+            if (!booster || booster.BoosterEffect == null) return;
+
+            Context.PendingEffects.Add(new PendingEffect(origin, booster.BoosterEffect));
         }
 
         private void EnqueueSingleBoosterEffect(Vector2Int origin, BoosterType type)
