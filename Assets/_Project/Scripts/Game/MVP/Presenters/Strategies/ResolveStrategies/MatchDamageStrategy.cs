@@ -17,7 +17,7 @@ namespace Core.Handlers
                 
                 cell.AddDamage(1, DamageSource.Item);
 
-                ResolveMarkUtil.AddNeighborObstacleDamage(cells, width, height, c);
+                ResolveMarkHelper.AddNeighborObstacleDamage(cells, width, height, c);
             }
         }
     }

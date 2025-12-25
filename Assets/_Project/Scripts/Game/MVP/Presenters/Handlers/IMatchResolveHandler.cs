@@ -8,6 +8,6 @@ namespace Core.Handlers
     {
         bool CanHandle(GridObjectType startData);
 
-        void Handle(GridStateContext context, GridObjectType[,] typeGrid, List<Vector2Int> group, int width, int height, CellResolveData[,] cells, List<BoosterSpawn> spawns);
+        void Handle(GridStateContext context, GridObjectType[,] typeGrid, List<Vector2Int> group, int width, int height, CellResolveData[,] cells, List<BoosterSpawnResult> spawns);
     }
 }

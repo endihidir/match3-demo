@@ -43,6 +43,7 @@ namespace Core.Handlers
             var a = move.A;
 
             var obj = Context.Model.GetGridObject(a);
+            
             if (!obj)
             {
                 Context.MoveQueue.Dequeue();
@@ -107,12 +108,12 @@ namespace Core.Handlers
             PlaySwapAndCommit(objA, objB, coordA, coordB, true).Forget();
         }
 
-        private async UniTask PlayPingPong(BaseGridObject objA, BaseGridObject objB, Vector2Int a, Vector2Int b)
+        private async UniTask PlayPingPong(BaseGridObject objA, BaseGridObject objB, Vector2Int coordA, Vector2Int coordB)
         {
             var tasks = new List<UniTask>();
 
-            var tweenA = objA.ItemAnimation.PingPongMove(Context.View.GridToWorld(b));
-            var tweenB = objB.ItemAnimation.PingPongMove(Context.View.GridToWorld(a));
+            var tweenA = objA.ItemAnimation.PingPongMove(Context.View.GridToWorld(coordB));
+            var tweenB = objB.ItemAnimation.PingPongMove(Context.View.GridToWorld(coordA));
 
             tasks.Add(tweenA.AsyncWaitForCompletion().AsUniTask());
             tasks.Add(tweenB.AsyncWaitForCompletion().AsUniTask());
@@ -198,10 +199,10 @@ namespace Core.Handlers
             {
                 for (int i = 0; i < rule.Effects.Length; i++)
                 {
-                    var e = rule.Effects[i];
-                    if (e == null) continue;
+                    var boosterEffectBase = rule.Effects[i];
+                    if (boosterEffectBase == null) continue;
 
-                    Context.PendingEffects.Add(new PendingEffect(origin, e));
+                    Context.PendingEffects.Add(new PendingEffect(origin, boosterEffectBase));
                 }
 
                 return;
