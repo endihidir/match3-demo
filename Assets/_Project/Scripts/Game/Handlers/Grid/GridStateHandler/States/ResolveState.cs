@@ -83,7 +83,7 @@ namespace Core.Handlers
                 ResolveRegularMatches(typeGrid, matchMask, cells, width, height, spawns);
             }
 
-            var hasEffects = Context.PendingEffects != null && Context.PendingEffects.Count > 0;
+            var hasEffects = Context.PendingEffects is { Count: > 0 };
             if (hasEffects)
             {
                 ApplyPendingEffects(cells, width, height);
