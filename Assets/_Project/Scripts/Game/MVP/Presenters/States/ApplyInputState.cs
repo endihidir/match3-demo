@@ -53,7 +53,6 @@ namespace Core.Handlers
 
             if (obj.IsShiftInProgress)
             {
-                Context.MoveQueue.Dequeue();
                 Exit();
                 return;
             }
@@ -86,7 +85,6 @@ namespace Core.Handlers
 
             if (objA.IsShiftInProgress || objB.IsShiftInProgress)
             {
-                Context.MoveQueue.Dequeue();
                 Exit();
                 return;
             }
