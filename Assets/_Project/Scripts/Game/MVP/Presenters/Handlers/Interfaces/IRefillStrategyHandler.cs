@@ -2,7 +2,7 @@ using Core.Models;
 
 namespace Core.Handlers
 {
-    public interface IRefillStrategyHandler
+    public interface IRefillStrategySelectionHandler
     {
         IRefillStrategy SelectStrategy(IGridModel model);
     }

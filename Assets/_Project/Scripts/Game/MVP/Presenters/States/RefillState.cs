@@ -9,11 +9,11 @@ namespace Core.Handlers
     {
         public override bool NeedsExitTime => true;
         
-        private readonly IRefillStrategyHandler _refillStrategyHandler;
+        private readonly IRefillStrategySelectionHandler _refillStrategySelectionHandler;
 
-        public RefillState(IRefillStrategyHandler refillStrategyHandler)
+        public RefillState(IRefillStrategySelectionHandler refillStrategySelectionHandler)
         {
-            _refillStrategyHandler = refillStrategyHandler;
+            _refillStrategySelectionHandler = refillStrategySelectionHandler;
         }
 
         protected override void OnEnter()
@@ -32,7 +32,7 @@ namespace Core.Handlers
         private async UniTask Run()
         {
             var tasks = new List<UniTask>();
-            var strategy = _refillStrategyHandler.SelectStrategy(Context.Model);
+            var strategy = _refillStrategySelectionHandler.SelectStrategy(Context.Model);
             await strategy.Execute(Context, tasks, 0.15f);
             await UniTask.WhenAll(tasks);
             FinishCascade();

@@ -4,10 +4,10 @@ using Core.Models;
 
 namespace Core.Handlers
 {
-    public sealed class RefillStrategyHandler : IRefillStrategyHandler
+    public sealed class RefillStrategySelectionHandler : IRefillStrategySelectionHandler
     {
         private readonly IEnumerable<IRefillStrategy> _refillStrategies;
-        public RefillStrategyHandler(IEnumerable<IRefillStrategy> refillStrategies) => _refillStrategies = refillStrategies;
+        public RefillStrategySelectionHandler(IEnumerable<IRefillStrategy> refillStrategies) => _refillStrategies = refillStrategies;
         public IRefillStrategy SelectStrategy(IGridModel model) => _refillStrategies.FirstOrDefault(refillStrategy => refillStrategy.CanRefill(model));
     }
 }
