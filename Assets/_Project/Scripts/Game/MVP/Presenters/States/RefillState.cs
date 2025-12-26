@@ -33,7 +33,7 @@ namespace Core.Handlers
         {
             var tasks = new List<UniTask>();
             var strategy = _refillStrategySelectionHandler.SelectStrategy(Context.Model);
-            await strategy.Execute(Context, tasks, 0.05f);
+            await strategy.Execute(Context, tasks, 0.15f);
             await UniTask.WhenAll(tasks);
             FinishCascade();
         }
