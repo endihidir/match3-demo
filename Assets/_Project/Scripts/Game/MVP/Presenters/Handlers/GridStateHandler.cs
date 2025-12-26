@@ -42,7 +42,7 @@ namespace Core.Handlers
             _stateMachine.AddTransition(_idleState, _applyInputState, () => _moveQueue.Count > 0)
                          .AddTransition(_idleState, _resolveState, () => _context.RefillResolveRequested && !_context.RefillInProgress)
                          .AddTransition(_applyInputState, _idleState, () => _applyInputState.IsExitReady)
-                         //.AddTransition(_applyInputState, _resolveState, () => _applyInputState.IsExitReady) // TODO: Think about it!
+                         .AddTransition(_applyInputState, _resolveState, () => _applyInputState.IsExitReady) // TODO: Think about it!
                          .AddTransition(_resolveState, _refillState, () => _resolveState.IsExitReady && _context.ResolvedAnyMatch)
                          .AddTransition(_resolveState, _idleState, () => _resolveState.IsExitReady && !_context.ResolvedAnyMatch)
                          .AddTransition(_refillState, _idleState, () => _refillState.IsExitReady);
