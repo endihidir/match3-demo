@@ -220,23 +220,20 @@ namespace Core.Handlers
 
            void ProcessDamageableCell(int x, int y, Vector2Int pos, BaseGridObject obj, IDamageableItem damageable, ref CellResolveData cell, ref bool loopAgainFlag)
            {
-               if (cell.Remove)
-               {
-                   EnqueueTriggerIfNeeded(x, y, pos, obj);
-                   FlushEffects(ref loopAgainFlag);
-
-                   if (ApplyDamage(damageable, Mathf.Max(1, cell.Damage), cell.Source))
-                   {
-                        DestroyAt(pos, obj);
-                   }
-               }
-
                if (cell.ObstacleDamage > 0)
                {
                    if (ApplyDamage(damageable, Mathf.Max(1, cell.ObstacleDamage), cell.ObstacleSource))
                    {
-                        DestroyAt(pos, obj);
+                       DestroyAt(pos, obj);
+                       return;
                    }
+               }
+               
+               if (cell.Remove)
+               {
+                   EnqueueTriggerIfNeeded(x, y, pos, obj);
+                   FlushEffects(ref loopAgainFlag);
+                   DestroyAt(pos, obj);
                }
            }
 

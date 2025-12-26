@@ -55,7 +55,7 @@ namespace Core.Utils
             {
                 if (x < 0 || y < 0 || x >= width || y >= height) return;
                 ref var cell = ref cells[x, y];
-                cell.AddObstacleOnlyDamage(1, DamageSource.Item);
+                cell.AddObstacleDamage(1, DamageSource.Item);
             }
         }
     }
