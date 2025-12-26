@@ -12,7 +12,7 @@ namespace Core.Handlers
     {
         public override bool NeedsExitTime => true;
 
-        private const float MergeMoveDuration = 0.15f;
+        private const float MergeMoveDuration = 0.1f;
         private const Ease MergeEase = Ease.InOutQuad;
         private readonly IMatchResolveHandler _matchResolveHandler;
 
@@ -220,20 +220,19 @@ namespace Core.Handlers
 
            void ProcessDamageableCell(int x, int y, Vector2Int pos, BaseGridObject obj, IDamageableItem damageable, ref CellResolveData cell, ref bool loopAgainFlag)
            {
-               if (cell.ObstacleDamage > 0)
-               {
-                   if (ApplyDamage(damageable, Mathf.Max(1, cell.ObstacleDamage), cell.ObstacleSource))
-                   {
-                       DestroyAt(pos, obj);
-                       return;
-                   }
-               }
-               
                if (cell.Remove)
                {
                    EnqueueTriggerIfNeeded(x, y, pos, obj);
                    FlushEffects(ref loopAgainFlag);
                    DestroyAt(pos, obj);
+               }
+
+               if (cell.ObstacleDamage > 0)
+               {
+                   if (ApplyDamage(damageable, Mathf.Max(1, cell.ObstacleDamage), cell.ObstacleSource))
+                   {
+                        DestroyAt(pos, obj);
+                   }
                }
            }
 

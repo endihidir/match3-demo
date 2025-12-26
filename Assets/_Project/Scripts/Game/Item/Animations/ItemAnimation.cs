@@ -43,8 +43,6 @@ namespace Core.Item
 
         public Tween PingPongMove(Vector3 targetPos, float duration = 0.15f, Ease ease = Ease.Linear)
         {
-            if (_shiftTween.IsActive()) return null;
-            
             _moveTween?.Kill();
                 
             var defaultPos = transform.position;
@@ -59,8 +57,6 @@ namespace Core.Item
 
         public Tween Move(Vector3 worldPos, float duration = 0.15f, Ease ease = Ease.Linear)
         {
-            if(_shiftTween.IsActive()) return null;
-            
             _moveTween?.Kill();
             
             _moveTween = transform.DOMove(worldPos, duration)
