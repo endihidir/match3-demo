@@ -5,14 +5,14 @@ namespace Core.Handlers
     public readonly struct GridMove
     {
         public readonly GridMoveType Type;
-        public readonly Vector2Int A;
-        public readonly Vector2Int B;
+        public readonly Vector2Int CoordA;
+        public readonly Vector2Int CoordB;
 
-        public GridMove(GridMoveType type, Vector2Int a, Vector2Int b = default)
+        public GridMove(GridMoveType type, Vector2Int coordA, Vector2Int coordB = default)
         {
             Type = type;
-            A = a;
-            B = b;
+            CoordA = coordA;
+            CoordB = coordB;
         }
     }
 }

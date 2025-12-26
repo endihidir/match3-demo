@@ -7,18 +7,16 @@ namespace Core.Handlers
 {
     public sealed class MatchResolveHandler : IMatchResolveHandler
     {
-        private readonly BoosterSelectionStrategy _boosterSelection;
-        private readonly MatchDamageStrategy _matchDamage;
-        private readonly SpawnOverrideStrategy _spawnOverride;
+        private IBoosterSelectionPolicy _boosterSelection;
 
-        public MatchResolveHandler(GridStateContext context)
+        public MatchResolveHandler(IBoosterSelectionPolicy boosterSelectionPolicy)
         {
-            _boosterSelection = new BoosterSelectionStrategy(context);
-            _matchDamage = new MatchDamageStrategy();
-            _spawnOverride = new SpawnOverrideStrategy();
+            _boosterSelection = boosterSelectionPolicy;
         }
-
-        public bool CanHandle(GridObjectType startData) => GridMatchDetectUtil.IsRegularItem(startData);
+        public void Initialize(GridStateContext context)
+        {
+            _boosterSelection.Initialize(context);
+        }
 
         public void Handle(GridStateContext context, GridObjectType[,] typeGrid, List<Vector2Int> group, int width, int height, CellResolveData[,] cells, 
             List<BoosterSpawnResult> spawns)
@@ -26,15 +24,41 @@ namespace Core.Handlers
             if (group == null || group.Count == 0) return;
 
             var id = typeGrid[group[0].x, group[0].y].TypeId;
-
+          
             var spawn = _boosterSelection.Decide(typeGrid, group, width, height, id);
 
-            _matchDamage.Apply(cells, width, height, group);
+            Apply(cells, width, height, group);
 
             if (spawn.HasSpawn)
             {
                 spawns.Add(spawn);
-                _spawnOverride.Apply(cells, group);
+                Apply(cells, group);
+            }
+        }
+
+        private void Apply(CellResolveData[,] cells, int width, int height, List<Vector2Int> group)
+        {
+            for (int i = 0; i < group.Count; i++)
+            {
+                var c = group[i];
+
+                ref var cell = ref cells[c.x, c.y];
+                
+                cell.AddDamage(1, DamageSource.Item);
+
+                ResolveMarkHelper.AddNeighborObstacleDamage(cells, width, height, c);
+            }
+        }
+
+        private void Apply(CellResolveData[,] cells, List<Vector2Int> group)
+        {
+            for (int i = 0; i < group.Count; i++)
+            {
+                var c = group[i];
+
+                ref var cell = ref cells[c.x, c.y];
+                cell.Remove = false;
+                cell.Source &= ~DamageSource.Item;
             }
         }
     }

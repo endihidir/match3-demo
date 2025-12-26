@@ -32,6 +32,13 @@ namespace Core.LifetimeScopes
             builder.Register<GridModel>(Lifetime.Scoped).As<IGridModel>();
             builder.RegisterComponentInHierarchy<GridView>().As<IGridView>();
             builder.Register<GridPresenter>(Lifetime.Scoped).As<IInitializable>();
+
+            builder.Register<MatchResolveHandler>(Lifetime.Scoped).As<IMatchResolveHandler>();
+            builder.Register<BoosterSelectionPolicy>(Lifetime.Scoped).As<IBoosterSelectionPolicy>();
+            
+            builder.Register<RefillStrategyHandler>(Lifetime.Scoped).As<IRefillStrategyHandler>();
+            builder.Register<FallDownRefillStrategy>(Lifetime.Scoped).As<IRefillStrategy>();
+            builder.Register<SlideDownRefillStrategy>(Lifetime.Scoped).As<IRefillStrategy>();
         }
 
         private void Start()

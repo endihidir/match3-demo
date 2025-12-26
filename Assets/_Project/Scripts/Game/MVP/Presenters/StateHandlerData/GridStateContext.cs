@@ -16,11 +16,11 @@ namespace Core.Handlers
         public Queue<GridMove> MoveQueue { get; }
 
         public bool ResolvedAnyMatch { get; set; }
-        public bool CascadeInProgress { get; set; }
-        public bool CascadeResolveRequested { get; set; }
+        public bool RefillInProgress { get; set; }
+        public bool RefillResolveRequested { get; set; }
         
-        public bool IsForcedBoosterSpawnPos { get; set; }
-        public Vector2Int ForcedBoosterSpawnPos { get; set; }
+        public bool HasForcedBoosterSpawnCoord { get; set; }
+        public Vector2Int ForcedBoosterSpawnCoord { get; set; }
         public List<PendingEffect> PendingEffects { get; } = new();
 
         public GridStateContext(IGridModel model, IGridView view, IGridItemFactory factory, ItemConfigContainer configs, Queue<GridMove> moveQueue)
@@ -31,6 +31,5 @@ namespace Core.Handlers
             Configs = configs;
             MoveQueue = moveQueue;
         }
-
     }
 }

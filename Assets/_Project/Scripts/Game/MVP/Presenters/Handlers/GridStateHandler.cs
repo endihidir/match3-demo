@@ -13,7 +13,7 @@ namespace Core.Handlers
     public sealed class GridStateHandler : IGridStateHandler, ITickable, IFixedTickable, ILateTickable
     {
         private readonly IStateMachine _stateMachine;
-        private readonly GridStateContext _stateContext;
+        private readonly GridStateContext _context;
 
         private readonly IdleState _idleState;
         private readonly ApplyInputState _applyInputState;
@@ -22,27 +22,29 @@ namespace Core.Handlers
 
         private readonly Queue<GridMove> _moveQueue = new();
 
-        public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory, GameplayConfigContainer configContainer)
+        public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory, GameplayConfigContainer configContainer, 
+            IRefillStrategyHandler refillStrategyHandler, IMatchResolveHandler matchResolveHandler)
         {
             _stateMachine = new StateMachine();
             
             var itemConfigContainer = configContainer.ItemConfigContainer;
-            _stateContext = new GridStateContext(model, view, factory, itemConfigContainer, _moveQueue);
+            _context = new GridStateContext(model, view, factory, itemConfigContainer, _moveQueue);
+            matchResolveHandler.Initialize(_context);
 
-            _idleState = new IdleState().Init(_stateContext) as IdleState;
-            _applyInputState = new ApplyInputState().Init(_stateContext) as ApplyInputState;
-            _resolveState = new ResolveState().Init(_stateContext) as ResolveState;
-            _refillState = new RefillState().Init(_stateContext) as RefillState;
+            _idleState = new IdleState().Init(_context) as IdleState;
+            _applyInputState = new ApplyInputState().Init(_context) as ApplyInputState;
+            _resolveState = new ResolveState(matchResolveHandler).Init(_context) as ResolveState;
+            _refillState = new RefillState(refillStrategyHandler).Init(_context) as RefillState;
 
             var states = new StateBase<GridStateContext>[] { _idleState, _applyInputState, _resolveState, _refillState };
             _stateMachine.Register(states);
 
-            _stateMachine.AddTransition(_idleState, _applyInputState, () => _moveQueue.Count > 0 /*&& !_context.CascadeInProgress*/)
-                         .AddTransition(_idleState, _resolveState, () => _stateContext.CascadeResolveRequested && !_stateContext.CascadeInProgress)
-                         .AddTransition(_applyInputState, _resolveState, () => _applyInputState.IsExitReady)
+            _stateMachine.AddTransition(_idleState, _applyInputState, () => _moveQueue.Count > 0)
+                         .AddTransition(_idleState, _resolveState, () => _context.RefillResolveRequested && !_context.RefillInProgress)
                          .AddTransition(_applyInputState, _idleState, () => _applyInputState.IsExitReady)
-                         .AddTransition(_resolveState, _refillState, () => _resolveState.IsExitReady && _stateContext.ResolvedAnyMatch)
-                         .AddTransition(_resolveState, _idleState, () => _resolveState.IsExitReady && !_stateContext.ResolvedAnyMatch)
+                         //.AddTransition(_applyInputState, _resolveState, () => _applyInputState.IsExitReady) // TODO: Think about it!
+                         .AddTransition(_resolveState, _refillState, () => _resolveState.IsExitReady && _context.ResolvedAnyMatch)
+                         .AddTransition(_resolveState, _idleState, () => _resolveState.IsExitReady && !_context.ResolvedAnyMatch)
                          .AddTransition(_refillState, _idleState, () => _refillState.IsExitReady);
 
             _stateMachine.SetInitialState(_idleState);
@@ -59,9 +61,9 @@ namespace Core.Handlers
 
         private bool TryEnqueueBooster(Vector2Int a)
         {
-            if (!_stateContext.Model.IsInRange(a)) return false;
+            if (!_context.Model.IsInRange(a)) return false;
 
-            var objA = _stateContext.Model.GetGridObject(a);
+            var objA = _context.Model.GetGridObject(a);
             if (!objA) return false;
 
             if (!IsSourceInteractable(objA) || objA is not BoosterObject)
@@ -77,10 +79,10 @@ namespace Core.Handlers
         private bool TryEnqueueSwap(Vector2Int a, Vector2Int b)
         {
             if (a == b) return false;
-            if (!_stateContext.Model.IsInRange(a) || !_stateContext.Model.IsInRange(b)) return false;
+            if (!_context.Model.IsInRange(a) || !_context.Model.IsInRange(b)) return false;
 
-            var objA = _stateContext.Model.GetGridObject(a);
-            var objB = _stateContext.Model.GetGridObject(b);
+            var objA = _context.Model.GetGridObject(a);
+            var objB = _context.Model.GetGridObject(b);
 
             if (!objA || !objB) return false;
 

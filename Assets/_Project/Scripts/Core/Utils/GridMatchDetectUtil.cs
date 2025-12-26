@@ -13,12 +13,12 @@ namespace Core.Utils
             }
 
             if (HasLineMatchAt(grid, x, y, width, height, id, assumeCenterIsId)) return true;
-            if (Has2x2Square(grid, x, y, width, height, id, assumeCenterIsId)) return true;
+            if (Has2X2Square(grid, x, y, width, height, id, assumeCenterIsId)) return true;
 
             return false;
         }
 
-        public static bool HasLineMatchAt(GridObjectType[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId)
+        private static bool HasLineMatchAt(GridObjectType[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId)
         {
             if (!IsCenterOk(grid, x, y, id, assumeCenterIsId)) return false;
 
@@ -33,7 +33,7 @@ namespace Core.Utils
             return down + 1 + up >= 3;
         }
 
-        public static bool Has2x2Square(GridObjectType[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId)
+        public static bool Has2X2Square(GridObjectType[,] grid, int x, int y, int width, int height, int id, bool assumeCenterIsId)
         {
             if (IsSquareAt(x, y)) return true;
             if (IsSquareAt(x - 1, y)) return true;
@@ -82,7 +82,7 @@ namespace Core.Utils
             return false;
         }
 
-        public static bool[,] BuildMatchMask(GridObjectType[,] grid, int width, int height, out bool anyMatch)
+        public static bool[,] BuildMatchMask_CellBased(GridObjectType[,] grid, int width, int height, out bool anyMatch)
         {
             var remove = new bool[width, height];
             anyMatch = false;
@@ -97,7 +97,7 @@ namespace Core.Utils
                     var id = data.TypeId;
 
                     if (HasLineMatchAt(grid, x, y, width, height, id, assumeCenterIsId: false) ||
-                        Has2x2Square(grid, x, y, width, height, id, assumeCenterIsId: false))
+                        Has2X2Square(grid, x, y, width, height, id, assumeCenterIsId: false))
                     {
                         remove[x, y] = true;
                         anyMatch = true;
@@ -108,7 +108,7 @@ namespace Core.Utils
             return remove;
         }
 
-        public static bool[,] BuildMatchMaskFast(GridObjectType[,] grid, int width, int height, out bool anyMatch)
+        public static bool[,] BuildMatchMask_ScanBased(GridObjectType[,] grid, int width, int height, out bool anyMatch)
         {
             var remove = new bool[width, height];
             var any = false;

@@ -5,14 +5,17 @@ using UnityEngine;
 
 namespace Core.Handlers
 {
-    public sealed class BoosterSelectionStrategy
+    public interface IBoosterSelectionPolicy
     {
-        private readonly GridStateContext _context;
+        void Initialize(GridStateContext context);
+        BoosterSpawnResult Decide(GridObjectType[,] grid, List<Vector2Int> cells, int width, int height, int id);
+    }
+    
+    public sealed class BoosterSelectionPolicy :  IBoosterSelectionPolicy
+    {
+        private GridStateContext _context;
 
-        public BoosterSelectionStrategy(GridStateContext context)
-        {
-            _context = context;
-        }
+        public void Initialize(GridStateContext context) => _context = context;
 
         public BoosterSpawnResult Decide(GridObjectType[,] grid, List<Vector2Int> cells, int width, int height, int id)
         {
@@ -40,7 +43,7 @@ namespace Core.Handlers
                     continue;
                 }
 
-                if (GridMatchDetectUtil.Has2x2Square(grid, coord.x, coord.y, width, height, id, assumeCenterIsId: true))
+                if (GridMatchDetectUtil.Has2X2Square(grid, coord.x, coord.y, width, height, id, assumeCenterIsId: true))
                 {
                     TrySet(3, coord, BoosterType.Bomb);
                     continue;
@@ -53,15 +56,15 @@ namespace Core.Handlers
                 }
             }
 
-            if (_context.IsForcedBoosterSpawnPos)
+            if (_context is { HasForcedBoosterSpawnCoord: true })
             {
-                var forced = _context.ForcedBoosterSpawnPos;
+                var forced = _context.ForcedBoosterSpawnCoord;
 
                 for (int i = 0; i < cells.Count; i++)
                 {
                     if (cells[i] == forced)
                     {
-                        _context.IsForcedBoosterSpawnPos = false;
+                        _context.HasForcedBoosterSpawnCoord = false;
                         bestPos = forced;
                         break;
                     }
@@ -79,5 +82,6 @@ namespace Core.Handlers
                 bestType = type;
             }
         }
+
     }
 }
