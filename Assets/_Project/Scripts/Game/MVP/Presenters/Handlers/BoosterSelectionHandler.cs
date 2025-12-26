@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Core.Handlers
 {
-    public sealed class BoosterSelectionPolicy : IBoosterSelectionPolicy
+    public sealed class BoosterSelectionHandler : IBoosterSelectionHandler
     {
         private GridStateContext _context;
 

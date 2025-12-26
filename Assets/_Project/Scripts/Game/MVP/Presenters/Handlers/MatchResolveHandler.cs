@@ -7,11 +7,11 @@ namespace Core.Handlers
 {
     public sealed class MatchResolveHandler : IMatchResolveHandler
     {
-        private IBoosterSelectionPolicy _boosterSelection;
+        private IBoosterSelectionHandler _boosterSelection;
 
-        public MatchResolveHandler(IBoosterSelectionPolicy boosterSelectionPolicy)
+        public MatchResolveHandler(IBoosterSelectionHandler boosterSelectionHandler)
         {
-            _boosterSelection = boosterSelectionPolicy;
+            _boosterSelection = boosterSelectionHandler;
         }
         public void Initialize(GridStateContext context)
         {

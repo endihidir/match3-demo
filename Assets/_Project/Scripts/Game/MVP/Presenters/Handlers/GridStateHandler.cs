@@ -23,7 +23,7 @@ namespace Core.Handlers
         private readonly Queue<GridMove> _moveQueue = new();
 
         public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory, GameplayConfigContainer configContainer, 
-            IRefillStrategyHandler refillStrategyHandler, IMatchResolveHandler matchResolveHandler)
+            IRefillStrategySelectionHandler refillStrategySelectionHandler, IMatchResolveHandler matchResolveHandler)
         {
             _stateMachine = new StateMachine();
             
@@ -34,7 +34,7 @@ namespace Core.Handlers
             _idleState = new IdleState().Init(_context) as IdleState;
             _applyInputState = new ApplyInputState().Init(_context) as ApplyInputState;
             _resolveState = new ResolveState(matchResolveHandler).Init(_context) as ResolveState;
-            _refillState = new RefillState(refillStrategyHandler).Init(_context) as RefillState;
+            _refillState = new RefillState(refillStrategySelectionHandler).Init(_context) as RefillState;
 
             var states = new StateBase<GridStateContext>[] { _idleState, _applyInputState, _resolveState, _refillState };
             _stateMachine.Register(states);

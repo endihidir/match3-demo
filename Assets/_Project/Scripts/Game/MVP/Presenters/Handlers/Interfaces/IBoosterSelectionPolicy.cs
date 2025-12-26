@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Core.Handlers
 {
-    public interface IBoosterSelectionPolicy
+    public interface IBoosterSelectionHandler
     {
         void Initialize(GridStateContext context);
         BoosterSpawnResult Decide(GridObjectType[,] grid, List<Vector2Int> cells, int width, int height, int id);
