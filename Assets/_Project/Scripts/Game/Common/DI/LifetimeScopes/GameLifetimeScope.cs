@@ -36,7 +36,7 @@ namespace Core.LifetimeScopes
             builder.Register<MatchResolveHandler>(Lifetime.Scoped).As<IMatchResolveHandler>();
             builder.Register<BoosterSelectionHandler>(Lifetime.Scoped).As<IBoosterSelectionHandler>();
             
-            builder.Register<RefillStrategySelectionHandler>(Lifetime.Scoped).As<IRefillStrategySelectionHandler>();
+            builder.Register<RefillStrategyHandler>(Lifetime.Scoped).As<IRefillStrategyHandler>();
             builder.Register<FallDownRefillStrategy>(Lifetime.Scoped).As<IRefillStrategy>();
             builder.Register<SlideDownRefillStrategy>(Lifetime.Scoped).As<IRefillStrategy>();
         }

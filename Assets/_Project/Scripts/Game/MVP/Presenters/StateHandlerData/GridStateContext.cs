@@ -15,21 +15,23 @@ namespace Core.Handlers
         public ItemConfigContainer Configs { get; }
         public Queue<GridMove> MoveQueue { get; }
 
+        public bool AutoResolveEnabled { get; private set; }
         public bool ResolvedAnyMatch { get; set; }
         public bool RefillInProgress { get; set; }
         public bool RefillResolveRequested { get; set; }
-        
         public bool HasForcedBoosterSpawnCoord { get; set; }
+        
         public Vector2Int ForcedBoosterSpawnCoord { get; set; }
         public List<PendingEffect> PendingEffects { get; } = new();
 
-        public GridStateContext(IGridModel model, IGridView view, IGridItemFactory factory, ItemConfigContainer configs, Queue<GridMove> moveQueue)
+        public GridStateContext(IGridModel model, IGridView view, IGridItemFactory factory, ItemConfigContainer configs, Queue<GridMove> moveQueue, bool autoResolveEnabled)
         {
             Model = model;
             View = view;
             Factory = factory;
             Configs = configs;
             MoveQueue = moveQueue;
+            AutoResolveEnabled = autoResolveEnabled;
         }
     }
 }

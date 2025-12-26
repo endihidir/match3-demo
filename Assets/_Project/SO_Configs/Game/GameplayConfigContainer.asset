@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1e6d29a61044dc7a3d43603c6653aca, type: 3}
   m_Name: GameplayConfigContainer
   m_EditorClassIdentifier: 
-  <GameBootstrapperConfig>k__BackingField: {fileID: 11400000, guid: fb198210dbbf9be41a51240c889db109,
+  <GameplayBootstrapperConfig>k__BackingField: {fileID: 11400000, guid: fb198210dbbf9be41a51240c889db109,
     type: 2}
   <ItemConfigContainer>k__BackingField: {fileID: 11400000, guid: b073fd11c439b684f8cf60ca66481a9b,
     type: 2}

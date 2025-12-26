@@ -9,11 +9,15 @@ namespace Core.Handlers
     {
         public override bool NeedsExitTime => true;
         
-        private readonly IRefillStrategySelectionHandler _refillStrategySelectionHandler;
+        private readonly IRefillStrategyHandler _strategyHandler;
+        private float _refillStartDelay;
 
-        public RefillState(IRefillStrategySelectionHandler refillStrategySelectionHandler)
+        public RefillState(IRefillStrategyHandler strategyHandler) => _strategyHandler = strategyHandler;
+
+        protected override void OnInit()
         {
-            _refillStrategySelectionHandler = refillStrategySelectionHandler;
+            _refillStartDelay = Context.Configs.RefillSettings.RefillStartDelay;
+            _strategyHandler.Initialize(Context.Configs.RefillSettings);
         }
 
         protected override void OnEnter()
@@ -32,8 +36,8 @@ namespace Core.Handlers
         private async UniTask Run()
         {
             var tasks = new List<UniTask>();
-            var strategy = _refillStrategySelectionHandler.SelectStrategy(Context.Model);
-            await strategy.Execute(Context, tasks, 0.15f);
+            var strategy = _strategyHandler.SelectStrategy(Context.Model);
+            await strategy.Execute(Context, tasks, _refillStartDelay);
             await UniTask.WhenAll(tasks);
             FinishCascade();
         }
@@ -42,8 +46,8 @@ namespace Core.Handlers
         {
             Context.RefillInProgress = false;
             var model = Context.Model;
-            var grid = model.BuildTypeDataGrid();
-            Context.RefillResolveRequested = GridMatchDetectUtil.HasAnyRegularMatchOnBoard(grid, model.Width, model.Height);
+            var gridObjectTypes = model.BuildTypeDataGrid();
+            Context.RefillResolveRequested = GridMatchDetectUtil.HasAnyRegularMatchOnBoard(gridObjectTypes, model.Width, model.Height);
         }
     }
 }

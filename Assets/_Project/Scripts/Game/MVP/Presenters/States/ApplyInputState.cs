@@ -38,12 +38,12 @@ namespace Core.Handlers
             HandleSwap(move);
         }
 
-        private void HandleBoosterTap(in GridMove move)
+        private void HandleBoosterTap(GridMove move)
         {
             var coordA = move.CoordA;
-
-            var obj = Context.Model.GetGridObject(coordA);
             
+            var obj = Context.Model.GetGridObject(coordA);
+
             if (!obj)
             {
                 Context.MoveQueue.Dequeue();
@@ -53,18 +53,23 @@ namespace Core.Handlers
 
             if (obj.IsShiftInProgress)
             {
+                Context.MoveQueue.Dequeue();
                 Exit();
                 return;
             }
 
-            Context.MoveQueue.Dequeue();
-
-            if (obj is BoosterObject booster)
+            if (obj is not BoosterObject booster)
             {
-                EnqueueSingleBoosterEffect(coordA, booster);
-                Context.RefillResolveRequested = true;
+                obj.ItemAnimation.Shake();
+                Context.MoveQueue.Dequeue();
+                Exit();
+                return;
             }
 
+            EnqueueSingleBoosterEffect(coordA, booster);
+            Context.RefillResolveRequested = true;
+
+            Context.MoveQueue.Dequeue();
             Exit();
         }
 
@@ -85,6 +90,7 @@ namespace Core.Handlers
 
             if (objA.IsShiftInProgress || objB.IsShiftInProgress)
             {
+                Context.MoveQueue.Dequeue();
                 Exit();
                 return;
             }

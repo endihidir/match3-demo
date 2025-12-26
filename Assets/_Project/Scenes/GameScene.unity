@@ -169,6 +169,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <IsInitialized>k__BackingField: 0
+  <Layout>k__BackingField:
+    cellSize: 0
+    originOffset: {x: 0, y: 0, z: 0}
+    screenSidePaddingRatio: 0
+    cellSpacingRatio: 0
   <Cam>k__BackingField: {fileID: 671010485}
   <GridRoot>k__BackingField: {fileID: 195934560}
   <GridObjectsParent>k__BackingField: {fileID: 1824729426}
@@ -179,11 +184,6 @@ MonoBehaviour:
     type: 2}
   <DrawGridGizmos>k__BackingField: 0
   <GizmosColor>k__BackingField: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  <Layout>k__BackingField:
-    cellSize: 0
-    originOffset: {x: 0, y: 0, z: 0}
-    screenSidePaddingRatio: 0
-    cellSpacingRatio: 0
 --- !u!1 &262796440
 GameObject:
   m_ObjectHideFlags: 0
@@ -232,7 +232,7 @@ MonoBehaviour:
     TypeName: 
   autoRun: 0
   autoInjectGameObjects: []
-  <GameConfigContainer>k__BackingField: {fileID: 11400000, guid: f503e54070851b94ebd161bb6103e266,
+  <GameplayConfigContainer>k__BackingField: {fileID: 11400000, guid: f503e54070851b94ebd161bb6103e266,
     type: 2}
 --- !u!1 &495241981
 GameObject:

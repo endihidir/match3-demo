@@ -18,3 +18,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8327294c71b752e40be756f4525ff15a, type: 2}
   <BoosterMergeConfig>k__BackingField: {fileID: 11400000, guid: cccd3d23ec1b86a4e8534d8e235742cd,
     type: 2}
+  <RefillSettings>k__BackingField: {fileID: 11400000, guid: 4640726bde3138b4ba2ba4961de0deca,
+    type: 2}
