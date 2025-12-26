@@ -12,34 +12,25 @@ namespace Core.Handlers
     {
         public override bool NeedsExitTime => true;
 
-        private const float MergeMoveDuration = 0.12f;
+        private const float MergeMoveDuration = 0.15f;
         private const Ease MergeEase = Ease.InOutQuad;
+        private readonly IMatchResolveHandler _matchResolveHandler;
 
-        private List<IMatchResolveHandler> _handlers;
+        public ResolveState(IMatchResolveHandler matchResolveHandler) => _matchResolveHandler = matchResolveHandler;
 
         protected override void OnEnter()
         {
-            EnsureHandlers();
-
-            Context.CascadeResolveRequested = false;
+            Context.RefillResolveRequested = false;
             ResolveAsync().Forget();
         }
 
-        private void EnsureHandlers()
-        {
-            _handlers ??= new List<IMatchResolveHandler>(1)
-            {
-                new MatchResolveHandler(Context)
-            };
-        }
-
-        private async UniTaskVoid ResolveAsync()
+        private async UniTask ResolveAsync()
         {
             var width = Context.Model.Width;
             var height = Context.Model.Height;
 
             var typeGrid = Context.Model.BuildTypeDataGrid();
-            var matchMask = GridMatchDetectUtil.BuildMatchMaskFast(typeGrid, width, height, out var hasMatch);
+            var matchMask = GridMatchDetectUtil.BuildMatchMask_ScanBased(typeGrid, width, height, out var hasMatch);
 
             var cells = new CellResolveData[width, height];
             var spawns = new List<BoosterSpawnResult>(8);
@@ -50,6 +41,7 @@ namespace Core.Handlers
             }
 
             var hasEffects = Context.PendingEffects is { Count: > 0 };
+            
             if (hasEffects)
             {
                 ApplyPendingEffects(cells, width, height);
@@ -68,11 +60,11 @@ namespace Core.Handlers
             {
                 for (int i = 0; i < spawns.Count; i++)
                 {
-                    var s = spawns[i];
-                    if (!s.HasSpawn) continue;
+                    var spawnResult = spawns[i];
+                    if (!spawnResult.HasSpawn) continue;
 
-                    await PlayMatchMergeAnimation(s);
-                    SpawnBooster(s.Pos, s.Type);
+                    await PlayMatchMergeAnimation(spawnResult);
+                    SpawnBooster(spawnResult.Pos, spawnResult.Type);
                 }
             }
 
@@ -93,26 +85,12 @@ namespace Core.Handlers
 
                     var startData = typeGrid[x, y];
 
-                    var handler = FindHandler(startData);
-                    if (handler == null) continue;
-
                     var group = ResolveMarkHelper.CollectGroup(matchMask, visited, typeGrid, width, height, new Vector2Int(x, y), startData.TypeId);
                     if (group.Count == 0) continue;
 
-                    handler.Handle(Context, typeGrid, group, width, height, cells, spawns);
+                    _matchResolveHandler.Handle(Context, typeGrid, group, width, height, cells, spawns);
                 }
             }
-        }
-
-        private IMatchResolveHandler FindHandler(GridObjectType startData)
-        {
-            for (int i = 0; i < _handlers.Count; i++)
-            {
-                if (_handlers[i].CanHandle(startData))
-                    return _handlers[i];
-            }
-
-            return null;
         }
 
         private void ApplyPendingEffects(CellResolveData[,] cells, int width, int height)
@@ -146,6 +124,7 @@ namespace Core.Handlers
                 if (!obj) continue;
 
                 var tween = obj.ItemAnimation.Move(targetWorld, MergeMoveDuration, MergeEase);
+                
                 if (tween == null)
                 {
                     obj.SetPosition(targetWorld);
@@ -188,122 +167,119 @@ namespace Core.Handlers
             booster.SetParent(Context.View.GridObjectsParent);
         }
 
-       private void ApplyResolveData(CellResolveData[,] cells, int width, int height)
-        {
-            var triggered = new bool[width, height];
-            var effects = new Queue<PendingEffect>(8);
+        private void ApplyResolveData(CellResolveData[,] cells, int width, int height)
+        { 
+           var triggered = new bool[width, height];
+           var effects = new Queue<PendingEffect>(8);
 
-            var loopAgain = false;
+           var loopAgain = false;
 
-            do
-            {
-                loopAgain = false;
+           do
+           {
+               loopAgain = false;
 
-                for (int y = 0; y < height; y++)
-                {
-                    for (int x = 0; x < width; x++)
-                    {
-                        if (!TryGetActiveObject(x, y, out var pos, out var obj)) continue;
+               for (int y = 0; y < height; y++)
+               {
+                   for (int x = 0; x < width; x++)
+                   {
+                       if (!TryGetActiveObject(x, y, out var pos, out var obj)) continue;
 
-                        ref var cell = ref cells[x, y];
+                       ref var cell = ref cells[x, y];
 
-                        if (!HasAnyWork(cell)) continue;
+                       if (!HasAnyWork(cell)) continue;
 
-                        if (obj is IDamageableItem damageable)
-                        {
-                            ProcessDamageableCell(x, y, pos, obj, damageable, ref cell, ref loopAgain);
-                            continue;
-                        }
+                       if (obj is IDamageableItem damageable)
+                       {
+                           ProcessDamageableCell(x, y, pos, obj, damageable, ref cell, ref loopAgain);
+                           continue;
+                       }
 
-                        ProcessNonDamageableCell(x, y, pos, obj, ref cell, ref loopAgain);
-                    }
-                }
-            }
-            while (loopAgain);
+                       ProcessNonDamageableCell(x, y, pos, obj, ref cell, ref loopAgain);
+                   }
+               }
+           }
+           while (loopAgain);
             
-            return;
+           return;
 
-            bool TryGetActiveObject(int x, int y, out Vector2Int pos, out BaseGridObject obj)
-            {
-                pos = new Vector2Int(x, y);
+           bool TryGetActiveObject(int x, int y, out Vector2Int pos, out BaseGridObject obj)
+           {
+               pos = new Vector2Int(x, y);
 
-                if (!Context.Model.IsCellActive(pos))
-                {
-                    obj = null;
-                    return false;
-                }
+               if (!Context.Model.IsCellActive(pos))
+               {
+                   obj = null;
+                   return false;
+               }
 
-                obj = Context.Model.GetGridObject(pos);
-                return obj;
-            }
+               obj = Context.Model.GetGridObject(pos);
+               return obj;
+           }
 
-            bool HasAnyWork(in CellResolveData cell)
-            {
-                return cell.Remove || cell.ObstacleDamage > 0;
-            }
+           bool HasAnyWork(in CellResolveData cell) => cell.Remove || cell.ObstacleDamage > 0;
 
-            void ProcessDamageableCell(int x, int y, Vector2Int pos, BaseGridObject obj, IDamageableItem damageable, ref CellResolveData cell, ref bool loopAgainFlag)
-            {
-                if (cell.Remove)
-                {
-                    EnqueueTriggerIfNeeded(x, y, pos, obj);
-                    FlushEffects(ref loopAgainFlag);
+           void ProcessDamageableCell(int x, int y, Vector2Int pos, BaseGridObject obj, IDamageableItem damageable, ref CellResolveData cell, ref bool loopAgainFlag)
+           {
+               if (cell.Remove)
+               {
+                   EnqueueTriggerIfNeeded(x, y, pos, obj);
+                   FlushEffects(ref loopAgainFlag);
 
-                    if (ApplyDamage(damageable, Mathf.Max(1, cell.Damage), cell.Source))
-                    {
+                   if (ApplyDamage(damageable, Mathf.Max(1, cell.Damage), cell.Source))
+                   {
                         DestroyAt(pos, obj);
-                    }
-                }
+                   }
+               }
 
-                if (cell.ObstacleDamage > 0)
-                {
-                    if (ApplyDamage(damageable, Mathf.Max(1, cell.ObstacleDamage), cell.ObstacleSource))
-                    {
+               if (cell.ObstacleDamage > 0)
+               {
+                   if (ApplyDamage(damageable, Mathf.Max(1, cell.ObstacleDamage), cell.ObstacleSource))
+                   {
                         DestroyAt(pos, obj);
-                    }
-                }
-            }
+                   }
+               }
+           }
 
-            void ProcessNonDamageableCell(int x, int y, Vector2Int pos, BaseGridObject obj, ref CellResolveData cell, ref bool loopAgainFlag)
-            {
-                if (!cell.Remove) return;
+           void ProcessNonDamageableCell(int x, int y, Vector2Int pos, BaseGridObject obj, ref CellResolveData cell, ref bool loopAgainFlag)
+           {
+               if (!cell.Remove) return;
 
-                EnqueueTriggerIfNeeded(x, y, pos, obj);
-                FlushEffects(ref loopAgainFlag);
-                DestroyAt(pos, obj);
-            }
+               EnqueueTriggerIfNeeded(x, y, pos, obj);
+               FlushEffects(ref loopAgainFlag);
+               DestroyAt(pos, obj);
+           }
 
-            bool ApplyDamage(IDamageableItem damageable, int dmg, DamageSource src)
-            {
-                return damageable.TakeDamage(dmg, src) == DamageResult.Destroyed;
-            }
+           bool ApplyDamage(IDamageableItem damageable, int dmg, DamageSource src)
+           {
+               return damageable.TakeDamage(dmg, src) == DamageResult.Destroyed;
+           }
 
-            void EnqueueTriggerIfNeeded(int x, int y, Vector2Int pos, BaseGridObject obj)
-            {
-                if (triggered[x, y]) return;
+           void EnqueueTriggerIfNeeded(int x, int y, Vector2Int pos, BaseGridObject obj)
+           {
+               if (triggered[x, y]) return;
 
-                if (obj is ITriggerEffectSource trigger && trigger.TryBuildEffect(pos, out var effect))
-                {
-                    effects.Enqueue(effect);
-                    triggered[x, y] = true;
-                }
-            }
+               if (obj is ITriggerEffectSource trigger && trigger.TryBuildEffect(pos, out var effect))
+               {
+                   effects.Enqueue(effect);
+                   triggered[x, y] = true;
+               }
+           }
 
-            void FlushEffects(ref bool loopAgainFlag)
-            {
-                while (effects.Count > 0)
-                {
-                    var pendingEffect = effects.Dequeue();
-                    BoosterEffectApplyHelper.ApplyEffect(cells, width, height, pendingEffect.Origin, pendingEffect.boosterAction);
-                    loopAgainFlag = true;
-                }
-            }
+           void FlushEffects(ref bool loopAgainFlag)
+           {
+               while (effects.Count > 0)
+               {
+                   var pendingEffect = effects.Dequeue();
+                   BoosterEffectApplyHelper.ApplyEffect(cells, width, height, pendingEffect.Origin, pendingEffect.boosterAction);
+                   loopAgainFlag = true;
+               }
+           }
 
-            void DestroyAt(Vector2Int pos, BaseGridObject obj)
-            {
-                Context.Factory.ReleaseItem(obj);
-                Context.Model.SetGridObject(pos, null);
-            }
+           void DestroyAt(Vector2Int pos, BaseGridObject obj)
+           {
+               Context.Factory.ReleaseItem(obj);
+               Context.Model.SetGridObject(pos, null);
+           }
         }
     }
 }

@@ -40,9 +40,9 @@ namespace Core.Handlers
 
         private void HandleBoosterTap(in GridMove move)
         {
-            var a = move.A;
+            var coordA = move.CoordA;
 
-            var obj = Context.Model.GetGridObject(a);
+            var obj = Context.Model.GetGridObject(coordA);
             
             if (!obj)
             {
@@ -53,6 +53,7 @@ namespace Core.Handlers
 
             if (obj.IsShiftInProgress)
             {
+                Context.MoveQueue.Dequeue();
                 Exit();
                 return;
             }
@@ -61,8 +62,8 @@ namespace Core.Handlers
 
             if (obj is BoosterObject booster)
             {
-                EnqueueSingleBoosterEffect(a, booster);
-                Context.CascadeResolveRequested = true;
+                EnqueueSingleBoosterEffect(coordA, booster);
+                Context.RefillResolveRequested = true;
             }
 
             Exit();
@@ -70,8 +71,8 @@ namespace Core.Handlers
 
         private void HandleSwap(in GridMove move)
         {
-            var coordA = move.A;
-            var coordB = move.B;
+            var coordA = move.CoordA;
+            var coordB = move.CoordB;
 
             var objA = Context.Model.GetGridObject(coordA);
             var objB = Context.Model.GetGridObject(coordB);
@@ -85,6 +86,7 @@ namespace Core.Handlers
 
             if (objA.IsShiftInProgress || objB.IsShiftInProgress)
             {
+                Context.MoveQueue.Dequeue();
                 Exit();
                 return;
             }
@@ -139,8 +141,8 @@ namespace Core.Handlers
 
             if (forceBoosterCenterToB)
             {
-                Context.IsForcedBoosterSpawnPos = true;
-                Context.ForcedBoosterSpawnPos = coordB;
+                Context.HasForcedBoosterSpawnCoord = true;
+                Context.ForcedBoosterSpawnCoord = coordB;
             }
 
             AfterSwapCommitted(coordA, coordB);
@@ -156,14 +158,14 @@ namespace Core.Handlers
             if (objA is BoosterObject boosterA && objB is BoosterObject boosterB)
             {
                 EnqueueMergedEffects(coordB, boosterA.BoosterType, boosterB.BoosterType);
-                Context.CascadeResolveRequested = true;
+                Context.RefillResolveRequested = true;
                 return;
             }
 
             if (objB is BoosterObject movedBoosterToB)
             {
                 EnqueueSingleBoosterEffect(coordB, movedBoosterToB);
-                Context.CascadeResolveRequested = true;
+                Context.RefillResolveRequested = true;
                 return;
             }
 
@@ -172,7 +174,7 @@ namespace Core.Handlers
                 EnqueueSingleBoosterEffect(coordA, movedBoosterToA);
             }
 
-            Context.CascadeResolveRequested = true;
+            Context.RefillResolveRequested = true;
         }
 
         private void EnqueueSingleBoosterEffect(Vector2Int origin, BoosterObject booster)

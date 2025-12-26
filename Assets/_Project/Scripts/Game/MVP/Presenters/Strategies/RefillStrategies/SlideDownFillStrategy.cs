@@ -25,6 +25,8 @@ namespace Core.Handlers
             public bool HasSlide;
             public Vector2Int SlideTargetCell;
         }
+        
+        public bool CanRefill(IGridModel model) => model.HasStationaryAndBlocking();
 
         public async UniTask Execute(GridStateContext stateContext, List<UniTask> tasks, float startDelay = 0f)
         {

@@ -13,6 +13,8 @@ namespace Core.Handlers
         private const float FallDistanceMultiplier = 0.2f;
         private const float SpawnYOffset = 1.25f;
 
+        public bool CanRefill(IGridModel model) => !model.HasStationaryAndBlocking();
+
         public async UniTask Execute(GridStateContext stateContext, List<UniTask> tasks, float startDelay = 0f)
         {
             await UniTask.WaitForSeconds(startDelay);
