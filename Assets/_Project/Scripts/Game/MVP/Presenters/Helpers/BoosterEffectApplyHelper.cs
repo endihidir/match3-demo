@@ -49,7 +49,8 @@ namespace Core.Utils
                 for (int x = 0; x < width; x++)
                 {
                     ref var cell = ref cells[x, y];
-                    cell.AddDamage(damage, source);
+                    cell.MarkRemove(source);
+                    cell.AddObstacleDamage(damage, source);
                 }
             }
         }
@@ -66,7 +67,8 @@ namespace Core.Utils
                 for (int y = 0; y < height; y++)
                 {
                     ref var cell = ref cells[x, y];
-                    cell.AddDamage(damage, source);
+                    cell.MarkRemove(source);
+                    cell.AddObstacleDamage(damage, source);
                 }
             }
         }
@@ -82,7 +84,8 @@ namespace Core.Utils
                     if (x < 0 || y < 0 || x >= width || y >= height) continue;
 
                     ref var cell = ref cells[x, y];
-                    cell.AddDamage(damage, source);
+                    cell.MarkRemove(source);
+                    cell.AddObstacleDamage(damage, source);
                 }
             }
         }
@@ -94,7 +97,8 @@ namespace Core.Utils
                 for (int x = 0; x < width; x++)
                 {
                     ref var cell = ref cells[x, y];
-                    cell.AddDamage(damage, source);
+                    cell.MarkRemove(source);
+                    cell.AddObstacleDamage(damage, source);
                 }
             }
         }
