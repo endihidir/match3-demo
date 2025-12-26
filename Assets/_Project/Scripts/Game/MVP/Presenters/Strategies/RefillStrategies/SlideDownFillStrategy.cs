@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Core.Config;
 using Core.Item;
 using Core.Models;
 using Core.Views;
@@ -10,13 +11,13 @@ namespace Core.Handlers
 {
     public sealed class SlideDownRefillStrategy : IRefillStrategy
     {
-        private const float WaveDelayStep = 0.05f;
-        private const float FallDistanceMultiplier = 0.2f;
         private const float SpawnYOffset = 1.25f;
 
         private readonly List<Vector2Int> _spawnCells = new();
         private readonly HashSet<BaseGridObject> _spawnedInThisSim = new();
 
+        private float _shiftDurationMultiplier;
+        private float _shiftDelayMultiplier;
         private struct MoveInfo
         {
             public BaseGridObject grid;
@@ -50,6 +51,12 @@ namespace Core.Handlers
             PlayMoveAnimations(view, width, cellSize, movedSet, startWorldByItem, finalCellByItem, slideStepByItem, tasks);
 
             await UniTask.CompletedTask;
+        }
+
+        public void SetRefillSettings(RefillSettings refillSettings)
+        {
+            _shiftDurationMultiplier = refillSettings.ShiftDurationMultiplier;
+            _shiftDelayMultiplier =  refillSettings.ShiftDelayMultiplier;
         }
 
         private void SimulateGravityAndSlides(GridStateContext stateContext, int width, int height, float cellSize, HashSet<BaseGridObject> movedSet, Dictionary<BaseGridObject, Vector3> startWorldByItem, Dictionary<BaseGridObject, Vector2Int> slideStepByItem)
@@ -323,7 +330,7 @@ namespace Core.Handlers
                         var slideWorld = view.GridToWorld(info.SlideTargetCell);
                         var finalWorld = view.GridToWorld(info.TargetCell);
 
-                        var slideDurationMultiplier = 1f + 2f * FallDistanceMultiplier;
+                        var slideDurationMultiplier = 1f + 2f * _shiftDurationMultiplier;
                         var fallDurationMultiplier = CalcFallDurMul(slideWorld.y, finalWorld.y, cellSize);
 
                         var seq = DOTween.Sequence();
@@ -340,7 +347,7 @@ namespace Core.Handlers
 
                         var fallDurationMultiplier = CalcFallDurMul(info.StartWorld.y, finalWorld.y, cellSize);
 
-                        var delay = waveIndex * WaveDelayStep;
+                        var delay = waveIndex * _shiftDelayMultiplier;
                         waveIndex++;
 
                         var tween = info.grid.ItemAnimation.Shift(finalWorld, fallDurationMultiplier, delay);
@@ -353,7 +360,7 @@ namespace Core.Handlers
         private float CalcFallDurMul(float fromY, float toY, float cellSize)
         {
             var dist = Mathf.Abs(toY - fromY) / cellSize;
-            return 1f + dist * FallDistanceMultiplier;
+            return 1f + dist * _shiftDurationMultiplier;
         }
     }
 }

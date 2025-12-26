@@ -21,26 +21,26 @@ namespace Core.Handlers
         private readonly RefillState _refillState;
 
         private readonly Queue<GridMove> _moveQueue = new();
+        private const bool AutoResolveEnabled = true;
 
         public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory, GameplayConfigContainer configContainer, 
-            IRefillStrategySelectionHandler refillStrategySelectionHandler, IMatchResolveHandler matchResolveHandler)
+            IRefillStrategyHandler strategyHandler, IMatchResolveHandler matchResolveHandler)
         {
             _stateMachine = new StateMachine();
             
-            var itemConfigContainer = configContainer.ItemConfigContainer;
-            _context = new GridStateContext(model, view, factory, itemConfigContainer, _moveQueue);
-            matchResolveHandler.Initialize(_context);
+            var itemConfigs = configContainer.ItemConfigContainer;
+            _context = new GridStateContext(model, view, factory, itemConfigs, _moveQueue, AutoResolveEnabled);
 
             _idleState = new IdleState().Init(_context) as IdleState;
             _applyInputState = new ApplyInputState().Init(_context) as ApplyInputState;
             _resolveState = new ResolveState(matchResolveHandler).Init(_context) as ResolveState;
-            _refillState = new RefillState(refillStrategySelectionHandler).Init(_context) as RefillState;
+            _refillState = new RefillState(strategyHandler).Init(_context) as RefillState;
 
             var states = new StateBase<GridStateContext>[] { _idleState, _applyInputState, _resolveState, _refillState };
             _stateMachine.Register(states);
 
             _stateMachine.AddTransition(_idleState, _applyInputState, () => _moveQueue.Count > 0)
-                         .AddTransition(_idleState, _resolveState, () => _context.RefillResolveRequested && !_context.RefillInProgress)
+                         .AddTransition(_idleState, _resolveState, () => _context.RefillResolveRequested && !_context.RefillInProgress && AutoResolveEnabled)
                          .AddTransition(_applyInputState, _resolveState, () => _applyInputState.IsExitReady)
                          .AddTransition(_applyInputState, _idleState, () => _applyInputState.IsExitReady)
                          .AddTransition(_resolveState, _refillState, () => _resolveState.IsExitReady && _context.ResolvedAnyMatch)
@@ -53,20 +53,20 @@ namespace Core.Handlers
         public bool TryEnqueueInput(Vector2Int sourceCoord, Vector2Int direction)
         {
             if (direction == Vector2Int.zero)
-                return TryEnqueueBooster(sourceCoord);
+                return TryEnqueueTap(sourceCoord);
 
             var targetCoord = sourceCoord + direction;
             return TryEnqueueSwap(sourceCoord, targetCoord);
         }
 
-        private bool TryEnqueueBooster(Vector2Int a)
+        private bool TryEnqueueTap(Vector2Int a)
         {
             if (!_context.Model.IsInRange(a)) return false;
 
             var objA = _context.Model.GetGridObject(a);
             if (!objA) return false;
 
-            if (!IsSourceInteractable(objA) || objA is not BoosterObject)
+            if (!IsSourceInteractable(objA))
             {
                 objA.ItemAnimation.Shake();
                 return false;

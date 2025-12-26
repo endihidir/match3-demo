@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Core.Config;
 using Core.Models;
 using Core.Views;
 using Cysharp.Threading.Tasks;
@@ -9,10 +10,10 @@ namespace Core.Handlers
 {
     public sealed class FallDownRefillStrategy : IRefillStrategy
     {
-        private const float WaveDelayStep = 0.05f;
-        private const float FallDistanceMultiplier = 0.2f;
-        private const float SpawnYOffset = 1.25f;
+        private float SpawnYOffset = 1.25f;
 
+        private float _shiftDurationMultiplier = 0.2f;
+        private float _shiftDelayMultiplier = 0.05f;
         public bool CanRefill(IGridModel model) => !model.HasStationaryAndBlocking();
 
         public async UniTask Execute(GridStateContext stateContext, List<UniTask> tasks, float startDelay = 0f)
@@ -37,6 +38,12 @@ namespace Core.Handlers
             }
 
             await UniTask.CompletedTask;
+        }
+        
+        public void SetRefillSettings(RefillSettings refillSettings)
+        {
+            _shiftDurationMultiplier = refillSettings.ShiftDurationMultiplier;
+            _shiftDelayMultiplier =  refillSettings.ShiftDelayMultiplier;
         }
 
         private void ShiftColumn(GridStateContext stateContext, int x, int height, float cellSize, ref int wave, List<UniTask> tasks)
@@ -66,8 +73,8 @@ namespace Core.Handlers
                 model.SetGridObject(src, null);
 
                 var dist = Mathf.Abs(finalWorld.y - startWorld.y) / cellSize;
-                var durMul = 1f + dist * FallDistanceMultiplier;
-                var delay = wave * WaveDelayStep;
+                var durMul = 1f + dist * _shiftDurationMultiplier;
+                var delay = wave * _shiftDelayMultiplier;
 
                 var tween = obj.ItemAnimation.Shift(finalWorld, durMul, delay);
                 tasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
@@ -102,8 +109,8 @@ namespace Core.Handlers
                 var finalWorld = target;
 
                 var dist = Mathf.Abs(finalWorld.y - start.y) / cellSize;
-                var durMul = 1f + dist * FallDistanceMultiplier;
-                var delay = wave * WaveDelayStep;
+                var durMul = 1f + dist * _shiftDurationMultiplier;
+                var delay = wave * _shiftDelayMultiplier;
 
                 var tween = item.ItemAnimation.Shift(finalWorld, durMul, delay);
                 tasks.Add(tween.AsyncWaitForCompletion().AsUniTask());

@@ -17,10 +17,11 @@ namespace Core.Handlers
         private readonly IMatchResolveHandler _matchResolveHandler;
 
         public ResolveState(IMatchResolveHandler matchResolveHandler) => _matchResolveHandler = matchResolveHandler;
-
+        protected override void OnInit() => _matchResolveHandler.Initialize(Context);
         protected override void OnEnter()
         {
             Context.RefillResolveRequested = false;
+            
             ResolveAsync().Forget();
         }
 
@@ -34,13 +35,35 @@ namespace Core.Handlers
 
             var cells = new CellResolveData[width, height];
             var spawns = new List<BoosterSpawnResult>(8);
+            
+            var hasEffects = Context.PendingEffects is { Count: > 0 };
+            
+            HashSet<Vector2Int> focus = null;
+
+            if (!Context.AutoResolveEnabled)
+            {
+                focus = new HashSet<Vector2Int>();
+
+                if (Context.HasForcedBoosterSpawnCoord)
+                {
+                    focus.Add(Context.ForcedBoosterSpawnCoord);
+                    Context.HasForcedBoosterSpawnCoord = false;
+                }
+
+                if (hasEffects)
+                {
+                    for (int i = 0; i < Context.PendingEffects.Count; i++)
+                        focus.Add(Context.PendingEffects[i].Origin);
+                }
+                
+                if (focus.Count == 0)
+                    hasMatch = false;
+            }
 
             if (hasMatch)
             {
-                ResolveMatches(typeGrid, matchMask, cells, width, height, spawns);
+                ResolveMatches(typeGrid, matchMask, cells, width, height, spawns, focus);
             }
-
-            var hasEffects = Context.PendingEffects is { Count: > 0 };
             
             if (hasEffects)
             {
@@ -72,7 +95,7 @@ namespace Core.Handlers
             RequestExit();
         }
 
-        private void ResolveMatches(GridObjectType[,] typeGrid, bool[,] matchMask, CellResolveData[,] cells, int width, int height, List<BoosterSpawnResult> spawns)
+        private void ResolveMatches(GridObjectType[,] typeGrid, bool[,] matchMask, CellResolveData[,] cells, int width, int height, List<BoosterSpawnResult> spawns, HashSet<Vector2Int> focus)
         {
             var visited = new bool[width, height];
 
@@ -88,8 +111,22 @@ namespace Core.Handlers
                     var group = ResolveMarkHelper.CollectGroup(matchMask, visited, typeGrid, width, height, new Vector2Int(x, y), startData.TypeId);
                     if (group.Count == 0) continue;
 
+                    if (focus != null && focus.Count > 0 && !GroupIntersectsFocus(group, focus))
+                        continue;
+
                     _matchResolveHandler.Handle(Context, typeGrid, group, width, height, cells, spawns);
                 }
+            }
+            
+            return;
+
+            static bool GroupIntersectsFocus(List<Vector2Int> group, HashSet<Vector2Int> focus)
+            {
+                for (int i = 0; i < group.Count; i++)
+                {
+                    if (focus.Contains(group[i])) return true;
+                }
+                return false;
             }
         }
 
@@ -105,7 +142,7 @@ namespace Core.Handlers
                     cell.MarkRemove(DamageSource.Booster);
                 }
 
-                BoosterEffectApplyHelper.ApplyEffect(cells, width, height, pending.Origin, pending.boosterAction);
+                BoosterEffectApplyHelper.ApplyEffect(cells, width, height, pending.Origin, pending.BoosterAction);
             }
         }
 
@@ -266,7 +303,7 @@ namespace Core.Handlers
                while (effects.Count > 0)
                {
                    var pendingEffect = effects.Dequeue();
-                   BoosterEffectApplyHelper.ApplyEffect(cells, width, height, pendingEffect.Origin, pendingEffect.boosterAction);
+                   BoosterEffectApplyHelper.ApplyEffect(cells, width, height, pendingEffect.Origin, pendingEffect.BoosterAction);
                    loopAgainFlag = true;
                }
            }

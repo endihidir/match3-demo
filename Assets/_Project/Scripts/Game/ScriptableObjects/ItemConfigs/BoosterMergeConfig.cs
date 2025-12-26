@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Core.Config
 {
-    [CreateAssetMenu(fileName = "BoosterMergeConfig", menuName = "Match3/ItemConfigs/BoosterMergeConfig", order = 0)]
+    //[CreateAssetMenu(fileName = "BoosterMergeConfig", menuName = "Match3/ItemConfigs/BoosterMergeConfig", order = 0)]
     public sealed class BoosterMergeConfig : ScriptableObject
     {
         [SerializeField] private MergeRule[] rules;
