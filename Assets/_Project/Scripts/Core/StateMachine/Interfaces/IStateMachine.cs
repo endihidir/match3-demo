@@ -16,6 +16,8 @@ namespace Core.StateMachineCore
         IStateMachine SetInitialState(IState state);
 
         IStateMachine SetInitialState<T>(T state) where T : class, IState;
+        
+        IStateMachine ForceState(IState state);
 
         IStateMachine AddTransition(string from, string to, Func<bool> condition);
         IStateMachine AddTransition(IState from, IState to, Func<bool> condition);

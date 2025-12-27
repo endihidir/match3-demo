@@ -8,7 +8,7 @@ namespace Core.Item.Factories
 {
     public interface IGridItemFactory
     {
-        T GetItem<T>(GridObjectType ıd) where T : BaseGridObject;
+        T GetItem<T>(GridObjectType typeData) where T : BaseGridObject;
         T GetItem<T>(GridItemKind itemKind, int typeId) where T : BaseGridObject => GetItem<T>(new GridObjectType(itemKind, typeId));
         GridObject GetRandomItem();
         ObstacleObject GetRandomObstacle();
@@ -32,15 +32,15 @@ namespace Core.Item.Factories
             _itemConfigContainer = gameplayConfigContainer.ItemConfigContainer;
         }
         
-        public T GetItem<T>(GridObjectType ıd) where T : BaseGridObject
+        public T GetItem<T>(GridObjectType typeData) where T : BaseGridObject
         {
             var itemObject = _objectPoolService.GetObject<T>();
             
             itemObject.ResetItem();
 
-            var configData = _itemConfigContainer.GetConfigData(ıd);
+            var configData = _itemConfigContainer.GetConfigData(typeData);
             
-            itemObject.Initialize(ıd)
+            itemObject.Initialize(typeData)
                       .ApplyData(configData);
             
             return itemObject;
