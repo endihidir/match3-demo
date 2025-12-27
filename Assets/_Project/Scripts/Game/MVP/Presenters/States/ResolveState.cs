@@ -35,35 +35,13 @@ namespace Core.Handlers
 
             var cells = new CellResolveData[width, height];
             var spawns = new List<BoosterSpawnResult>(8);
-            
-            var hasEffects = Context.PendingEffects is { Count: > 0 };
-            
-            HashSet<Vector2Int> focus = null;
-
-            if (!Context.AutoResolveEnabled)
-            {
-                focus = new HashSet<Vector2Int>();
-
-                if (Context.HasForcedBoosterSpawnCoord)
-                {
-                    focus.Add(Context.ForcedBoosterSpawnCoord);
-                    Context.HasForcedBoosterSpawnCoord = false;
-                }
-
-                if (hasEffects)
-                {
-                    for (int i = 0; i < Context.PendingEffects.Count; i++)
-                        focus.Add(Context.PendingEffects[i].Origin);
-                }
-                
-                if (focus.Count == 0)
-                    hasMatch = false;
-            }
 
             if (hasMatch)
             {
-                ResolveMatches(typeGrid, matchMask, cells, width, height, spawns, focus);
+                ResolveMatches(typeGrid, matchMask, cells, width, height, spawns);
             }
+
+            var hasEffects = Context.PendingEffects is { Count: > 0 };
             
             if (hasEffects)
             {
@@ -95,7 +73,7 @@ namespace Core.Handlers
             RequestExit();
         }
 
-        private void ResolveMatches(GridObjectType[,] typeGrid, bool[,] matchMask, CellResolveData[,] cells, int width, int height, List<BoosterSpawnResult> spawns, HashSet<Vector2Int> focus)
+        private void ResolveMatches(GridObjectType[,] typeGrid, bool[,] matchMask, CellResolveData[,] cells, int width, int height, List<BoosterSpawnResult> spawns)
         {
             var visited = new bool[width, height];
 
@@ -111,22 +89,8 @@ namespace Core.Handlers
                     var group = ResolveMarkHelper.CollectGroup(matchMask, visited, typeGrid, width, height, new Vector2Int(x, y), startData.TypeId);
                     if (group.Count == 0) continue;
 
-                    if (focus != null && focus.Count > 0 && !GroupIntersectsFocus(group, focus))
-                        continue;
-
                     _matchResolveHandler.Handle(Context, typeGrid, group, width, height, cells, spawns);
                 }
-            }
-            
-            return;
-
-            static bool GroupIntersectsFocus(List<Vector2Int> group, HashSet<Vector2Int> focus)
-            {
-                for (int i = 0; i < group.Count; i++)
-                {
-                    if (focus.Contains(group[i])) return true;
-                }
-                return false;
             }
         }
 
