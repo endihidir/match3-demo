@@ -21,7 +21,6 @@ namespace Core.Handlers
         private readonly RefillState _refillState;
 
         private readonly Queue<GridMove> _moveQueue = new();
-        private const bool AutoResolveEnabled = true;
 
         public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory, GameplayConfigContainer configContainer, 
             IRefillStrategyHandler strategyHandler, IMatchResolveHandler matchResolveHandler)
@@ -29,7 +28,7 @@ namespace Core.Handlers
             _stateMachine = new StateMachine();
             
             var itemConfigs = configContainer.ItemConfigContainer;
-            _context = new GridStateContext(model, view, factory, itemConfigs, _moveQueue, AutoResolveEnabled);
+            _context = new GridStateContext(model, view, factory, itemConfigs, _moveQueue);
 
             _idleState = new IdleState().Init(_context) as IdleState;
             _applyInputState = new ApplyInputState().Init(_context) as ApplyInputState;
@@ -40,7 +39,7 @@ namespace Core.Handlers
             _stateMachine.Register(states);
 
             _stateMachine.AddTransition(_idleState, _applyInputState, () => _moveQueue.Count > 0)
-                         .AddTransition(_idleState, _resolveState, () => _context.RefillResolveRequested && !_context.RefillInProgress && AutoResolveEnabled)
+                         .AddTransition(_idleState, _resolveState, () => _context.RefillResolveRequested && !_context.RefillInProgress)
                          .AddTransition(_applyInputState, _resolveState, () => _applyInputState.IsExitReady)
                          .AddTransition(_applyInputState, _idleState, () => _applyInputState.IsExitReady)
                          .AddTransition(_resolveState, _refillState, () => _resolveState.IsExitReady && _context.ResolvedAnyMatch)
