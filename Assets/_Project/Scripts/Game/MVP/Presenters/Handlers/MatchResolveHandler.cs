@@ -7,7 +7,7 @@ namespace Core.Handlers
 {
     public sealed class MatchResolveHandler : IMatchResolveHandler
     {
-        private IBoosterSelectionHandler _boosterSelection;
+        private readonly IBoosterSelectionHandler _boosterSelection;
 
         public MatchResolveHandler(IBoosterSelectionHandler boosterSelectionHandler)
         {
@@ -19,8 +19,7 @@ namespace Core.Handlers
             _boosterSelection.Initialize(context);
         }
 
-        public void Handle(GridStateContext context, GridObjectType[,] typeGrid, List<Vector2Int> group, int width, int height, CellResolveData[,] cells,
-            List<BoosterSpawnResult> spawns)
+        public void Handle(GridObjectType[,] typeGrid, List<Vector2Int> group, int width, int height, CellResolveData[,] cells, List<BoosterSpawnResult> spawns)
         {
             if (group == null || group.Count == 0) return;
 
@@ -45,7 +44,7 @@ namespace Core.Handlers
 
                 ref var cell = ref cells[c.x, c.y];
 
-                cell.MarkRemove(DamageSource.Item);
+                cell.MarkRemove();
 
                 ResolveMarkHelper.AddNeighborObstacleDamage(cells, width, height, c);
             }
@@ -59,7 +58,7 @@ namespace Core.Handlers
 
                 ref var cell = ref cells[c.x, c.y];
 
-                cell.ClearRemoveFlag(DamageSource.Item);
+                cell.ClearRemove();
             }
         }
     }

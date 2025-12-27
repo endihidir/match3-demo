@@ -16,192 +16,159 @@ namespace Core.Handlers
         {
             if (Context.MoveQueue.Count == 0)
             {
-                Exit();
+                RequestExit();
                 return;
             }
 
-            var move = Context.MoveQueue.Peek();
+            var move = Context.MoveQueue.Dequeue();
 
-            if (move.Type == GridMoveType.Tap)
+            switch (move.MoveType)
             {
-                HandleBoosterTap(move);
-                return;
+                case GridMoveType.Tap:
+                    HandleTap(move);
+                    return;
+                case GridMoveType.Swap:
+                    HandleSwap(move);
+                    return;
+                default:
+                    RequestExit();
+                    break;
             }
-
-            if (move.Type != GridMoveType.Swap)
-            {
-                Context.MoveQueue.Dequeue();
-                Exit();
-                return;
-            }
-
-            HandleSwap(move);
         }
 
-        private void HandleBoosterTap(GridMove move)
+        private void HandleTap(in GridMove move)
         {
-            var coordA = move.CoordA;
+            var sourceCoord = move.SourceCoord;
             
-            var obj = Context.Model.GetGridObject(coordA);
-
-            if (!obj)
+            var sourceObj = Context.Model.GetGridObject(sourceCoord);
+            
+            if (!sourceObj)
             {
-                Context.MoveQueue.Dequeue();
-                Exit();
+                RequestExit();
                 return;
             }
 
-            if (obj.IsShiftInProgress)
+            if (sourceObj is not BoosterObject booster)
             {
-                Context.MoveQueue.Dequeue();
-                Exit();
+                sourceObj.ItemAnimation.Shake();
+                RequestExit();
                 return;
             }
 
-            if (obj is not BoosterObject booster)
-            {
-                obj.ItemAnimation.Shake();
-                Context.MoveQueue.Dequeue();
-                Exit();
-                return;
-            }
-
-            EnqueueSingleBoosterEffect(coordA, booster);
+            AddSingleBoosterEffect(sourceCoord, booster);
             Context.RefillResolveRequested = true;
-
-            Context.MoveQueue.Dequeue();
-            Exit();
+            RequestExit();
         }
 
         private void HandleSwap(in GridMove move)
         {
-            var coordA = move.CoordA;
-            var coordB = move.CoordB;
+            var sourceCoord = move.SourceCoord;
+            var targetCoord = move.TargetCoord;
 
-            var objA = Context.Model.GetGridObject(coordA);
-            var objB = Context.Model.GetGridObject(coordB);
-
-            if (!objA || !objB)
+            var sourceObj = Context.Model.GetGridObject(sourceCoord);
+            var targetObj = Context.Model.GetGridObject(targetCoord);
+         
+            if (!sourceObj || !targetObj)
             {
-                Context.MoveQueue.Dequeue();
-                Exit();
+                RequestExit();
                 return;
             }
-
-            if (objA.IsShiftInProgress || objB.IsShiftInProgress)
+           
+            if (sourceObj is BoosterObject || targetObj is BoosterObject)
             {
-                Context.MoveQueue.Dequeue();
-                Exit();
+                PlaySwapAndCommit(sourceObj, targetObj, sourceCoord, targetCoord, false).Forget();
                 return;
             }
-
-            Context.MoveQueue.Dequeue();
-
-            if (objA is BoosterObject || objB is BoosterObject)
+            
+            if (!GridMatchDetectUtil.IsRegularItem(sourceObj.ObjectType) || !GridMatchDetectUtil.IsRegularItem(targetObj.ObjectType) ||
+                !WouldCreateMatchAfterSwap(sourceCoord, targetCoord, sourceObj.ObjectType.TypeId, targetObj.ObjectType.TypeId))
             {
-                PlaySwapAndCommit(objA, objB, coordA, coordB, false).Forget();
+                PlayPingPong(sourceObj, targetObj, sourceCoord, targetCoord).Forget();
                 return;
             }
-
-            if (!GridMatchDetectUtil.IsRegularItem(objA.ObjectType) ||
-                !GridMatchDetectUtil.IsRegularItem(objB.ObjectType) ||
-                !WouldCreateMatchAfterSwap(coordA, coordB, objA.ObjectType.TypeId, objB.ObjectType.TypeId))
-            {
-                PlayPingPong(objA, objB, coordA, coordB).Forget();
-                return;
-            }
-
-            PlaySwapAndCommit(objA, objB, coordA, coordB, true).Forget();
+            
+            PlaySwapAndCommit(sourceObj, targetObj, sourceCoord, targetCoord, true).Forget();
         }
 
-        private async UniTask PlayPingPong(BaseGridObject objA, BaseGridObject objB, Vector2Int coordA, Vector2Int coordB)
+        private async UniTask PlayPingPong(BaseGridObject sourceObj, BaseGridObject targetObj, Vector2Int sourceCoord, Vector2Int targetCoord)
         {
             var tasks = new List<UniTask>();
 
-            var tweenA = objA.ItemAnimation.PingPongMove(Context.View.GridToWorld(coordB));
-            var tweenB = objB.ItemAnimation.PingPongMove(Context.View.GridToWorld(coordA));
+            var tweenA = sourceObj.ItemAnimation.PingPongMove(Context.View.GridToWorld(targetCoord));
+            var tweenB = targetObj.ItemAnimation.PingPongMove(Context.View.GridToWorld(sourceCoord));
 
             tasks.Add(tweenA.AsyncWaitForCompletion().AsUniTask());
             tasks.Add(tweenB.AsyncWaitForCompletion().AsUniTask());
 
             await UniTask.WhenAll(tasks);
 
-            Exit();
+            RequestExit();
         }
 
-        private async UniTask PlaySwapAndCommit(BaseGridObject objA, BaseGridObject objB, Vector2Int coordA, Vector2Int coordB, bool forceBoosterCenterToB)
+        private async UniTask PlaySwapAndCommit(BaseGridObject sourceObj, BaseGridObject targetObj, Vector2Int sourceCoord, Vector2Int targetCoord, bool forceBoosterSpawnCoord)
         {
             var tasks = new List<UniTask>();
 
-            var tweenA = objA.ItemAnimation.Move(Context.View.GridToWorld(coordB));
-            var tweenB = objB.ItemAnimation.Move(Context.View.GridToWorld(coordA));
+            var tweenA = sourceObj.ItemAnimation.Move(Context.View.GridToWorld(targetCoord));
+            var tweenB = targetObj.ItemAnimation.Move(Context.View.GridToWorld(sourceCoord));
 
             tasks.Add(tweenA.AsyncWaitForCompletion().AsUniTask());
             tasks.Add(tweenB.AsyncWaitForCompletion().AsUniTask());
 
             await UniTask.WhenAll(tasks);
 
-            Context.Model.Swap(coordA, coordB);
+            Context.Model.Swap(sourceCoord, targetCoord);
 
-            if (forceBoosterCenterToB)
+            if (forceBoosterSpawnCoord)
             {
                 Context.HasForcedBoosterSpawnCoord = true;
-                Context.ForcedBoosterSpawnCoord = coordB;
+                Context.ForcedBoosterSpawnCoord = targetCoord;
             }
 
-            AfterSwapCommitted(coordA, coordB);
+            AfterSwapCommitted(sourceCoord, targetCoord);
 
-            Exit();
+            RequestExit();
         }
 
-        private void AfterSwapCommitted(Vector2Int coordA, Vector2Int coordB)
+        private void AfterSwapCommitted(Vector2Int sourceCoord, Vector2Int targetCoord)
         {
-            var objA = Context.Model.GetGridObject(coordA);
-            var objB = Context.Model.GetGridObject(coordB);
+            var sourceObj = Context.Model.GetGridObject(sourceCoord);
+            var targetObj = Context.Model.GetGridObject(targetCoord);
 
-            if (objA is BoosterObject boosterA && objB is BoosterObject boosterB)
+            if (sourceObj is BoosterObject sourceBooster && targetObj is BoosterObject targetBooster)
             {
-                EnqueueMergedEffects(coordB, boosterA.BoosterType, boosterB.BoosterType);
+                AddMergedEffects(targetCoord, sourceBooster.BoosterType, targetBooster.BoosterType);
                 Context.RefillResolveRequested = true;
                 return;
             }
 
-            if (objB is BoosterObject movedBoosterToB)
+            if (targetObj is BoosterObject movedBoosterToB)
             {
-                EnqueueSingleBoosterEffect(coordB, movedBoosterToB);
+                AddSingleBoosterEffect(targetCoord, movedBoosterToB);
                 Context.RefillResolveRequested = true;
                 return;
             }
 
-            if (objA is BoosterObject movedBoosterToA)
+            if (sourceObj is BoosterObject movedBoosterToA)
             {
-                EnqueueSingleBoosterEffect(coordA, movedBoosterToA);
+                AddSingleBoosterEffect(sourceCoord, movedBoosterToA);
             }
 
             Context.RefillResolveRequested = true;
         }
 
-        private void EnqueueSingleBoosterEffect(Vector2Int origin, BoosterObject booster)
+        private void AddSingleBoosterEffect(Vector2Int originCoord, BoosterObject booster)
         {
             if (!booster || booster.BoosterAction == null) return;
 
-            Context.PendingEffects.Add(new PendingEffect(origin, booster.BoosterAction));
+            Context.PendingEffects.Add(new PendingEffect(originCoord, booster.BoosterAction));
         }
 
-        private void EnqueueSingleBoosterEffect(Vector2Int origin, BoosterType type)
+        private void AddMergedEffects(Vector2Int origin, BoosterType sourceBoosterType, BoosterType targetBoosterType)
         {
-            var data = Context.Configs.GetBoosterData(type);
+            var boosterMergeConfig = Context.Configs.BoosterMergeConfig;
 
-            if (!data || data.BoosterAction == null) return;
-
-            Context.PendingEffects.Add(new PendingEffect(origin, data.BoosterAction));
-        }
-
-        private void EnqueueMergedEffects(Vector2Int origin, BoosterType first, BoosterType second)
-        {
-            var config = Context.Configs.BoosterMergeConfig;
-
-            if (config && config.TryGetRule(first, second, out var rule) && rule.Actions != null)
+            if (boosterMergeConfig && boosterMergeConfig.TryGetRule(sourceBoosterType, targetBoosterType, out var rule) && rule.Actions != null)
             {
                 for (int i = 0; i < rule.Actions.Length; i++)
                 {
@@ -214,10 +181,19 @@ namespace Core.Handlers
                 return;
             }
 
-            EnqueueSingleBoosterEffect(origin, first);
-            EnqueueSingleBoosterEffect(origin, second);
+            AddSingleBoosterEffect(origin, sourceBoosterType);
+            AddSingleBoosterEffect(origin, targetBoosterType);
         }
 
+        private void AddSingleBoosterEffect(Vector2Int originCoord, BoosterType type)
+        {
+            var configData = Context.Configs.GetBoosterData(type);
+
+            if (!configData || configData.BoosterAction == null) return;
+
+            Context.PendingEffects.Add(new PendingEffect(originCoord, configData.BoosterAction));
+        }
+        
         private bool WouldCreateMatchAfterSwap(Vector2Int coordA, Vector2Int coordB, int typeA, int typeB)
         {
             var width = Context.Model.Width;
@@ -233,11 +209,6 @@ namespace Core.Handlers
 
             return GridMatchDetectUtil.WouldCreateBlastGroup(grid, coordA.x, coordA.y, width, height, typeB, false) ||
                    GridMatchDetectUtil.WouldCreateBlastGroup(grid, coordB.x, coordB.y, width, height, typeA, false);
-        }
-
-        protected override void OnExit()
-        {
-            RequestExit();
         }
     }
 }
