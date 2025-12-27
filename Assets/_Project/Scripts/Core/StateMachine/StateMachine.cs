@@ -73,6 +73,13 @@ namespace Core.StateMachineCore
         }
 
         public IStateMachine SetInitialState<T>(T state) where T : class, IState => SetInitialState((IState)state);
+        public IStateMachine ForceState(IState state)
+        {
+            CurrentState?.Exit();
+            CurrentState = state;
+            CurrentState?.Enter();
+            return this;
+        }
 
         public IStateMachine AddTransition(string from, string to, Func<bool> condition)
         {

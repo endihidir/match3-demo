@@ -38,11 +38,11 @@ namespace Core.Handlers
             }
         }
 
-        private BaseGridObject GetItem(GridObjectType ıd) => ıd.ItemKind switch
+        private BaseGridObject GetItem(GridObjectType typeData) => typeData.ItemKind switch
         {
-            GridItemKind.Regular => _gridItemFactory.GetItem<GridObject>(ıd),
-            GridItemKind.Booster => _gridItemFactory.GetItem<BoosterObject>(ıd),
-            GridItemKind.Obstacle => _gridItemFactory.GetItem<ObstacleObject>(ıd),
+            GridItemKind.Regular => _gridItemFactory.GetItem<GridObject>(typeData),
+            GridItemKind.Booster => _gridItemFactory.GetItem<BoosterObject>(typeData),
+            GridItemKind.Obstacle => _gridItemFactory.GetItem<ObstacleObject>(typeData),
             _ => null
         };
         

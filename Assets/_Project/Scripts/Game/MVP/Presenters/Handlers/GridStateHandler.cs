@@ -5,8 +5,10 @@ using Core.Item.Factories;
 using Core.Models;
 using Core.StateMachineCore;
 using Core.Views;
+using Unity.VisualScripting;
 using UnityEngine;
 using VContainer.Unity;
+using StateMachine = Core.StateMachineCore.StateMachine;
 
 namespace Core.Handlers
 {
@@ -21,7 +23,7 @@ namespace Core.Handlers
         private readonly RefillState _refillState;
 
         private readonly Queue<GridMove> _moveQueue = new();
-
+        
         public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory, GameplayConfigContainer configContainer, 
             IRefillStrategyHandler strategyHandler, IMatchResolveHandler matchResolveHandler)
         {
@@ -106,7 +108,66 @@ namespace Core.Handlers
             return !obj.IsStationary;
         }
 
-        public void Tick() => _stateMachine.Update(Time.deltaTime);
+        public void Tick()
+        {
+            if (Input.GetKeyDown(KeyCode.B))
+            {
+                GenerateBoosterAtMousePos(BoosterType.Bomb);
+            }
+            
+            if (Input.GetKeyDown(KeyCode.H))
+            {
+                GenerateBoosterAtMousePos(BoosterType.RocketHorizontal);
+            }
+            
+            if (Input.GetKeyDown(KeyCode.V))
+            {
+                GenerateBoosterAtMousePos(BoosterType.RocketVertical);
+            }
+            
+            if (Input.GetKeyDown(KeyCode.C))
+            {
+                CleanupBoosters();
+            }
+            
+            _stateMachine.Update(Time.deltaTime);
+        }
+
+        private void CleanupBoosters()
+        {
+            for (int i = 0; i < _context.Model.Width; i++)
+            {
+                for (int j = 0; j < _context.Model.Height; j++)
+                {
+                    var coord = new Vector2Int(i, j);
+                    var obj = _context.Model.GetGridObject(coord);
+                    if (obj is BoosterObject boosterObject)
+                    {
+                        _context.Factory.ReleaseItem(boosterObject);
+                        _context.Model.SetGridObject(coord, null);
+                        _stateMachine.ForceState(_refillState);
+                    }
+                }
+            }
+        }
+
+        private void GenerateBoosterAtMousePos(BoosterType boosterType)
+        {
+            var pos = _context.View.ScreenToGridCoordinate(Input.mousePosition);
+            var actPos = _context.View.InputDirectionToGridDirection(pos);
+            var obj = _context.Model.GetGridObject(actPos);
+            if (obj)
+            {
+                _context.Factory.ReleaseItem(obj);
+                _context.Model.SetGridObject(actPos, null);
+                var newObj = _context.Factory.GetItem<BoosterObject>(new GridObjectType(GridItemKind.Booster, (int)boosterType));
+                _context.Model.SetGridObject(actPos, newObj);
+                newObj.SetPosition(_context.View.GridToWorld(actPos));
+                newObj.SetSpriteSize(_context.View.GetCellSize());
+                newObj.SetParent(_context.View.GridObjectsParent);
+            }
+        }
+
         public void FixedTick() => _stateMachine.FixedUpdate(Time.fixedDeltaTime);
         public void LateTick() => _stateMachine.LateUpdate(Time.deltaTime);
     }
