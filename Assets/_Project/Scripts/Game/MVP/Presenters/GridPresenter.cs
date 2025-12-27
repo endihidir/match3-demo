@@ -34,8 +34,6 @@ namespace Core.Presenters
         {
             var sourceCoord = _gridView.ScreenToGridCoordinate(screenPos);
 
-            if (!_gridModel.IsInRange(sourceCoord)) return;
-
             var gridDirection = _gridView.InputDirectionToGridDirection(direction);
 
             _gridStateHandler.TryEnqueueInput(sourceCoord, gridDirection);

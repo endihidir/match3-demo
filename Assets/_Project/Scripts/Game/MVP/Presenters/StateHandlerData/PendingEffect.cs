@@ -5,12 +5,12 @@ namespace Core.Handlers
 {
     public readonly struct PendingEffect
     {
-        public readonly Vector2Int Origin;
+        public readonly Vector2Int OriginCoord;
         public readonly BoosterActionBase BoosterAction;
 
-        public PendingEffect(Vector2Int origin, BoosterActionBase boosterAction)
+        public PendingEffect(Vector2Int originCoord, BoosterActionBase boosterAction)
         {
-            Origin = origin;
+            OriginCoord = originCoord;
             BoosterAction = boosterAction;
         }
     }

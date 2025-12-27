@@ -27,8 +27,7 @@ namespace Core.Handlers
         {
             _stateMachine = new StateMachine();
             
-            var itemConfigs = configContainer.ItemConfigContainer;
-            _context = new GridStateContext(model, view, factory, itemConfigs, _moveQueue);
+            _context = new GridStateContext(model, view, factory, configContainer.ItemConfigContainer, _moveQueue);
 
             _idleState = new IdleState().Init(_context) as IdleState;
             _applyInputState = new ApplyInputState().Init(_context) as ApplyInputState;
@@ -58,55 +57,53 @@ namespace Core.Handlers
             return TryEnqueueSwap(sourceCoord, targetCoord);
         }
 
-        private bool TryEnqueueTap(Vector2Int a)
+        private bool TryEnqueueTap(Vector2Int sourceCoord)
         {
-            if (!_context.Model.IsInRange(a)) return false;
+            if (!_context.Model.IsInRange(sourceCoord)) return false;
 
-            var objA = _context.Model.GetGridObject(a);
+            var objA = _context.Model.GetGridObject(sourceCoord);
             if (!objA) return false;
 
-            if (!IsSourceInteractable(objA))
+            if (!IsInteractable(objA))
             {
                 objA.ItemAnimation.Shake();
                 return false;
             }
 
-            _moveQueue.Enqueue(new GridMove(GridMoveType.Tap, a));
+            _moveQueue.Enqueue(new GridMove(GridMoveType.Tap, sourceCoord));
             return true;
         }
 
-        private bool TryEnqueueSwap(Vector2Int a, Vector2Int b)
+        private bool TryEnqueueSwap(Vector2Int sourceCoord, Vector2Int targetCoord)
         {
-            if (a == b) return false;
-            if (!_context.Model.IsInRange(a) || !_context.Model.IsInRange(b)) return false;
+            if (sourceCoord == targetCoord) return false;
+            
+            if (!_context.Model.IsInRange(sourceCoord) || !_context.Model.IsInRange(targetCoord)) return false;
 
-            var objA = _context.Model.GetGridObject(a);
-            var objB = _context.Model.GetGridObject(b);
+            var sourceObj = _context.Model.GetGridObject(sourceCoord);
+            var targetObj = _context.Model.GetGridObject(targetCoord);
 
-            if (!objA || !objB) return false;
+            if (!sourceObj || !targetObj) return false;
 
-            if (!IsSourceInteractable(objA) || !IsTargetSwapCandidate(objB) || !IsSourceInteractable(objB))
+            if (!IsInteractable(sourceObj) || !IsInteractable(targetObj) || !IsSwapCandidate(sourceObj) || !IsSwapCandidate(targetObj))
             {
-                objA.ItemAnimation.Shake();
+                sourceObj.ItemAnimation.Shake();
                 return false;
             }
 
-            _moveQueue.Enqueue(new GridMove(GridMoveType.Swap, a, b));
+            _moveQueue.Enqueue(new GridMove(GridMoveType.Swap, sourceCoord, targetCoord));
             return true;
         }
 
-        private static bool IsSourceInteractable(BaseGridObject obj)
+        private static bool IsInteractable(BaseGridObject obj)
         {
-            if (!obj) return false;
             if (obj.IsEmpty) return false;
             return !obj.IsShiftInProgress;
         }
 
-        private static bool IsTargetSwapCandidate(BaseGridObject obj)
+        private static bool IsSwapCandidate(BaseGridObject obj)
         {
-            if (!obj) return false;
-            if (obj.IsStationary) return false;
-            return obj is not ObstacleObject;
+            return !obj.IsStationary;
         }
 
         public void Tick() => _stateMachine.Update(Time.deltaTime);

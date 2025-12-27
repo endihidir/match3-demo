@@ -1,4 +1,5 @@
 using Core.Config;
+using Core.Utils;
 using NaughtyAttributes;
 using UnityEngine;
 
@@ -31,6 +32,7 @@ namespace Core.Item
             if ((DamageSource & source) == 0 || Life <= 0) return DamageResult.Ignored;
             Life -= damage;
             Life = Mathf.Max(0, Life);
+            EditorLogger.LogError($"{ToString()} :  TakeDamage({damage},{source})  : Life : {Life}");
             return Life <= 0 ? DamageResult.Destroyed : DamageResult.Damaged;
         }
 

@@ -33,19 +33,19 @@ namespace Core.Handlers
             var typeGrid = Context.Model.BuildTypeDataGrid();
             var matchMask = GridMatchDetectUtil.BuildMatchMask_ScanBased(typeGrid, width, height, out var hasMatch);
 
-            var cells = new CellResolveData[width, height];
+            var resolveData = new CellResolveData[width, height];
             var spawns = new List<BoosterSpawnResult>(8);
 
             if (hasMatch)
             {
-                ResolveMatches(typeGrid, matchMask, cells, width, height, spawns);
+                ResolveMatches(typeGrid, matchMask, resolveData, width, height, spawns);
             }
 
             var hasEffects = Context.PendingEffects is { Count: > 0 };
             
             if (hasEffects)
             {
-                ApplyPendingEffects(cells, width, height);
+                MarkPendingEffects(resolveData, width, height);
                 Context.PendingEffects.Clear();
             }
 
@@ -69,7 +69,7 @@ namespace Core.Handlers
                 }
             }
 
-            ApplyResolveData(cells, width, height);
+            ApplyResolveData(resolveData, width, height);
             RequestExit();
         }
 
@@ -86,27 +86,29 @@ namespace Core.Handlers
 
                     var startData = typeGrid[x, y];
 
-                    var group = ResolveMarkHelper.CollectGroup(matchMask, visited, typeGrid, width, height, new Vector2Int(x, y), startData.TypeId);
+                    var coord = new Vector2Int(x, y);
+                    var group = ResolveMarkHelper.CollectGroup(matchMask, visited, typeGrid, width, height, coord, startData.TypeId);
                     if (group.Count == 0) continue;
 
-                    _matchResolveHandler.Handle(Context, typeGrid, group, width, height, cells, spawns);
+                    _matchResolveHandler.Handle(typeGrid, group, width, height, cells, spawns);
                 }
             }
         }
 
-        private void ApplyPendingEffects(CellResolveData[,] cells, int width, int height)
+        private void MarkPendingEffects(CellResolveData[,] cells, int width, int height)
         {
             for (int i = 0; i < Context.PendingEffects.Count; i++)
             {
                 var pending = Context.PendingEffects[i];
 
-                if (Context.Model.IsInRange(pending.Origin))
+                if (Context.Model.IsInRange(pending.OriginCoord))
                 {
-                    ref var cell = ref cells[pending.Origin.x, pending.Origin.y];
-                    cell.MarkRemove(DamageSource.Booster);
-                }
+                    ref var cell = ref cells[pending.OriginCoord.x, pending.OriginCoord.y];
 
-                BoosterEffectApplyHelper.ApplyEffect(cells, width, height, pending.Origin, pending.BoosterAction);
+                    cell.MarkRemove();
+                }
+                
+                BoosterEffectMarker.MarkEffect(cells, width, height, pending.OriginCoord, pending.BoosterAction);
             }
         }
 
@@ -191,7 +193,7 @@ namespace Core.Handlers
 
                        if (obj is IDamageableItem damageable)
                        {
-                           ProcessDamageableCell(x, y, pos, obj, damageable, ref cell, ref loopAgain);
+                           ProcessDamageableCell(pos, obj, damageable, ref cell);
                            continue;
                        }
 
@@ -219,21 +221,17 @@ namespace Core.Handlers
 
            bool HasAnyWork(in CellResolveData cell) => cell.Remove || cell.ObstacleDamage > 0;
 
-           void ProcessDamageableCell(int x, int y, Vector2Int pos, BaseGridObject obj, IDamageableItem damageable, ref CellResolveData cell, ref bool loopAgainFlag)
+           void ProcessDamageableCell(Vector2Int pos, BaseGridObject obj, IDamageableItem damageable, ref CellResolveData cell)
            {
-               if (cell.Remove)
-               {
-                   EnqueueTriggerIfNeeded(x, y, pos, obj);
-                   FlushEffects(ref loopAgainFlag);
-                   DestroyAt(pos, obj);
-               }
+               if (cell.ObstacleDamage <= 0) return;
 
-               if (cell.ObstacleDamage > 0)
+               var destroyed = ApplyDamage(damageable, cell.ObstacleDamage, cell.ObstacleSource);
+
+               cell.ClearDamage();
+
+               if (destroyed)
                {
-                   if (ApplyDamage(damageable, Mathf.Max(1, cell.ObstacleDamage), cell.ObstacleSource))
-                   {
-                        DestroyAt(pos, obj);
-                   }
+                   DestroyAt(pos, obj);
                }
            }
 
@@ -267,7 +265,7 @@ namespace Core.Handlers
                while (effects.Count > 0)
                {
                    var pendingEffect = effects.Dequeue();
-                   BoosterEffectApplyHelper.ApplyEffect(cells, width, height, pendingEffect.Origin, pendingEffect.BoosterAction);
+                   BoosterEffectMarker.ApplyEffectWithDamage(cells, width, height, pendingEffect.OriginCoord, pendingEffect.BoosterAction);
                    loopAgainFlag = true;
                }
            }
