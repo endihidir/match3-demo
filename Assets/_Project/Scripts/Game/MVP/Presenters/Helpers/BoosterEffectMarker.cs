@@ -7,34 +7,36 @@ namespace Core.Utils
 {
     public static class BoosterEffectMarker
     {
-        public static void ApplyEffectWithDamage(CellResolveData[,] cells, int width, int height, Vector2Int origin, BoosterActionBase action)
+        private delegate void CellApply(ref CellResolveData cell, int damage, DamageSource source);
+
+        public static void MarkObstacleDamageArea(CellResolveData[,] cells, int width, int height, Vector2Int origin, BoosterActionBase action)
         {
-            ApplyInternal(cells, width, height, origin, action, true);
+            ApplyInternal(cells, width, height, origin, action, ApplyDamage);
         }
 
-        public static void MarkEffect(CellResolveData[,] cells, int width, int height, Vector2Int origin, BoosterActionBase action)
+        public static void MarkClearArea(CellResolveData[,] cells, int width, int height, Vector2Int origin, BoosterActionBase action)
         {
-            ApplyInternal(cells, width, height, origin, action, false);
+            ApplyInternal(cells, width, height, origin, action, ApplyRemove);
         }
 
-        private static void ApplyInternal(CellResolveData[,] cells, int width, int height, Vector2Int origin, BoosterActionBase action, bool applyDamage)
+        private static void ApplyInternal(CellResolveData[,] cells, int width, int height, Vector2Int origin, BoosterActionBase action, CellApply apply)
         {
             switch (action)
             {
                 case RocketHorizontalAction rocketH:
-                    ApplyRowBand(cells, width, height, origin.y, rocketH.LineCount, rocketH.DamageAmount, DamageSource.Booster, applyDamage);
+                    ApplyRowBand(cells, width, height, origin.y, rocketH.LineCount, rocketH.DamageAmount, DamageSource.Booster, apply);
                     return;
 
                 case RocketVerticalAction rocketV:
-                    ApplyColumnBand(cells, width, height, origin.x, rocketV.LineCount, rocketV.DamageAmount, DamageSource.Booster, applyDamage);
+                    ApplyColumnBand(cells, width, height, origin.x, rocketV.LineCount, rocketV.DamageAmount, DamageSource.Booster, apply);
                     return;
 
                 case BombAction bomb:
-                    ApplySquare(cells, width, height, origin, bomb.Radius, bomb.DamageAmount, DamageSource.Booster, applyDamage);
+                    ApplySquare(cells, width, height, origin, bomb.Radius, bomb.DamageAmount, DamageSource.Booster, apply);
                     return;
 
                 case FullGridRemoveAction full:
-                    ApplyAll(cells, width, height, full.DamageAmount, DamageSource.Booster, applyDamage);
+                    ApplyAll(cells, width, height, full.DamageAmount, DamageSource.Booster, apply);
                     return;
 
                 case OrbAction:
@@ -43,7 +45,17 @@ namespace Core.Utils
             }
         }
 
-        private static void ApplyRowBand(CellResolveData[,] cells, int width, int height, int centerY, int lineCount, int damage, DamageSource source, bool applyDamage)
+        private static void ApplyRemove(ref CellResolveData cell, int damage, DamageSource source)
+        {
+            cell.MarkRemove();
+        }
+
+        private static void ApplyDamage(ref CellResolveData cell, int damage, DamageSource source)
+        {
+            cell.AddDamage(damage, source);
+        }
+
+        private static void ApplyRowBand(CellResolveData[,] cells, int width, int height, int centerY, int lineCount, int damage, DamageSource source, CellApply apply)
         {
             var half = Mathf.Max(0, (lineCount - 1) / 2);
 
@@ -55,13 +67,12 @@ namespace Core.Utils
                 for (int x = 0; x < width; x++)
                 {
                     ref var cell = ref cells[x, y];
-                    cell.MarkRemove();
-                    if (applyDamage) cell.AddDamage(damage, source);
+                    apply(ref cell, damage, source);
                 }
             }
         }
 
-        private static void ApplyColumnBand(CellResolveData[,] cells, int width, int height, int centerX, int lineCount, int damage, DamageSource source, bool applyDamage)
+        private static void ApplyColumnBand(CellResolveData[,] cells, int width, int height, int centerX, int lineCount, int damage, DamageSource source, CellApply apply)
         {
             var half = Mathf.Max(0, (lineCount - 1) / 2);
 
@@ -73,13 +84,12 @@ namespace Core.Utils
                 for (int y = 0; y < height; y++)
                 {
                     ref var cell = ref cells[x, y];
-                    cell.MarkRemove();
-                    if (applyDamage) cell.AddDamage(damage, source);
+                    apply(ref cell, damage, source);
                 }
             }
         }
 
-        private static void ApplySquare(CellResolveData[,] cells, int width, int height, Vector2Int center, int radius, int damage, DamageSource source, bool applyDamage)
+        private static void ApplySquare(CellResolveData[,] cells, int width, int height, Vector2Int center, int radius, int damage, DamageSource source, CellApply apply)
         {
             radius = Mathf.Max(0, radius);
 
@@ -90,21 +100,19 @@ namespace Core.Utils
                     if (x < 0 || y < 0 || x >= width || y >= height) continue;
 
                     ref var cell = ref cells[x, y];
-                    cell.MarkRemove();
-                    if (applyDamage) cell.AddDamage(damage, source);
+                    apply(ref cell, damage, source);
                 }
             }
         }
 
-        private static void ApplyAll(CellResolveData[,] cells, int width, int height, int damage, DamageSource source, bool applyDamage)
+        private static void ApplyAll(CellResolveData[,] cells, int width, int height, int damage, DamageSource source, CellApply apply)
         {
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
                     ref var cell = ref cells[x, y];
-                    cell.MarkRemove();
-                    if (applyDamage) cell.AddDamage(damage, source);
+                    apply(ref cell, damage, source);
                 }
             }
         }

@@ -108,7 +108,7 @@ namespace Core.Handlers
                     cell.MarkRemove();
                 }
                 
-                BoosterEffectMarker.MarkEffect(cells, width, height, pending.OriginCoord, pending.BoosterAction);
+                BoosterEffectMarker.MarkClearArea(cells, width, height, pending.OriginCoord, pending.BoosterAction);
             }
         }
 
@@ -265,7 +265,7 @@ namespace Core.Handlers
                while (effects.Count > 0)
                {
                    var pendingEffect = effects.Dequeue();
-                   BoosterEffectMarker.ApplyEffectWithDamage(cells, width, height, pendingEffect.OriginCoord, pendingEffect.BoosterAction);
+                   BoosterEffectMarker.MarkObstacleDamageArea(cells, width, height, pendingEffect.OriginCoord, pendingEffect.BoosterAction);
                    loopAgainFlag = true;
                }
            }
