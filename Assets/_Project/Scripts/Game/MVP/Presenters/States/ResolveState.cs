@@ -109,9 +109,9 @@ namespace Core.Handlers
                     {
                         cell.MarkDamage(damageAmount, DamageSource.Booster);
                     }
-                    else if (obj is ITriggerEffectSource triggerEffectSource)
+                    else if (obj is ITriggerEffectSource effectSource)
                     {
-                        if (triggerEffectSource.TryBuildEffect(coord, out var pendingEffect))
+                        if (effectSource.TryBuildEffect(coord, out var pendingEffect))
                         {
                             if (!Context.PendingEffects.Exists(x => 
                                     x.OriginCoord == pendingEffect.OriginCoord && 
