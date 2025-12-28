@@ -113,7 +113,9 @@ namespace Core.Handlers
                     {
                         if (triggerEffectSource.TryBuildEffect(coord, out var pendingEffect))
                         {
-                            if (!Context.PendingEffects.Exists(x=> x.OriginCoord != pendingEffect.OriginCoord))
+                            if (!Context.PendingEffects.Exists(x => 
+                                    x.OriginCoord == pendingEffect.OriginCoord && 
+                                    x.BoosterAction == pendingEffect.BoosterAction))
                             {
                                 Context.PendingEffects.Add(pendingEffect);
                             }
