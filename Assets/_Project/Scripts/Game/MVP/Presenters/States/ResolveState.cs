@@ -111,12 +111,11 @@ namespace Core.Handlers
                     }
                     else if (obj is ITriggerEffectSource triggerEffectSource)
                     {
-                        if (triggerEffectSource.TryBuildEffect(coord, out var pendingEffect))
+                        if (!triggerEffectSource.TryBuildEffect(coord, out var pendingEffect)) return;
+                        
+                        if (!Context.PendingEffects.Exists(x=> x.OriginCoord != pendingEffect.OriginCoord))
                         {
-                            if (!Context.PendingEffects.Exists(x=> x.OriginCoord != pendingEffect.OriginCoord))
-                            {
-                                Context.PendingEffects.Add(pendingEffect);
-                            }
+                            Context.PendingEffects.Add(pendingEffect);
                         }
                     }
                     else
