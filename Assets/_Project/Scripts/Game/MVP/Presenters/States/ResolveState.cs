@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Core.Config;
 using Core.Item;
 using Core.Models;
@@ -112,7 +113,10 @@ namespace Core.Handlers
                     {
                         if (triggerEffectSource.TryBuildEffect(coord, out var pendingEffect))
                         {
-                            Context.PendingEffects.Add(pendingEffect);
+                            if (!Context.PendingEffects.Exists(x=> x.OriginCoord != pendingEffect.OriginCoord))
+                            {
+                                Context.PendingEffects.Add(pendingEffect);
+                            }
                         }
                     }
                     else
