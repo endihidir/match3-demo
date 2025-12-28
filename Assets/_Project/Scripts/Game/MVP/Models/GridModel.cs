@@ -5,12 +5,12 @@ namespace Core.Models
 {
     public interface IGridModel : IBaseGridModel<BaseGridObject>
     {
-        void Swap(Vector2Int a, Vector2Int b);
+        void Swap(Vector2Int sourceCoord, Vector2Int targetCoord);
         bool HasStationaryAndBlocking();
         int FindFallSourceY(int x, int startY);
         GridObjectType[,] BuildTypeDataGrid();
 
-        bool TryFindVerticalSource(int x, int destY, out Vector2Int src);
+        bool TryFindVerticalSource(int x, int destY, out Vector2Int sourceCoord);
         bool TryGetBarrierYAbove(int x, int destY, out int barrierY);
         bool CanFallStraightDown(Vector2Int pos);
     }
@@ -21,15 +21,15 @@ namespace Core.Models
         {
         }
 
-        public void Swap(Vector2Int a, Vector2Int b)
+        public void Swap(Vector2Int sourceCoord, Vector2Int targetCoord)
         {
-            if (!IsInRange(a) || !IsInRange(b)) return;
+            if (!IsInRange(sourceCoord) || !IsInRange(targetCoord)) return;
 
-            var objA = GetGridObjectFast(a.x, a.y);
-            var objB = GetGridObjectFast(b.x, b.y);
+            var objA = GetGridObjectFast(sourceCoord.x, sourceCoord.y);
+            var objB = GetGridObjectFast(targetCoord.x, targetCoord.y);
 
-            SetGridObjectFast(a.x, a.y, objB);
-            SetGridObjectFast(b.x, b.y, objA);
+            SetGridObjectFast(sourceCoord.x, sourceCoord.y, objB);
+            SetGridObjectFast(targetCoord.x, targetCoord.y, objA);
         }
 
         public int FindFallSourceY(int x, int startY)
@@ -79,7 +79,7 @@ namespace Core.Models
             return grid;
         }
 
-        public bool TryFindVerticalSource(int x, int destY, out Vector2Int src) => TryScanUpForSource(x, destY, out src);
+        public bool TryFindVerticalSource(int x, int destY, out Vector2Int sourceCoord) => TryScanUpForSource(x, destY, out sourceCoord);
         public bool TryGetBarrierYAbove(int x, int destY, out int barrierY) => TryScanUpForBarrier(x, destY, out barrierY);
 
         public bool CanFallStraightDown(Vector2Int pos)
@@ -125,6 +125,12 @@ namespace Core.Models
 
             barrierY = -1;
             return false;
+        }
+
+        protected override void SetInternal(Vector2Int coord, BaseGridObject value, bool raiseEvent = true)
+        {
+            value?.SetCoordinate(coord);
+            base.SetInternal(coord, value, raiseEvent);
         }
     }
 }

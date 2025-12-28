@@ -4,6 +4,7 @@ using Core.Item;
 using Core.Item.Factories;
 using Core.Models;
 using Core.StateMachineCore;
+using Core.Utils;
 using Core.Views;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -25,7 +26,7 @@ namespace Core.Handlers
         private readonly Queue<GridMove> _moveQueue = new();
         
         public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory, GameplayConfigContainer configContainer, 
-            IRefillStrategyHandler strategyHandler, IMatchResolveHandler matchResolveHandler)
+            IRefillStrategyHandler strategyHandler)
         {
             _stateMachine = new StateMachine();
             
@@ -33,7 +34,7 @@ namespace Core.Handlers
 
             _idleState = new IdleState().Init(_context) as IdleState;
             _applyInputState = new ApplyInputState().Init(_context) as ApplyInputState;
-            _resolveState = new ResolveState(matchResolveHandler).Init(_context) as ResolveState;
+            _resolveState = new ResolveState().Init(_context) as ResolveState;
             _refillState = new RefillState(strategyHandler).Init(_context) as RefillState;
 
             var states = new StateBase<GridStateContext>[] { _idleState, _applyInputState, _resolveState, _refillState };
@@ -129,6 +130,11 @@ namespace Core.Handlers
             {
                 CleanupBoosters();
             }
+
+            if (Input.GetKeyDown(KeyCode.L))
+            {
+                EditorLogger.LogError(_stateMachine.CurrentState);
+            }
             
             _stateMachine.Update(Time.deltaTime);
         }
@@ -160,7 +166,7 @@ namespace Core.Handlers
             {
                 _context.Factory.ReleaseItem(obj);
                 _context.Model.SetGridObject(actPos, null);
-                var newObj = _context.Factory.GetItem<BoosterObject>(new GridObjectType(GridItemKind.Booster, (int)boosterType));
+                var newObj = _context.Factory.GetBoosterItem(boosterType);
                 _context.Model.SetGridObject(actPos, newObj);
                 newObj.SetPosition(_context.View.GridToWorld(actPos));
                 newObj.SetSpriteSize(_context.View.GetCellSize());
