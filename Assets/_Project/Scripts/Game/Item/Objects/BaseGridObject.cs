@@ -1,8 +1,5 @@
-using System.Diagnostics;
 using Core.Config;
 using Core.Pool;
-using Core.Utils;
-using Core.Views;
 using NaughtyAttributes;
 using UnityEngine;
 
@@ -13,6 +10,7 @@ namespace Core.Item
         [field: SerializeField] public ItemAnimation ItemAnimation { get; private set; }
         [field: SerializeField] public SpriteRenderer SpriteRenderer { get; private set; }
         [field: SerializeField, ReadOnly] public bool IsStationary { get; private set; }
+        [field: SerializeField, ReadOnly] public Vector2Int Coord { get; private set; }
         public GridObjectType ObjectType { get; private set; }
         public GridItemKind ItemKind => ObjectType.ItemKind;
         public int TypeId => ObjectType.TypeId;
@@ -53,31 +51,19 @@ namespace Core.Item
             IsStationary = baseItemConfigData.isStationary;
         }
         
+        public void SetCoordinate(Vector2Int coord) => Coord = coord;
         public void SetSpriteSize(float cellSize) => SpriteRenderer.size = cellSize * SpriteSizeMultiplier;
         public void SetPosition(Vector3 position) => transform.position = position;
         public void SetParent(Transform parent) => transform.SetParent(parent);
         protected override void OnDeactivate() => ResetItem();
         public void ResetItem()
         {
+            Coord = new Vector2Int(-1, -1);
             ObjectType = default;
             SetPosition(Vector3.zero);
             ItemAnimation?.Dispose();
             SpriteRenderer.sprite = null;
             SpriteSizeMultiplier = Vector2.zero;
-        }
-
-        [Conditional("UNITY_EDITOR"), Button]
-        private void LogCoordinate()
-        {
-            var gridView = FindObjectOfType<GridView>();
-            
-            if (!gridView && !gridView.IsInitialized)
-            {
-                EditorLogger.LogError("GridView not found!");
-                return;
-            }
-            
-            EditorLogger.Log(gridView.WorldToGrid(transform.position));
         }
     }
 }

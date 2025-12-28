@@ -6,7 +6,7 @@ namespace Core.Item
     public enum DamageSource
     {
         None = 0,
-        Item = 1,
-        Booster = 2
+        Match = 1 << 0,
+        Booster = 1 << 1,
     }
 }

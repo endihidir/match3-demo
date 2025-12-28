@@ -10,7 +10,10 @@ namespace Core.Item.Factories
     {
         T GetItem<T>(GridObjectType typeData) where T : BaseGridObject;
         T GetItem<T>(GridItemKind itemKind, int typeId) where T : BaseGridObject => GetItem<T>(new GridObjectType(itemKind, typeId));
-        GridObject GetRandomItem();
+        public ItemObject GetRegularItem(ItemType itemType) => GetItem<ItemObject>(new GridObjectType(GridItemKind.Booster, (int)itemType));
+        public BoosterObject GetBoosterItem(BoosterType boosterType) => GetItem<BoosterObject>(new GridObjectType(GridItemKind.Booster, (int)boosterType));
+        public ObstacleObject GetObstacleItem(ObstacleType obstacleType) => GetItem<ObstacleObject>(new GridObjectType(GridItemKind.Booster, (int)obstacleType));
+        ItemObject GetRandomItem();
         ObstacleObject GetRandomObstacle();
         BoosterObject GetRandomBooster();
         void ReleaseItem(BaseGridObject grid);
@@ -45,12 +48,12 @@ namespace Core.Item.Factories
             
             return itemObject;
         }
-        
-        public GridObject GetRandomItem()
+
+        public ItemObject GetRandomItem()
         {
             var randomType = LevelGridRandomUtil.GetRandomEnumValue<ItemType>(1);
             var objTypeData = new GridObjectType(GridItemKind.Regular, (int)randomType);
-            return GetItem<GridObject>(objTypeData);
+            return GetItem<ItemObject>(objTypeData);
         }
 
         public ObstacleObject GetRandomObstacle()

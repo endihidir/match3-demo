@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
+using Core.Config;
 using Core.Item;
+using Core.Models;
 using Core.StateMachineCore;
 using Core.Utils;
 using Cysharp.Threading.Tasks;
@@ -8,16 +11,33 @@ using UnityEngine;
 
 namespace Core.Handlers
 {
+    public struct CellEffectMark
+    {
+        public bool Remove { get; private set; }
+        public int DamageAmount { get; private set; }
+        public DamageSource DamageSource { get; private set; }
+        
+        public void MarkRemove() => Remove = true;
+        public void UnMarkRemove() => Remove = false;
+        public void MarkDamage(int damageAmount, DamageSource damageSource)
+        {
+            DamageAmount = damageAmount;
+            DamageSource |= damageSource;
+        }
+        public void ClearDamage()
+        {
+            DamageSource = 0;
+            DamageSource = DamageSource.None;
+        }
+    }
     public sealed class ResolveState : StateBase<GridStateContext>
     {
         public override bool NeedsExitTime => true;
 
         private const float MergeMoveDuration = 0.1f;
+        
         private const Ease MergeEase = Ease.InOutQuad;
-        private readonly IMatchResolveHandler _matchResolveHandler;
-
-        public ResolveState(IMatchResolveHandler matchResolveHandler) => _matchResolveHandler = matchResolveHandler;
-        protected override void OnInit() => _matchResolveHandler.Initialize(Context);
+        
         protected override void OnEnter()
         {
             Context.RefillResolveRequested = false;
@@ -27,54 +47,137 @@ namespace Core.Handlers
 
         private async UniTask ResolveAsync()
         {
-            var width = Context.Model.Width;
-            var height = Context.Model.Height;
-
-            var typeGrid = Context.Model.BuildTypeDataGrid();
-            var matchMask = GridMatchDetectUtil.BuildMatchMask_ScanBased(typeGrid, width, height, out var hasMatch);
-
-            var resolveData = new CellResolveData[width, height];
-            var spawns = new List<BoosterSpawnResult>(8);
-
-            if (hasMatch)
-            {
-                ResolveMatches(typeGrid, matchMask, resolveData, width, height, spawns);
-            }
-
-            var hasEffects = Context.PendingEffects is { Count: > 0 };
+            // TODO: RESOLVE PENDING EFFECTS FIRST IF EXIST AND RETURN!!! IF THERE IS NOT ANY PENDING EFFECTS THEN RESOLVE MATCHES!!!
             
-            if (hasEffects)
+            if (Context.PendingEffects is { Count: > 0 })
             {
-                MarkPendingEffects(resolveData, width, height);
+                ApplyPendingEffects();
                 Context.PendingEffects.Clear();
-            }
-
-            Context.ResolvedAnyMatch = hasMatch || hasEffects;
-
-            if (!Context.ResolvedAnyMatch)
-            {
+                Context.ResolvedAnyMatch = true;
                 RequestExit();
                 return;
             }
+            
+            var matchMask = GridMatchMaskBuilder.BuildMatchMask(Context.Model, out var hasMatch);
 
-            if (spawns.Count > 0)
+            if (hasMatch)
             {
-                for (int i = 0; i < spawns.Count; i++)
-                {
-                    var spawnResult = spawns[i];
-                    if (!spawnResult.HasSpawn) continue;
-
-                    await PlayMatchMergeAnimation(spawnResult);
-                    SpawnBooster(spawnResult.Pos, spawnResult.Type);
-                }
+                await ResolveFromMask(matchMask);
             }
-
-            ApplyResolveData(resolveData, width, height);
+            
+            Context.ResolvedAnyMatch = hasMatch;
+            
             RequestExit();
         }
 
-        private void ResolveMatches(GridObjectType[,] typeGrid, bool[,] matchMask, CellResolveData[,] cells, int width, int height, List<BoosterSpawnResult> spawns)
+        private void ApplyPendingEffects()
         {
+            var width = Context.Model.Width;
+            var height = Context.Model.Height;
+            var markData = new CellEffectMark[width, height];
+            
+            foreach (var effect in Context.PendingEffects)
+            {
+                switch (effect.BoosterAction)
+                {
+                    case RocketHorizontalAction hAction:
+                        MarkLinear(effect, markData, hAction.DamageAmount, hAction.LineCount, DirectionLookup.HorizontalDirections);
+                        break;
+                    case RocketVerticalAction vAction:
+                        MarkLinear(effect, markData, vAction.DamageAmount, vAction.LineCount, DirectionLookup.VerticalDirections);
+                        break;
+                    case BombAction bAction:
+                        break;
+                    case FullGridRemoveAction fullRemoveAction:
+                        break;
+                }
+            }
+        }
+
+        private void MarkLinear(PendingEffect effect, CellEffectMark[,] markData, int damageAmount, int lineCount, Vector2Int[] directions)
+        {
+            foreach (var leftRight in directions)
+            {
+                VisitLineExceptSelf(effect.OriginCoord, leftRight, lineCount, obj =>
+                {
+                    var coord = obj.Coord;
+                    
+                    ref var cell = ref markData[coord.x, coord.y];
+                                
+                    if (obj is IDamageableItem damageableItem)
+                    {
+                        cell.MarkDamage(damageAmount, DamageSource.Booster);
+                    }
+                    else if (obj is ITriggerEffectSource triggerEffectSource)
+                    {
+                        if (triggerEffectSource.TryBuildEffect(coord, out var pendingEffect))
+                        {
+                            Context.PendingEffects.Add(pendingEffect);
+                        }
+                    }
+                    else
+                    {
+                        cell.MarkRemove();
+                    }
+                });
+            }
+        }
+
+        private void VisitLineExceptSelf(Vector2Int origin, Vector2Int dir, int lineCount, Action<BaseGridObject> visit)
+        {
+            if (lineCount <= 0) return;
+
+            var model = Context.Model;
+            var width = model.Width;
+            var height = model.Height;
+
+            var half = (lineCount - 1) / 2;
+            var start = (lineCount & 1) == 1 ? -half : 0;
+            var end = (lineCount & 1) == 1 ? half : lineCount - 1;
+
+            if (dir.x != 0)
+            {
+                for (int dy = start; dy <= end; dy++)
+                {
+                    var y = origin.y + dy;
+                    if (y < 0 || y >= height) continue;
+
+                    for (int x = 0; x < width; x++)
+                    {
+                        var c = new Vector2Int(x, y);
+                        if (c == origin) continue;
+
+                        var obj = model.GetGridObject(c);
+                        if (obj) visit(obj);
+                    }
+                }
+
+                return;
+            }
+
+            for (int dx = start; dx <= end; dx++)
+            {
+                var x = origin.x + dx;
+                if (x < 0 || x >= width) continue;
+
+                for (int y = 0; y < height; y++)
+                {
+                    var c = new Vector2Int(x, y);
+                    if (c == origin) continue;
+
+                    var obj = model.GetGridObject(c);
+                    if (obj) visit(obj);
+                }
+            }
+        }
+
+        private async UniTask ResolveFromMask(bool[,] matchMask)
+        {
+            var model = Context.Model;
+            var width = model.Width;
+            var height = model.Height;
+
+            var grid = model.BuildTypeDataGrid();
             var visited = new bool[width, height];
 
             for (int y = 0; y < height; y++)
@@ -84,197 +187,87 @@ namespace Core.Handlers
                     if (!matchMask[x, y]) continue;
                     if (visited[x, y]) continue;
 
-                    var startData = typeGrid[x, y];
+                    var id = grid[x, y].TypeId;
+                    if (id <= 0) continue;
 
                     var coord = new Vector2Int(x, y);
-                    var group = ResolveMarkHelper.CollectGroup(matchMask, visited, typeGrid, width, height, coord, startData.TypeId);
-                    if (group.Count == 0) continue;
+                    var group = GridMatchGroupCollector.CollectGroupFromMask(matchMask, visited, model, grid, coord, id);
+                    if (group == null || group.Count == 0) continue;
 
-                    _matchResolveHandler.Handle(typeGrid, group, width, height, cells, spawns);
+                    await ResolveGroup(model, grid, matchMask, group, id);
                 }
             }
         }
 
-        private void MarkPendingEffects(CellResolveData[,] cells, int width, int height)
+        private async UniTask ResolveGroup(IGridModel model, GridObjectType[,] grid, bool[,] matchMask, List<Vector2Int> group, int id)
         {
-            for (int i = 0; i < Context.PendingEffects.Count; i++)
+            var boosterType = GridBoosterDecision.DecideBoosterTypeFromGroup(model, grid, matchMask, group, id);
+
+            if (!boosterType.HasValue)
             {
-                var pending = Context.PendingEffects[i];
-
-                if (Context.Model.IsInRange(pending.OriginCoord))
-                {
-                    ref var cell = ref cells[pending.OriginCoord.x, pending.OriginCoord.y];
-
-                    cell.MarkRemove();
-                }
-                
-                BoosterEffectMarker.MarkClearArea(cells, width, height, pending.OriginCoord, pending.BoosterAction);
+                ReleaseGroup(model, group);
+                return;
             }
+
+            var centerCoord = GridBoosterDecision.SelectMergeCenter(group, Context.HasForcedBoosterSpawnCoord, Context.ForcedBoosterSpawnCoord);
+
+            Context.HasForcedBoosterSpawnCoord = false;
+
+            await PlayMergeAnimation(group, centerCoord);
+
+            ReleaseGroup(model, group, centerCoord);
+
+            var centerObj = model.GetGridObject(centerCoord);
+            
+            if (centerObj)
+            {
+                Context.Factory.ReleaseItem(centerObj);
+                model.SetGridObject(centerCoord, null);
+            }
+
+            SpawnBooster(centerCoord, boosterType.Value);
         }
-
-        private async UniTask PlayMatchMergeAnimation(BoosterSpawnResult spawnResult)
+        
+        private void ReleaseGroup(IGridModel model, List<Vector2Int> group, Vector2Int? exceptCoord = null)
         {
-            var targetWorld = Context.View.GridToWorld(spawnResult.Pos);
-
-            var tasks = new List<UniTask>(spawnResult.GroupCells.Count);
-
-            for (int i = 0; i < spawnResult.GroupCells.Count; i++)
+            for (int i = 0; i < group.Count; i++)
             {
-                var c = spawnResult.GroupCells[i];
-                if (c == spawnResult.Pos) continue;
+                var c = group[i];
+                if (exceptCoord.HasValue && c == exceptCoord.Value) continue;
 
-                var obj = Context.Model.GetGridObject(c);
-                if (!obj) continue;
-
-                var tween = obj.ItemAnimation.Move(targetWorld, MergeMoveDuration, MergeEase);
-                
-                if (tween == null)
-                {
-                    obj.SetPosition(targetWorld);
-                    continue;
-                }
-
-                tasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
-            }
-
-            if (tasks.Count > 0)
-                await UniTask.WhenAll(tasks);
-
-            for (int i = 0; i < spawnResult.GroupCells.Count; i++)
-            {
-                var c = spawnResult.GroupCells[i];
-                if (c == spawnResult.Pos) continue;
-
-                var obj = Context.Model.GetGridObject(c);
+                var obj = model.GetGridObject(c);
                 if (!obj) continue;
 
                 Context.Factory.ReleaseItem(obj);
-                Context.Model.SetGridObject(c, null);
-            }
-
-            var targetObj = Context.Model.GetGridObject(spawnResult.Pos);
-            if (targetObj)
-            {
-                Context.Factory.ReleaseItem(targetObj);
-                Context.Model.SetGridObject(spawnResult.Pos, null);
+                model.SetGridObject(c, null);
             }
         }
-
-        private void SpawnBooster(Vector2Int pos, BoosterType type)
+        
+        private async UniTask PlayMergeAnimation(List<Vector2Int> group, Vector2Int spawn)
         {
-            var booster = Context.Factory.GetItem<BoosterObject>(GridItemKind.Booster, (int)type);
-            Context.Model.SetGridObject(pos, booster);
+            var tasks = new List<UniTask>(group.Count);
+            var targetWorld = Context.View.GridToWorld(spawn);
+            
+            for (int i = 0; i < group.Count; i++)
+            {
+                var c = group[i];
+                if (c == spawn) continue;
+                var obj = Context.Model.GetGridObject(c);
+                if (!obj) continue;
+                var tween = obj.ItemAnimation.Move(targetWorld, MergeMoveDuration, MergeEase);
+                tasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
+            }
 
-            booster.SetPosition(Context.View.GridToWorld(pos));
-            booster.SetSpriteSize(Context.View.GetCellSize());
-            booster.SetParent(Context.View.GridObjectsParent);
+            if (tasks.Count > 0) await UniTask.WhenAll(tasks);
         }
 
-        private void ApplyResolveData(CellResolveData[,] cells, int width, int height)
-        { 
-           var triggered = new bool[width, height];
-           var effects = new Queue<PendingEffect>(8);
-
-           var loopAgain = false;
-
-           do
-           {
-               loopAgain = false;
-
-               for (int y = 0; y < height; y++)
-               {
-                   for (int x = 0; x < width; x++)
-                   {
-                       if (!TryGetActiveObject(x, y, out var pos, out var obj)) continue;
-
-                       ref var cell = ref cells[x, y];
-
-                       if (!HasAnyWork(cell)) continue;
-
-                       if (obj is IDamageableItem damageable)
-                       {
-                           ProcessDamageableCell(pos, obj, damageable, ref cell);
-                           continue;
-                       }
-
-                       ProcessNonDamageableCell(x, y, pos, obj, ref cell, ref loopAgain);
-                   }
-               }
-           }
-           while (loopAgain);
-            
-           return;
-
-           bool TryGetActiveObject(int x, int y, out Vector2Int pos, out BaseGridObject obj)
-           {
-               pos = new Vector2Int(x, y);
-
-               if (!Context.Model.IsCellActive(pos))
-               {
-                   obj = null;
-                   return false;
-               }
-
-               obj = Context.Model.GetGridObject(pos);
-               return obj;
-           }
-
-           bool HasAnyWork(in CellResolveData cell) => cell.Remove || cell.ObstacleDamage > 0;
-
-           void ProcessDamageableCell(Vector2Int pos, BaseGridObject obj, IDamageableItem damageable, ref CellResolveData cell)
-           {
-               if (cell.ObstacleDamage <= 0) return;
-
-               var destroyed = ApplyDamage(damageable, cell.ObstacleDamage, cell.ObstacleSource);
-
-               cell.ClearDamage();
-
-               if (destroyed)
-               {
-                   DestroyAt(pos, obj);
-               }
-           }
-
-           void ProcessNonDamageableCell(int x, int y, Vector2Int pos, BaseGridObject obj, ref CellResolveData cell, ref bool loopAgainFlag)
-           {
-               if (!cell.Remove) return;
-
-               EnqueueTriggerIfNeeded(x, y, pos, obj);
-               FlushEffects(ref loopAgainFlag);
-               DestroyAt(pos, obj);
-           }
-
-           bool ApplyDamage(IDamageableItem damageable, int dmg, DamageSource src)
-           {
-               return damageable.TakeDamage(dmg, src) == DamageResult.Destroyed;
-           }
-
-           void EnqueueTriggerIfNeeded(int x, int y, Vector2Int pos, BaseGridObject obj)
-           {
-               if (triggered[x, y]) return;
-
-               if (obj is ITriggerEffectSource trigger && trigger.TryBuildEffect(pos, out var effect))
-               {
-                   effects.Enqueue(effect);
-                   triggered[x, y] = true;
-               }
-           }
-
-           void FlushEffects(ref bool loopAgainFlag)
-           {
-               while (effects.Count > 0)
-               {
-                   var pendingEffect = effects.Dequeue();
-                   BoosterEffectMarker.MarkObstacleDamageArea(cells, width, height, pendingEffect.OriginCoord, pendingEffect.BoosterAction);
-                   loopAgainFlag = true;
-               }
-           }
-
-           void DestroyAt(Vector2Int pos, BaseGridObject obj)
-           {
-               Context.Factory.ReleaseItem(obj);
-               Context.Model.SetGridObject(pos, null);
-           }
+        private void SpawnBooster(Vector2Int pos, BoosterType boosterType)
+        {
+            var booster = Context.Factory.GetBoosterItem(boosterType); 
+            Context.Model.SetGridObject(pos, booster); 
+            booster.SetPosition(Context.View.GridToWorld(pos)); 
+            booster.SetSpriteSize(Context.View.GetCellSize()); 
+            booster.SetParent(Context.View.GridObjectsParent);
         }
     }
 }

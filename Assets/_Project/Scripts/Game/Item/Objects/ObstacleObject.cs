@@ -9,7 +9,7 @@ namespace Core.Item
     {
         [field: SerializeField, ReadOnly] public ObstacleType ObstacleType { get; private set; }
         [field: SerializeField, ReadOnly] public int Life { get; private set; }
-        [field: SerializeField, ReadOnly] public DamageSource DamageSource { get; private set; }
+        [field: SerializeField, ReadOnly] public DamageSource AllowDamageSources { get; private set; }
 
         protected override void OnInitialize()
         {
@@ -23,13 +23,13 @@ namespace Core.Item
             if (baseItemConfigData is ObstacleConfigData obstacleConfigData)
             {
                 Life = obstacleConfigData.Life;
-                DamageSource = obstacleConfigData.DamageSource;
+                AllowDamageSources = obstacleConfigData.DamageSource;
             }
         }
 
         public DamageResult TakeDamage(int damage, DamageSource source)
         {
-            if ((DamageSource & source) == 0 || Life <= 0) return DamageResult.Ignored;
+            if ((AllowDamageSources & source) == 0 || Life <= 0) return DamageResult.Ignored;
             Life -= damage;
             Life = Mathf.Max(0, Life);
             EditorLogger.LogError($"{ToString()} :  TakeDamage({damage},{source})  : Life : {Life}");

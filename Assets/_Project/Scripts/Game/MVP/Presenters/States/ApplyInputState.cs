@@ -81,7 +81,7 @@ namespace Core.Handlers
             }
             
             if (!GridMatchDetectUtil.IsRegularItem(sourceObj.ObjectType) || !GridMatchDetectUtil.IsRegularItem(targetObj.ObjectType) ||
-                !WouldCreateMatchAfterSwap(sourceCoord, targetCoord, sourceObj.ObjectType.TypeId, targetObj.ObjectType.TypeId))
+                !AreCellsMatched(sourceCoord, targetCoord, sourceObj.ObjectType.TypeId, targetObj.ObjectType.TypeId))
             {
                 PlayPingPong(sourceObj, targetObj, sourceCoord, targetCoord).Forget();
                 return;
@@ -194,12 +194,11 @@ namespace Core.Handlers
             Context.PendingEffects.Add(new PendingEffect(originCoord, configData.BoosterAction));
         }
         
-        private bool WouldCreateMatchAfterSwap(Vector2Int coordA, Vector2Int coordB, int typeA, int typeB)
+        private bool AreCellsMatched(Vector2Int coordA, Vector2Int coordB, int typeA, int typeB)
         {
-            var width = Context.Model.Width;
-            var height = Context.Model.Height;
+            var model = Context.Model;
 
-            var grid = Context.Model.BuildTypeDataGrid();
+            var grid = model.BuildTypeDataGrid();
 
             var cellA = grid[coordA.x, coordA.y];
             var cellB = grid[coordB.x, coordB.y];
@@ -207,8 +206,8 @@ namespace Core.Handlers
             grid[coordA.x, coordA.y] = new GridObjectType(cellA.ItemKind, typeB);
             grid[coordB.x, coordB.y] = new GridObjectType(cellB.ItemKind, typeA);
 
-            return GridMatchDetectUtil.WouldCreateBlastGroup(grid, coordA.x, coordA.y, width, height, typeB, false) ||
-                   GridMatchDetectUtil.WouldCreateBlastGroup(grid, coordB.x, coordB.y, width, height, typeA, false);
+            return GridMatchRules.IsCellMatched(model, grid, coordA.x, coordA.y, typeB) ||
+                   GridMatchRules.IsCellMatched(model, grid, coordB.x, coordB.y, typeA);
         }
     }
 }

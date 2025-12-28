@@ -10,6 +10,7 @@ namespace Core.Models
         int Height { get; }
         Vector2Int GridSize { get; }
         bool[,] ActiveCells { get; }
+        T[,] GridArray { get; }
 
         event Action<T> OnGridObjectInitialized;
         event Action<T> OnUpdateCellData;
@@ -17,27 +18,27 @@ namespace Core.Models
 
         IBaseGridModel<T> Initialize(T[,] value, int width, int height, out bool[,] activeCells);
 
-        bool TryGetGridObject(Vector2Int pos, out T gridObject);
-        T GetGridObject(Vector2Int gridPos);
-        void SetGridObject(Vector2Int gridPos, T item);
+        bool TryGetGridObject(Vector2Int coord, out T gridObject);
+        T GetGridObject(Vector2Int coord);
+        void SetGridObject(Vector2Int coord, T item);
 
-        bool IsCellActive(Vector2Int pos);
-        bool IsInRange(Vector2Int pos);
+        bool IsCellActive(Vector2Int coord);
+        bool IsInRange(Vector2Int coord);
+        bool IsInRange(int x, int y) => IsInRange(new Vector2Int(x, y));
 
-        bool TryGetNeighbour(Vector2Int pos, Vector2Int direction, out T neighbour);
+        bool TryGetNeighbour(Vector2Int sourceCoord, Vector2Int direction, out T neighbour);
 
-        bool TryGetNeighbours(Vector2Int pos, out T[] neighbours);
-        bool TryGetNeighboursNonAlloc(Vector2Int pos, Span<T> resultBuffer, out int count);
+        bool TryGetNeighbours(Vector2Int sourceCoord, out T[] neighbours);
+        bool TryGetNeighboursNonAlloc(Vector2Int sourceCoord, Span<T> resultBuffer, out int count);
     }
 
     public abstract class BaseGridModel<T> : IBaseGridModel<T> where T : class
     {
-        private T[,] _gridArray;
-
         public int Width { get; private set; }
         public int Height { get; private set; }
         public Vector2Int GridSize { get; private set; }
         public bool[,] ActiveCells { get; private set; }
+        public T[,] GridArray { get; private set; }
 
         public event Action<T> OnGridObjectInitialized;
         public event Action<T> OnUpdateCellData;
@@ -45,7 +46,7 @@ namespace Core.Models
 
         public IBaseGridModel<T> Initialize(T[,] value, int width, int height, out bool[,] activeCells)
         {
-            _gridArray = new T[width, height];
+            GridArray = new T[width, height];
 
             Width = width;
             Height = height;
@@ -78,46 +79,46 @@ namespace Core.Models
 
         protected abstract void OnInitialize();
 
-        public bool TryGetGridObject(Vector2Int pos, out T gridObject)
+        public bool TryGetGridObject(Vector2Int coord, out T gridObject)
         {
-            if (!IsInRange(pos))
+            if (!IsInRange(coord))
             {
                 gridObject = null;
                 return false;
             }
 
-            gridObject = GetInternal(pos);
+            gridObject = GetInternal(coord);
             return true;
         }
 
-        public T GetGridObject(Vector2Int pos)
+        public T GetGridObject(Vector2Int coord)
         {
-            if (!IsInRange(pos)) return null;
-            return GetInternal(pos);
+            if (!IsInRange(coord)) return null;
+            return GetInternal(coord);
         }
 
-        public void SetGridObject(Vector2Int pos, T value)
+        public void SetGridObject(Vector2Int coord, T value)
         {
-            if (!IsInRange(pos)) return;
-            SetInternal(pos, value);
+            if (!IsInRange(coord)) return;
+            SetInternal(coord, value);
         }
 
-        public bool TryGetNeighbour(Vector2Int pos, Vector2Int direction, out T neighbour)
+        public bool TryGetNeighbour(Vector2Int sourceCoord, Vector2Int direction, out T neighbour)
         {
             neighbour = null;
 
             if (direction == Vector2Int.zero) return false;
 
-            var newPos = pos + direction;
-            if (!IsInRange(newPos)) return false;
+            var targetCoord = sourceCoord + direction;
+            if (!IsInRange(targetCoord)) return false;
 
-            neighbour = GetInternal(newPos);
+            neighbour = GetInternal(targetCoord);
             return neighbour != null;
         }
 
-        public bool TryGetNeighbours(Vector2Int pos, out T[] neighbours)
+        public bool TryGetNeighbours(Vector2Int sourceCoord, out T[] neighbours)
         {
-            if (!IsInRange(pos))
+            if (!IsInRange(sourceCoord))
             {
                 neighbours = Array.Empty<T>();
                 return false;
@@ -126,7 +127,7 @@ namespace Core.Models
             var buffer = new T[8];
             var span = buffer.AsSpan();
 
-            if (!TryGetNeighboursNonAlloc(pos, span, out var count) || count == 0)
+            if (!TryGetNeighboursNonAlloc(sourceCoord, span, out var count) || count == 0)
             {
                 neighbours = Array.Empty<T>();
                 return false;
@@ -137,15 +138,15 @@ namespace Core.Models
             return true;
         }
 
-        public bool TryGetNeighboursNonAlloc(Vector2Int pos, Span<T> resultBuffer, out int count)
+        public bool TryGetNeighboursNonAlloc(Vector2Int sourceCoord, Span<T> resultBuffer, out int count)
         {
             count = 0;
 
-            if (!IsInRange(pos)) return false;
+            if (!IsInRange(sourceCoord)) return false;
 
             foreach (var direction in DirectionLookup.AllDirections)
             {
-                if (!TryGetNeighbour(pos, direction, out var neighbour)) continue;
+                if (!TryGetNeighbour(sourceCoord, direction, out var neighbour)) continue;
 
                 if (count >= resultBuffer.Length) return true;
 
@@ -155,18 +156,18 @@ namespace Core.Models
             return count > 0;
         }
 
-        public bool IsCellActive(Vector2Int pos)
+        public bool IsCellActive(Vector2Int coord)
         {
-            if (!IsInRange(pos)) return false;
-            return ActiveCells[pos.x, pos.y];
+            if (!IsInRange(coord)) return false;
+            return ActiveCells[coord.x, coord.y];
         }
 
-        public bool IsInRange(Vector2Int pos) => pos is { x: >= 0, y: >= 0 } && pos.x < Width && pos.y < Height;
+        public bool IsInRange(Vector2Int coord) => coord is { x: >= 0, y: >= 0 } && coord.x < Width && coord.y < Height;
 
-        protected T GetGridObjectFast(int x, int y) => _gridArray[x, y];
+        protected T GetGridObjectFast(int x, int y) => GridArray[x, y];
         protected void SetGridObjectFast(int x, int y, T value, bool raiseEvent = true)
         {
-            _gridArray[x, y] = value;
+            GridArray[x, y] = value;
 
             if (raiseEvent)
                 OnUpdateCellData?.Invoke(value);
@@ -174,11 +175,11 @@ namespace Core.Models
 
         protected bool IsCellActiveFast(int x, int y) => ActiveCells[x, y];
 
-        private T GetInternal(Vector2Int pos) => _gridArray[pos.x, pos.y];
+        private T GetInternal(Vector2Int coord) => GridArray[coord.x, coord.y];
 
-        private void SetInternal(Vector2Int pos, T value, bool raiseEvent = true)
+        protected virtual void SetInternal(Vector2Int coord, T value, bool raiseEvent = true)
         {
-            _gridArray[pos.x, pos.y] = value;
+            GridArray[coord.x, coord.y] = value;
 
             if (raiseEvent)
                 OnUpdateCellData?.Invoke(value);

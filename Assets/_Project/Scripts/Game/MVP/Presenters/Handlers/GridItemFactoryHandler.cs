@@ -40,7 +40,7 @@ namespace Core.Handlers
 
         private BaseGridObject GetItem(GridObjectType typeData) => typeData.ItemKind switch
         {
-            GridItemKind.Regular => _gridItemFactory.GetItem<GridObject>(typeData),
+            GridItemKind.Regular => _gridItemFactory.GetItem<ItemObject>(typeData),
             GridItemKind.Booster => _gridItemFactory.GetItem<BoosterObject>(typeData),
             GridItemKind.Obstacle => _gridItemFactory.GetItem<ObstacleObject>(typeData),
             _ => null
