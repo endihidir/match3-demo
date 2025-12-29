@@ -2,7 +2,7 @@ using Core.Item;
 
 namespace Core.Handlers
 {
-    public struct CellEffectMark
+    public struct CellImpactMarkData
     {
         public bool Remove { get; private set; }
         public bool HasDamage => DamageSource > 0;
@@ -18,8 +18,14 @@ namespace Core.Handlers
         }
         public void UnmarkDamage()
         {
-            DamageSource = 0;
+            DamageAmount = 0;
             DamageSource = DamageSource.None;
+        }
+
+        public void Dispose()
+        {
+            UnMarkRemove();
+            UnmarkDamage();
         }
     }
 }

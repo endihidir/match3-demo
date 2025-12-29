@@ -8,89 +8,90 @@ using UnityEngine;
 
 namespace Core.Handlers
 {
-    public class EffectResolveState : StateBase<GridStateContext>
+    public class BoosterResolveState : StateBase<GridStateContext>
     {
+        public override bool NeedsExitPermission => true;
         protected override void OnEnter()
         {
             Context.RefillResolveRequested = false;
-            ResolveEffects();
+            ResolveBoosters();
         }
 
-        private void ResolveEffects()
+        private void ResolveBoosters()
         {
-            var hasEffects = Context.PendingEffects is { Count: > 0 };
+            var hasActions = Context.PendingBoosterActions is { Count: > 0 };
 
-            if (hasEffects)
+            if (hasActions)
             {
-                ApplyPendingEffects();
+                ApplyPendingActions();
             }
 
-            Context.ResolvedAnyEffect = hasEffects;
+            Context.ResolvedAnyBooster = hasActions;
             
             RequestExit();
         }
         
-        private void ApplyPendingEffects()
+        private void ApplyPendingActions()
         {
             var model = Context.Model;
-            var markData = new CellEffectMark[model.Width, model.Height];
-            MarkPendingEffects(model, markData);
-            ApplyMarkedEffects(model, markData);
+            var markData = new CellImpactMarkData[model.Width, model.Height];
+            MarkPendingActions(model, markData);
+            ApplyMarkedActions(model, markData);
         }
 
-        private void MarkPendingEffects(IGridModel model, CellEffectMark[,] markData)
+        private void MarkPendingActions(IGridModel model, CellImpactMarkData[,] markData)
         {
-            var queue = new Queue<PendingEffect>();
-            var seen = new HashSet<EffectKey>();
+            var queue = new Queue<PendingBoosterAction>();
+            var seen = new HashSet<BoosterActionKey>();
             
-            for (int i = 0; i < Context.PendingEffects.Count; i++)
+            for (int i = 0; i < Context.PendingBoosterActions.Count; i++)
             {
-                EnqueueIfNew(Context.PendingEffects[i]);
+                EnqueueIfNew(Context.PendingBoosterActions[i]);
             }
             
-            Context.PendingEffects.Clear();
+            Context.PendingBoosterActions.Clear();
 
             while (queue.Count > 0)
             {
-                var effect = queue.Dequeue();
+                var action = queue.Dequeue();
                 
-                var originObj = model.GetGridObject(effect.OriginCoord);
+                var originObj = model.GetGridObject(action.OriginCoord);
                 
                 if (originObj)
                 {
                     GridMarkRules.MarkOriginObject(originObj, markData);
                 }
                 
-                switch (effect.BoosterAction)
+                switch (action.BoosterAction)
                 {
                     case RocketHorizontalAction hAction:
                         var horDirs = DirectionLookup.HorizontalDirections;
-                        GridMarkRules.MarkLinearArea(model, effect, markData, hAction.DamageAmount, hAction.LineCount, horDirs, EnqueueIfNew);
+                        GridMarkRules.MarkLinearArea(model, action, markData, hAction.DamageAmount, hAction.LineCount, horDirs, EnqueueIfNew);
                         break;
                     case RocketVerticalAction vAction:
                         var verDirs = DirectionLookup.VerticalDirections;
-                        GridMarkRules.MarkLinearArea(model, effect, markData, vAction.DamageAmount, vAction.LineCount, verDirs, EnqueueIfNew);
+                        GridMarkRules.MarkLinearArea(model, action, markData, vAction.DamageAmount, vAction.LineCount, verDirs, EnqueueIfNew);
                         break;
                     case BombAction bAction:
-                        GridMarkRules.MarkSquareArea(model, effect, markData, bAction.DamageAmount, bAction.Radius, EnqueueIfNew);
+                        GridMarkRules.MarkSquareArea(model, action, markData, bAction.DamageAmount, bAction.Radius, EnqueueIfNew);
                         break;
                     case FullGridRemoveAction fullRemoveAction:
-                        GridMarkRules.MarkAllAreaFromOrigin(model, effect, markData, fullRemoveAction.DamageAmount, EnqueueIfNew);
+                        GridMarkRules.MarkAllAreaFromOrigin(model, action, markData, fullRemoveAction.DamageAmount, EnqueueIfNew);
                         break;
                 }
             }
             
             return;
             
-            void EnqueueIfNew(PendingEffect effect)
+            void EnqueueIfNew(PendingBoosterAction boosterAction)
             {
-                var key = new EffectKey(effect.OriginCoord, effect.BoosterAction);
+                var key = new BoosterActionKey(boosterAction.OriginCoord, boosterAction.BoosterAction);
                 if (!seen.Add(key)) return;
-                queue.Enqueue(effect);
+                queue.Enqueue(boosterAction);
             }
         }
         
-        private void ApplyMarkedEffects(IGridModel model, CellEffectMark[,] markData)
+        private void ApplyMarkedActions(IGridModel model, CellImpactMarkData[,] markData)
         { 
             for (int x = 0; x < model.Width; x++)
             {
@@ -106,7 +107,7 @@ namespace Core.Handlers
                     {
                         ClearAndRelease(coord, obj);
                         
-                        if (obj is ITriggerEffectSource source)
+                        if (obj is IBoosterActionSource source)
                         {
                             // TODO: play booster effect!
                         }
@@ -127,7 +128,7 @@ namespace Core.Handlers
                         {
                             ClearAndRelease(coord, obj);
                             
-                            if (obj is ITriggerEffectSource source)
+                            if (obj is IBoosterActionSource source)
                             {
                                 // TODO: play booster effect!
                             }

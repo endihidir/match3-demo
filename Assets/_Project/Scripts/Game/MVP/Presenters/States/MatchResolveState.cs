@@ -11,11 +11,7 @@ namespace Core.Handlers
 {
     public sealed class MatchResolveState : StateBase<GridStateContext>
     {
-        public override bool NeedsExitTime => true;
-
-        private const float MergeMoveDuration = 0.1f;
-        
-        private const Ease MergeEase = Ease.InOutQuad;
+        public override bool NeedsExitPermission => true;
         
         protected override void OnEnter()
         {
@@ -133,22 +129,23 @@ namespace Core.Handlers
             }
         }
         
-        private async UniTask PlayMergeAnimation(List<Vector2Int> group, Vector2Int spawn)
+        private async UniTask PlayMergeAnimation(List<Vector2Int> group, Vector2Int spawnCoord)
         {
             var tasks = new List<UniTask>(group.Count);
-            var targetWorld = Context.View.GridToWorld(spawn);
+            var targetWorld = Context.View.GridToWorld(spawnCoord);
             
             for (int i = 0; i < group.Count; i++)
             {
-                var c = group[i];
-                if (c == spawn) continue;
-                var obj = Context.Model.GetGridObject(c);
+                var coord = group[i];
+                if (coord == spawnCoord) continue;
+                var obj = Context.Model.GetGridObject(coord);
                 if (!obj) continue;
-                var tween = obj.ItemAnimation.Move(targetWorld, MergeMoveDuration, MergeEase);
+                var tween = obj.ItemAnimation.Move(targetWorld);
                 tasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
             }
 
-            if (tasks.Count > 0) await UniTask.WhenAll(tasks);
+            if (tasks.Count > 0) 
+                await UniTask.WhenAll(tasks);
         }
 
         private void SpawnBooster(Vector2Int pos, BoosterType boosterType)

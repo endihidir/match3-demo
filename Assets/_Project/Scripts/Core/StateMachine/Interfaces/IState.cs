@@ -5,7 +5,7 @@ namespace Core.StateMachineCore
         public string StateID { get; }
         public bool HasInit { get; }
         public bool IsActive { get; }
-        public bool NeedsExitTime { get; }
+        public bool NeedsExitPermission { get; }
         public bool IsExitReady { get; }
         public void RequestExit();
         public void Enter();

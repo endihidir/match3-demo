@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Core.Item
 {
-    public class BoosterObject : BaseGridObject, ITriggerEffectSource
+    public class BoosterObject : BaseGridObject, IBoosterActionSource
     {
         [field: SerializeField, ReadOnly] public BoosterType BoosterType { get; private set; }
         [field: SerializeReference, ReadOnly] public BoosterActionBase BoosterAction { get; private set; }
@@ -31,15 +31,15 @@ namespace Core.Item
                 BoosterAction = boosterConfigData.BoosterAction;
             }
         }
-        public bool TryBuildEffect(Vector2Int origin, out PendingEffect effect)
+        public bool TryBuildAction(Vector2Int origin, out PendingBoosterAction boosterAction)
         {
             if (BoosterAction == null)
             {
-                effect = default;
+                boosterAction = default;
                 return false;
             }
 
-            effect = new PendingEffect(origin, BoosterAction);
+            boosterAction = new PendingBoosterAction(origin, BoosterAction);
 
             return true;
         }

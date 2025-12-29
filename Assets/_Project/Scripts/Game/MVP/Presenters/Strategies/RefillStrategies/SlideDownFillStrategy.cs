@@ -12,12 +12,14 @@ namespace Core.Handlers
     public sealed class SlideDownRefillStrategy : IRefillStrategy
     {
         private const float SpawnYOffset = 1.25f;
+       
+        private float _startDelay;
+        private float _shiftDurationMultiplier;
+        private float _shiftDelayMultiplier;
 
         private readonly List<Vector2Int> _spawnCells = new();
         private readonly HashSet<BaseGridObject> _spawnedInThisSim = new();
 
-        private float _shiftDurationMultiplier;
-        private float _shiftDelayMultiplier;
         private struct MoveInfo
         {
             public BaseGridObject grid;
@@ -27,11 +29,17 @@ namespace Core.Handlers
             public Vector2Int SlideTargetCell;
         }
         
+        public void SetRefillSettings(RefillSettings refillSettings)
+        {
+            _shiftDurationMultiplier = refillSettings.ShiftDurationMultiplier;
+            _shiftDelayMultiplier = refillSettings.ShiftDelayMultiplier;
+        }
+        
         public bool CanRefill(IGridModel model) => model.HasStationaryAndBlocking();
 
-        public async UniTask Execute(GridStateContext stateContext, List<UniTask> tasks, float startDelay = 0f)
+        public async UniTask Execute(GridStateContext stateContext, List<UniTask> tasks)
         {
-            await UniTask.WaitForSeconds(startDelay);
+            await UniTask.WaitForSeconds(_startDelay);
             var model = stateContext.Model;
             var view = stateContext.View;
 
@@ -51,12 +59,6 @@ namespace Core.Handlers
             PlayMoveAnimations(view, width, cellSize, movedSet, startWorldByItem, finalCellByItem, slideStepByItem, tasks);
 
             await UniTask.CompletedTask;
-        }
-
-        public void SetRefillSettings(RefillSettings refillSettings)
-        {
-            _shiftDurationMultiplier = refillSettings.ShiftDurationMultiplier;
-            _shiftDelayMultiplier =  refillSettings.ShiftDelayMultiplier;
         }
 
         private void SimulateGravityAndSlides(GridStateContext stateContext, int width, int height, float cellSize, HashSet<BaseGridObject> movedSet, Dictionary<BaseGridObject, Vector3> startWorldByItem, Dictionary<BaseGridObject, Vector2Int> slideStepByItem)

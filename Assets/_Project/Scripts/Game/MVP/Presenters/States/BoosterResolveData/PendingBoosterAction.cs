@@ -3,12 +3,12 @@ using UnityEngine;
 
 namespace Core.Handlers
 {
-    public readonly struct PendingEffect
+    public readonly struct PendingBoosterAction
     {
         public readonly Vector2Int OriginCoord;
         public readonly BoosterActionBase BoosterAction;
 
-        public PendingEffect(Vector2Int originCoord, BoosterActionBase boosterAction)
+        public PendingBoosterAction(Vector2Int originCoord, BoosterActionBase boosterAction)
         {
             OriginCoord = originCoord;
             BoosterAction = boosterAction;
