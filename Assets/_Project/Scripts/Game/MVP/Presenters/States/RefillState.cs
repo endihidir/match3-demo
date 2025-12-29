@@ -22,11 +22,11 @@ namespace Core.Handlers
 
         protected override void OnEnter()
         {
-            if (!Context.ResolvedAnyMatch)
+            /*if (!Context.ResolvedAnyMatch && !Context.ResolvedAnyEffect)
             {
                 RequestExit();
                 return;
-            }
+            }*/
 
             Context.RefillInProgress = true;
             Run().Forget();
@@ -45,9 +45,7 @@ namespace Core.Handlers
         private void FinishCascade()
         {
             Context.RefillInProgress = false;
-            var model = Context.Model;
-            var gridObjectTypes = model.BuildTypeDataGrid();
-            Context.RefillResolveRequested = GridMatchDetectUtil.HasAnyRegularMatchOnBoard(gridObjectTypes, model.Width, model.Height);
+            Context.RefillResolveRequested = GridMatchRules.HasAnyRegularMatchOnBoard(Context.Model);
         }
     }
 }
