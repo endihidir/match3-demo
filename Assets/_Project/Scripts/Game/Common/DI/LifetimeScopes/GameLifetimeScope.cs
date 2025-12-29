@@ -7,7 +7,6 @@ using Core.Presenters;
 using Core.Services;
 using Core.Views;
 using UnityEngine;
-using UnityEngine.Serialization;
 using VContainer;
 using VContainer.Unity;
 
@@ -15,7 +14,7 @@ namespace Core.LifetimeScopes
 {
     public class GameLifetimeScope : LifetimeScope
     {
-        [field: FormerlySerializedAs("<GameConfigContainer>k__BackingField")] [field: SerializeField] private GameplayConfigContainer GameplayConfigContainer {get; set;}
+        [field: SerializeField] private GameplayConfigContainer GameplayConfigContainer {get; set;}
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -32,6 +31,7 @@ namespace Core.LifetimeScopes
             builder.Register<GridModel>(Lifetime.Scoped).As<IGridModel>();
             builder.RegisterComponentInHierarchy<GridView>().As<IGridView>();
             builder.Register<GridPresenter>(Lifetime.Scoped).As<IInitializable>();
+            builder.Register<GridCheatHandler>(Lifetime.Scoped).As<IGridCheatHandler, ITickable>();
             
             builder.Register<RefillStrategyHandler>(Lifetime.Scoped).As<IRefillStrategyHandler>();
             builder.Register<FallDownRefillStrategy>(Lifetime.Scoped).As<IRefillStrategy>();

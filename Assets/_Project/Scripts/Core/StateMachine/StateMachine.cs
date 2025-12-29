@@ -73,13 +73,6 @@ namespace Core.StateMachineCore
         }
 
         public IStateMachine SetInitialState<T>(T state) where T : class, IState => SetInitialState((IState)state);
-        public IStateMachine ForceState(IState state)
-        {
-            CurrentState?.Exit();
-            CurrentState = state;
-            CurrentState?.Enter();
-            return this;
-        }
 
         public IStateMachine AddTransition(string from, string to, Func<bool> condition)
         {
@@ -178,9 +171,26 @@ namespace Core.StateMachineCore
 
         public void FixedUpdate(float deltaTime) => CurrentState?.FixedUpdate(deltaTime);
         public void LateUpdate(float deltaTime) => CurrentState?.LateUpdate(deltaTime);
-
         public T CurrentAs<T>() where T : class, IState => CurrentState as T;
-
+        
+        public IStateMachine ForceState(IState state)
+        {
+            CurrentState?.Exit();
+            CurrentState = state;
+            CurrentState?.Enter();
+            return this;
+        }
+        
+        public IStateMachine ForceState<T>() where T : IState
+        {
+            var key = typeof(T).Name;
+            if (!_states.TryGetValue(key, out var state)) return this;
+            CurrentState?.Exit();
+            CurrentState = state;
+            CurrentState?.Enter();
+            return this;
+        }
+        
         private void ApplyTransition(ITransition tr)
         {
             if (tr.From == tr.To) return;
