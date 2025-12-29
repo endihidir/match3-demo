@@ -41,26 +41,26 @@ namespace Core.Item
             return _shiftTween;
         }
 
-        public Tween PingPongMove(Vector3 targetPos, float duration = 0.15f, Ease ease = Ease.Linear)
+        public Tween PingPongMove(Vector3 targetPos)
         {
             _moveTween?.Kill();
                 
             var defaultPos = transform.position;
 
             _moveTween = DOTween.Sequence()
-                                .Append(transform.DOMove(targetPos, duration).SetEase(ease))
-                                .Append(transform.DOMove(defaultPos, duration).SetEase(ease))
+                                .Append(transform.DOMove(targetPos, 0.15f).SetEase(Ease.Linear))
+                                .Append(transform.DOMove(defaultPos, 0.15f).SetEase(Ease.Linear))
                                 .SetUpdate(UseUnscaledTime);
             
             return _moveTween;
         }
 
-        public Tween Move(Vector3 worldPos, float duration = 0.15f, Ease ease = Ease.Linear)
+        public Tween Move(Vector3 worldPos)
         {
             _moveTween?.Kill();
             
-            _moveTween = transform.DOMove(worldPos, duration)
-                                  .SetEase(ease)
+            _moveTween = transform.DOMove(worldPos, 0.15f)
+                                  .SetEase(Ease.Linear)
                                   .SetUpdate(UseUnscaledTime);
 
             return _moveTween;

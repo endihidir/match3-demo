@@ -12,13 +12,21 @@ namespace Core.Handlers
     {
         private float SpawnYOffset = 1.25f;
 
+        private float _startDelay = 0f;
         private float _shiftDurationMultiplier = 0.2f;
         private float _shiftDelayMultiplier = 0.05f;
         public bool CanRefill(IGridModel model) => !model.HasStationaryAndBlocking();
-
-        public async UniTask Execute(GridStateContext stateContext, List<UniTask> tasks, float startDelay = 0f)
+        
+        public void SetRefillSettings(RefillSettings refillSettings)
         {
-            await UniTask.WaitForSeconds(startDelay);
+            _startDelay = refillSettings.RefillStartDelay;
+            _shiftDurationMultiplier = refillSettings.ShiftDurationMultiplier;
+            _shiftDelayMultiplier =  refillSettings.ShiftDelayMultiplier;
+        }
+
+        public async UniTask Execute(GridStateContext stateContext, List<UniTask> tasks)
+        {
+            await UniTask.WaitForSeconds(_startDelay);
             var model = stateContext.Model;
             var view = stateContext.View;
 
@@ -38,12 +46,6 @@ namespace Core.Handlers
             }
 
             await UniTask.CompletedTask;
-        }
-        
-        public void SetRefillSettings(RefillSettings refillSettings)
-        {
-            _shiftDurationMultiplier = refillSettings.ShiftDurationMultiplier;
-            _shiftDelayMultiplier =  refillSettings.ShiftDelayMultiplier;
         }
 
         private void ShiftColumn(GridStateContext stateContext, int x, int height, float cellSize, ref int wave, List<UniTask> tasks)

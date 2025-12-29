@@ -166,7 +166,7 @@ namespace Core.StateMachineCore
 
             if (selected == null) return;
 
-            if (selected.From.NeedsExitTime && !selected.From.IsExitReady)
+            if (selected.From.NeedsExitPermission && !selected.From.IsExitReady)
             {
                 _pending = selected;
                 selected.From.RequestExit();

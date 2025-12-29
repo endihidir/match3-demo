@@ -16,13 +16,13 @@ namespace Core.Handlers
         public Queue<GridMove> MoveQueue { get; }
         
         public bool ResolvedAnyMatch { get; set; }
-        public bool ResolvedAnyEffect { get; set; }
+        public bool ResolvedAnyBooster { get; set; }
         public bool RefillInProgress { get; set; }
         public bool RefillResolveRequested { get; set; }
         
         public bool HasForcedBoosterSpawnCoord { get; set; }
         public Vector2Int ForcedBoosterSpawnCoord { get; set; }
-        public List<PendingEffect> PendingEffects { get; } = new();
+        public List<PendingBoosterAction> PendingBoosterActions { get; } = new();
 
         public GridStateContext(IGridModel model, IGridView view, IGridItemFactory factory, ItemConfigContainer configs, Queue<GridMove> moveQueue)
         {

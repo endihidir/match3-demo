@@ -10,7 +10,7 @@ namespace Core.Handlers
 {
     public sealed class ApplyInputState : StateBase<GridStateContext>
     {
-        public override bool NeedsExitTime => true;
+        public override bool NeedsExitPermission => true;
 
         protected override void OnEnter()
         {
@@ -161,7 +161,7 @@ namespace Core.Handlers
         {
             if (!booster || booster.BoosterAction == null) return;
 
-            Context.PendingEffects.Add(new PendingEffect(originCoord, booster.BoosterAction));
+            Context.PendingBoosterActions.Add(new PendingBoosterAction(originCoord, booster.BoosterAction));
         }
 
         private void AddMergedEffects(Vector2Int origin, BoosterType sourceBoosterType, BoosterType targetBoosterType)
@@ -175,7 +175,7 @@ namespace Core.Handlers
                     var boosterEffectBase = rule.Actions[i];
                     if (boosterEffectBase == null) continue;
 
-                    Context.PendingEffects.Add(new PendingEffect(origin, boosterEffectBase));
+                    Context.PendingBoosterActions.Add(new PendingBoosterAction(origin, boosterEffectBase));
                 }
 
                 return;
@@ -191,7 +191,7 @@ namespace Core.Handlers
 
             if (!configData || configData.BoosterAction == null) return;
 
-            Context.PendingEffects.Add(new PendingEffect(originCoord, configData.BoosterAction));
+            Context.PendingBoosterActions.Add(new PendingBoosterAction(originCoord, configData.BoosterAction));
         }
         
         private bool AreCellsMatched(Vector2Int coordA, Vector2Int coordB, int typeA, int typeB)

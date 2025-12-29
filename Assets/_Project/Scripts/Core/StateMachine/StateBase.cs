@@ -16,7 +16,7 @@ namespace Core.StateMachineCore
 
         protected bool ShowLogs;
 
-        public virtual bool NeedsExitTime => false;
+        public virtual bool NeedsExitPermission => false;
         public bool IsExitReady { get; protected set; }
 
         protected StateBase() => StateID = GetType().ToString();

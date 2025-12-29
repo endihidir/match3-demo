@@ -8,13 +8,13 @@ namespace Core.Utils
 {
     public static class GridMarkRules
     {
-        public static void MarkOriginObject(BaseGridObject obj, CellEffectMark[,] markData)
+        public static void MarkOriginObject(BaseGridObject obj, CellImpactMarkData[,] markData)
         {
             var coord = obj.Coord;
             
             ref var cell = ref markData[coord.x, coord.y];
 
-            if (obj is ITriggerEffectSource trigger)
+            if (obj is IBoosterActionSource trigger)
             {
                 cell.MarkRemove();
                 return;
@@ -26,42 +26,42 @@ namespace Core.Utils
             }
         }
         
-        public static void MarkLinearArea(IGridModel model, PendingEffect effect, CellEffectMark[,] markData, int damageAmount, int lineCount, Vector2Int[] directions, Action<PendingEffect> enqueue)
+        public static void MarkLinearArea(IGridModel model, PendingBoosterAction boosterAction, CellImpactMarkData[,] markData, int damageAmount, int lineCount, Vector2Int[] directions, Action<PendingBoosterAction> enqueue)
         {
             foreach (var dir in directions)
             {
-                VisitLineExceptSelf(model, effect.OriginCoord, dir, lineCount, 
+                VisitLineExceptSelf(model, boosterAction.OriginCoord, dir, lineCount, 
                     obj => MarkVisitedObject(obj, markData, damageAmount, enqueue));
             }
         }
 
-        public static void MarkSquareArea(IGridModel model, PendingEffect effect, CellEffectMark[,] markData, int damageAmount, int radius, Action<PendingEffect> enqueue)
+        public static void MarkSquareArea(IGridModel model, PendingBoosterAction boosterAction, CellImpactMarkData[,] markData, int damageAmount, int radius, Action<PendingBoosterAction> enqueue)
         {
             for (int r = 1; r <= radius; r++)
             {
-                VisitRingExceptSelf(model, effect.OriginCoord, r, 
+                VisitRingExceptSelf(model, boosterAction.OriginCoord, r, 
                     obj => MarkVisitedObject(obj, markData, damageAmount, enqueue));
             }
         }
         
-        public static void MarkAllAreaFromOrigin(IGridModel model, PendingEffect effect, CellEffectMark[,] markData, int damageAmount, Action<PendingEffect> enqueue)
+        public static void MarkAllAreaFromOrigin(IGridModel model, PendingBoosterAction boosterAction, CellImpactMarkData[,] markData, int damageAmount, Action<PendingBoosterAction> enqueue)
         {
             var maxRadius = Mathf.Max(model.Width, model.Height);
 
             for (int r = 1; r <= maxRadius; r++)
             {
-                VisitRingExceptSelf(model, effect.OriginCoord, r, obj => MarkVisitedObject(obj, markData, damageAmount, enqueue));
+                VisitRingExceptSelf(model, boosterAction.OriginCoord, r, obj => MarkVisitedObject(obj, markData, damageAmount, enqueue));
             }
         }
 
-        private static void MarkVisitedObject(BaseGridObject obj, CellEffectMark[,] markData, int damageAmount, Action<PendingEffect> enqueue)
+        private static void MarkVisitedObject(BaseGridObject obj, CellImpactMarkData[,] markData, int damageAmount, Action<PendingBoosterAction> enqueue)
         {
             var coord = obj.Coord;
             
             ref var cell = ref markData[coord.x, coord.y];
             
             var isDamageable = obj is IDamageableItem;
-            var trigger = obj as ITriggerEffectSource;
+            var trigger = obj as IBoosterActionSource;
 
             if (isDamageable)
             {
@@ -70,9 +70,9 @@ namespace Core.Utils
 
             if (trigger != null)
             {
-                if (trigger.TryBuildEffect(coord, out var pendingEffect))
+                if (trigger.TryBuildAction(coord, out var boosterAction))
                 {
-                    enqueue(pendingEffect);
+                    enqueue(boosterAction);
                 }
 
                 cell.MarkRemove();

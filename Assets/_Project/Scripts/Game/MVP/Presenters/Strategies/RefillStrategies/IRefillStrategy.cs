@@ -8,7 +8,7 @@ namespace Core.Handlers
     public interface IRefillStrategy
     {
         bool CanRefill(IGridModel model);
-        UniTask Execute(GridStateContext stateContext, List<UniTask> tasks, float startDelay = 0f);
+        UniTask Execute(GridStateContext stateContext, List<UniTask> tasks);
         public void SetRefillSettings(RefillSettings refillSettings);
     }
 }

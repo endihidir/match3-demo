@@ -7,16 +7,14 @@ namespace Core.Handlers
 {
     public sealed class RefillState : StateBase<GridStateContext>
     {
-        public override bool NeedsExitTime => true;
+        public override bool NeedsExitPermission => true;
         
         private readonly IRefillStrategyHandler _strategyHandler;
-        private float _refillStartDelay;
 
         public RefillState(IRefillStrategyHandler strategyHandler) => _strategyHandler = strategyHandler;
 
         protected override void OnInit()
         {
-            _refillStartDelay = Context.Configs.RefillSettings.RefillStartDelay;
             _strategyHandler.Initialize(Context.Configs.RefillSettings);
         }
 
@@ -37,7 +35,7 @@ namespace Core.Handlers
         {
             var tasks = new List<UniTask>();
             var strategy = _strategyHandler.SelectStrategy(Context.Model);
-            await strategy.Execute(Context, tasks, _refillStartDelay);
+            await strategy.Execute(Context, tasks);
             await UniTask.WhenAll(tasks);
             FinishCascade();
         }
