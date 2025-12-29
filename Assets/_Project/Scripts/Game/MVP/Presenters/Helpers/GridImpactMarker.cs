@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Core.Utils
 {
-    public static class GridMarkRules
+    public static class GridImpactMarker
     {
         public static void MarkOriginObject(BaseGridObject obj, CellImpactMarkData[,] markData)
         {
