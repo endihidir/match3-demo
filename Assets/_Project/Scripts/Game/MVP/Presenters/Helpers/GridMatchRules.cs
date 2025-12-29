@@ -28,6 +28,25 @@ namespace Core.Utils
 
             return false;
         }
+        
+        public static bool HasAnyRegularMatchOnBoard(IGridModel model)
+        {
+            var grid = model.BuildTypeDataGrid();
+            
+            for (int y = 0; y < model.Height; y++)
+            {
+                for (int x = 0; x < model.Width; x++)
+                {
+                    var data = grid[x, y];
+                    if (!IsRegularItem(data)) continue;
+
+                    if (IsCellMatched(model, grid, x, y, data.TypeId))
+                        return true;
+                }
+            }
+
+            return false;
+        }
 
         private static int CountSameInGrid(IGridModel model, GridObjectType[,] grid, int x, int y, int id, int dx, int dy)
         {

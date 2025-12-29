@@ -6,7 +6,6 @@ using Core.Models;
 using Core.StateMachineCore;
 using Core.Utils;
 using Core.Views;
-using Unity.VisualScripting;
 using UnityEngine;
 using VContainer.Unity;
 using StateMachine = Core.StateMachineCore.StateMachine;
@@ -20,8 +19,9 @@ namespace Core.Handlers
 
         private readonly IdleState _idleState;
         private readonly ApplyInputState _applyInputState;
-        private readonly ResolveState _resolveState;
+        private readonly MatchResolveState _matchResolveState;
         private readonly RefillState _refillState;
+        private readonly EffectResolveState _effectResolveState;
 
         private readonly Queue<GridMove> _moveQueue = new();
         
@@ -34,18 +34,22 @@ namespace Core.Handlers
 
             _idleState = new IdleState().Init(_context) as IdleState;
             _applyInputState = new ApplyInputState().Init(_context) as ApplyInputState;
-            _resolveState = new ResolveState().Init(_context) as ResolveState;
+            _effectResolveState = new EffectResolveState().Init(_context) as EffectResolveState;
+            _matchResolveState = new MatchResolveState().Init(_context) as MatchResolveState;
             _refillState = new RefillState(strategyHandler).Init(_context) as RefillState;
+            
 
-            var states = new StateBase<GridStateContext>[] { _idleState, _applyInputState, _resolveState, _refillState };
+            var states = new StateBase<GridStateContext>[] { _idleState, _applyInputState, _effectResolveState, _matchResolveState, _refillState };
             _stateMachine.Register(states);
 
             _stateMachine.AddTransition(_idleState, _applyInputState, () => _moveQueue.Count > 0)
-                         .AddTransition(_idleState, _resolveState, () => _context.RefillResolveRequested && !_context.RefillInProgress)
-                         .AddTransition(_applyInputState, _resolveState, () => _applyInputState.IsExitReady)
+                         .AddTransition(_idleState, _matchResolveState, () => _context.RefillResolveRequested && !_context.RefillInProgress)
+                         .AddTransition(_applyInputState, _effectResolveState, () => _applyInputState.IsExitReady)
                          .AddTransition(_applyInputState, _idleState, () => _applyInputState.IsExitReady)
-                         .AddTransition(_resolveState, _refillState, () => _resolveState.IsExitReady && _context.ResolvedAnyMatch)
-                         .AddTransition(_resolveState, _idleState, () => _resolveState.IsExitReady && !_context.ResolvedAnyMatch)
+                         .AddTransition(_effectResolveState, _refillState, () => _effectResolveState.IsExitReady && _context.ResolvedAnyEffect)
+                         .AddTransition(_effectResolveState, _matchResolveState, () => _effectResolveState.IsExitReady && !_context.ResolvedAnyEffect)
+                         .AddTransition(_matchResolveState, _refillState, () => _matchResolveState.IsExitReady && _context.ResolvedAnyMatch)
+                         .AddTransition(_matchResolveState, _idleState, () => _matchResolveState.IsExitReady && !_context.ResolvedAnyMatch)
                          .AddTransition(_refillState, _idleState, () => _refillState.IsExitReady);
 
             _stateMachine.SetInitialState(_idleState);

@@ -16,6 +16,7 @@ namespace Core.Handlers
         public Queue<GridMove> MoveQueue { get; }
         
         public bool ResolvedAnyMatch { get; set; }
+        public bool ResolvedAnyEffect { get; set; }
         public bool RefillInProgress { get; set; }
         public bool RefillResolveRequested { get; set; }
         

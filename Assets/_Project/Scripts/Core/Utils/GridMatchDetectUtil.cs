@@ -65,23 +65,6 @@ namespace Core.Utils
             }
         }
 
-        public static bool HasAnyRegularMatchOnBoard(GridObjectType[,] grid, int width, int height)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    var data = grid[x, y];
-                    if (!IsRegularItem(data)) continue;
-
-                    if (WouldCreateBlastGroup(grid, x, y, width, height, data.TypeId, assumeCenterIsId: false))
-                        return true;
-                }
-            }
-
-            return false;
-        }
-
         private static bool IsCenterOk(GridObjectType[,] grid, int x, int y, int id, bool assumeCenterIsId)
         {
             if (assumeCenterIsId) return true;
