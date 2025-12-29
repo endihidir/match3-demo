@@ -59,24 +59,24 @@ namespace Core.Handlers
                 
                 if (originObj)
                 {
-                    GridMarkRules.MarkOriginObject(originObj, markData);
+                    GridImpactMarker.MarkOriginObject(originObj, markData);
                 }
                 
                 switch (action.BoosterAction)
                 {
                     case RocketHorizontalAction hAction:
                         var horDirs = DirectionLookup.HorizontalDirections;
-                        GridMarkRules.MarkLinearArea(model, action, markData, hAction.DamageAmount, hAction.LineCount, horDirs, EnqueueIfNew);
+                        GridImpactMarker.MarkLinearArea(model, action, markData, hAction.DamageAmount, hAction.LineCount, horDirs, EnqueueIfNew);
                         break;
                     case RocketVerticalAction vAction:
                         var verDirs = DirectionLookup.VerticalDirections;
-                        GridMarkRules.MarkLinearArea(model, action, markData, vAction.DamageAmount, vAction.LineCount, verDirs, EnqueueIfNew);
+                        GridImpactMarker.MarkLinearArea(model, action, markData, vAction.DamageAmount, vAction.LineCount, verDirs, EnqueueIfNew);
                         break;
                     case BombAction bAction:
-                        GridMarkRules.MarkSquareArea(model, action, markData, bAction.DamageAmount, bAction.Radius, EnqueueIfNew);
+                        GridImpactMarker.MarkSquareArea(model, action, markData, bAction.DamageAmount, bAction.Radius, EnqueueIfNew);
                         break;
                     case FullGridRemoveAction fullRemoveAction:
-                        GridMarkRules.MarkAllAreaFromOrigin(model, action, markData, fullRemoveAction.DamageAmount, EnqueueIfNew);
+                        GridImpactMarker.MarkAllAreaFromOrigin(model, action, markData, fullRemoveAction.DamageAmount, EnqueueIfNew);
                         break;
                 }
             }
