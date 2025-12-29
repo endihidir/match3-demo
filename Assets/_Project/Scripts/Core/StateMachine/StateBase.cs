@@ -19,7 +19,7 @@ namespace Core.StateMachineCore
         public virtual bool NeedsExitPermission => false;
         public bool IsExitReady { get; protected set; }
 
-        protected StateBase() => StateID = GetType().ToString();
+        protected StateBase() => StateID = GetType().Name;
 
         public IState Init(TContext context, bool showLogs = true)
         {

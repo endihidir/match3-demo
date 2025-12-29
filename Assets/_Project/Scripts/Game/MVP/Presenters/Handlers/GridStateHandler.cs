@@ -25,12 +25,17 @@ namespace Core.Handlers
 
         private readonly Queue<GridMove> _moveQueue = new();
         
+        public IStateMachine StateMachine { get; private set; }
+        public GridStateContext StateContext { get; private set; }
+        
         public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory, GameplayConfigContainer configContainer, 
             IRefillStrategyHandler strategyHandler)
         {
             _stateMachine = new StateMachine();
+            StateMachine = _stateMachine;
             
             _context = new GridStateContext(model, view, factory, configContainer.ItemConfigContainer, _moveQueue);
+            StateContext = _context;
 
             _idleState = new IdleState().Init(_context) as IdleState;
             _applyInputState = new ApplyInputState().Init(_context) as ApplyInputState;
@@ -111,71 +116,7 @@ namespace Core.Handlers
 
         private static bool IsSwapCandidate(BaseGridObject obj) => !obj.IsStationary;
 
-        public void Tick()
-        {
-            if (Input.GetKeyDown(KeyCode.B))
-            {
-                GenerateBoosterAtMousePos(BoosterType.Bomb);
-            }
-            
-            if (Input.GetKeyDown(KeyCode.H))
-            {
-                GenerateBoosterAtMousePos(BoosterType.RocketHorizontal);
-            }
-            
-            if (Input.GetKeyDown(KeyCode.V))
-            {
-                GenerateBoosterAtMousePos(BoosterType.RocketVertical);
-            }
-            
-            if (Input.GetKeyDown(KeyCode.C))
-            {
-                CleanupBoosters();
-            }
-
-            if (Input.GetKeyDown(KeyCode.L))
-            {
-                EditorLogger.LogError(_stateMachine.CurrentState);
-            }
-            
-            _stateMachine.Update(Time.deltaTime);
-        }
-
-        private void CleanupBoosters()
-        {
-            for (int i = 0; i < _context.Model.Width; i++)
-            {
-                for (int j = 0; j < _context.Model.Height; j++)
-                {
-                    var coord = new Vector2Int(i, j);
-                    var obj = _context.Model.GetGridObject(coord);
-                    if (obj is BoosterObject boosterObject)
-                    {
-                        _context.Factory.ReleaseItem(boosterObject);
-                        _context.Model.SetGridObject(coord, null);
-                        _stateMachine.ForceState(_refillState);
-                    }
-                }
-            }
-        }
-
-        private void GenerateBoosterAtMousePos(BoosterType boosterType)
-        {
-            var pos = _context.View.ScreenToGridCoordinate(Input.mousePosition);
-            var actPos = _context.View.InputDirectionToGridDirection(pos);
-            var obj = _context.Model.GetGridObject(actPos);
-            if (obj)
-            {
-                _context.Factory.ReleaseItem(obj);
-                _context.Model.SetGridObject(actPos, null);
-                var newObj = _context.Factory.GetBoosterItem(boosterType);
-                _context.Model.SetGridObject(actPos, newObj);
-                newObj.SetPosition(_context.View.GridToWorld(actPos));
-                newObj.SetSpriteSize(_context.View.GetCellSize());
-                newObj.SetParent(_context.View.GridObjectsParent);
-            }
-        }
-
+        public void Tick() => _stateMachine.Update(Time.deltaTime);
         public void FixedTick() => _stateMachine.FixedUpdate(Time.fixedDeltaTime);
         public void LateTick() => _stateMachine.LateUpdate(Time.deltaTime);
     }
