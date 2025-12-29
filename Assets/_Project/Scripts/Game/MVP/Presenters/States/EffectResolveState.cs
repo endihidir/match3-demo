@@ -13,22 +13,19 @@ namespace Core.Handlers
         protected override void OnEnter()
         {
             Context.RefillResolveRequested = false;
-            
             ResolveEffects();
         }
 
         private void ResolveEffects()
         {
-            if (Context.PendingEffects is not { Count: > 0 })
+            var hasEffects = Context.PendingEffects is { Count: > 0 };
+
+            if (hasEffects)
             {
-                Context.ResolvedAnyEffect = false;
-                RequestExit();
-                return;
+                ApplyPendingEffects();
             }
-            
-            ApplyPendingEffects();
-            
-            Context.ResolvedAnyEffect = true;
+
+            Context.ResolvedAnyEffect = hasEffects;
             
             RequestExit();
         }
@@ -114,7 +111,7 @@ namespace Core.Handlers
                             // TODO: play booster effect!
                         }
 
-                        // TODO: play remove effect!
+                        // TODO: play destroy effect!
                         continue;
                     }
 
@@ -135,7 +132,7 @@ namespace Core.Handlers
                                 // TODO: play booster effect!
                             }
                             
-                            // TODO: play remove effect!
+                            // TODO: play destroy effect!
                         }
                         continue;
                     }
