@@ -12,25 +12,6 @@ using UnityEngine;
 
 namespace Core.Handlers
 {
-    public struct CellEffectMark
-    {
-        public bool Remove { get; private set; }
-        public int DamageAmount { get; private set; }
-        public DamageSource DamageSource { get; private set; }
-        
-        public void MarkRemove() => Remove = true;
-        public void UnMarkRemove() => Remove = false;
-        public void MarkDamage(int damageAmount, DamageSource damageSource)
-        {
-            DamageAmount = damageAmount;
-            DamageSource |= damageSource;
-        }
-        public void ClearDamage()
-        {
-            DamageSource = 0;
-            DamageSource = DamageSource.None;
-        }
-    }
     public sealed class ResolveState : StateBase<GridStateContext>
     {
         public override bool NeedsExitTime => true;
@@ -53,9 +34,11 @@ namespace Core.Handlers
             if (Context.PendingEffects is { Count: > 0 })
             {
                 ApplyPendingEffects();
-                Context.PendingEffects.Clear();
+                
                 Context.ResolvedAnyMatch = true;
+                
                 RequestExit();
+                
                 return;
             }
             
@@ -73,107 +56,118 @@ namespace Core.Handlers
 
         private void ApplyPendingEffects()
         {
-            var width = Context.Model.Width;
-            var height = Context.Model.Height;
-            var markData = new CellEffectMark[width, height];
+            var model = Context.Model;
+            var markData = new CellEffectMark[model.Width, model.Height];
+            MarkPendingEffects(model, markData);
+            ApplyMarkedEffects(model, markData);
+        }
+
+        private void MarkPendingEffects(IGridModel model, CellEffectMark[,] markData)
+        {
+            var queue = new Queue<PendingEffect>();
+            var seen = new HashSet<EffectKey>();
             
-            foreach (var effect in Context.PendingEffects)
+            for (int i = 0; i < Context.PendingEffects.Count; i++)
             {
+                EnqueueIfNew(Context.PendingEffects[i]);
+            }
+            
+            Context.PendingEffects.Clear();
+
+            while (queue.Count > 0)
+            {
+                var effect = queue.Dequeue();
+                
+                var originObj = model.GetGridObject(effect.OriginCoord);
+                
+                if (originObj)
+                {
+                    GridMarkRules.MarkOriginObject(originObj, markData);
+                }
+                
                 switch (effect.BoosterAction)
                 {
                     case RocketHorizontalAction hAction:
-                        MarkLinear(effect, markData, hAction.DamageAmount, hAction.LineCount, DirectionLookup.HorizontalDirections);
+                        var horDirs = DirectionLookup.HorizontalDirections;
+                        GridMarkRules.MarkLinearArea(model, effect, markData, hAction.DamageAmount, hAction.LineCount, horDirs, EnqueueIfNew);
                         break;
                     case RocketVerticalAction vAction:
-                        MarkLinear(effect, markData, vAction.DamageAmount, vAction.LineCount, DirectionLookup.VerticalDirections);
+                        var verDirs = DirectionLookup.VerticalDirections;
+                        GridMarkRules.MarkLinearArea(model, effect, markData, vAction.DamageAmount, vAction.LineCount, verDirs, EnqueueIfNew);
                         break;
                     case BombAction bAction:
+                        GridMarkRules.MarkSquareArea(model, effect, markData, bAction.DamageAmount, bAction.Radius, EnqueueIfNew);
                         break;
                     case FullGridRemoveAction fullRemoveAction:
+                        GridMarkRules.MarkAllAreaFromOrigin(model, effect, markData, fullRemoveAction.DamageAmount, EnqueueIfNew);
                         break;
                 }
             }
-        }
-
-        private void MarkLinear(PendingEffect effect, CellEffectMark[,] markData, int damageAmount, int lineCount, Vector2Int[] directions)
-        {
-            foreach (var leftRight in directions)
+            
+            return;
+            
+            void EnqueueIfNew(PendingEffect effect)
             {
-                VisitLineExceptSelf(effect.OriginCoord, leftRight, lineCount, obj =>
+                var key = new EffectKey(effect.OriginCoord, effect.BoosterAction);
+                if (!seen.Add(key)) return;
+                queue.Enqueue(effect);
+            }
+        }
+        
+        private void ApplyMarkedEffects(IGridModel model, CellEffectMark[,] markData)
+        { 
+            for (int x = 0; x < model.Width; x++)
+            {
+                for (int y = 0; y < model.Height; y++)
                 {
-                    var coord = obj.Coord;
+                    var coord = new Vector2Int(x, y);
+                    var obj =  model.GetGridObject(coord);
+                    if(!obj) continue;
                     
-                    ref var cell = ref markData[coord.x, coord.y];
-                                
-                    if (obj is IDamageableItem damageableItem)
+                    var data = markData[x, y];
+
+                    if (data.Remove)
                     {
-                        cell.MarkDamage(damageAmount, DamageSource.Booster);
-                    }
-                    else if (obj is ITriggerEffectSource effectSource)
-                    {
-                        if (effectSource.TryBuildEffect(coord, out var pendingEffect))
+                        ClearAndRelease(coord, obj);
+                        
+                        if (obj is ITriggerEffectSource source)
                         {
-                            if (!Context.PendingEffects.Exists(x => 
-                                    x.OriginCoord == pendingEffect.OriginCoord && 
-                                    x.BoosterAction == pendingEffect.BoosterAction))
-                            {
-                                Context.PendingEffects.Add(pendingEffect);
-                            }
+                            // TODO: play booster effect!
                         }
+
+                        // TODO: play remove effect!
+                        continue;
                     }
-                    else
+
+                    if (data.HasDamage && obj is IDamageableItem damageableItem)
                     {
-                        cell.MarkRemove();
-                    }
-                });
-            }
-        }
+                        var damageResult = damageableItem.TakeDamage(data.DamageAmount, data.DamageSource);
 
-        private void VisitLineExceptSelf(Vector2Int origin, Vector2Int dir, int lineCount, Action<BaseGridObject> visit)
-        {
-            if (lineCount <= 0) return;
-
-            var model = Context.Model;
-            var width = model.Width;
-            var height = model.Height;
-
-            var half = (lineCount - 1) / 2;
-            var start = (lineCount & 1) == 1 ? -half : 0;
-            var end = (lineCount & 1) == 1 ? half : lineCount - 1;
-
-            if (dir.x != 0)
-            {
-                for (int dy = start; dy <= end; dy++)
-                {
-                    var y = origin.y + dy;
-                    if (y < 0 || y >= height) continue;
-
-                    for (int x = 0; x < width; x++)
-                    {
-                        var c = new Vector2Int(x, y);
-                        if (c == origin) continue;
-
-                        var obj = model.GetGridObject(c);
-                        if (obj) visit(obj);
+                        if (damageResult == DamageResult.Damaged)
+                        {
+                            // TODO: play damaged effect!
+                        }
+                        else if (damageResult == DamageResult.Destroyed)
+                        {
+                            ClearAndRelease(coord, obj);
+                            
+                            if (obj is ITriggerEffectSource source)
+                            {
+                                // TODO: play booster effect!
+                            }
+                            
+                            // TODO: play remove effect!
+                        }
+                        continue;
                     }
                 }
-
-                return;
             }
-
-            for (int dx = start; dx <= end; dx++)
+            return;
+            
+            void ClearAndRelease(Vector2Int coord, BaseGridObject obj)
             {
-                var x = origin.x + dx;
-                if (x < 0 || x >= width) continue;
-
-                for (int y = 0; y < height; y++)
-                {
-                    var c = new Vector2Int(x, y);
-                    if (c == origin) continue;
-
-                    var obj = model.GetGridObject(c);
-                    if (obj) visit(obj);
-                }
+                model.SetGridObject(coord, null);
+                Context.Factory.ReleaseItem(obj);
             }
         }
 
@@ -211,7 +205,7 @@ namespace Core.Handlers
 
             if (!boosterType.HasValue)
             {
-                ReleaseGroup(model, group);
+                ReleaseGroup(model, group, true);
                 return;
             }
 
@@ -221,7 +215,7 @@ namespace Core.Handlers
 
             await PlayMergeAnimation(group, centerCoord);
 
-            ReleaseGroup(model, group, centerCoord);
+            ReleaseGroup(model, group, false, centerCoord);
 
             var centerObj = model.GetGridObject(centerCoord);
             
@@ -234,18 +228,43 @@ namespace Core.Handlers
             SpawnBooster(centerCoord, boosterType.Value);
         }
         
-        private void ReleaseGroup(IGridModel model, List<Vector2Int> group, Vector2Int? exceptCoord = null)
+        private void ReleaseGroup(IGridModel model, List<Vector2Int> group, bool hasDamage = false, Vector2Int? exceptCoord = null)
         {
             for (int i = 0; i < group.Count; i++)
             {
-                var c = group[i];
-                if (exceptCoord.HasValue && c == exceptCoord.Value) continue;
+                var coord = group[i];
+                if (exceptCoord.HasValue && coord == exceptCoord.Value) continue;
 
-                var obj = model.GetGridObject(c);
+                var obj = model.GetGridObject(coord);
                 if (!obj) continue;
 
+                if (hasDamage) ApplyNeighbourDamage(model, coord);
+                
                 Context.Factory.ReleaseItem(obj);
-                model.SetGridObject(c, null);
+                model.SetGridObject(coord, null);
+            }
+        }
+        
+        private void ApplyNeighbourDamage(IGridModel model, Vector2Int origin)
+        {
+            foreach (var linearDirection in DirectionLookup.LinearDirections)
+            {
+                var neighbour = origin + linearDirection;
+                if (!model.IsInRange(neighbour)) continue;
+
+                var obj = model.GetGridObject(neighbour);
+                if (!obj) continue;
+
+                if (obj is IDamageableItem damageable)
+                {
+                    var result = damageable.TakeDamage(1, DamageSource.Match);
+
+                    if (result == DamageResult.Destroyed)
+                    {
+                        Context.Factory.ReleaseItem(obj);
+                        model.SetGridObject(neighbour, null);
+                    }
+                }
             }
         }
         

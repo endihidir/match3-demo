@@ -175,7 +175,7 @@ namespace Core.Models
 
         protected bool IsCellActiveFast(int x, int y) => ActiveCells[x, y];
 
-        private T GetInternal(Vector2Int coord) => GridArray[coord.x, coord.y];
+        protected T GetInternal(Vector2Int coord) => GridArray[coord.x, coord.y];
 
         protected virtual void SetInternal(Vector2Int coord, T value, bool raiseEvent = true)
         {
