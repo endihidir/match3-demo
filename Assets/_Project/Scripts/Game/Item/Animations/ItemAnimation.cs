@@ -44,7 +44,7 @@ namespace Core.Item
         
         public Tween ShiftPath(Vector3[] worldPoints, float durationMultiplier, float delay = 0f)
         {
-            _shiftTween?.Kill();
+            _shiftTween?.Kill(true);
 
             var sequence = DOTween.Sequence();
 
