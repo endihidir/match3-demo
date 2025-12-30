@@ -46,37 +46,25 @@ namespace Core.Item
         {
             _shiftTween?.Kill();
 
-            if (worldPoints == null || worldPoints.Length == 0)
-                return null;
-
-            var seq = DOTween.Sequence();
-
-            if (delay > 0f)
-                seq.SetDelay(delay);
+            var sequence = DOTween.Sequence();
 
             var current = transform.position;
 
-            for (int i = 0; i < worldPoints.Length; i++)
+            foreach (var next in worldPoints)
             {
-                var next = worldPoints[i];
-
-                var segDist = Vector3.Distance(current, next);
-                if (segDist <= 0.0001f)
-                {
-                    current = next;
-                    continue;
-                }
-                
-                var distCells = segDist / 2.5f;
+                var segDist = Mathf.Abs(current.y - next.y);
+                var distCells = segDist / 2f;
                 var durMul = 1f + distCells * durationMultiplier;
                 var duration = 0.15f * durMul;
 
-                seq.Append(transform.DOMove(next, duration).SetEase(Ease.InOutQuad));
+                sequence.Append(transform.DOMove(next, duration).SetEase(Ease.InOutQuad).SetDelay(delay))
+                        .SetUpdate(UseUnscaledTime);;
 
                 current = next;
             }
 
-            _shiftTween = seq.SetUpdate(UseUnscaledTime);
+            _shiftTween = sequence;
+            
             return _shiftTween;
         }
 
