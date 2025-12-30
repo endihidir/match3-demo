@@ -363,8 +363,7 @@ namespace Core.Handlers
             }
 
             // Avoid duplicating the same cell consecutively
-            if (list.Count > 0 && list[^1] == step)
-                return;
+            if (list.Count > 0 && list[^1] == step) return;
 
             list.Add(step);
         }
