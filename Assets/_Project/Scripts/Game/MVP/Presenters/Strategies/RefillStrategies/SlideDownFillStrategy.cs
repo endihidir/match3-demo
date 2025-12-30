@@ -37,11 +37,11 @@ namespace Core.Handlers
         
         public bool CanRefill(IGridModel model) => model.HasStationaryAndBlocking();
 
-        public async UniTask Execute(GridStateContext stateContext, List<UniTask> tasks)
+        public async UniTask Execute(GridStateContext context, List<UniTask> tasks)
         {
             await UniTask.WaitForSeconds(_startDelay);
-            var model = stateContext.Model;
-            var view = stateContext.View;
+            var model = context.Model;
+            var view = context.View;
 
             var width = model.Width;
             var height = model.Height;
@@ -52,8 +52,8 @@ namespace Core.Handlers
             var startWorldByItem = new Dictionary<BaseGridObject, Vector3>(width * height);
             var slideStepByItem = new Dictionary<BaseGridObject, Vector2Int>(width * height);
 
-            SimulateGravityAndSlides(stateContext, width, height, cellSize, movedSet, startWorldByItem, slideStepByItem);
-            SpawnRefill(stateContext, view, width, height, cellSize, movedSet, startWorldByItem);
+            SimulateGravityAndSlides(context, width, height, cellSize, movedSet, startWorldByItem, slideStepByItem);
+            SpawnRefill(context, view, width, height, cellSize, movedSet, startWorldByItem);
 
             var finalCellByItem = BuildFinalCellMap(model, width, height, movedSet);
             PlayMoveAnimations(view, width, cellSize, movedSet, startWorldByItem, finalCellByItem, slideStepByItem, tasks);

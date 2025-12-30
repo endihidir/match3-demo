@@ -24,11 +24,11 @@ namespace Core.Handlers
             _shiftDelayMultiplier =  refillSettings.ShiftDelayMultiplier;
         }
 
-        public async UniTask Execute(GridStateContext stateContext, List<UniTask> tasks)
+        public async UniTask Execute(GridStateContext context, List<UniTask> tasks)
         {
             await UniTask.WaitForSeconds(_startDelay);
-            var model = stateContext.Model;
-            var view = stateContext.View;
+            var model = context.Model;
+            var view = context.View;
 
             var width = model.Width;
             var height = model.Height;
@@ -39,10 +39,10 @@ namespace Core.Handlers
             {
                 var wave = 0;
 
-                ShiftColumn(stateContext, x, height, cellSize, ref wave, tasks);
+                ShiftColumn(context, x, height, cellSize, ref wave, tasks);
 
                 if (TryGetSpawnY(model, view, x, height, cellSize, out var spawnY))
-                    RefillColumn(stateContext, x, height, cellSize, spawnY, ref wave, tasks);
+                    RefillColumn(context, x, height, cellSize, spawnY, ref wave, tasks);
             }
 
             await UniTask.CompletedTask;
