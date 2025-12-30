@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Core.Config;
 using Core.Item;
 using Core.Models;
+using Core.Utils;
 using Core.Views;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
@@ -31,14 +32,16 @@ namespace Core.Handlers
         
         public void SetRefillSettings(RefillSettings refillSettings)
         {
+            _startDelay = refillSettings.RefillStartDelay;
             _shiftDurationMultiplier = refillSettings.ShiftDurationMultiplier;
             _shiftDelayMultiplier = refillSettings.ShiftDelayMultiplier;
         }
         
-        public bool CanRefill(IGridModel model) => model.HasStationaryAndBlocking();
+        public bool CanRefill(IGridModel model) => GridRefillCalc.HasStationaryAndBlocking(model);
 
         public async UniTask Execute(GridStateContext context, List<UniTask> tasks)
         {
+            EditorLogger.Log("SLIDE DOWN STRATEGY");
             await UniTask.WaitForSeconds(_startDelay);
             var model = context.Model;
             var view = context.View;
@@ -129,7 +132,7 @@ namespace Core.Handlers
 
         private bool TryFallIntoCell(IGridModel model, Vector2Int emptyCell, HashSet<BaseGridObject> movedSet, Dictionary<BaseGridObject, Vector3> startWorldByItem)
         {
-            if (!model.TryFindVerticalSource(emptyCell.x, emptyCell.y, out var sourceCell)) return false;
+            if (!GridRefillCalc.TryFindVerticalSource(model, emptyCell.x, emptyCell.y, out var sourceCell)) return false;
 
             var item = model.GetGridObject(sourceCell);
             if (!item || item.IsStationary) return false;
@@ -144,7 +147,7 @@ namespace Core.Handlers
 
         private bool TrySlideIntoTopGap(IGridModel model, Vector2Int emptyCell, int height, HashSet<BaseGridObject> movedSet, Dictionary<BaseGridObject, Vector3> startWorldByItem, Dictionary<BaseGridObject, Vector2Int> slideStepByItem)
         {
-            if (!model.TryGetBarrierYAbove(emptyCell.x, emptyCell.y, out var barrierY)) return false;
+            if (!GridRefillCalc.TryGetBarrierYAbove(model, emptyCell.x, emptyCell.y, out var barrierY)) return false;
 
             var topGapY = barrierY + 1;
             if (topGapY >= height) return false;
@@ -185,7 +188,7 @@ namespace Core.Handlers
                 return false;
 
             if (item.IsStationary) return false;
-            if (model.CanFallStraightDown(sideCell)) return false;
+            if (GridRefillCalc.CanFallStraightDown(model, sideCell)) return false;
 
             TrackMovedItem(item, movedSet, startWorldByItem);
             model.SetGridObject(targetCell, item);

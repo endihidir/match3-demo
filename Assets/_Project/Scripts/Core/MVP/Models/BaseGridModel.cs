@@ -20,9 +20,11 @@ namespace Core.Models
 
         bool TryGetGridObject(Vector2Int coord, out T gridObject);
         T GetGridObject(Vector2Int coord);
+        T GetGridObjectFast(int x, int y);
         void SetGridObject(Vector2Int coord, T item);
 
         bool IsCellActive(Vector2Int coord);
+        bool IsCellActiveFast(int x, int y);
         bool IsInRange(Vector2Int coord);
         bool IsInRange(int x, int y) => IsInRange(new Vector2Int(x, y));
 
@@ -164,16 +166,8 @@ namespace Core.Models
 
         public bool IsInRange(Vector2Int coord) => coord is { x: >= 0, y: >= 0 } && coord.x < Width && coord.y < Height;
 
-        protected T GetGridObjectFast(int x, int y) => GridArray[x, y];
-        protected void SetGridObjectFast(int x, int y, T value, bool raiseEvent = true)
-        {
-            GridArray[x, y] = value;
-
-            if (raiseEvent)
-                OnUpdateCellData?.Invoke(value);
-        }
-
-        protected bool IsCellActiveFast(int x, int y) => ActiveCells[x, y];
+        public T GetGridObjectFast(int x, int y) => GridArray[x, y];
+        public bool IsCellActiveFast(int x, int y) => ActiveCells[x, y];
 
         protected T GetInternal(Vector2Int coord) => GridArray[coord.x, coord.y];
 

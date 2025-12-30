@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Core.Config;
 using Core.Models;
+using Core.Utils;
 using Core.Views;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
@@ -10,12 +11,10 @@ namespace Core.Handlers
 {
     public sealed class FallDownRefillStrategy : IRefillStrategy
     {
-        private float SpawnYOffset = 1.25f;
-
-        private float _startDelay = 0f;
-        private float _shiftDurationMultiplier = 0.2f;
-        private float _shiftDelayMultiplier = 0.05f;
-        public bool CanRefill(IGridModel model) => !model.HasStationaryAndBlocking();
+        private float _startDelay;
+        private float _shiftDurationMultiplier;
+        private float _shiftDelayMultiplier;
+        public bool CanRefill(IGridModel model) => !GridRefillCalc.HasStationaryAndBlocking(model);
         
         public void SetRefillSettings(RefillSettings refillSettings)
         {
@@ -26,6 +25,7 @@ namespace Core.Handlers
 
         public async UniTask Execute(GridStateContext context, List<UniTask> tasks)
         {
+            EditorLogger.Log("FALL DOWN STRATEGY");
             await UniTask.WaitForSeconds(_startDelay);
             var model = context.Model;
             var view = context.View;
@@ -41,8 +41,11 @@ namespace Core.Handlers
 
                 ShiftColumn(context, x, height, cellSize, ref wave, tasks);
 
-                if (TryGetSpawnY(model, view, x, height, cellSize, out var spawnY))
+                if (GridRefillCalc.TryGetSpawnCell(model, x, model.Height, out var spawnCell))
+                {
+                    var spawnY = view.GridToWorld(spawnCell).y + cellSize * 1.25f;
                     RefillColumn(context, x, height, cellSize, spawnY, ref wave, tasks);
+                }
             }
 
             await UniTask.CompletedTask;
@@ -60,7 +63,7 @@ namespace Core.Handlers
                 if (!model.IsCellActive(dest)) continue;
                 if (model.GetGridObject(dest)) continue;
 
-                var srcY = model.FindFallSourceY(x, y - 1);
+                var srcY = GridRefillCalc.FindFallSourceY(stateContext.Model, x, y - 1);
                 if (srcY < 0) continue;
 
                 var src = new Vector2Int(x, srcY);
@@ -118,21 +121,6 @@ namespace Core.Handlers
                 tasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
                 wave++;
             }
-        }
-
-        private bool TryGetSpawnY(IGridModel model, IGridView view, int x, int height, float cellSize, out float spawnY)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                var pos = new Vector2Int(x, y);
-                if (!model.IsCellActive(pos)) continue;
-
-                spawnY = view.GridToWorld(pos).y + cellSize * SpawnYOffset;
-                return true;
-            }
-
-            spawnY = 0f;
-            return false;
         }
     }
 }
