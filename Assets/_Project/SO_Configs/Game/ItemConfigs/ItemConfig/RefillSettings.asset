@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2314602c931e44f2bdadca2e2a2cc750, type: 3}
   m_Name: RefillSettings
   m_EditorClassIdentifier: 
-  <RefillStartDelay>k__BackingField: 0.1
+  <RefillStartDelay>k__BackingField: 0
   <ShiftDurationMultiplier>k__BackingField: 0.1
   <ShiftDelayMultiplier>k__BackingField: 0.01

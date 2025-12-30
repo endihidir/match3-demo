@@ -34,13 +34,13 @@ namespace Core.Handlers
         private void ApplyPendingActions()
         {
             var model = Context.Model;
-            var markData = new CellImpactMarkData[model.Width, model.Height];
-            MarkPendingActions(model, markData);
+            MarkPendingActions(model, out var markData);
             ApplyMarkedActions(model, markData);
         }
 
-        private void MarkPendingActions(IGridModel model, CellImpactMarkData[,] markData)
+        private void MarkPendingActions(IGridModel model, out CellImpactMarkData[,] markData)
         {
+            markData = new CellImpactMarkData[model.Width, model.Height]; 
             var queue = new Queue<PendingBoosterAction>();
             var seen = new HashSet<BoosterActionKey>();
             

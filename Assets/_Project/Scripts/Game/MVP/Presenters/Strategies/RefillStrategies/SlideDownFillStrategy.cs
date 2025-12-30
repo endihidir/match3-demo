@@ -13,36 +13,52 @@ namespace Core.Handlers
     public sealed class SlideDownRefillStrategy : IRefillStrategy
     {
         private const float SpawnYOffset = 1.25f;
-       
-        private float _startDelay;
-        private float _shiftDurationMultiplier;
-        private float _shiftDelayMultiplier;
+
+        private RefillSettings _refillSettings;
 
         private readonly List<Vector2Int> _spawnCells = new();
         private readonly HashSet<BaseGridObject> _spawnedInThisSim = new();
 
-        private struct MoveInfo
+        private enum MoveKind
         {
-            public BaseGridObject grid;
-            public Vector3 StartWorld;
-            public Vector2Int TargetCell;
-            public bool HasSlide;
-            public Vector2Int SlideTargetCell;
+            Fall,
+            Slide
         }
-        
+
+        private readonly struct MovePlan
+        {
+            public readonly Vector2Int From;
+            public readonly Vector2Int To;
+            public readonly BaseGridObject Item;
+            public readonly MoveKind Kind;
+
+            public MovePlan(Vector2Int from, Vector2Int to, BaseGridObject item, MoveKind kind)
+            {
+                From = from;
+                To = to;
+                Item = item;
+                Kind = kind;
+            }
+        }
+
+        public struct ItemMoveRecord
+        {
+            public Vector2Int[] Path { get; set; }
+        }
+
         public void SetRefillSettings(RefillSettings refillSettings)
         {
-            _startDelay = refillSettings.RefillStartDelay;
-            _shiftDurationMultiplier = refillSettings.ShiftDurationMultiplier;
-            _shiftDelayMultiplier = refillSettings.ShiftDelayMultiplier;
+            _refillSettings = refillSettings;
         }
-        
+
         public bool CanRefill(IGridModel model) => GridRefillCalc.HasStationaryAndBlocking(model);
 
         public async UniTask Execute(GridStateContext context, List<UniTask> tasks)
         {
-            EditorLogger.Log("SLIDE DOWN STRATEGY");
-            await UniTask.WaitForSeconds(_startDelay);
+            EditorLogger.Log("SLIDE DOWN STRATEGY (MARK/APPLY PATH)");
+
+            await UniTask.WaitForSeconds(_refillSettings.RefillStartDelay);
+
             var model = context.Model;
             var view = context.View;
 
@@ -51,208 +67,253 @@ namespace Core.Handlers
 
             var cellSize = view.GetCellSize();
 
-            var movedSet = new HashSet<BaseGridObject>(width * height);
-            var startWorldByItem = new Dictionary<BaseGridObject, Vector3>(width * height);
-            var slideStepByItem = new Dictionary<BaseGridObject, Vector2Int>(width * height);
+            var pathByItem = new Dictionary<BaseGridObject, List<Vector2Int>>(width * height);
+            var records = new ItemMoveRecord[width, height];
 
-            SimulateGravityAndSlides(context, width, height, cellSize, movedSet, startWorldByItem, slideStepByItem);
-            SpawnRefill(context, view, width, height, cellSize, movedSet, startWorldByItem);
+            _spawnedInThisSim.Clear();
 
-            var finalCellByItem = BuildFinalCellMap(model, width, height, movedSet);
-            PlayMoveAnimations(view, width, cellSize, movedSet, startWorldByItem, finalCellByItem, slideStepByItem, tasks);
+            var outerSafety = width * height * 12;
+
+            while (outerSafety-- > 0)
+            {
+                var movedAny = MarkAndApplyMoves(context, width, height, pathByItem);
+                var spawnedAny = SpawnRefill(context, view, width, height, cellSize, pathByItem);
+
+                if (!movedAny && !spawnedAny) break;
+            }
+
+            BuildFinalCellRecords(model, width, height, pathByItem, records);
+            PlayMoveAnimation(model, view, width, height, records, tasks);
 
             await UniTask.CompletedTask;
         }
 
-        private void SimulateGravityAndSlides(GridStateContext stateContext, int width, int height, float cellSize, HashSet<BaseGridObject> movedSet, Dictionary<BaseGridObject, Vector3> startWorldByItem, Dictionary<BaseGridObject, Vector2Int> slideStepByItem)
+        private bool MarkAndApplyMoves(GridStateContext stateContext, int width, int height, Dictionary<BaseGridObject, List<Vector2Int>> pathByItem)
         {
             var model = stateContext.Model;
-            var view = stateContext.View;
 
-            _spawnedInThisSim.Clear();
+            var movedAnyOverall = false;
 
-            var anyMoved = true;
             var safety = width * height * 12;
 
-            while (anyMoved && safety-- > 0)
+            while (safety-- > 0)
             {
-                anyMoved = false;
+                var plans = new List<MovePlan>(64);
 
-                for (int y = height - 1; y >= 0; y--)
-                {
-                    for (int x = 0; x < width; x++)
-                    {
-                        var emptyCell = new Vector2Int(x, y);
+                // Mark: fall moves (bottom-up, per empty cell)
+                MarkFallPlans(model, width, height, plans);
 
-                        if (!IsEmptyActiveCell(model, emptyCell)) continue;
+                // Mark: slide moves (top-gap under barrier)
+                MarkSlidePlans(model, width, height, plans);
 
-                        if (TryFallIntoCell(model, emptyCell, movedSet, startWorldByItem))
-                            anyMoved = true;
-                    }
-                }
+                if (plans.Count == 0) break;
 
-                for (int y = height - 1; y >= 0; y--)
-                {
-                    for (int x = 0; x < width; x++)
-                    {
-                        var emptyCell = new Vector2Int(x, y);
+                // Apply: execute all marked moves in a safe way (destinations unique)
+                ApplyPlans(model, plans, pathByItem);
 
-                        if (!IsEmptyActiveCell(model, emptyCell)) continue;
+                movedAnyOverall = true;
+            }
 
-                        if (TrySlideIntoTopGap(model, emptyCell, height, movedSet, startWorldByItem, slideStepByItem))
-                            anyMoved = true;
-                    }
-                }
+            return movedAnyOverall;
+        }
 
-                var spawnedAny = false;
+        private void MarkFallPlans(IGridModel model, int width, int height, List<MovePlan> plans)
+        {
+            // Prevent using the same source twice in this pass
+            var reservedSources = new HashSet<Vector2Int>();
 
+            for (int y = height - 1; y >= 0; y--)
+            {
                 for (int x = 0; x < width; x++)
                 {
-                    if (!TryGetSpawnYForColumn(model, view, x, height, cellSize, out var spawnY))
-                        continue;
+                    var emptyCell = new Vector2Int(x, y);
 
-                    var before = movedSet.Count;
+                    if (!IsEmptyActiveCell(model, emptyCell)) continue;
 
-                    SpawnTopOpenCells(stateContext, view, x, height, cellSize, spawnY, movedSet, startWorldByItem);
+                    if (!GridRefillCalc.TryFindVerticalSource(model, emptyCell.x, emptyCell.y, out var sourceCell)) continue;
 
-                    if (movedSet.Count != before)
-                        spawnedAny = true;
+                    if (reservedSources.Contains(sourceCell)) continue;
+
+                    var item = model.GetGridObject(sourceCell);
+                    if (!item || item.IsStationary) continue;
+
+                    plans.Add(new MovePlan(sourceCell, emptyCell, item, MoveKind.Fall));
+                    reservedSources.Add(sourceCell);
                 }
+            }
+        }
 
-                if (spawnedAny)
-                    anyMoved = true;
+        private void MarkSlidePlans(IGridModel model, int width, int height, List<MovePlan> plans)
+        {
+            // Prevent using the same source twice in this pass
+            var reservedSources = new HashSet<Vector2Int>();
+
+            for (int y = height - 1; y >= 0; y--)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    var emptyCell = new Vector2Int(x, y);
+
+                    if (!IsEmptyActiveCell(model, emptyCell)) continue;
+
+                    if (!GridRefillCalc.TryGetBarrierYAbove(model, emptyCell.x, emptyCell.y, out var barrierY)) continue;
+
+                    var topGapY = barrierY + 1;
+                    if (topGapY >= height) continue;
+
+                    // Only the top-most gap under the barrier can be filled by sliding
+                    if (emptyCell.y != topGapY) continue;
+
+                    var topGapCell = new Vector2Int(emptyCell.x, topGapY);
+
+                    if (!IsEmptyActiveCell(model, topGapCell)) continue;
+
+                    var barrierAtTop = IsBarrierAtColumnTop(model, emptyCell.x, barrierY);
+
+                    // Try right then left (keep priority)
+                    if (TryMarkSlideFromSide(model, topGapCell, emptyCell.x + 1, barrierY, barrierAtTop, reservedSources, plans)) continue;
+
+                    TryMarkSlideFromSide(model, topGapCell, emptyCell.x - 1, barrierY, barrierAtTop, reservedSources, plans);
+                }
+            }
+        }
+
+        private bool TryMarkSlideFromSide(IGridModel model, Vector2Int targetCell, int sideX, int sourceY, bool barrierAtTop, HashSet<Vector2Int> reservedSources, List<MovePlan> plans)
+        {
+            if (sideX < 0 || sideX >= model.Width)
+                return false;
+
+            var sideCell = new Vector2Int(sideX, sourceY);
+
+            if (reservedSources.Contains(sideCell))
+                return false;
+
+            if (!model.IsCellActive(sideCell))
+                return false;
+
+            var item = model.GetGridObject(sideCell);
+            if (!item)
+                return false;
+
+            // Prevent sliding freshly spawned items unless the barrier is at the column top
+            if (!barrierAtTop && _spawnedInThisSim.Contains(item))
+                return false;
+
+            if (item.IsStationary)
+                return false;
+
+            // If the side item can fall straight down, do not use it as a donor for sliding.
+            if (GridRefillCalc.CanFallStraightDown(model, sideCell))
+                return false;
+
+            plans.Add(new MovePlan(sideCell, targetCell, item, MoveKind.Slide));
+            reservedSources.Add(sideCell);
+            return true;
+        }
+
+        private static void ApplyPlans(IGridModel model, List<MovePlan> plans, Dictionary<BaseGridObject, List<Vector2Int>> pathByItem)
+        {
+            // Destinations should be unique by construction; still guard to avoid overwrites.
+            var usedDestinations = new HashSet<Vector2Int>(plans.Count);
+
+            for (int i = 0; i < plans.Count; i++)
+            {
+                if (!usedDestinations.Add(plans[i].To))
+                    continue;
+            }
+
+            // First clear all sources, then set destinations (prevents accidental donor reads later in this pass)
+            for (int i = 0; i < plans.Count; i++)
+            {
+                var plan = plans[i];
+
+                var current = model.GetGridObject(plan.From);
+                if (!current || current != plan.Item)
+                    continue;
+
+                model.SetGridObject(plan.From, null);
+            }
+
+            for (int i = 0; i < plans.Count; i++)
+            {
+                var plan = plans[i];
+
+                // Record step into destination
+                AddPathStep(pathByItem, plan.Item, plan.To);
+
+                model.SetGridObject(plan.To, plan.Item);
             }
         }
 
         private bool IsEmptyActiveCell(IGridModel model, Vector2Int cell)
         {
-            if (!model.IsCellActive(cell)) return false;
+            if (!model.IsCellActive(cell))
+                return false;
+
             return !model.GetGridObject(cell);
-        }
-
-        private bool TryFallIntoCell(IGridModel model, Vector2Int emptyCell, HashSet<BaseGridObject> movedSet, Dictionary<BaseGridObject, Vector3> startWorldByItem)
-        {
-            if (!GridRefillCalc.TryFindVerticalSource(model, emptyCell.x, emptyCell.y, out var sourceCell)) return false;
-
-            var item = model.GetGridObject(sourceCell);
-            if (!item || item.IsStationary) return false;
-
-            TrackMovedItem(item, movedSet, startWorldByItem);
-
-            model.SetGridObject(emptyCell, item);
-            model.SetGridObject(sourceCell, null);
-
-            return true;
-        }
-
-        private bool TrySlideIntoTopGap(IGridModel model, Vector2Int emptyCell, int height, HashSet<BaseGridObject> movedSet, Dictionary<BaseGridObject, Vector3> startWorldByItem, Dictionary<BaseGridObject, Vector2Int> slideStepByItem)
-        {
-            if (!GridRefillCalc.TryGetBarrierYAbove(model, emptyCell.x, emptyCell.y, out var barrierY)) return false;
-
-            var topGapY = barrierY + 1;
-            if (topGapY >= height) return false;
-            if (emptyCell.y != topGapY) return false;
-            var topGapCell = new Vector2Int(emptyCell.x, topGapY);
-
-            if (!IsEmptyActiveCell(model, topGapCell)) return false;
-
-            var barrierAtTop = IsBarrierAtColumnTop(model, emptyCell.x, barrierY);
-
-            return TrySlideFromSideIntoCell(model, topGapCell, emptyCell.x + 1, barrierY, barrierAtTop, movedSet, startWorldByItem, slideStepByItem) ||
-                   TrySlideFromSideIntoCell(model, topGapCell, emptyCell.x - 1, barrierY, barrierAtTop, movedSet, startWorldByItem, slideStepByItem);
         }
 
         private bool IsBarrierAtColumnTop(IGridModel model, int x, int barrierY)
         {
+            // If there is any active cell above the barrier, then the barrier is not at the top.
             for (int y = barrierY - 1; y >= 0; y--)
             {
                 var cell = new Vector2Int(x, y);
-                if (!model.IsCellActive(cell)) continue;
-                return false;
-            }
-
-            return true;
-        }
-
-        private bool TrySlideFromSideIntoCell(IGridModel model, Vector2Int targetCell, int sideX, int sourceY, bool barrierAtTop, HashSet<BaseGridObject> movedSet, Dictionary<BaseGridObject, Vector3> startWorldByItem, Dictionary<BaseGridObject, Vector2Int> slideStepByItem)
-        {
-            if (sideX < 0 || sideX >= model.Width) return false;
-
-            var sideCell = new Vector2Int(sideX, sourceY);
-            if (!model.IsCellActive(sideCell)) return false;
-
-            var item = model.GetGridObject(sideCell);
-            if (!item) return false;
-
-            if (!barrierAtTop && _spawnedInThisSim.Contains(item))
-                return false;
-
-            if (item.IsStationary) return false;
-            if (GridRefillCalc.CanFallStraightDown(model, sideCell)) return false;
-
-            TrackMovedItem(item, movedSet, startWorldByItem);
-            model.SetGridObject(targetCell, item);
-            model.SetGridObject(sideCell, null);
-            slideStepByItem[item] = targetCell;
-
-            return true;
-        }
-
-        private void TrackMovedItem(BaseGridObject grid, HashSet<BaseGridObject> movedSet, Dictionary<BaseGridObject, Vector3> startWorldByItem)
-        {
-            movedSet.Add(grid);
-
-            if (!startWorldByItem.ContainsKey(grid))
-                startWorldByItem.Add(grid, grid.transform.position);
-        }
-
-        private void SpawnRefill(GridStateContext stateContext, IGridView view, int width, int height, float cellSize, HashSet<BaseGridObject> movedSet, Dictionary<BaseGridObject, Vector3> startWorldByItem)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                if (!TryGetSpawnYForColumn(stateContext.Model, view, x, height, cellSize, out var spawnY))
+                if (!model.IsCellActive(cell))
                     continue;
 
-                SpawnTopOpenCells(stateContext, view, x, height, cellSize, spawnY, movedSet, startWorldByItem);
+                return false;
             }
+
+            return true;
         }
 
-        private bool TryGetSpawnYForColumn(IGridModel model, IGridView view, int x, int height, float cellSize, out float spawnY)
+        private bool SpawnRefill(GridStateContext stateContext, IGridView view, int width, int height, float cellSize, Dictionary<BaseGridObject, List<Vector2Int>> pathByItem)
         {
-            for (int y = 0; y < height; y++)
+            var spawnedAny = false;
+
+            for (int x = 0; x < width; x++)
             {
-                var cell = new Vector2Int(x, y);
+                if (!GridRefillCalc.TryGetSpawnCell(stateContext.Model, x, height, out var spawnCell))
+                    continue;
 
-                if (!model.IsCellActive(cell)) continue;
-
-                spawnY = view.GridToWorld(cell).y + cellSize * SpawnYOffset;
-                return true;
+                if (SpawnTopOpenCells(stateContext, view, x, height, cellSize, spawnCell, pathByItem))
+                    spawnedAny = true;
             }
 
-            spawnY = 0f;
-            return false;
+            return spawnedAny;
         }
 
-        private void SpawnTopOpenCells(GridStateContext stateContext, IGridView view, int x, int height, float cellSize, float spawnY, HashSet<BaseGridObject> movedSet, Dictionary<BaseGridObject, Vector3> startWorldByItem)
+        private bool SpawnTopOpenCells(GridStateContext stateContext, IGridView view, int x, int height, float cellSize, Vector2Int spawnCell, Dictionary<BaseGridObject, List<Vector2Int>> pathByItem)
         {
             var model = stateContext.Model;
 
             _spawnCells.Clear();
 
+            // Collect consecutive empty active cells from the top until we hit an existing object or a stationary barrier
             for (int y = 0; y < height; y++)
             {
                 var cell = new Vector2Int(x, y);
 
-                if (!model.IsCellActive(cell)) continue;
+                if (!model.IsCellActive(cell))
+                    continue;
 
                 var existing = model.GetGridObject(cell);
 
-                if (existing && existing.IsStationary) break;
+                if (existing && existing.IsStationary)
+                    break;
 
-                if (existing) break;
+                if (existing)
+                    break;
 
                 _spawnCells.Add(cell);
             }
+
+            if (_spawnCells.Count == 0)
+                return false;
+
+            var spawnWorld = view.GridToWorld(spawnCell);
+            var spawnY = spawnWorld.y + cellSize * SpawnYOffset;
 
             for (int i = 0; i < _spawnCells.Count; i++)
             {
@@ -263,109 +324,110 @@ namespace Core.Handlers
                 item.SetSpriteSize(cellSize);
 
                 var targetWorld = view.GridToWorld(cell);
+
+                // Place spawned item above the grid visually
                 item.SetPosition(new Vector3(targetWorld.x, spawnY, targetWorld.z));
 
                 model.SetGridObject(cell, item);
+
                 _spawnedInThisSim.Add(item);
-                TrackMovedItem(item, movedSet, startWorldByItem);
+
+                // Record the first step into the grid
+                AddPathStep(pathByItem, item, cell);
             }
+
+            return true;
         }
 
-        private Dictionary<BaseGridObject, Vector2Int> BuildFinalCellMap(IGridModel model, int width, int height, HashSet<BaseGridObject> movedSet)
+        private void BuildFinalCellRecords(IGridModel model, int width, int height, Dictionary<BaseGridObject, List<Vector2Int>> pathByItem, ItemMoveRecord[,] records)
         {
-            var map = new Dictionary<BaseGridObject, Vector2Int>(movedSet.Count);
-
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
                     var cell = new Vector2Int(x, y);
-                    if (!model.IsCellActive(cell)) continue;
+
+                    if (!model.IsCellActive(cell))
+                        continue;
+
                     var item = model.GetGridObject(cell);
-                    if (!item) continue;
-                    if (!movedSet.Contains(item)) continue;
-                    map.TryAdd(item, cell);
+                    if (!item)
+                        continue;
+
+                    if (!pathByItem.TryGetValue(item, out var path) || path.Count == 0)
+                        continue;
+
+                    records[x, y] = new ItemMoveRecord
+                    {
+                        Path = path.ToArray()
+                    };
                 }
             }
-
-            return map;
         }
 
-        private void PlayMoveAnimations(IGridView view, int width, float cellSize, HashSet<BaseGridObject> movedSet, Dictionary<BaseGridObject, Vector3> startWorldByItem, Dictionary<BaseGridObject, Vector2Int> finalCellByItem, Dictionary<BaseGridObject, Vector2Int> slideStepByItem, List<UniTask> tasks)
+        private void PlayMoveAnimation(IGridModel model, IGridView view, int width, int height, ItemMoveRecord[,] records, List<UniTask> tasks)
         {
-            var movesByColumn = new List<MoveInfo>[width];
-
-            for (int x = 0; x < width; x++)
-                movesByColumn[x] = new List<MoveInfo>();
-
-            foreach (var item in movedSet)
-            {
-                if (!item) continue;
-                if (!finalCellByItem.TryGetValue(item, out var finalCell)) continue;
-
-                if (!startWorldByItem.TryGetValue(item, out var startWorld))
-                    startWorld = item.transform.position;
-
-                var hasSlide = slideStepByItem.TryGetValue(item, out var slideCell);
-
-                movesByColumn[finalCell.x].Add(new MoveInfo
-                {
-                    grid = item,
-                    StartWorld = startWorld,
-                    TargetCell = finalCell,
-                    HasSlide = hasSlide,
-                    SlideTargetCell = slideCell
-                });
-            }
-
-            var swipeDelay = 0f;
-
             for (int x = 0; x < width; x++)
             {
-                movesByColumn[x].Sort((a, b) => b.TargetCell.y.CompareTo(a.TargetCell.y));
-
                 var waveIndex = 0;
 
-                for (int i = 0; i < movesByColumn[x].Count; i++)
+                for (int y = height - 1; y >= 0; y--)
                 {
-                    var info = movesByColumn[x][i];
+                    var record = records[x, y];
 
-                    if (info.HasSlide)
+                    if (record.Path == null || record.Path.Length == 0)
+                        continue;
+
+                    var cell = new Vector2Int(x, y);
+                    var item = model.GetGridObject(cell);
+                    if (!item)
+                        continue;
+
+                    var delay = waveIndex * _refillSettings.ShiftDelayMultiplier;
+                    waveIndex++;
+
+                    if (HasHorizontalStep(record.Path))
                     {
-                        var slideWorld = view.GridToWorld(info.SlideTargetCell);
-                        var finalWorld = view.GridToWorld(info.TargetCell);
-
-                        var slideDurationMultiplier = 1f + 2f * _shiftDurationMultiplier;
-                        var fallDurationMultiplier = CalcFallDurMul(slideWorld.y, finalWorld.y, cellSize);
-
-                        var seq = DOTween.Sequence();
-                        seq.Append(info.grid.ItemAnimation.Shift(slideWorld, slideDurationMultiplier, swipeDelay));
-                        var fallTween = info.grid.ItemAnimation.Shift(finalWorld, fallDurationMultiplier, 0f);
-                        seq.Append(fallTween);
-
-                        swipeDelay += fallTween.Duration() * 0.75f;
-                        tasks.Add(seq.AsyncWaitForCompletion().AsUniTask());
+                        delay = 0f;
                     }
-                    else
-                    {
-                        var finalWorld = view.GridToWorld(info.TargetCell);
 
-                        var fallDurationMultiplier = CalcFallDurMul(info.StartWorld.y, finalWorld.y, cellSize);
+                    var worldPoints = new Vector3[record.Path.Length];
 
-                        var delay = waveIndex * _shiftDelayMultiplier;
-                        waveIndex++;
+                    for (int i = 0; i < record.Path.Length; i++)
+                        worldPoints[i] = view.GridToWorld(record.Path[i]);
 
-                        var tween = info.grid.ItemAnimation.Shift(finalWorld, fallDurationMultiplier, delay);
-                        tasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
-                    }
+                    var tween = item.ItemAnimation.ShiftPath(worldPoints, _refillSettings.ShiftDurationMultiplier, delay);
+                    if (tween == null) continue;
+
+                    tasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
                 }
             }
         }
 
-        private float CalcFallDurMul(float fromY, float toY, float cellSize)
+        private static bool HasHorizontalStep(Vector2Int[] path)
         {
-            var dist = Mathf.Abs(toY - fromY) / cellSize;
-            return 1f + dist * _shiftDurationMultiplier;
+            for (int i = 1; i < path.Length; i++)
+            {
+                if (path[i].x != path[i - 1].x)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static void AddPathStep(Dictionary<BaseGridObject, List<Vector2Int>> pathByItem, BaseGridObject item, Vector2Int step)
+        {
+            if (!pathByItem.TryGetValue(item, out var list))
+            {
+                list = new List<Vector2Int>(8);
+                pathByItem.Add(item, list);
+            }
+
+            // Avoid duplicating the same cell consecutively
+            if (list.Count > 0 && list[list.Count - 1] == step)
+                return;
+
+            list.Add(step);
         }
     }
 }
