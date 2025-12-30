@@ -11,22 +11,18 @@ namespace Core.Handlers
 {
     public sealed class FallDownRefillStrategy : IRefillStrategy
     {
-        private float _startDelay;
-        private float _shiftDurationMultiplier;
-        private float _shiftDelayMultiplier;
+        private RefillSettings _refillSettings;
         public bool CanRefill(IGridModel model) => !GridRefillCalc.HasStationaryAndBlocking(model);
         
         public void SetRefillSettings(RefillSettings refillSettings)
         {
-            _startDelay = refillSettings.RefillStartDelay;
-            _shiftDurationMultiplier = refillSettings.ShiftDurationMultiplier;
-            _shiftDelayMultiplier =  refillSettings.ShiftDelayMultiplier;
+            _refillSettings = refillSettings;
         }
 
         public async UniTask Execute(GridStateContext context, List<UniTask> tasks)
         {
             EditorLogger.Log("FALL DOWN STRATEGY");
-            await UniTask.WaitForSeconds(_startDelay);
+            await UniTask.WaitForSeconds(_refillSettings.RefillStartDelay);
             var model = context.Model;
             var view = context.View;
 
@@ -43,7 +39,7 @@ namespace Core.Handlers
 
                 if (GridRefillCalc.TryGetSpawnCell(model, x, model.Height, out var spawnCell))
                 {
-                    var spawnY = view.GridToWorld(spawnCell).y + cellSize * 1.25f;
+                    var spawnY = view.GridToWorld(spawnCell).y + cellSize;
                     RefillColumn(context, x, height, cellSize, spawnY, ref wave, tasks);
                 }
             }
@@ -78,8 +74,8 @@ namespace Core.Handlers
                 model.SetGridObject(src, null);
 
                 var dist = Mathf.Abs(finalWorld.y - startWorld.y) / cellSize;
-                var durMul = 1f + dist * _shiftDurationMultiplier;
-                var delay = wave * _shiftDelayMultiplier;
+                var durMul = 1f + dist * _refillSettings.ShiftDurationMultiplier;
+                var delay = wave * _refillSettings.ShiftDelayMultiplier;
 
                 var tween = obj.ItemAnimation.Shift(finalWorld, durMul, delay);
                 tasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
@@ -114,8 +110,8 @@ namespace Core.Handlers
                 var finalWorld = target;
 
                 var dist = Mathf.Abs(finalWorld.y - start.y) / cellSize;
-                var durMul = 1f + dist * _shiftDurationMultiplier;
-                var delay = wave * _shiftDelayMultiplier;
+                var durMul = 1f + dist * _refillSettings.ShiftDurationMultiplier;
+                var delay = wave * _refillSettings.ShiftDelayMultiplier;
 
                 var tween = item.ItemAnimation.Shift(finalWorld, durMul, delay);
                 tasks.Add(tween.AsyncWaitForCompletion().AsUniTask());

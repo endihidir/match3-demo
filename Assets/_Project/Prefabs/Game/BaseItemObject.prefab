@@ -48,9 +48,31 @@ MonoBehaviour:
   <UseUnscaledTime>k__BackingField: 1
   <ShakeSettingsConfig>k__BackingField: {fileID: 11400000, guid: 77a7af5d0a5a8a64ab14b70f909cff9c,
     type: 2}
-  <ShiftSettingsConfig>k__BackingField: {fileID: 11400000, guid: 384fd099bf9dca546bf66b9403c6873e,
-    type: 2}
   <ItemHolder>k__BackingField: {fileID: 3218266720199594933}
+  <Curve>k__BackingField:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: -0.0019032239
+      outSlope: -0.0019032239
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.061633285
+    - serializedVersion: 3
+      time: 1
+      value: 0.2
+      inSlope: -0.0034780393
+      outSlope: -0.0034780393
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.06009239
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &4759215270928394382
 GameObject:
   m_ObjectHideFlags: 0
