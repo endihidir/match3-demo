@@ -7,7 +7,6 @@ namespace Core.Item
     public class ItemAnimation : MonoBehaviour
     {
         [field: SerializeField] private bool UseUnscaledTime { get; set; }= true;
-        [field: SerializeField] private ShakeSettingsConfig ShakeSettingsConfig { get; set; }
         [field: SerializeField] private Transform ItemHolder { get; set; }
         public bool IsShiftInProgress => _shiftTween.IsActive();
         
@@ -15,12 +14,10 @@ namespace Core.Item
 
         public void Shake()
         {
-            var shakeSettings = ShakeSettingsConfig;
-
             _shakeTween?.Kill(true);
             
-            var duration = shakeSettings.duration / 3f;
-            var rotAngle = shakeSettings.angle;
+            var duration = 0.25f / 3f;
+            var rotAngle = 10;
 
             _shakeTween = DOTween.Sequence()
                 .Append(ItemHolder.transform.DORotate(Vector3.forward * rotAngle, duration))
@@ -35,7 +32,7 @@ namespace Core.Item
             _shiftTween?.Kill();
             
             _shiftTween = DOTween.Sequence()
-                .Append(transform.DOMove(worldPos, 0.15f * durationMultiplier).SetEase(Ease.InOutQuad).SetDelay(0.05f + delay))
+                .Append(transform.DOMove(worldPos, 0.15f * durationMultiplier).SetEase(Ease.InOutQuad).SetDelay(delay))
                 .SetUpdate(UseUnscaledTime);
 
             return _shiftTween;
@@ -47,7 +44,7 @@ namespace Core.Item
 
             var sequence = DOTween.Sequence()
                 .SetUpdate(UseUnscaledTime)
-                .SetDelay(0.05f + delay);
+                .SetDelay(delay);
 
             var current = transform.position;
 
