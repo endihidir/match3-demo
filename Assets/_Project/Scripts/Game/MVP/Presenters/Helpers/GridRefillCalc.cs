@@ -1,3 +1,4 @@
+using Core.Item;
 using Core.Models;
 using UnityEngine;
 
@@ -11,19 +12,16 @@ namespace Core.Utils
             {
                 for (int x = 0; x < model.Width; x++)
                 {
-                    var coord = new Vector2Int(x, y);
-
-                    var obj = model.GetGridObject(coord);
-                    if (!obj || !obj.IsStationary) continue;
+                    if (!TryGetActiveObject(model, x, y, out var obj)) continue;
+                    if (!obj.IsStationary) continue;
 
                     // Stationary at bottom cannot block anything
                     if (y >= model.Height - 1) continue;
 
                     int gapY = y + 1;
-                    var gapCoord = new Vector2Int(x, gapY);
 
                     // If the cell directly below is not active, there is no "blocked gap" to fill
-                    if (!model.IsCellActive(gapCoord)) continue;
+                    if (!model.IsCellActive(new Vector2Int(x, gapY))) continue;
 
                     // Strategy is only meaningful if at least one side column can structurally donate at row y
                     if (CanColumnStructurallyDonateAtRow(model, x - 1, y) ||
@@ -42,10 +40,8 @@ namespace Core.Utils
             // Out of bounds
             if (donorX < 0 || donorX >= model.Width) return false;
 
-            var donorCoordAtRow = new Vector2Int(donorX, rowY);
-
             // Donor cell at the stationary row must exist (active)
-            if (!model.IsCellActive(donorCoordAtRow)) return false;
+            if (!model.IsCellActive(new Vector2Int(donorX, rowY))) return false;
 
             // Donor column must be structurally continuous (no inactive holes) from top to rowY
             // This encodes "it can be filled up to the stationary row" regardless of current occupancy.
@@ -64,6 +60,7 @@ namespace Core.Utils
                 for (int x = 0; x < model.Width; x++)
                 {
                     var cell = new Vector2Int(x, y);
+
                     if (!model.IsCellActive(cell)) continue;
                     if (!model.GetGridObject(cell)) return true;
                 }
@@ -110,12 +107,11 @@ namespace Core.Utils
             // Stationary blocks stop the scan.
             for (int y = destY - 1; y >= 0; y--)
             {
-                var coord = new Vector2Int(x, y);
-                if (!model.IsCellActive(coord)) continue;
-                var obj = model.GetGridObject(coord);
-                if (!obj) continue;
+                if (!TryGetActiveObject(model, x, y, out var obj)) continue;
+
                 if (obj.IsStationary) break;
-                sourceCoord = coord;
+
+                sourceCoord = new Vector2Int(x, y);
                 return true;
             }
 
@@ -128,12 +124,9 @@ namespace Core.Utils
             // Scan upward (decreasing Y) for the first stationary object.
             for (int y = destY - 1; y >= 0; y--)
             {
-                var coord = new Vector2Int(x, y);
+                if (!TryGetActiveObject(model, x, y, out var obj)) continue;
 
-                if (!model.IsCellActive(coord)) continue;
-
-                var obj = model.GetGridObject(coord);
-                if (obj && obj.IsStationary)
+                if (obj.IsStationary)
                 {
                     barrierY = y;
                     return true;
@@ -169,13 +162,26 @@ namespace Core.Utils
 
             for (int y = startY; y >= 0; y--)
             {
-                var coord = new Vector2Int(x, y);
-                if (!model.IsCellActive(coord)) continue;
-                var obj = model.GetGridObject(coord);
-                if (obj) return y;
+                if (!TryGetActiveObject(model, x, y, out _)) continue;
+                return y;
             }
 
             return -1;
+        }
+
+        private static bool TryGetActiveObject(IGridModel model, int x, int y, out BaseGridObject obj)
+        {
+            obj = null;
+
+            if (!model.IsInRange(x, y)) return false;
+
+            var coord = new Vector2Int(x, y);
+
+            if (!model.IsCellActive(coord)) return false;
+
+            obj = model.GetGridObject(coord);
+            
+            return obj;
         }
     }
 }
