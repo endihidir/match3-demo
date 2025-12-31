@@ -11,19 +11,19 @@ namespace Core.Utils
             {
                 for (int x = 0; x < model.Width; x++)
                 {
-                    var obj = model.GetGridObjectFast(x, y);
-                    if (!obj || !obj.IsStationary)
-                        continue;
+                    var coord = new Vector2Int(x, y);
+
+                    var obj = model.GetGridObject(coord);
+                    if (!obj || !obj.IsStationary) continue;
 
                     // Stationary at bottom cannot block anything
-                    if (y >= model.Height - 1)
-                        continue;
+                    if (y >= model.Height - 1) continue;
 
                     int gapY = y + 1;
+                    var gapCoord = new Vector2Int(x, gapY);
 
                     // If the cell directly below is not active, there is no "blocked gap" to fill
-                    if (!model.IsCellActiveFast(x, gapY))
-                        continue;
+                    if (!model.IsCellActive(gapCoord)) continue;
 
                     // Strategy is only meaningful if at least one side column can structurally donate at row y
                     if (CanColumnStructurallyDonateAtRow(model, x - 1, y) ||
@@ -37,27 +37,26 @@ namespace Core.Utils
             return false;
         }
 
-        public static bool CanColumnStructurallyDonateAtRow(IGridModel model, int donorX, int rowY)
+        private static bool CanColumnStructurallyDonateAtRow(IGridModel model, int donorX, int rowY)
         {
             // Out of bounds
-            if (donorX < 0 || donorX >= model.Width)
-                return false;
+            if (donorX < 0 || donorX >= model.Width) return false;
+
+            var donorCoordAtRow = new Vector2Int(donorX, rowY);
 
             // Donor cell at the stationary row must exist (active)
-            if (!model.IsCellActiveFast(donorX, rowY))
-                return false;
+            if (!model.IsCellActive(donorCoordAtRow)) return false;
 
             // Donor column must be structurally continuous (no inactive holes) from top to rowY
             // This encodes "it can be filled up to the stationary row" regardless of current occupancy.
             for (int y = 0; y <= rowY; y++)
             {
-                if (!model.IsCellActiveFast(donorX, y))
-                    return false;
+                if (!model.IsCellActive(new Vector2Int(donorX, y))) return false;
             }
 
             return true;
         }
-        
+
         public static bool HasAnyEmptyActiveCell(IGridModel model)
         {
             for (int y = 0; y < model.Height; y++)
@@ -72,7 +71,7 @@ namespace Core.Utils
 
             return false;
         }
-        
+
         public static bool IsEmptyActiveCell(IGridModel model, Vector2Int cell)
         {
             if (!model.IsCellActive(cell)) return false;
@@ -85,7 +84,6 @@ namespace Core.Utils
             {
                 var cell = new Vector2Int(x, y);
                 if (!model.IsCellActive(cell)) continue;
-
                 return false;
             }
 
@@ -97,13 +95,13 @@ namespace Core.Utils
             // Falling direction is +Y (Y increases downward)
             int belowY = pos.y + 1;
 
-            if (belowY < 0 || belowY >= model.Height)
-                return false;
+            if (belowY < 0 || belowY >= model.Height) return false;
 
-            if (!model.IsCellActiveFast(pos.x, belowY))
-                return false;
+            var belowCoord = new Vector2Int(pos.x, belowY);
 
-            return !model.GetGridObjectFast(pos.x, belowY);
+            if (!model.IsCellActive(belowCoord)) return false;
+
+            return !model.GetGridObject(belowCoord);
         }
 
         public static bool TryFindVerticalSource(IGridModel model, int x, int destY, out Vector2Int sourceCoord)
@@ -112,17 +110,12 @@ namespace Core.Utils
             // Stationary blocks stop the scan.
             for (int y = destY - 1; y >= 0; y--)
             {
-                if (!model.IsCellActiveFast(x, y))
-                    continue;
-
-                var obj = model.GetGridObjectFast(x, y);
-                if (!obj)
-                    continue;
-
-                if (obj.IsStationary)
-                    break;
-
-                sourceCoord = new Vector2Int(x, y);
+                var coord = new Vector2Int(x, y);
+                if (!model.IsCellActive(coord)) continue;
+                var obj = model.GetGridObject(coord);
+                if (!obj) continue;
+                if (obj.IsStationary) break;
+                sourceCoord = coord;
                 return true;
             }
 
@@ -135,9 +128,11 @@ namespace Core.Utils
             // Scan upward (decreasing Y) for the first stationary object.
             for (int y = destY - 1; y >= 0; y--)
             {
-                if (!model.IsCellActiveFast(x, y)) continue;
+                var coord = new Vector2Int(x, y);
 
-                var obj = model.GetGridObjectFast(x, y);
+                if (!model.IsCellActive(coord)) continue;
+
+                var obj = model.GetGridObject(coord);
                 if (obj && obj.IsStationary)
                 {
                     barrierY = y;
@@ -148,37 +143,36 @@ namespace Core.Utils
             barrierY = -1;
             return false;
         }
-        
+
         public static bool TryGetSpawnCell(IGridModel model, int x, int height, out Vector2Int spawnCell)
         {
             // Scan from top to bottom (y = 0 is top)
             for (int y = 0; y < height; y++)
             {
-                if (!model.IsCellActiveFast(x, y))
+                var coord = new Vector2Int(x, y);
+
+                if (!model.IsCellActive(coord))
                     continue;
 
-                spawnCell = new Vector2Int(x, y);
+                spawnCell = coord;
                 return true;
             }
 
             spawnCell = default;
             return false;
         }
-        
+
         public static int FindFallSourceY(IGridModel model, int x, int startY)
         {
             // Scan upward (decreasing Y) for the first active cell that has an object.
-            if (x < 0 || x >= model.Width)
-                return -1;
+            if (x < 0 || x >= model.Width) return -1;
 
             for (int y = startY; y >= 0; y--)
             {
-                if (!model.IsCellActiveFast(x, y))
-                    continue;
-
-                var obj = model.GetGridObjectFast(x, y);
-                if (obj)
-                    return y;
+                var coord = new Vector2Int(x, y);
+                if (!model.IsCellActive(coord)) continue;
+                var obj = model.GetGridObject(coord);
+                if (obj) return y;
             }
 
             return -1;

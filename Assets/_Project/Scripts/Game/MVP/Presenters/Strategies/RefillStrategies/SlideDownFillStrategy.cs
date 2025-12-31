@@ -45,8 +45,6 @@ namespace Core.Handlers
             {
                 var movedAny = MarkAndApplyMoves(context, width, height, pathByItem);
                 var spawnedAny = SpawnRefill(context, view, width, height, cellSize, pathByItem);
-                
-                if (!GridRefillCalc.HasAnyEmptyActiveCell(model)) break;
 
                 if (!movedAny && !spawnedAny) break;
             }

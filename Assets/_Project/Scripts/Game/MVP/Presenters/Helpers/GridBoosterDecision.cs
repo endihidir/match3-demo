@@ -112,10 +112,10 @@ namespace Core.Utils
 
                 if (!matchMask[c.x, c.y] || !matchMask[b.x, b.y] || !matchMask[d.x, d.y] || !matchMask[e.x, e.y]) continue;
 
-                if(model.GetGridObjectFast(c.x, c.y).TypeId != id) continue;
-                if(model.GetGridObjectFast(b.x, b.y).TypeId != id) continue;
-                if(model.GetGridObjectFast(d.x, d.y).TypeId != id) continue;
-                if(model.GetGridObjectFast(e.x, e.y).TypeId != id) continue;
+                if(model.GetGridObject(c.x, c.y).TypeId != id) continue;
+                if(model.GetGridObject(b.x, b.y).TypeId != id) continue;
+                if(model.GetGridObject(d.x, d.y).TypeId != id) continue;
+                if(model.GetGridObject(e.x, e.y).TypeId != id) continue;
                 return true;
             }
 
