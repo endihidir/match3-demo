@@ -10,12 +10,12 @@ namespace Core.Utils
             if (!model.IsInRange(x, y)) return false;
             if (grid[x, y].TypeId != id) return false;
 
-            var left = CountSameInGrid(model, grid, x, y, id, -1, 0);
-            var right = CountSameInGrid(model, grid, x, y, id, 1, 0);
+            var left = CountSame(model, grid, x, y, id, -1, 0);
+            var right = CountSame(model, grid, x, y, id, 1, 0);
             if (1 + left + right >= 3) return true;
 
-            var down = CountSameInGrid(model, grid, x, y, id, 0, -1);
-            var up = CountSameInGrid(model, grid, x, y, id, 0, 1);
+            var down = CountSame(model, grid, x, y, id, 0, -1);
+            var up = CountSame(model, grid, x, y, id, 0, 1);
             if (1 + down + up >= 3) return true;
 
             if (Has2X2SquareAt(model, grid, x, y, id)) return true;
@@ -44,30 +44,7 @@ namespace Core.Utils
             return false;
         }
 
-        private static int CountSameInGrid(IGridModel model, GridObjectType[,] grid, int x, int y, int id, int dx, int dy)
-        {
-            var count = 0;
-
-            var cx = x + dx;
-            var cy = y + dy;
-
-            while (model.IsInRange(cx, cy))
-            {
-                var data = grid[cx, cy];
-                
-                if (!IsRegularItem(data)) break;
-
-                if (data.TypeId != id) break;
-
-                count++;
-                cx += dx;
-                cy += dy;
-            }
-
-            return count;
-        }
-
-        private static bool Has2X2SquareAt(IGridModel model, GridObjectType[,] grid, int x, int y, int id)
+        public static bool Has2X2SquareAt(IGridModel model, GridObjectType[,] grid, int x, int y, int id)
         {
             if (x < 0 || y < 0) return false;
             if (x + 1 >= model.Width || y + 1 >= model.Height) return false;
@@ -77,13 +54,7 @@ namespace Core.Utils
                    && grid[x, y + 1].TypeId == id
                    && grid[x + 1, y + 1].TypeId == id;
         }
-
-        public static void GetLineLengthsAt(IGridModel gridModel, int x, int y, int id, bool assumeCenterIsId, out int horizontal, out int vertical)
-        {
-            var grid = gridModel.BuildTypeDataGrid();
-            GetLineLengthsAt(gridModel, grid, x, y, id, assumeCenterIsId, out horizontal, out vertical);
-        }
-
+        
         public static void GetLineLengthsAt(IGridModel gridModel, GridObjectType[,] grid, int x, int y, int id, bool assumeCenterIsId, out int horizontal, out int vertical)
         {
             if (!IsCenterOk(grid, x, y, id, assumeCenterIsId))
@@ -130,6 +101,6 @@ namespace Core.Utils
             return count;
         }
 
-        private static bool IsRegularItem(GridObjectType data) => data is { ItemKind: GridItemKind.Regular, TypeId: > 0 };
+        public static bool IsRegularItem(GridObjectType data) => data is { ItemKind: GridItemKind.Regular, TypeId: > 0 };
     }
 }

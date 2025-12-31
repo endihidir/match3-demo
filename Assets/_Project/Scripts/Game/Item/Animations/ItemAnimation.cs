@@ -1,5 +1,4 @@
 using Core.Config;
-using Core.Utils;
 using DG.Tweening;
 using UnityEngine;
 
