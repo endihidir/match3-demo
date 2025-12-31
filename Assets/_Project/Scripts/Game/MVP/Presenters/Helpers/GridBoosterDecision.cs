@@ -63,11 +63,11 @@ namespace Core.Utils
             return SelectMergeCenter(group);
         }
 
-        public static BoosterType? DecideBoosterTypeFromGroup(IGridModel model, GridObjectType[,] grid, bool[,] matchMask, List<Vector2Int> group, int id)
+        public static BoosterType? DecideBoosterTypeFromGroup(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int id)
         {
             GetGroupLineLengths(group, out var hLen, out var vLen, out var isCross);
 
-            var hasSquare = Has2X2SquareInGroup(model, grid, matchMask, group, id);
+            var hasSquare = Has2X2SquareInGroup(model, matchMask, group, id);
 
             if (hLen >= 5 || vLen >= 5)
             {
@@ -94,7 +94,7 @@ namespace Core.Utils
             return null;
         }
 
-        private static bool Has2X2SquareInGroup(IGridModel model, GridObjectType[,] grid, bool[,] matchMask, List<Vector2Int> group, int id)
+        private static bool Has2X2SquareInGroup(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int id)
         {
             var set = new HashSet<Vector2Int>(group);
 
@@ -112,11 +112,10 @@ namespace Core.Utils
 
                 if (!matchMask[c.x, c.y] || !matchMask[b.x, b.y] || !matchMask[d.x, d.y] || !matchMask[e.x, e.y]) continue;
 
-                if (grid[c.x, c.y].TypeId != id) continue;
-                if (grid[b.x, b.y].TypeId != id) continue;
-                if (grid[d.x, d.y].TypeId != id) continue;
-                if (grid[e.x, e.y].TypeId != id) continue;
-
+                if(model.GetGridObjectFast(c.x, c.y).TypeId != id) continue;
+                if(model.GetGridObjectFast(b.x, b.y).TypeId != id) continue;
+                if(model.GetGridObjectFast(d.x, d.y).TypeId != id) continue;
+                if(model.GetGridObjectFast(e.x, e.y).TypeId != id) continue;
                 return true;
             }
 

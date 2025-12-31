@@ -176,8 +176,7 @@ namespace Core.Utils
             // Scan upward (decreasing Y) for the first stationary object.
             for (int y = destY - 1; y >= 0; y--)
             {
-                if (!model.IsCellActiveFast(x, y))
-                    continue;
+                if (!model.IsCellActiveFast(x, y)) continue;
 
                 var obj = model.GetGridObjectFast(x, y);
                 if (obj && obj.IsStationary)
