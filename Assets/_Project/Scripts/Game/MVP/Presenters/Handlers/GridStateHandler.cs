@@ -49,6 +49,7 @@ namespace Core.Handlers
 
             _stateMachine.AddTransition(_idleState, _applyInputState, () => _moveQueue.Count > 0)
                          .AddTransition(_idleState, _matchResolveState, () => _context.RefillResolveRequested && !_context.RefillInProgress)
+                         .AddTransition(_idleState, _refillState, () => GridRefillCalc.HasAnyEmptyActiveCell(_context.Model))
                          .AddTransition(_applyInputState, _boosterResolveState, () => _applyInputState.IsExitReady)
                          .AddTransition(_applyInputState, _idleState, () => _applyInputState.IsExitReady)
                          .AddTransition(_boosterResolveState, _refillState, () => _boosterResolveState.IsExitReady && _context.ResolvedAnyBooster)

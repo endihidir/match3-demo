@@ -8,6 +8,7 @@ namespace Core.Models
         int Width { get; }
         int Height { get; }
         Vector2Int GridSize { get; }
+
         bool[,] ActiveCells { get; }
         T[,] GridArray { get; }
 
@@ -17,19 +18,20 @@ namespace Core.Models
 
         IBaseGridModel<T> Initialize(T[,] value, int width, int height, out bool[,] activeCells);
 
+        // Grid access (safe)
         bool TryGetGridObject(Vector2Int coord, out T gridObject);
         T GetGridObject(Vector2Int coord);
-        T GetGridObjectFast(int x, int y);
-        void SetGridObject(Vector2Int coord, T item);
+        T GetGridObject(int x, int y) => GetGridObject(new Vector2Int(x, y));
+        void SetGridObject(Vector2Int coord, T value);
 
-        bool IsCellActive(Vector2Int coord);
-        bool IsCellActiveFast(int x, int y);
-        bool IsInRange(Vector2Int coord);
-        bool IsInRange(int x, int y) => IsInRange(new Vector2Int(x, y));
-
+        // Neighbour queries (safe)
         bool TryGetNeighbour(Vector2Int sourceCoord, Vector2Int direction, out T neighbour);
-
         bool TryGetNeighbours(Vector2Int sourceCoord, out T[] neighbours);
         bool TryGetNeighboursNonAlloc(Vector2Int sourceCoord, Span<T> resultBuffer, out int count);
+
+        // Cell state
+        bool IsCellActive(Vector2Int coord);
+        bool IsInRange(Vector2Int coord);
+        bool IsInRange(int x, int y) => IsInRange(new Vector2Int(x, y));
     }
 }

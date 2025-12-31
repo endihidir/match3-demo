@@ -13,8 +13,8 @@ namespace Core.Models
         {
             if (!IsInRange(sourceCoord) || !IsInRange(targetCoord)) return;
 
-            var objA = GetGridObjectFast(sourceCoord.x, sourceCoord.y);
-            var objB = GetGridObjectFast(targetCoord.x, targetCoord.y);
+            var objA = GetGridObject(sourceCoord);
+            var objB = GetGridObject(targetCoord);
 
             SetInternal(sourceCoord, objB);
             SetInternal(targetCoord, objA);
@@ -28,7 +28,7 @@ namespace Core.Models
             {
                 for (int x = 0; x < Width; x++)
                 {
-                    var obj = GetGridObjectFast(x, y);
+                    var obj = GetGridObject(new Vector2Int(x, y));
                     grid[x, y] = obj ? obj.ObjectType : default;
                 }
             }

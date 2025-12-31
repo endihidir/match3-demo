@@ -37,8 +37,7 @@ namespace Core.Utils
                     var data = grid[x, y];
                     if (!IsRegularItem(data)) continue;
 
-                    if (IsCellMatched(model, grid, x, y, data.TypeId))
-                        return true;
+                    if (IsCellMatched(model, grid, x, y, data.TypeId)) return true;
                 }
             }
 
@@ -54,7 +53,12 @@ namespace Core.Utils
 
             while (model.IsInRange(cx, cy))
             {
-                if (grid[cx, cy].TypeId != id) break;
+                var data = grid[cx, cy];
+                
+                if (!IsRegularItem(data)) break;
+
+                if (data.TypeId != id) break;
+
                 count++;
                 cx += dx;
                 cy += dy;

@@ -47,7 +47,7 @@ namespace Core.Handlers
                     if (!matchMask[x, y]) continue;
                     if (visited[x, y]) continue;
 
-                    var obj = model.GetGridObjectFast(x, y);
+                    var obj = model.GetGridObject(x, y);
                     if (!obj) continue;
                     var id = obj.TypeId;
                     if (id <= 0) continue;
