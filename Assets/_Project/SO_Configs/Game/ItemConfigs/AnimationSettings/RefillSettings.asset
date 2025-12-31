@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: RefillSettings
   m_EditorClassIdentifier: 
   <RefillStartDelay>k__BackingField: 0
-  <ShiftDurationMultiplier>k__BackingField: 0.15
-  <ShiftDelayMultiplier>k__BackingField: 0.05
+  <ShiftDurationMultiplier>k__BackingField: 0.1
+  <ShiftDelayMultiplier>k__BackingField: 0.01
