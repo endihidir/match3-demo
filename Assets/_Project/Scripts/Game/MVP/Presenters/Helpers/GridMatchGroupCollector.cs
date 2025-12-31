@@ -7,8 +7,9 @@ namespace Core.Utils
 {
     public static class GridMatchGroupCollector
     {
-        public static List<Vector2Int> CollectGroupFromMask(bool[,] matchMask, bool[,] visited, IGridModel model, GridObjectType[,] grid, Vector2Int coord, int id)
+        public static List<Vector2Int> CollectGroupFromMask(bool[,] matchMask, bool[,] visited, IGridModel model, Vector2Int coord, int id)
         {
+            var grid = model.BuildTypeDataGrid();
             var group = new List<Vector2Int>(16);
 
             if (!model.IsInRange(coord)) return group;

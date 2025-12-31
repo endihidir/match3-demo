@@ -37,8 +37,7 @@ namespace Core.Handlers
             var model = Context.Model;
             var width = model.Width;
             var height = model.Height;
-
-            var grid = model.BuildTypeDataGrid();
+            
             var visited = new bool[width, height];
 
             for (int y = 0; y < height; y++)
@@ -48,21 +47,23 @@ namespace Core.Handlers
                     if (!matchMask[x, y]) continue;
                     if (visited[x, y]) continue;
 
-                    var id = grid[x, y].TypeId;
+                    var obj = model.GetGridObjectFast(x, y);
+                    if (!obj) continue;
+                    var id = obj.TypeId;
                     if (id <= 0) continue;
 
                     var coord = new Vector2Int(x, y);
-                    var group = GridMatchGroupCollector.CollectGroupFromMask(matchMask, visited, model, grid, coord, id);
+                    var group = GridMatchGroupCollector.CollectGroupFromMask(matchMask, visited, model, coord, id);
                     if (group == null || group.Count == 0) continue;
 
-                    await ResolveGroup(model, grid, matchMask, group, id);
+                    await ResolveGroup(model, matchMask, group, id);
                 }
             }
         }
 
-        private async UniTask ResolveGroup(IGridModel model, GridObjectType[,] grid, bool[,] matchMask, List<Vector2Int> group, int id)
+        private async UniTask ResolveGroup(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int id)
         {
-            var boosterType = GridBoosterDecision.DecideBoosterTypeFromGroup(model, grid, matchMask, group, id);
+            var boosterType = GridBoosterDecision.DecideBoosterTypeFromGroup(model, matchMask, group, id);
 
             if (!boosterType.HasValue)
             {

@@ -21,7 +21,6 @@ namespace Core.Handlers
 
         public async UniTask Execute(GridStateContext context, List<UniTask> tasks)
         {
-            await UniTask.WaitForSeconds(_refillSettings.RefillStartDelay);
             var model = context.Model;
             var view = context.View;
 

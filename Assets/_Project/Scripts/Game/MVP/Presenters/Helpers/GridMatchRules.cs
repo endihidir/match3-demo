@@ -10,9 +10,6 @@ namespace Core.Utils
             if (!model.IsInRange(x, y)) return false;
             if (grid[x, y].TypeId != id) return false;
 
-            var w = model.Width;
-            var h = model.Height;
-
             var left = CountSameInGrid(model, grid, x, y, id, -1, 0);
             var right = CountSameInGrid(model, grid, x, y, id, 1, 0);
             if (1 + left + right >= 3) return true;

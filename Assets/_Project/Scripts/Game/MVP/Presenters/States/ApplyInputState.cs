@@ -81,16 +81,16 @@ namespace Core.Handlers
             }
             
             if (!GridMatchDetectUtil.IsRegularItem(sourceObj.ObjectType) || !GridMatchDetectUtil.IsRegularItem(targetObj.ObjectType) ||
-                !AreCellsMatched(sourceCoord, targetCoord, sourceObj.ObjectType.TypeId, targetObj.ObjectType.TypeId))
+                !IsCellsMatched(sourceCoord, targetCoord, sourceObj.ObjectType.TypeId, targetObj.ObjectType.TypeId))
             {
-                PlayPingPong(sourceObj, targetObj, sourceCoord, targetCoord).Forget();
+                PlaySwapAndBack(sourceObj, targetObj, sourceCoord, targetCoord).Forget();
                 return;
             }
             
             PlaySwapAndCommit(sourceObj, targetObj, sourceCoord, targetCoord, true).Forget();
         }
 
-        private async UniTask PlayPingPong(BaseGridObject sourceObj, BaseGridObject targetObj, Vector2Int sourceCoord, Vector2Int targetCoord)
+        private async UniTask PlaySwapAndBack(BaseGridObject sourceObj, BaseGridObject targetObj, Vector2Int sourceCoord, Vector2Int targetCoord)
         {
             var tasks = new List<UniTask>();
 
@@ -194,7 +194,7 @@ namespace Core.Handlers
             Context.PendingBoosterActions.Add(new PendingBoosterAction(originCoord, configData.BoosterAction));
         }
         
-        private bool AreCellsMatched(Vector2Int coordA, Vector2Int coordB, int typeA, int typeB)
+        private bool IsCellsMatched(Vector2Int coordA, Vector2Int coordB, int typeA, int typeB)
         {
             var model = Context.Model;
 

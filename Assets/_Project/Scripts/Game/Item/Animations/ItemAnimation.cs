@@ -36,17 +36,19 @@ namespace Core.Item
             _shiftTween?.Kill();
             
             _shiftTween = DOTween.Sequence()
-                .Append(transform.DOMove(worldPos, 0.15f * durationMultiplier).SetEase(Ease.InOutQuad).SetDelay(delay))
+                .Append(transform.DOMove(worldPos, 0.15f * durationMultiplier).SetEase(Ease.InOutQuad).SetDelay(0.05f + delay))
                 .SetUpdate(UseUnscaledTime);
 
             return _shiftTween;
         }
         
-        public Tween ShiftPath(Vector3[] worldPoints, float durationMultiplier, float delay = 0f)
+        public Tween ShiftPath(Vector3[] worldPoints, float durationMultiplier = 1f, float delay = 0f)
         {
-            _shiftTween?.Kill(true);
+            _shiftTween?.Kill();
 
-            var sequence = DOTween.Sequence();
+            var sequence = DOTween.Sequence()
+                .SetUpdate(UseUnscaledTime)
+                .SetDelay(0.05f + delay);
 
             var current = transform.position;
 
@@ -55,16 +57,11 @@ namespace Core.Item
                 var segDist = Mathf.Abs(current.y - next.y);
                 var distCells = segDist / 2f;
                 var durMul = 1f + distCells * durationMultiplier;
-                var duration = 0.15f * durMul;
-
-                sequence.Append(transform.DOMove(next, duration).SetEase(Ease.InOutQuad).SetDelay(delay))
-                        .SetUpdate(UseUnscaledTime);;
-
+                sequence.Append(transform.DOMove(next, 0.15f * durMul).SetEase(Ease.InOutQuad));
                 current = next;
             }
 
             _shiftTween = sequence;
-            
             return _shiftTween;
         }
 
