@@ -1,4 +1,3 @@
-using Core.Config;
 using DG.Tweening;
 using UnityEngine;
 
@@ -6,7 +5,7 @@ namespace Core.Item
 {
     public class ItemAnimation : MonoBehaviour
     {
-        [field: SerializeField] private bool UseUnscaledTime { get; set; }= true;
+        [field: SerializeField] private bool UseUnscaledTime { get; set; } = true;
         [field: SerializeField] private Transform ItemHolder { get; set; }
         public bool IsShiftInProgress => _shiftTween.IsActive();
         
