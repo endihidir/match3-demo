@@ -32,7 +32,7 @@ namespace Core.Item
             _shiftTween?.Kill();
             
             _shiftTween = DOTween.Sequence()
-                .Append(transform.DOMove(worldPos, 0.15f * durationMultiplier).SetEase(Ease.InOutQuad).SetDelay(delay))
+                .Append(transform.DOMove(worldPos, 0.15f * durationMultiplier).SetEase(Ease.InOutQuad).SetDelay(0.05f + delay))
                 .SetUpdate(UseUnscaledTime);
 
             return _shiftTween;
@@ -44,7 +44,7 @@ namespace Core.Item
 
             var sequence = DOTween.Sequence()
                 .SetUpdate(UseUnscaledTime)
-                .SetDelay(delay);
+                .SetDelay(0.05f + delay);
 
             var current = transform.position;
 
