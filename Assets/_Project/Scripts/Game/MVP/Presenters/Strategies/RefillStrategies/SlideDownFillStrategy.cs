@@ -290,7 +290,8 @@ namespace Core.Handlers
         {
             for (int x = 0; x < width; x++)
             {
-                var waveIndex = 0;
+                // 1) Count non-spawn moves in this column so that spawns start AFTER them.
+                var nonSpawnMoveCount = 0;
 
                 for (int y = height - 1; y >= 0; y--)
                 {
@@ -301,16 +302,52 @@ namespace Core.Handlers
                     var item = model.GetGridObject(cell);
                     if (!item) continue;
 
+                    if (_spawnedInThisSim.Contains(item)) continue;
+
+                    nonSpawnMoveCount++;
+                }
+
+                // 2) Animate: non-spawn first (wave 0..), spawns after (wave nonSpawnMoveCount..)
+                var nonSpawnWaveIndex = 0;
+                var spawnWaveIndex = 0;
+
+                for (int y = height - 1; y >= 0; y--)
+                {
+                    var record = records[x, y];
+                    if (record.Path == null || record.Path.Length == 0) continue;
+
+                    var cell = new Vector2Int(x, y);
+                    var item = model.GetGridObject(cell);
+                    if (!item) continue;
+
+                    var isSpawned = _spawnedInThisSim.Contains(item);
+
+                    var waveIndex = isSpawned ? nonSpawnMoveCount + spawnWaveIndex++ : nonSpawnWaveIndex++;
+
                     var delay = waveIndex * _refillSettings.ShiftDelayMultiplier;
-                    waveIndex++;
 
                     if (HasHorizontalStep(record.Path))
                         delay = 0f;
 
-                    var worldPoints = new Vector3[record.Path.Length];
+                    // Build world points.
+                    // For spawned items, prepend current position (spawnY) so it actually "falls" instead of instantly settling.
+                    Vector3[] worldPoints;
 
-                    for (int i = 0; i < record.Path.Length; i++)
-                        worldPoints[i] = view.GridToWorld(record.Path[i]);
+                    if (isSpawned)
+                    {
+                        worldPoints = new Vector3[record.Path.Length + 1];
+                        worldPoints[0] = item.transform.position;
+
+                        for (int i = 0; i < record.Path.Length; i++)
+                            worldPoints[i + 1] = view.GridToWorld(record.Path[i]);
+                    }
+                    else
+                    {
+                        worldPoints = new Vector3[record.Path.Length];
+
+                        for (int i = 0; i < record.Path.Length; i++)
+                            worldPoints[i] = view.GridToWorld(record.Path[i]);
+                    }
 
                     var tween = item.ItemAnimation.ShiftPath(worldPoints, _refillSettings.ShiftDurationMultiplier, delay);
 
