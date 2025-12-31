@@ -3,12 +3,6 @@ using UnityEngine;
 
 namespace Core.Models
 {
-    public interface IGridModel : IBaseGridModel<BaseGridObject>
-    {
-        void Swap(Vector2Int sourceCoord, Vector2Int targetCoord);
-        GridObjectType[,] BuildTypeDataGrid();
-    }
-
     public class GridModel : BaseGridModel<BaseGridObject>, IGridModel
     {
         protected override void OnInitialize()

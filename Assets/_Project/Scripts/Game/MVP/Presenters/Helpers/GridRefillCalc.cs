@@ -57,80 +57,39 @@ namespace Core.Utils
 
             return true;
         }
-
-        public static bool CanDonateIntoBlockedCell(IGridModel model, int blockedX, int blockedY, int stationaryY)
+        
+        public static bool HasAnyEmptyActiveCell(IGridModel model)
         {
-            // Donation is allowed only from the left or right neighbor of the stationary column
-            if (CanDonateFromSide(model, blockedX + 1, blockedY, stationaryY))
-                return true;
-
-            if (CanDonateFromSide(model, blockedX - 1, blockedY, stationaryY))
-                return true;
+            for (int y = 0; y < model.Height; y++)
+            {
+                for (int x = 0; x < model.Width; x++)
+                {
+                    var cell = new Vector2Int(x, y);
+                    if (!model.IsCellActive(cell)) continue;
+                    if (!model.GetGridObject(cell)) return true;
+                }
+            }
 
             return false;
         }
-
-        public static bool CanDonateFromSide(IGridModel model, int donorX, int donorY, int stationaryY)
+        
+        public static bool IsEmptyActiveCell(IGridModel model, Vector2Int cell)
         {
-            // Out of grid bounds
-            if (donorX < 0 || donorX >= model.Width)
-                return false;
-
-            // Donor cell must be active
-            if (!model.IsCellActiveFast(donorX, donorY))
-                return false;
-
-            var donorObj = model.GetGridObjectFast(donorX, donorY);
-
-            // Donor must exist on the same row
-            if (!donorObj)
-                return false;
-
-            // Stationary items cannot act as donors
-            if (donorObj.IsStationary)
-                return false;
-
-            // Donation readiness rule:
-            // The donor column must be fully settled from the top (y=0) down to the stationary Y.
-            if (!IsColumnFilledUpToY(model, donorX, stationaryY))
-                return false;
-
-            return true;
+            if (!model.IsCellActive(cell)) return false;
+            return !model.GetGridObject(cell);
         }
 
-        public static bool IsColumnFilledUpToY(IGridModel model, int x, int yMaxInclusive)
+        public static bool IsBarrierAtColumnTop(IGridModel model, int x, int barrierY)
         {
-            // Y = 0 is the top.
-            // Require the donor column to have no empty active cells down to stationaryY.
-            for (int y = 0; y <= yMaxInclusive; y++)
+            for (int y = barrierY - 1; y >= 0; y--)
             {
-                if (!model.IsCellActiveFast(x, y))
-                    continue;
+                var cell = new Vector2Int(x, y);
+                if (!model.IsCellActive(cell)) continue;
 
-                if (!model.GetGridObjectFast(x, y))
-                    return false;
+                return false;
             }
 
             return true;
-        }
-
-        public static int FindFallSourceY(IGridModel model, int x, int startY)
-        {
-            // Scan upward (decreasing Y) for the first active cell that has an object.
-            if (x < 0 || x >= model.Width)
-                return -1;
-
-            for (int y = startY; y >= 0; y--)
-            {
-                if (!model.IsCellActiveFast(x, y))
-                    continue;
-
-                var obj = model.GetGridObjectFast(x, y);
-                if (obj)
-                    return y;
-            }
-
-            return -1;
         }
 
         public static bool CanFallStraightDown(IGridModel model, Vector2Int pos)
@@ -204,6 +163,25 @@ namespace Core.Utils
 
             spawnCell = default;
             return false;
+        }
+        
+        public static int FindFallSourceY(IGridModel model, int x, int startY)
+        {
+            // Scan upward (decreasing Y) for the first active cell that has an object.
+            if (x < 0 || x >= model.Width)
+                return -1;
+
+            for (int y = startY; y >= 0; y--)
+            {
+                if (!model.IsCellActiveFast(x, y))
+                    continue;
+
+                var obj = model.GetGridObjectFast(x, y);
+                if (obj)
+                    return y;
+            }
+
+            return -1;
         }
     }
 }

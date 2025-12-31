@@ -46,7 +46,7 @@ namespace Core.Handlers
                 var movedAny = MarkAndApplyMoves(context, width, height, pathByItem);
                 var spawnedAny = SpawnRefill(context, view, width, height, cellSize, pathByItem);
                 
-                if (!HasAnyEmptyActiveCell(model)) break;
+                if (!GridRefillCalc.HasAnyEmptyActiveCell(model)) break;
 
                 if (!movedAny && !spawnedAny) break;
             }
@@ -55,21 +55,6 @@ namespace Core.Handlers
             PlayMoveAnimation(model, view, width, height, records, tasks);
 
             await UniTask.CompletedTask;
-        }
-        
-        private static bool HasAnyEmptyActiveCell(IGridModel model)
-        {
-            for (int y = 0; y < model.Height; y++)
-            {
-                for (int x = 0; x < model.Width; x++)
-                {
-                    var cell = new Vector2Int(x, y);
-                    if (!model.IsCellActive(cell)) continue;
-                    if (!model.GetGridObject(cell)) return true;
-                }
-            }
-
-            return false;
         }
 
         private bool MarkAndApplyMoves(GridStateContext stateContext, int width, int height, Dictionary<BaseGridObject, List<Vector2Int>> pathByItem)
@@ -108,7 +93,7 @@ namespace Core.Handlers
                 {
                     var emptyCell = new Vector2Int(x, y);
 
-                    if (!IsEmptyActiveCell(model, emptyCell)) continue;
+                    if (!GridRefillCalc.IsEmptyActiveCell(model, emptyCell)) continue;
 
                     if (!GridRefillCalc.TryFindVerticalSource(model, emptyCell.x, emptyCell.y, out var sourceCell)) continue;
 
@@ -131,7 +116,7 @@ namespace Core.Handlers
                 {
                     var emptyCell = new Vector2Int(x, y);
 
-                    if (!IsEmptyActiveCell(model, emptyCell)) continue;
+                    if (!GridRefillCalc.IsEmptyActiveCell(model, emptyCell)) continue;
 
                     if (!GridRefillCalc.TryGetBarrierYAbove(model, emptyCell.x, emptyCell.y, out var barrierY)) continue;
 
@@ -142,9 +127,9 @@ namespace Core.Handlers
 
                     var topGapCell = new Vector2Int(emptyCell.x, topGapY);
 
-                    if (!IsEmptyActiveCell(model, topGapCell)) continue;
+                    if (!GridRefillCalc.IsEmptyActiveCell(model, topGapCell)) continue;
 
-                    var barrierAtTop = IsBarrierAtColumnTop(model, emptyCell.x, barrierY);
+                    var barrierAtTop = GridRefillCalc.IsBarrierAtColumnTop(model, emptyCell.x, barrierY);
 
                     if (TryMarkSlideFromSide(model, topGapCell, emptyCell.x + 1, barrierY, barrierAtTop, reservedSources, plans)) continue;
 
@@ -220,25 +205,6 @@ namespace Core.Handlers
                 AddPathStep(pathByItem, plan.Item, plan.To);
                 model.SetGridObject(plan.To, plan.Item);
             }
-        }
-
-        private static bool IsEmptyActiveCell(IGridModel model, Vector2Int cell)
-        {
-            if (!model.IsCellActive(cell)) return false;
-            return !model.GetGridObject(cell);
-        }
-
-        private static bool IsBarrierAtColumnTop(IGridModel model, int x, int barrierY)
-        {
-            for (int y = barrierY - 1; y >= 0; y--)
-            {
-                var cell = new Vector2Int(x, y);
-                if (!model.IsCellActive(cell)) continue;
-
-                return false;
-            }
-
-            return true;
         }
 
         private bool SpawnRefill(GridStateContext stateContext, IGridView view, int width, int height, float cellSize, Dictionary<BaseGridObject, List<Vector2Int>> pathByItem)
