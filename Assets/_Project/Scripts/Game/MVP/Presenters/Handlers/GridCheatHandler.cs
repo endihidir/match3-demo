@@ -14,7 +14,7 @@ namespace Core.Handlers
         public GridCheatHandler(IGridStateHandler gridStateHandler)
         {
             _gridStateMachine = gridStateHandler.StateMachine;
-            _gridStateContext = gridStateHandler.StateContext;
+            _gridStateContext = gridStateHandler.Context;
         }
 
         public void Tick()
@@ -63,7 +63,7 @@ namespace Core.Handlers
                     {
                         context.Factory.ReleaseItem(boosterObject);
                         context.Model.SetGridObject(coord, null);
-                        stateMachine.ForceState<RefillState>();
+                        stateMachine.ForceState<RefillResolveState>();
                     }
                 }
             }

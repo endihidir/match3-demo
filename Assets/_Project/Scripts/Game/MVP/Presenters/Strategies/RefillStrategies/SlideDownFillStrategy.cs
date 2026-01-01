@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Core.Config;
+using Core.Configs;
 using Core.Item;
 using Core.Models;
 using Core.Utils;
@@ -12,20 +13,21 @@ namespace Core.Handlers
 {
     public sealed class SlideDownRefillStrategy : IRefillStrategy
     {
-        private RefillSettingsSO _refillSettingsSo;
-
+        private readonly RefillSettingsSO _refillSettingsSo;
+        private readonly List<UniTask> _refillTasks = new(128);
         private readonly List<Vector2Int> _spawnCoords = new();
         private readonly HashSet<BaseGridObject> _spawnedInThisSim = new();
 
-        public void SetRefillSettings(RefillSettingsSO refillSettingsSo)
+        public SlideDownRefillStrategy(GameplayConfigContainer configContainer)
         {
-            _refillSettingsSo = refillSettingsSo;
+            _refillSettingsSo = configContainer.ItemConfigContainerSo.RefillSettingsSo;
         }
+        
+        public bool CanRefill(IGridModel model) => GridRefillCalcUtils.HasStationaryAndBlocking(model);
 
-        public bool CanRefill(IGridModel model) => GridRefillCalc.HasStationaryAndBlocking(model);
-
-        public async UniTask Execute(GridStateContext context, List<UniTask> tasks)
+        public async UniTask Execute(GridStateContext context)
         {
+            _refillTasks.Clear();
             var model = context.Model;
             var view = context.View;
 
@@ -50,9 +52,9 @@ namespace Core.Handlers
             }
 
             BuildFinalCellRecords(model, width, height, pathByItem, records);
-            PlayMoveAnimation(model, view, width, height, records, tasks);
+            PlayMoveAnimation(model, view, width, height, records, _refillTasks);
 
-            await UniTask.CompletedTask;
+            await UniTask.WhenAll(_refillTasks);
         }
 
         private bool MarkAndApplyMoves(GridStateContext stateContext, int width, int height, Dictionary<BaseGridObject, List<Vector2Int>> pathByItem)
@@ -91,9 +93,9 @@ namespace Core.Handlers
                 {
                     var coord = new Vector2Int(x, y);
 
-                    if (!GridRefillCalc.IsEmptyActiveCell(model, coord)) continue;
+                    if (!GridRefillCalcUtils.IsEmptyActiveCell(model, coord)) continue;
 
-                    if (!GridRefillCalc.TryFindVerticalSource(model, coord.x, coord.y, out var sourceCoord)) continue;
+                    if (!GridRefillCalcUtils.TryFindVerticalSource(model, coord.x, coord.y, out var sourceCoord)) continue;
 
                     if (reservedSourceCoords.Contains(sourceCoord)) continue;
 
@@ -114,9 +116,9 @@ namespace Core.Handlers
                 {
                     var coord = new Vector2Int(x, y);
 
-                    if (!GridRefillCalc.IsEmptyActiveCell(model, coord)) continue;
+                    if (!GridRefillCalcUtils.IsEmptyActiveCell(model, coord)) continue;
 
-                    if (!GridRefillCalc.TryGetBarrierYAbove(model, coord.x, coord.y, out var barrierY)) continue;
+                    if (!GridRefillCalcUtils.TryGetBarrierYAbove(model, coord.x, coord.y, out var barrierY)) continue;
 
                     var topGapY = barrierY + 1;
                     if (topGapY >= height) continue;
@@ -125,9 +127,9 @@ namespace Core.Handlers
 
                     var topGapCell = new Vector2Int(coord.x, topGapY);
 
-                    if (!GridRefillCalc.IsEmptyActiveCell(model, topGapCell)) continue;
+                    if (!GridRefillCalcUtils.IsEmptyActiveCell(model, topGapCell)) continue;
 
-                    var barrierAtTop = GridRefillCalc.IsBarrierAtColumnTop(model, coord.x, barrierY);
+                    var barrierAtTop = GridRefillCalcUtils.IsBarrierAtColumnTop(model, coord.x, barrierY);
 
                     if (TryMarkSlideFromSide(model, topGapCell, coord.x + 1, barrierY, barrierAtTop, reservedSources, plans)) continue;
 
@@ -152,7 +154,7 @@ namespace Core.Handlers
 
             if (item.IsStationary) return false;
 
-            if (GridRefillCalc.CanFallStraightDown(model, sideCellCoord)) return false;
+            if (GridRefillCalcUtils.CanFallStraightDown(model, sideCellCoord)) return false;
 
             plans.Add(new SlideMovePlan(sideCellCoord, targetCell, item, true));
             reservedSources.Add(sideCellCoord);
@@ -209,7 +211,7 @@ namespace Core.Handlers
 
             for (int x = 0; x < width; x++)
             {
-                if (!GridRefillCalc.TryGetSpawnCellCoord(stateContext.Model, x, height, out var cellCoord)) continue;
+                if (!GridRefillCalcUtils.TryGetSpawnCellCoord(stateContext.Model, x, height, out var cellCoord)) continue;
                 
                 if (SpawnTopOpenCells(stateContext, view, x, height, cellSize, cellCoord, pathByItem))
                 {

@@ -13,7 +13,7 @@ namespace Core.Handlers
         public IGridView View { get; }
         public IGridItemFactory Factory { get; }
         public ItemConfigContainerSO Configs { get; }
-        public Queue<GridMove> MoveQueue { get; }
+        public Queue<GridMove> MoveQueue { get; } = new();
         
         public bool ResolvedAnyMatch { get; set; }
         public bool ResolvedAnyBooster { get; set; }
@@ -24,13 +24,12 @@ namespace Core.Handlers
         public Vector2Int ForcedBoosterSpawnCoord { get; set; }
         public List<PendingBoosterAction> PendingBoosterActions { get; } = new();
 
-        public GridStateContext(IGridModel model, IGridView view, IGridItemFactory factory, ItemConfigContainerSO configs, Queue<GridMove> moveQueue)
+        public GridStateContext(IGridModel model, IGridView view, IGridItemFactory factory, ItemConfigContainerSO configs)
         {
             Model = model;
             View = view;
             Factory = factory;
             Configs = configs;
-            MoveQueue = moveQueue;
         }
     }
 }

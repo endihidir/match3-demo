@@ -11,6 +11,11 @@ namespace Core.Handlers
 {
     public sealed class MatchResolveState : StateBase<GridStateContext>
     {
+        public MatchResolveState(GridStateContext context, bool showLogs = true) : base(context, showLogs)
+        {
+            
+        }
+
         public override bool NeedsExitPermission => true;
         
         protected override void OnEnter()
