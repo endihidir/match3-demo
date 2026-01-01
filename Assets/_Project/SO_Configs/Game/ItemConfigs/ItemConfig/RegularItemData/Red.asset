@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: Red
   m_EditorClassIdentifier: 
   icon: {fileID: 21300000, guid: 714434f083d633140a41e8101ec09313, type: 3}
-  spriteSizeMultiplier: {x: 0.85, y: 0.85}
+  spriteSizeMultiplier: {x: 0.8, y: 0.8}
   isStationary: 0
