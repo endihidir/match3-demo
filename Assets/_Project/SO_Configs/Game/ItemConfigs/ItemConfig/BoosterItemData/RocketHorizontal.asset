@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: RocketHorizontal
   m_EditorClassIdentifier: 
   icon: {fileID: 21300000, guid: bcccb43884c472a4b9809d95444b8337, type: 3}
-  spriteSizeMultiplier: {x: 1, y: 1}
+  spriteSizeMultiplier: {x: 0.9, y: 0.9}
   isStationary: 0
   <BoosterAction>k__BackingField:
     rid: 4085054608288776204

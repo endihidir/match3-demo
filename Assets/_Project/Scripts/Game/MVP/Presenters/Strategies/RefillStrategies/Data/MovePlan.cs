@@ -18,10 +18,4 @@ namespace Core.Handlers
             Kind = kind;
         }
     }
-    
-    public enum MoveKind
-    {
-        Fall,
-        Slide
-    }
 }
