@@ -2,12 +2,7 @@
 
 namespace Core.StateMachineCore
 {
-    public interface IState<in TContext> : IState where TContext : class
-    {
-        public IState Init(TContext context, bool showLogs = true);
-    }
-
-    public abstract class StateBase<TContext> : IState<TContext> where TContext : class
+    public abstract class StateBase<TContext> : IState where TContext : class
     {
         public string StateID { get; protected set; }
         public bool HasInit { get; private set; }
@@ -19,21 +14,17 @@ namespace Core.StateMachineCore
         public virtual bool NeedsExitPermission => false;
         public bool IsExitReady { get; protected set; }
 
-        protected StateBase() => StateID = GetType().Name;
-
-        public IState Init(TContext context, bool showLogs = true)
+        protected StateBase(TContext context, bool showLogs = true)
         {
+            StateID = GetType().Name;
+            
             Context = context;
 
             ShowLogs = showLogs;
 
-            if (HasInit) return this;
+            if (HasInit) return;
 
             HasInit = true;
-
-            OnInit();
-
-            return this;
         }
 
         public void Enter()
@@ -98,7 +89,6 @@ namespace Core.StateMachineCore
         }
 
         public virtual void RequestExit() => IsExitReady = true;
-        protected virtual void OnInit(){}
         protected virtual bool OnBeforeEnter() => true;
         protected virtual void OnEnter(){}
         protected virtual void OnUpdate(float deltaTime){}

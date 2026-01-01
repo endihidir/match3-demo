@@ -10,6 +10,11 @@ namespace Core.Handlers
 {
     public class BoosterResolveState : StateBase<GridStateContext>
     {
+        public BoosterResolveState(GridStateContext context, bool showLogs = true) : base(context, showLogs)
+        {
+            
+        }
+
         public override bool NeedsExitPermission => true;
         protected override void OnEnter()
         {

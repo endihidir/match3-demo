@@ -8,9 +8,13 @@ using UnityEngine;
 
 namespace Core.Handlers
 {
-    public sealed class ApplyInputState : StateBase<GridStateContext>
-    {
+    public sealed class InputResolveState : StateBase<GridStateContext>
+    { 
         public override bool NeedsExitPermission => true;
+        public InputResolveState(GridStateContext context, bool showLogs = true) : base(context, showLogs)
+        {
+            
+        }
 
         protected override void OnEnter()
         {

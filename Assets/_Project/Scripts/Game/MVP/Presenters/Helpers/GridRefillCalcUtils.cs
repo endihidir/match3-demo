@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Core.Utils
 {
-    public static class GridRefillCalc
+    public static class GridRefillCalcUtils
     {
         public static bool HasStationaryAndBlocking(IGridModel model)
         {

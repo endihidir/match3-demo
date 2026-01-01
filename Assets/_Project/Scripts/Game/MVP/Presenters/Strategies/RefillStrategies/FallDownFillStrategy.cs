@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using Core.Config;
+using Core.Configs;
 using Core.Models;
 using Core.Utils;
-using Core.Views;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
@@ -11,16 +11,18 @@ namespace Core.Handlers
 {
     public sealed class FallDownRefillStrategy : IRefillStrategy
     {
-        private RefillSettingsSO _refillSettingsSo;
-        public bool CanRefill(IGridModel model) => !GridRefillCalc.HasStationaryAndBlocking(model);
-        
-        public void SetRefillSettings(RefillSettingsSO refillSettingsSo)
+        private readonly RefillSettingsSO _refillSettingsSo;
+        private readonly List<UniTask> _refillTasks = new(128);
+        public bool CanRefill(IGridModel model) => !GridRefillCalcUtils.HasStationaryAndBlocking(model);
+
+        public FallDownRefillStrategy(GameplayConfigContainer configContainer)
         {
-            _refillSettingsSo = refillSettingsSo;
+            _refillSettingsSo = configContainer.ItemConfigContainerSo.RefillSettingsSo;
         }
 
-        public async UniTask Execute(GridStateContext context, List<UniTask> tasks)
+        public async UniTask Execute(GridStateContext context)
         {
+            _refillTasks.Clear();
             var model = context.Model;
             var view = context.View;
 
@@ -33,16 +35,16 @@ namespace Core.Handlers
             {
                 var wave = 0;
 
-                ShiftColumn(context, x, height, cellSize, ref wave, tasks);
+                ShiftColumn(context, x, height, cellSize, ref wave, _refillTasks);
 
-                if (GridRefillCalc.TryGetSpawnCellCoord(model, x, model.Height, out var spawnCell))
+                if (GridRefillCalcUtils.TryGetSpawnCellCoord(model, x, model.Height, out var spawnCell))
                 {
                     var spawnY = view.GridToWorld(spawnCell).y + cellSize;
-                    RefillColumn(context, x, height, cellSize, spawnY, ref wave, tasks);
+                    RefillColumn(context, x, height, cellSize, spawnY, ref wave, _refillTasks);
                 }
             }
 
-            await UniTask.CompletedTask;
+            await UniTask.WhenAll(_refillTasks);
         }
 
         private void ShiftColumn(GridStateContext stateContext, int x, int height, float cellSize, ref int wave, List<UniTask> tasks)
@@ -57,7 +59,7 @@ namespace Core.Handlers
                 if (!model.IsCellActive(coord)) continue;
                 if (model.GetGridObject(coord)) continue;
 
-                var srcY = GridRefillCalc.FindFallSourceY(stateContext.Model, x, y - 1);
+                var srcY = GridRefillCalcUtils.FindFallSourceY(stateContext.Model, x, y - 1);
                 if (srcY < 0) continue;
 
                 var src = new Vector2Int(x, srcY);
