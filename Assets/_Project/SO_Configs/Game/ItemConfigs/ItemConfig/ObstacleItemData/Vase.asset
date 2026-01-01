@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Vase
   m_EditorClassIdentifier: 
   icon: {fileID: 21300000, guid: f1284f1fe9eb2a545b2ef886c61ba241, type: 3}
-  spriteSizeMultiplier: {x: 0.9, y: 0.9}
+  spriteSizeMultiplier: {x: 1, y: 1}
   isStationary: 1
   <Life>k__BackingField: 2
   <DamageSource>k__BackingField: 2
