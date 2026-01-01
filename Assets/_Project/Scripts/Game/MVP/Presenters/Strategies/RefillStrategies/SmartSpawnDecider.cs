@@ -44,11 +44,11 @@ namespace Core.Handlers
                     safe[safeCount++] = type;
             }
 
-            var allowMatch = Mathf.Clamp01(settings.AllowImmediateMatch - safetyBoost);
+            var immediateChance01 = Mathf.Clamp01((settings.ImmediateMatchChance - safetyBoost) / 100f);
             var pickMatch = false;
 
             if (matchCount > 0 && safeCount > 0)
-                pickMatch = UnityEngine.Random.value < allowMatch;
+                pickMatch = UnityEngine.Random.value < immediateChance01;
             else if (matchCount > 0)
                 pickMatch = true;
 
@@ -69,8 +69,11 @@ namespace Core.Handlers
                 var score = 0f;
 
                 // Penalize near-match setups (adjacency / 2-in-a-row potential)
-                if (settings.NearMatchPenalty > 0f)
-                    score += settings.NearMatchPenalty * NearMatchScore(model, cell, type);
+                if (settings.NearMatchAvoidance > 0f)
+                {
+                    var nearAvoid01 = settings.NearMatchAvoidance / 100f;
+                    score += nearAvoid01 * NearMatchScore(model, cell, type);
+                }
 
                 // Small noise to avoid always picking the same type
                 score += UnityEngine.Random.value * 0.01f;
