@@ -34,7 +34,7 @@ namespace Core.Handlers
             _stateMachine = new StateMachine();
             StateMachine = _stateMachine;
             
-            _context = new GridStateContext(model, view, factory, configContainer.ItemConfigContainer, _moveQueue);
+            _context = new GridStateContext(model, view, factory, configContainer.ItemConfigContainerSo, _moveQueue);
             StateContext = _context;
 
             _idleState = new IdleState().Init(_context) as IdleState;

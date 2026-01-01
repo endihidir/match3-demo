@@ -15,8 +15,8 @@ namespace Core.Views
         [field: SerializeField] public Transform GridRoot { get; private set; }
         [field: SerializeField] public Transform GridObjectsParent { get; private set; }
         [field: SerializeField] public MeshFilter GridMeshFilter { get; private set; }
-        [field: SerializeField] public GridMeshSettingsConfig MeshSettings { get; private set; }
-        [field: SerializeField] public GridLayoutSettingsConfig LayoutSettings { get; private set; }
+        [field: SerializeField] public GridMeshSettingsSO MeshSettings { get; private set; }
+        [field: SerializeField] public GridLayoutSettingsSO LayoutSettings { get; private set; }
         [field: SerializeField] public bool DrawGridGizmos { get; private set; }
         [field: SerializeField, ShowIf(nameof(DrawGridGizmos))] public Color GizmosColor { get; private set; } = Color.yellow;
         public event Action OnViewInitialized;

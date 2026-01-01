@@ -15,7 +15,7 @@ namespace Core.Handlers
 
         protected override void OnInit()
         {
-            _strategyHandler.Initialize(Context.Configs.RefillSettings);
+            _strategyHandler.Initialize(Context.Configs.RefillSettingsSo);
         }
 
         protected override void OnEnter()

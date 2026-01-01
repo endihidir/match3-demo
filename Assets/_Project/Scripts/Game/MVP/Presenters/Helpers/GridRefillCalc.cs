@@ -69,10 +69,10 @@ namespace Core.Utils
             return false;
         }
 
-        public static bool IsEmptyActiveCell(IGridModel model, Vector2Int cell)
+        public static bool IsEmptyActiveCell(IGridModel model, Vector2Int coord)
         {
-            if (!model.IsCellActive(cell)) return false;
-            return !model.GetGridObject(cell);
+            if (!model.IsCellActive(coord)) return false;
+            return !model.GetGridObject(coord);
         }
 
         public static bool IsBarrierAtColumnTop(IGridModel model, int x, int barrierY)
@@ -87,14 +87,14 @@ namespace Core.Utils
             return true;
         }
 
-        public static bool CanFallStraightDown(IGridModel model, Vector2Int pos)
+        public static bool CanFallStraightDown(IGridModel model, Vector2Int coord)
         {
             // Falling direction is +Y (Y increases downward)
-            int belowY = pos.y + 1;
+            int belowY = coord.y + 1;
 
             if (belowY < 0 || belowY >= model.Height) return false;
 
-            var belowCoord = new Vector2Int(pos.x, belowY);
+            var belowCoord = new Vector2Int(coord.x, belowY);
 
             if (!model.IsCellActive(belowCoord)) return false;
 
@@ -137,7 +137,7 @@ namespace Core.Utils
             return false;
         }
 
-        public static bool TryGetSpawnCell(IGridModel model, int x, int height, out Vector2Int spawnCell)
+        public static bool TryGetSpawnCellCoord(IGridModel model, int x, int height, out Vector2Int cellCoord)
         {
             // Scan from top to bottom (y = 0 is top)
             for (int y = 0; y < height; y++)
@@ -147,11 +147,11 @@ namespace Core.Utils
                 if (!model.IsCellActive(coord))
                     continue;
 
-                spawnCell = coord;
+                cellCoord = coord;
                 return true;
             }
 
-            spawnCell = default;
+            cellCoord = default;
             return false;
         }
 

@@ -9,6 +9,6 @@ namespace Core.Handlers
     {
         bool CanRefill(IGridModel model);
         UniTask Execute(GridStateContext context, List<UniTask> tasks);
-        public void SetRefillSettings(RefillSettings refillSettings);
+        public void SetRefillSettings(RefillSettingsSO refillSettingsSo);
     }
 }

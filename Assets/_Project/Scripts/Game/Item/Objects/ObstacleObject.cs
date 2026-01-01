@@ -16,11 +16,11 @@ namespace Core.Item
             ObstacleType = (ObstacleType)TypeId;
         }
 
-        public override void ApplyData(BaseItemConfigData baseItemConfigData)
+        public override void ApplyData(BaseItemDataSO baseItemDataSo)
         {
-            base.ApplyData(baseItemConfigData);
+            base.ApplyData(baseItemDataSo);
 
-            if (baseItemConfigData is ObstacleConfigData obstacleConfigData)
+            if (baseItemDataSo is ObstacleDataSO obstacleConfigData)
             {
                 Life = obstacleConfigData.Life;
                 AllowDamageSources = obstacleConfigData.DamageSource;

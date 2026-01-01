@@ -166,7 +166,7 @@ namespace Core.Handlers
 
         private void AddMergedEffects(Vector2Int origin, BoosterType sourceBoosterType, BoosterType targetBoosterType)
         {
-            var boosterMergeConfig = Context.Configs.BoosterMergeConfig;
+            var boosterMergeConfig = Context.Configs.BoosterMergeConfigSo;
 
             if (boosterMergeConfig && boosterMergeConfig.TryGetRule(sourceBoosterType, targetBoosterType, out var rule) && rule.Actions != null)
             {

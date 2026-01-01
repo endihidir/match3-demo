@@ -5,7 +5,7 @@ namespace Core.Handlers
 {
     public interface IRefillStrategyHandler
     {
-        void Initialize(RefillSettings settings);
+        void Initialize(RefillSettingsSO settingsSo);
         IRefillStrategy SelectStrategy(IGridModel model);
     }
 }
