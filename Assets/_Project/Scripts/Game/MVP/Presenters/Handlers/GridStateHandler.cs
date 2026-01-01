@@ -13,12 +13,11 @@ namespace Core.Handlers
 {
     public sealed class GridStateHandler : IGridStateHandler, ITickable, IFixedTickable, ILateTickable
     {
-        public IStateMachine StateMachine { get; private set; }
-        public GridStateContext Context { get; private set; }
+        public IStateMachine StateMachine { get; } = new StateMachine();
+        public GridStateContext Context { get; }
 
         public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory, GameplayConfigContainer configContainer, IRefillStrategyHandler strategyHandler)
         {
-            StateMachine = new StateMachine();
             Context = new GridStateContext(model, view, factory, configContainer.ItemConfigContainerSo);
 
             var idleState = new IdleState(Context);
@@ -28,6 +27,7 @@ namespace Core.Handlers
             var refillResolveState = new RefillResolveState(strategyHandler, Context);
 
             var states = new StateBase<GridStateContext>[] { idleState, inputResolveState, boosterResolveState, matchResolveState, refillResolveState };
+            
             StateMachine.Register(states);
 
             StateMachine.AddTransition(idleState, inputResolveState, () => Context.MoveQueue.Count > 0)
