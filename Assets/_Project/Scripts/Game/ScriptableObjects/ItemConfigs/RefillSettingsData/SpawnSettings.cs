@@ -8,13 +8,15 @@ namespace Core.Config
     /// All tuning is done via this struct.
     /// </summary>
     [Serializable]
-    public struct SpawnSettings
+    public class SpawnSettings
     {
         // 0 = never allow immediate match (if possible)
-        // 1 = fully allow immediate match
-        [field: SerializeField, Range(0f, 1f)] public float AllowImmediateMatch { get; private set; }
+        // 100 = fully allow immediate match
+        [field: SerializeField, Range(0f, 100f)]
+        public float ImmediateMatchChance { get; private set; } = 0f;
 
         // Penalty for near-match (2-in-a-row / adjacency) setups
-        [field: SerializeField, Range(0f, 1f)] public float NearMatchPenalty{ get; private set; }
+        [field: SerializeField, Range(0f, 100f)]
+        public float NearMatchAvoidance { get; private set; } = 100f;
     }
 }
