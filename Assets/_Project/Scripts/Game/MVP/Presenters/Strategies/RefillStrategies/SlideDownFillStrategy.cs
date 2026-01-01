@@ -169,8 +169,7 @@ namespace Core.Handlers
             {
                 var plan = plans[i];
 
-                if (!usedDestinations.Add(plan.To))
-                    continue;
+                if (!usedDestinations.Add(plan.To)) continue;
 
                 accepted[i] = true;
 
@@ -187,8 +186,7 @@ namespace Core.Handlers
                 var plan = plans[i];
 
                 var current = model.GetGridObject(plan.From);
-                if (!current || current != plan.Item)
-                    continue;
+                if (!current || current != plan.Item) continue;
 
                 model.SetGridObject(plan.From, null);
             }
@@ -212,7 +210,11 @@ namespace Core.Handlers
             for (int x = 0; x < width; x++)
             {
                 if (!GridRefillCalc.TryGetSpawnCell(stateContext.Model, x, height, out var spawnCell)) continue;
-                if (SpawnTopOpenCells(stateContext, view, x, height, cellSize, spawnCell, pathByItem)) spawnedAny = true;
+                
+                if (SpawnTopOpenCells(stateContext, view, x, height, cellSize, spawnCell, pathByItem))
+                {
+                    spawnedAny = true;
+                }
             }
 
             return spawnedAny;
@@ -274,6 +276,7 @@ namespace Core.Handlers
                     if (!model.IsCellActive(cell)) continue;
 
                     var item = model.GetGridObject(cell);
+                    
                     if (!item) continue;
 
                     if (!pathByItem.TryGetValue(item, out var path) || path.Count == 0) continue;
@@ -299,7 +302,9 @@ namespace Core.Handlers
                     if (record.Path == null || record.Path.Length == 0) continue;
 
                     var cell = new Vector2Int(x, y);
+                    
                     var item = model.GetGridObject(cell);
+                    
                     if (!item) continue;
 
                     if (_spawnedInThisSim.Contains(item)) continue;
