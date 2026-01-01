@@ -22,11 +22,11 @@ namespace Core.Item
             UpdateIdentity();
         }
 
-        public override void ApplyData(BaseItemConfigData baseItemConfigData)
+        public override void ApplyData(BaseItemDataSO baseItemDataSo)
         {
-            base.ApplyData(baseItemConfigData);
+            base.ApplyData(baseItemDataSo);
 
-            if (baseItemConfigData is BoosterConfigData boosterConfigData)
+            if (baseItemDataSo is BoosterDataSO boosterConfigData)
             {
                 BoosterAction = boosterConfigData.BoosterAction;
             }

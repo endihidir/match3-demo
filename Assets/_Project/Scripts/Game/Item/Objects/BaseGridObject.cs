@@ -44,11 +44,11 @@ namespace Core.Item
             IsEmpty = TypeId == 0;
         }
         
-        public virtual void ApplyData(BaseItemConfigData baseItemConfigData)
+        public virtual void ApplyData(BaseItemDataSO baseItemDataSo)
         {
-            SpriteRenderer.sprite = baseItemConfigData.icon;
-            SpriteSizeMultiplier = baseItemConfigData.spriteSizeMultiplier;
-            IsStationary = baseItemConfigData.isStationary;
+            SpriteRenderer.sprite = baseItemDataSo.icon;
+            SpriteSizeMultiplier = baseItemDataSo.spriteSizeMultiplier;
+            IsStationary = baseItemDataSo.isStationary;
         }
         
         public void SetCoordinate(Vector2Int coord) => Coord = coord;

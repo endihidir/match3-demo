@@ -13,11 +13,11 @@ namespace Core.Handlers
             _refillStrategies = refillStrategies;
         }
 
-        public void Initialize(RefillSettings settings)
+        public void Initialize(RefillSettingsSO settingsSo)
         {
             foreach (var refillStrategy in _refillStrategies)
             {
-                refillStrategy.SetRefillSettings(settings);
+                refillStrategy.SetRefillSettings(settingsSo);
             }
         }
 

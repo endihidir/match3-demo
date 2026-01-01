@@ -10,9 +10,9 @@ namespace Core.Item.Factories
     {
         T GetItem<T>(GridObjectType typeData) where T : BaseGridObject;
         T GetItem<T>(GridItemKind itemKind, int typeId) where T : BaseGridObject => GetItem<T>(new GridObjectType(itemKind, typeId));
-        public ItemObject GetRegularItem(ItemType itemType) => GetItem<ItemObject>(new GridObjectType(GridItemKind.Booster, (int)itemType));
+        public ItemObject GetRegularItem(ItemType itemType) => GetItem<ItemObject>(new GridObjectType(GridItemKind.Regular, (int)itemType));
         public BoosterObject GetBoosterItem(BoosterType boosterType) => GetItem<BoosterObject>(new GridObjectType(GridItemKind.Booster, (int)boosterType));
-        public ObstacleObject GetObstacleItem(ObstacleType obstacleType) => GetItem<ObstacleObject>(new GridObjectType(GridItemKind.Booster, (int)obstacleType));
+        public ObstacleObject GetObstacleItem(ObstacleType obstacleType) => GetItem<ObstacleObject>(new GridObjectType(GridItemKind.Obstacle, (int)obstacleType));
         ItemObject GetRandomItem();
         ObstacleObject GetRandomObstacle();
         BoosterObject GetRandomBooster();
@@ -27,12 +27,12 @@ namespace Core.Item.Factories
     public class GridItemFactory : IGridItemFactory
     {
         private readonly IObjectPoolService _objectPoolService;
-        private readonly ItemConfigContainer _itemConfigContainer;
+        private readonly ItemConfigContainerSO _ıtemConfigContainerSo;
 
         public GridItemFactory(IObjectPoolService objectPoolService, GameplayConfigContainer gameplayConfigContainer)
         {
             _objectPoolService = objectPoolService;
-            _itemConfigContainer = gameplayConfigContainer.ItemConfigContainer;
+            _ıtemConfigContainerSo = gameplayConfigContainer.ItemConfigContainerSo;
         }
         
         public T GetItem<T>(GridObjectType typeData) where T : BaseGridObject
@@ -41,7 +41,7 @@ namespace Core.Item.Factories
             
             itemObject.ResetItem();
 
-            var configData = _itemConfigContainer.GetConfigData(typeData);
+            var configData = _ıtemConfigContainerSo.GetConfigData(typeData);
             
             itemObject.Initialize(typeData)
                       .ApplyData(configData);

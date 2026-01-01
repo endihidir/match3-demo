@@ -1,7 +1,6 @@
 using Core.Config;
 using NaughtyAttributes;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Core.Configs
 {
@@ -9,7 +8,7 @@ namespace Core.Configs
     public class GameplayConfigContainer : ScriptableObject
     {
         [field: SerializeField, Required] public GameplayBootstrapperConfig GameplayBootstrapperConfig { get; private set; }
-        [field: SerializeField, Required] public ItemConfigContainer ItemConfigContainer { get; private set; }
+        [field: SerializeField, Required] public ItemConfigContainerSO ItemConfigContainerSo { get; private set; }
         public void Initialize()
         {
             
