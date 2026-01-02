@@ -67,8 +67,8 @@ namespace Core.Item
             var defaultPos = transform.position;
 
             _moveTween = DOTween.Sequence()
-                                .Append(transform.DOMove(targetPos, 0.15f).SetEase(Ease.Linear))
-                                .Append(transform.DOMove(defaultPos, 0.15f).SetEase(Ease.Linear))
+                                .Append(transform.DOMove(targetPos, 0.1f).SetEase(Ease.Linear))
+                                .Append(transform.DOMove(defaultPos, 0.1f).SetEase(Ease.Linear))
                                 .SetUpdate(UseUnscaledTime);
             
             return _moveTween;
@@ -78,7 +78,7 @@ namespace Core.Item
         {
             _moveTween?.Kill();
             
-            _moveTween = transform.DOMove(worldPos, 0.15f)
+            _moveTween = transform.DOMove(worldPos, 0.1f)
                                   .SetEase(Ease.Linear)
                                   .SetUpdate(UseUnscaledTime);
 

@@ -52,7 +52,6 @@ namespace Core.Handlers
                     var coord = new Vector2Int(x, y);
                     var group = GridMatchGroupCollector.CollectGroupFromMask(model, matchMask, visited, coord);
                     if (group == null || group.Count == 0) continue;
-                    
                     var id = obj.TypeId;
                     if (id <= 0) continue;
                     await ResolveGroupAsync(model, matchMask, group, id);

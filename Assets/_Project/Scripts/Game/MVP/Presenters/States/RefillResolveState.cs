@@ -17,17 +17,18 @@ namespace Core.Handlers
 
         protected override void OnEnter()
         {
-            RefillAsync().Forget();
+            RefillGrid().Forget();
             RequestExit();
         }
 
-        private async UniTask RefillAsync()
+        private async UniTaskVoid RefillGrid()
         {
             Context.RefillInProgress = true;
             var strategy = _strategyHandler.SelectStrategy(Context.Model);
-            await strategy.ExecuteAsync(Context);
+            await strategy.Execute(Context).WaitAnimationsAsync();
             Context.RefillInProgress = false;
             Context.MatchResolveRequested = GridMatchRules.HasAnyRegularMatchOnBoard(Context.Model);
+            //RequestExit();
         }
     }
 }

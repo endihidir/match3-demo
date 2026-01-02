@@ -14,9 +14,10 @@ namespace Core.Handlers
     public sealed class SlideDownRefillStrategy : IRefillStrategy
     {
         private readonly RefillSettingsSO _refillSettingsSo;
-        private readonly List<UniTask> _refillTasks = new(128);
         private readonly List<Vector2Int> _spawnCoords = new();
+        private readonly List<UniTask> _animTasks = new(128);
         private readonly HashSet<BaseGridObject> _spawnedInThisSim = new();
+        private UniTask _runningAnimations;
 
         public SlideDownRefillStrategy(GameplayConfigContainer configContainer)
         {
@@ -25,9 +26,8 @@ namespace Core.Handlers
         
         public bool CanRefill(IGridModel model) => GridRefillCalcUtil.HasStationaryAndBlocking(model);
 
-        public async UniTask ExecuteAsync(GridStateContext context)
+        public IRefillStrategy Execute(GridStateContext context)
         {
-            _refillTasks.Clear();
             var model = context.Model;
             var view = context.View;
 
@@ -52,10 +52,11 @@ namespace Core.Handlers
             }
 
             BuildFinalCellRecords(model, width, height, pathByItem, records);
-            PlayMoveAnimation(model, view, width, height, records, _refillTasks);
-
-            await UniTask.WhenAll(_refillTasks);
+            _runningAnimations = PlayMoveAnimation(model, view, width, height, records);
+            return this;
         }
+
+        public UniTask WaitAnimationsAsync() => _runningAnimations;
 
         private bool MarkAndApplyMoves(GridStateContext stateContext, int width, int height, Dictionary<BaseGridObject, List<Vector2Int>> pathByItem)
         {
@@ -292,8 +293,10 @@ namespace Core.Handlers
             }
         }
 
-        private void PlayMoveAnimation(IGridModel model, IGridView view, int width, int height, SlideMoveRecord[,] records, List<UniTask> tasks)
+        private async UniTask PlayMoveAnimation(IGridModel model, IGridView view, int width, int height, SlideMoveRecord[,] records)
         {
+            _animTasks.Clear();
+            
             for (int x = 0; x < width; x++)
             {
                 // 1) Count non-spawn moves in this column so that spawns start AFTER them.
@@ -361,9 +364,11 @@ namespace Core.Handlers
 
                     if (tween == null) continue;
 
-                    tasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
+                    _animTasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
                 }
             }
+            
+            await UniTask.WhenAll(_animTasks);
         }
 
         private static bool HasHorizontalStep(Vector2Int[] path)
