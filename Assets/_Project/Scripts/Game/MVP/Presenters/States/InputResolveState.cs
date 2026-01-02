@@ -141,9 +141,7 @@ namespace Core.Handlers
             if (sourceObj is BoosterObject sourceBooster && targetObj is BoosterObject targetBooster)
             {
                 AddMergedEffects(sourceCoord, sourceBooster.BoosterType, targetBooster.BoosterType);
-                Context.Factory.ReleaseItem(sourceObj);
                 Context.Factory.ReleaseItem(targetObj);
-                Context.Model.SetGridObject(sourceCoord, null);
                 Context.Model.SetGridObject(targetCoord, null);
                 return;
             }
