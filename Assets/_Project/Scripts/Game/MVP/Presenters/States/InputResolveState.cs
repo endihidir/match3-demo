@@ -56,7 +56,8 @@ namespace Core.Handlers
                 return;
             }
 
-            AddSingleBoosterEffect(sourceCoord, booster);
+            AddBoosterAction(sourceCoord, booster);
+            ReleaseItem(sourceObj, sourceCoord);
             RequestExit();
         }
 
@@ -140,62 +141,62 @@ namespace Core.Handlers
             
             if (sourceObj is BoosterObject sourceBooster && targetObj is BoosterObject targetBooster)
             {
-                AddMergedEffects(sourceCoord, sourceBooster.BoosterType, targetBooster.BoosterType);
-                Context.Factory.ReleaseItem(targetObj);
-                Context.Model.SetGridObject(targetCoord, null);
+                AddMergedActions(sourceCoord, sourceBooster.BoosterType, targetBooster.BoosterType);
+                ReleaseItem(sourceObj, sourceCoord);
+                ReleaseItem(targetObj, targetCoord);
                 return;
             }
 
             if (targetObj is BoosterObject movedBoosterToB)
             {
-                AddSingleBoosterEffect(targetCoord, movedBoosterToB);
+                AddBoosterAction(targetCoord, movedBoosterToB);
+                ReleaseItem(targetObj, targetCoord);
                 return;
             }
 
             if (sourceObj is BoosterObject movedBoosterToA)
             {
-                AddSingleBoosterEffect(sourceCoord, movedBoosterToA);
+                AddBoosterAction(sourceCoord, movedBoosterToA);
+                ReleaseItem(sourceObj, sourceCoord);
                 return;
             }
             
             Context.MatchResolveRequested = true;
         }
 
-        private void AddSingleBoosterEffect(Vector2Int originCoord, BoosterObject booster)
+        private void AddBoosterAction(Vector2Int originCoord, BoosterObject booster)
         {
             if (!booster || booster.BoosterAction == null) return;
 
-            Context.PendingBoosterActions.Add(new PendingBoosterAction(originCoord, booster.BoosterAction));
+            Context.PendingBoosterActions.Add(new PendingBoosterAction(Context.NextBoosterGroupId(), originCoord, booster.BoosterAction));
         }
 
-        private void AddMergedEffects(Vector2Int origin, BoosterType sourceBoosterType, BoosterType targetBoosterType)
+        private void AddMergedActions(Vector2Int origin, BoosterType sourceBoosterType, BoosterType targetBoosterType)
         {
             var boosterMergeConfig = Context.Configs.BoosterMergeConfigSo;
 
             if (boosterMergeConfig && boosterMergeConfig.TryGetRule(sourceBoosterType, targetBoosterType, out var rule) && rule.Actions != null)
             {
+                var nextGroupId = Context.NextBoosterGroupId();
+                
                 for (int i = 0; i < rule.Actions.Length; i++)
                 {
                     var boosterEffectBase = rule.Actions[i];
                     if (boosterEffectBase == null) continue;
 
-                    Context.PendingBoosterActions.Add(new PendingBoosterAction(origin, boosterEffectBase));
+                    Context.PendingBoosterActions.Add(new PendingBoosterAction(nextGroupId, origin, boosterEffectBase));
                 }
-
-                return;
             }
-
-            AddSingleBoosterEffect(origin, sourceBoosterType);
-            AddSingleBoosterEffect(origin, targetBoosterType);
+            else
+            {
+                EditorLogger.LogError($"{sourceBoosterType} - {targetBoosterType} merge rule does not exist!");
+            }
         }
-
-        private void AddSingleBoosterEffect(Vector2Int originCoord, BoosterType type)
+        
+        private void ReleaseItem(BaseGridObject sourceObj, Vector2Int sourceCoord)
         {
-            var configData = Context.Configs.GetBoosterData(type);
-
-            if (!configData || configData.BoosterAction == null) return;
-
-            Context.PendingBoosterActions.Add(new PendingBoosterAction(originCoord, configData.BoosterAction));
+            Context.Factory.ReleaseItem(sourceObj);
+            Context.Model.SetGridObject(sourceCoord, null);
         }
         
         private bool IsCellsMatched(Vector2Int coordA, Vector2Int coordB, int typeA, int typeB)

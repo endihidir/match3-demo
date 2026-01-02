@@ -78,7 +78,7 @@ namespace Core.Item
         {
             _moveTween?.Kill();
             
-            _moveTween = transform.DOMove(worldPos, 0.1f)
+            _moveTween = transform.DOMove(worldPos, 0.15f)
                                   .SetEase(Ease.Linear)
                                   .SetUpdate(UseUnscaledTime);
 

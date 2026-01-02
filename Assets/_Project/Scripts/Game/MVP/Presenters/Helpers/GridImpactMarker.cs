@@ -8,30 +8,12 @@ namespace Core.Utils
 {
     public static class GridImpactMarker
     {
-        public static void MarkOriginObject(BaseGridObject obj, CellImpactMarkData[,] markData)
-        {
-            var coord = obj.Coord;
-            
-            ref var cell = ref markData[coord.x, coord.y];
-
-            if (obj is IBoosterActionSource trigger)
-            {
-                cell.MarkRemove();
-                return;
-            }
-
-            if (obj is IDamageableItem)
-            {
-                cell.AddDamage(1, DamageSource.Booster);
-            }
-        }
-        
         public static void MarkLinearArea(IGridModel model, PendingBoosterAction boosterAction, CellImpactMarkData[,] markData, int damageAmount, int lineCount, Vector2Int[] directions, Action<PendingBoosterAction> enqueue)
         {
             foreach (var dir in directions)
             {
                 VisitLineExceptSelf(model, boosterAction.OriginCoord, dir, lineCount, 
-                    obj => MarkVisitedObject(obj, markData, damageAmount, enqueue));
+                    obj => MarkVisitedObject(obj, boosterAction.GroupId, markData, damageAmount, enqueue));
             }
         }
 
@@ -40,7 +22,7 @@ namespace Core.Utils
             for (int r = 1; r <= radius; r++)
             {
                 VisitRingExceptSelf(model, boosterAction.OriginCoord, r, 
-                    obj => MarkVisitedObject(obj, markData, damageAmount, enqueue));
+                    obj => MarkVisitedObject(obj, boosterAction.GroupId, markData, damageAmount, enqueue));
             }
         }
         
@@ -50,11 +32,11 @@ namespace Core.Utils
 
             for (int r = 1; r <= maxRadius; r++)
             {
-                VisitRingExceptSelf(model, boosterAction.OriginCoord, r, obj => MarkVisitedObject(obj, markData, damageAmount, enqueue));
+                VisitRingExceptSelf(model, boosterAction.OriginCoord, r, obj => MarkVisitedObject(obj, boosterAction.GroupId, markData, damageAmount, enqueue));
             }
         }
 
-        private static void MarkVisitedObject(BaseGridObject obj, CellImpactMarkData[,] markData, int damageAmount, Action<PendingBoosterAction> enqueue)
+        private static void MarkVisitedObject(BaseGridObject obj, int actionGroupId, CellImpactMarkData[,] markData, int damageAmount, Action<PendingBoosterAction> enqueue)
         {
             var coord = obj.Coord;
             
@@ -65,7 +47,7 @@ namespace Core.Utils
 
             if (isDamageable)
             {
-                cell.AddDamage(damageAmount, DamageSource.Booster);
+                cell.AddDamage(actionGroupId, damageAmount, DamageSource.Booster);
             }
 
             if (trigger != null)

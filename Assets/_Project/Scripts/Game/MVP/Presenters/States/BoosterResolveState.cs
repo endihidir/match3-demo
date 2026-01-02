@@ -43,13 +43,6 @@ namespace Core.Handlers
             {
                 var action = queue.Dequeue();
                 
-                var originObj = model.GetGridObject(action.OriginCoord);
-                
-                if (originObj)
-                {
-                    GridImpactMarker.MarkOriginObject(originObj, markData);
-                }
-                
                 switch (action.BoosterAction)
                 {
                     case RocketHorizontalAction hAction:
@@ -75,6 +68,10 @@ namespace Core.Handlers
             {
                 var key = new BoosterActionKey(boosterAction.OriginCoord, boosterAction.BoosterAction);
                 if (!seen.Add(key)) return;
+                
+                if (boosterAction.GroupId == 0)
+                    boosterAction.SetGroupId(Context.NextBoosterGroupId());
+                
                 queue.Enqueue(boosterAction);
             }
         }
