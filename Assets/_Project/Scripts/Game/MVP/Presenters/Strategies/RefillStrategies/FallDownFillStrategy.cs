@@ -13,7 +13,7 @@ namespace Core.Handlers
     {
         private readonly RefillSettingsSO _refillSettingsSo;
         private readonly List<UniTask> _refillTasks = new(128);
-        public bool CanRefill(IGridModel model) => !GridRefillCalcUtils.HasStationaryAndBlocking(model);
+        public bool CanRefill(IGridModel model) => !GridRefillCalcUtil.HasStationaryAndBlocking(model);
 
         public FallDownRefillStrategy(GameplayConfigContainer configContainer)
         {
@@ -37,7 +37,7 @@ namespace Core.Handlers
 
                 ShiftColumn(context, x, height, cellSize, ref wave, _refillTasks);
 
-                if (GridRefillCalcUtils.TryGetSpawnCellCoord(model, x, model.Height, out var spawnCell))
+                if (GridRefillCalcUtil.TryGetSpawnCellCoord(model, x, model.Height, out var spawnCell))
                 {
                     var spawnY = view.GridToWorld(spawnCell).y + cellSize;
                     RefillColumn(context, x, height, cellSize, spawnY, ref wave, _refillTasks);
@@ -59,7 +59,7 @@ namespace Core.Handlers
                 if (!model.IsCellActive(coord)) continue;
                 if (model.GetGridObject(coord)) continue;
 
-                var srcY = GridRefillCalcUtils.FindFallSourceY(stateContext.Model, x, y - 1);
+                var srcY = GridRefillCalcUtil.FindFallSourceY(stateContext.Model, x, y - 1);
                 if (srcY < 0) continue;
 
                 var src = new Vector2Int(x, srcY);

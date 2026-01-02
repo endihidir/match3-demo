@@ -23,7 +23,7 @@ namespace Core.Handlers
         public bool RefillInProgress { get; set; }
         public bool MatchResolveRequested { get; set; }
         public bool HasPendingBoosterActions => PendingBoosterActions.Count > 0;
-        public bool HasAnyEmptyActiveCell => GridRefillCalcUtils.HasAnyEmptyActiveCell(Model);
+        public bool HasAnyEmptyActiveCell => GridRefillCalcUtil.HasAnyEmptyActiveCell(Model);
 
         public GridStateContext(IGridModel model, IGridView view, IGridItemFactory factory, ItemConfigContainerSO configs)
         {

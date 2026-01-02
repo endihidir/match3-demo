@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Core.Utils
 {
-    public static class GridRefillCalcUtils
+    public static class GridRefillCalcUtil
     {
         public static bool HasStationaryAndBlocking(IGridModel model)
         {
@@ -62,11 +62,7 @@ namespace Core.Utils
                     var coord = new Vector2Int(x, y);
 
                     if (!model.IsCellActive(coord)) continue;
-                    if (!model.GetGridObject(coord))
-                    {
-                        EditorLogger.LogError(coord);
-                        return true;
-                    }
+                    if (!model.GetGridObject(coord)) return true;
                 }
             }
 

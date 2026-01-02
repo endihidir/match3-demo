@@ -23,7 +23,7 @@ namespace Core.Handlers
             _refillSettingsSo = configContainer.ItemConfigContainer.RefillSettingsSo;
         }
         
-        public bool CanRefill(IGridModel model) => GridRefillCalcUtils.HasStationaryAndBlocking(model);
+        public bool CanRefill(IGridModel model) => GridRefillCalcUtil.HasStationaryAndBlocking(model);
 
         public async UniTask ExecuteAsync(GridStateContext context)
         {
@@ -93,9 +93,9 @@ namespace Core.Handlers
                 {
                     var coord = new Vector2Int(x, y);
 
-                    if (!GridRefillCalcUtils.IsEmptyActiveCell(model, coord)) continue;
+                    if (!GridRefillCalcUtil.IsEmptyActiveCell(model, coord)) continue;
 
-                    if (!GridRefillCalcUtils.TryFindVerticalSource(model, coord.x, coord.y, out var sourceCoord)) continue;
+                    if (!GridRefillCalcUtil.TryFindVerticalSource(model, coord.x, coord.y, out var sourceCoord)) continue;
 
                     if (reservedSourceCoords.Contains(sourceCoord)) continue;
 
@@ -116,9 +116,9 @@ namespace Core.Handlers
                 {
                     var coord = new Vector2Int(x, y);
 
-                    if (!GridRefillCalcUtils.IsEmptyActiveCell(model, coord)) continue;
+                    if (!GridRefillCalcUtil.IsEmptyActiveCell(model, coord)) continue;
 
-                    if (!GridRefillCalcUtils.TryGetBarrierYAbove(model, coord.x, coord.y, out var barrierY)) continue;
+                    if (!GridRefillCalcUtil.TryGetBarrierYAbove(model, coord.x, coord.y, out var barrierY)) continue;
 
                     var topGapY = barrierY + 1;
                     if (topGapY >= height) continue;
@@ -127,9 +127,9 @@ namespace Core.Handlers
 
                     var topGapCell = new Vector2Int(coord.x, topGapY);
 
-                    if (!GridRefillCalcUtils.IsEmptyActiveCell(model, topGapCell)) continue;
+                    if (!GridRefillCalcUtil.IsEmptyActiveCell(model, topGapCell)) continue;
 
-                    var barrierAtTop = GridRefillCalcUtils.IsBarrierAtColumnTop(model, coord.x, barrierY);
+                    var barrierAtTop = GridRefillCalcUtil.IsBarrierAtColumnTop(model, coord.x, barrierY);
 
                     if (TryMarkSlideFromSide(model, topGapCell, coord.x + 1, barrierY, barrierAtTop, reservedSources, plans)) continue;
 
@@ -154,7 +154,7 @@ namespace Core.Handlers
 
             if (item.IsStationary) return false;
 
-            if (GridRefillCalcUtils.CanFallStraightDown(model, sideCellCoord)) return false;
+            if (GridRefillCalcUtil.CanFallStraightDown(model, sideCellCoord)) return false;
 
             plans.Add(new SlideMovePlan(sideCellCoord, targetCell, item, true));
             reservedSources.Add(sideCellCoord);
@@ -211,7 +211,7 @@ namespace Core.Handlers
 
             for (int x = 0; x < width; x++)
             {
-                if (!GridRefillCalcUtils.TryGetSpawnCellCoord(stateContext.Model, x, height, out var cellCoord)) continue;
+                if (!GridRefillCalcUtil.TryGetSpawnCellCoord(stateContext.Model, x, height, out var cellCoord)) continue;
                 
                 if (SpawnTopOpenCells(stateContext, view, x, height, cellSize, cellCoord, pathByItem))
                 {
