@@ -67,6 +67,7 @@ namespace Core.Handlers
             void EnqueueIfNew(PendingBoosterAction boosterAction)
             {
                 var key = new BoosterActionKey(boosterAction.OriginCoord, boosterAction.BoosterAction);
+                
                 if (!seen.Add(key)) return;
                 
                 if (boosterAction.GroupId == 0)

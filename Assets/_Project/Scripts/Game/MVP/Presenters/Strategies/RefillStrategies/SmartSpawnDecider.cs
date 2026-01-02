@@ -38,11 +38,19 @@ namespace Core.Handlers
             {
                 var type = types[i];
 
+                // Avoid vertical stacks regardless of fill order (above OR below)
+                if (IsSame(model, coord.x, coord.y + 1, type) || IsSame(model, coord.x, coord.y - 1, type))
+                    continue;
+
                 if (CreatesImmediateMatch(model, coord, type))
                     match[matchCount++] = type;
                 else
                     safe[safeCount++] = type;
             }
+
+            // If everything got filtered out (edge case), relax and pick from all types.
+            if (safeCount == 0 && matchCount == 0)
+                return types[UnityEngine.Random.Range(0, types.Length)];
 
             var immediateChance01 = Mathf.Clamp01((settings.ImmediateMatchChance - safetyBoost) / 100f);
             var pickMatch = false;
@@ -91,10 +99,24 @@ namespace Core.Handlers
         // Immediate match check (left2 / down2)
         private static bool CreatesImmediateMatch(IGridModel model, Vector2Int cell, ItemType type)
         {
+            // Horizontal: XX_ , _XX , X_X
             if (IsSame(model, cell.x - 1, cell.y, type) && IsSame(model, cell.x - 2, cell.y, type))
                 return true;
 
+            if (IsSame(model, cell.x + 1, cell.y, type) && IsSame(model, cell.x + 2, cell.y, type))
+                return true;
+
+            if (IsSame(model, cell.x - 1, cell.y, type) && IsSame(model, cell.x + 1, cell.y, type))
+                return true;
+
+            // Vertical: XX_ , _XX , X_X
             if (IsSame(model, cell.x, cell.y - 1, type) && IsSame(model, cell.x, cell.y - 2, type))
+                return true;
+
+            if (IsSame(model, cell.x, cell.y + 1, type) && IsSame(model, cell.x, cell.y + 2, type))
+                return true;
+
+            if (IsSame(model, cell.x, cell.y - 1, type) && IsSame(model, cell.x, cell.y + 1, type))
                 return true;
 
             return false;
@@ -105,12 +127,20 @@ namespace Core.Handlers
         {
             var score = 0;
 
+            // adjacency
             if (IsSame(model, cell.x - 1, cell.y, type)) score++;
             if (IsSame(model, cell.x + 1, cell.y, type)) score++;
             if (IsSame(model, cell.x, cell.y - 1, type)) score++;
             if (IsSame(model, cell.x, cell.y + 1, type)) score++;
 
-            // You can expand this with x_x patterns if you want it stricter.
+            // "two-in-line potential" penalties (stronger)
+            if (IsSame(model, cell.x - 2, cell.y, type) && IsSame(model, cell.x - 1, cell.y, type)) score += 4;
+            if (IsSame(model, cell.x + 2, cell.y, type) && IsSame(model, cell.x + 1, cell.y, type)) score += 4;
+            if (IsSame(model, cell.x - 1, cell.y, type) && IsSame(model, cell.x + 1, cell.y, type)) score += 4;
+
+            if (IsSame(model, cell.x, cell.y - 2, type) && IsSame(model, cell.x, cell.y - 1, type)) score += 4;
+            if (IsSame(model, cell.x, cell.y + 2, type) && IsSame(model, cell.x, cell.y + 1, type)) score += 4;
+            if (IsSame(model, cell.x, cell.y - 1, type) && IsSame(model, cell.x, cell.y + 1, type)) score += 4;
 
             return score;
         }
@@ -121,8 +151,7 @@ namespace Core.Handlers
                 return false;
 
             var obj = model.GetGridObject(new Vector2Int(x, y));
-            if (obj is not ItemObject item)
-                return false;
+            if (obj is not ItemObject item) return false;
 
             return item.ItemType == type;
         }
