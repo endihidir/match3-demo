@@ -20,12 +20,12 @@ namespace Core.Handlers
 
         public SlideDownRefillStrategy(GameplayConfigContainer configContainer)
         {
-            _refillSettingsSo = configContainer.ItemConfigContainerSo.RefillSettingsSo;
+            _refillSettingsSo = configContainer.ItemConfigContainer.RefillSettingsSo;
         }
         
         public bool CanRefill(IGridModel model) => GridRefillCalcUtils.HasStationaryAndBlocking(model);
 
-        public async UniTask Execute(GridStateContext context)
+        public async UniTask ExecuteAsync(GridStateContext context)
         {
             _refillTasks.Clear();
             var model = context.Model;
@@ -332,7 +332,7 @@ namespace Core.Handlers
 
                     var waveIndex = isSpawned ? nonSpawnMoveCount + spawnWaveIndex++ : nonSpawnWaveIndex++;
 
-                    var delay = waveIndex * _refillSettingsSo.ShiftDelayMultiplier;
+                    var delay = (waveIndex * _refillSettingsSo.ShiftDelayMultiplier);
 
                     if (HasHorizontalStep(record.ItemCoordPath))
                         delay = 0f;

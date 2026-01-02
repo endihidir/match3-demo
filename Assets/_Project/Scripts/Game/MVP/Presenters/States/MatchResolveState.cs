@@ -11,33 +11,27 @@ namespace Core.Handlers
 {
     public sealed class MatchResolveState : StateBase<GridStateContext>
     {
-        public MatchResolveState(GridStateContext context, bool showLogs = true) : base(context, showLogs)
-        {
-            
-        }
-
         public override bool NeedsExitPermission => true;
+        public MatchResolveState(GridStateContext context) : base(context) { }
         
         protected override void OnEnter()
         {
-            ResolveAsync().Forget();
+            Context.MatchResolveRequested = false;
+            
+            ResolveMatchesAsync().Forget();
         }
 
-        private async UniTask ResolveAsync()
+        private async UniTask ResolveMatchesAsync()
         {
-            var matchMask = GridMatchMaskBuilder.BuildMatchMask(Context.Model, out var hasMatch);
-
-            if (hasMatch)
+            if (GridMatchMaskBuilder.TryBuildMatchMask(Context.Model, out var matchMask))
             {
-                await ResolveFromMask(matchMask);
+                await ResolveMaskAsync(matchMask);
             }
-            
-            Context.ResolvedAnyMatch = hasMatch;
             
             RequestExit();
         }
 
-        private async UniTask ResolveFromMask(bool[,] matchMask)
+        private async UniTask ResolveMaskAsync(bool[,] matchMask)
         {
             var model = Context.Model;
             var width = model.Width;
@@ -54,19 +48,19 @@ namespace Core.Handlers
 
                     var obj = model.GetGridObject(x, y);
                     if (!obj) continue;
-                    var id = obj.TypeId;
-                    if (id <= 0) continue;
 
                     var coord = new Vector2Int(x, y);
-                    var group = GridMatchGroupCollector.CollectGroupFromMask(matchMask, visited, model, coord, id);
+                    var group = GridMatchGroupCollector.CollectGroupFromMask(model, matchMask, visited, coord);
                     if (group == null || group.Count == 0) continue;
-
-                    await ResolveGroup(model, matchMask, group, id);
+                    
+                    var id = obj.TypeId;
+                    if (id <= 0) continue;
+                    await ResolveGroupAsync(model, matchMask, group, id);
                 }
             }
         }
 
-        private async UniTask ResolveGroup(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int id)
+        private async UniTask ResolveGroupAsync(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int id)
         {
             var boosterType = GridBoosterDecision.DecideBoosterTypeFromGroup(model, matchMask, group, id);
 
@@ -80,7 +74,7 @@ namespace Core.Handlers
 
             Context.HasForcedBoosterSpawnCoord = false;
 
-            await PlayMergeAnimation(group, centerCoord);
+            await PlayMergeAnimationAsync(group, centerCoord);
 
             ReleaseGroup(model, group, false, centerCoord);
 
@@ -135,7 +129,7 @@ namespace Core.Handlers
             }
         }
         
-        private async UniTask PlayMergeAnimation(List<Vector2Int> group, Vector2Int spawnCoord)
+        private async UniTask PlayMergeAnimationAsync(List<Vector2Int> group, Vector2Int spawnCoord)
         {
             var tasks = new List<UniTask>(group.Count);
             var targetWorld = Context.View.GridToWorld(spawnCoord);

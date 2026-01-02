@@ -8,13 +8,11 @@ namespace Core.Handlers
 {
     public sealed class GridCheatHandler : IGridCheatHandler, ITickable
     {
-        private readonly IStateMachine _gridStateMachine;
-        private readonly GridStateContext _gridStateContext;
+        private readonly IGridStateHandler _gridStateHandler;
         
         public GridCheatHandler(IGridStateHandler gridStateHandler)
         {
-            _gridStateMachine = gridStateHandler.StateMachine;
-            _gridStateContext = gridStateHandler.Context;
+            _gridStateHandler = gridStateHandler;
         }
 
         public void Tick()
@@ -41,15 +39,17 @@ namespace Core.Handlers
             
             if (Input.GetKeyDown(KeyCode.L))
             {
-                if(_gridStateMachine != null)
-                    EditorLogger.LogError(_gridStateMachine.CurrentState);
+                if (_gridStateHandler != null)
+                {
+                    EditorLogger.LogError(_gridStateHandler.StateMachine.CurrentState.StateID);
+                }
             }
         }
         
         public void CleanupBoosters()
         {
-            var context = _gridStateContext;
-            var stateMachine = _gridStateMachine;
+            var context = _gridStateHandler.Context;
+            var stateMachine = _gridStateHandler.StateMachine;
             
             if(context == null || stateMachine == null)  return;
             
@@ -71,8 +71,8 @@ namespace Core.Handlers
 
         public void GenerateBoosterAtMousePos(BoosterType boosterType)
         {
-            var context = _gridStateContext;
-            var stateMachine = _gridStateMachine;
+            var context = _gridStateHandler.Context;
+            var stateMachine = _gridStateHandler.StateMachine;
             
             if(context == null || stateMachine == null)  return;
             

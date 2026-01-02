@@ -59,10 +59,14 @@ namespace Core.Utils
             {
                 for (int x = 0; x < model.Width; x++)
                 {
-                    var cell = new Vector2Int(x, y);
+                    var coord = new Vector2Int(x, y);
 
-                    if (!model.IsCellActive(cell)) continue;
-                    if (!model.GetGridObject(cell)) return true;
+                    if (!model.IsCellActive(coord)) continue;
+                    if (!model.GetGridObject(coord))
+                    {
+                        EditorLogger.LogError(coord);
+                        return true;
+                    }
                 }
             }
 

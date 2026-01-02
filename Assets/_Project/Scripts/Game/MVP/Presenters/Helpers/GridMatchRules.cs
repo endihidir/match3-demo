@@ -8,6 +8,7 @@ namespace Core.Utils
         public static bool IsCellMatched(IGridModel model, GridObjectType[,] grid, int x, int y, int id)
         {
             if (!model.IsInRange(x, y)) return false;
+            if (!IsRegularItem(grid[x, y])) return false;
             if (grid[x, y].TypeId != id) return false;
 
             var left = CountSame(model, grid, x, y, id, -1, 0);
@@ -36,7 +37,6 @@ namespace Core.Utils
                 {
                     var data = grid[x, y];
                     if (!IsRegularItem(data)) continue;
-
                     if (IsCellMatched(model, grid, x, y, data.TypeId)) return true;
                 }
             }
@@ -49,10 +49,17 @@ namespace Core.Utils
             if (x < 0 || y < 0) return false;
             if (x + 1 >= model.Width || y + 1 >= model.Height) return false;
 
-            return grid[x, y].TypeId == id
-                   && grid[x + 1, y].TypeId == id
-                   && grid[x, y + 1].TypeId == id
-                   && grid[x + 1, y + 1].TypeId == id;
+            var a = grid[x, y];
+            var b = grid[x + 1, y];
+            var c = grid[x, y + 1];
+            var d = grid[x + 1, y + 1];
+
+            if (!IsRegularItem(a) || a.TypeId != id) return false;
+            if (!IsRegularItem(b) || b.TypeId != id) return false;
+            if (!IsRegularItem(c) || c.TypeId != id) return false;
+            if (!IsRegularItem(d) || d.TypeId != id) return false;
+
+            return true;
         }
         
         public static void GetLineLengthsAt(IGridModel gridModel, GridObjectType[,] grid, int x, int y, int id, bool assumeCenterIsId, out int horizontal, out int vertical)

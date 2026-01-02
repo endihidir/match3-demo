@@ -8,7 +8,7 @@ namespace Core.Configs
     public class GameplayConfigContainer : ScriptableObject
     {
         [field: SerializeField, Required] public GameplayBootstrapperConfig GameplayBootstrapperConfig { get; private set; }
-        [field: SerializeField, Required] public ItemConfigContainerSO ItemConfigContainerSo { get; private set; }
+        [field: SerializeField, Required] public ItemConfigContainerSO ItemConfigContainer { get; private set; }
         public void Initialize()
         {
             

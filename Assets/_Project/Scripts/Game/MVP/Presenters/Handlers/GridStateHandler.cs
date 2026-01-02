@@ -3,7 +3,6 @@ using Core.Item;
 using Core.Item.Factories;
 using Core.Models;
 using Core.StateMachineCore;
-using Core.Utils;
 using Core.Views;
 using UnityEngine;
 using VContainer.Unity;
@@ -15,35 +14,38 @@ namespace Core.Handlers
     {
         public IStateMachine StateMachine { get; } = new StateMachine();
         public GridStateContext Context { get; }
+        private bool HasAnyInput => Context.Inputs.Count > 0;
+        private bool HasPendingBoosterActions => Context.HasPendingBoosterActions;
+        private bool HasAnyEmptyActiveCell => Context.HasAnyEmptyActiveCell;
+        private bool MatchResolveRequested => Context.MatchResolveRequested;
+        private bool RefillInProgress => Context.RefillInProgress;
 
         public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory, GameplayConfigContainer configContainer, IRefillStrategyHandler strategyHandler)
         {
-            Context = new GridStateContext(model, view, factory, configContainer.ItemConfigContainerSo);
+            Context = new GridStateContext(model, view, factory, configContainer.ItemConfigContainer);
 
             var idleState = new IdleState(Context);
-            var inputResolveState = new InputResolveState(Context);
-            var boosterResolveState = new BoosterResolveState(Context);
-            var matchResolveState = new MatchResolveState(Context);
-            var refillResolveState = new RefillResolveState(strategyHandler, Context);
+            var inputState = new InputResolveState(Context);
+            var boosterState = new BoosterResolveState(Context);
+            var matchState = new MatchResolveState(Context);
+            var refillState = new RefillResolveState(strategyHandler, Context);
 
-            var states = new StateBase<GridStateContext>[] { idleState, inputResolveState, boosterResolveState, matchResolveState, refillResolveState };
+            var states = new StateBase<GridStateContext>[] { idleState, inputState, boosterState, matchState, refillState };
             
             StateMachine.Register(states);
 
-            StateMachine.AddTransition(idleState, inputResolveState, () => Context.MoveQueue.Count > 0)
-                         .AddTransition(idleState, matchResolveState, () => Context.RefillResolveRequested && !Context.RefillInProgress)
-                         .AddTransition(idleState, refillResolveState, () => GridRefillCalcUtils.HasAnyEmptyActiveCell(Context.Model))
+            StateMachine.AddTransition(idleState, inputState, () => HasAnyInput)
+                         .AddTransition(idleState, matchState, () => MatchResolveRequested && !RefillInProgress)
+                         .AddTransition(idleState, refillState, () => HasAnyEmptyActiveCell && !HasAnyInput && !MatchResolveRequested)
                          
-                         .AddTransition(inputResolveState, boosterResolveState, () => inputResolveState.IsExitReady)
-                         .AddTransition(inputResolveState, idleState, () => inputResolveState.IsExitReady)
+                         .AddTransition(inputState, boosterState, () => inputState.IsExitReady && HasPendingBoosterActions)
+                         .AddTransition(inputState, matchState, () => inputState.IsExitReady && MatchResolveRequested && !HasPendingBoosterActions)
+                         .AddTransition(inputState, idleState, () => inputState.IsExitReady)
                          
-                         .AddTransition(boosterResolveState, refillResolveState, () => boosterResolveState.IsExitReady && Context.ResolvedAnyBooster)
-                         .AddTransition(boosterResolveState, matchResolveState, () => boosterResolveState.IsExitReady && !Context.ResolvedAnyBooster)
+                         .AddTransition(boosterState, refillState, () => boosterState.IsExitReady)
+                         .AddTransition(matchState, refillState, () => matchState.IsExitReady)
                          
-                         .AddTransition(matchResolveState, refillResolveState, () => matchResolveState.IsExitReady && Context.ResolvedAnyMatch)
-                         .AddTransition(matchResolveState, idleState, () => matchResolveState.IsExitReady && !Context.ResolvedAnyMatch)
-                         
-                         .AddTransition(refillResolveState, idleState, () => refillResolveState.IsExitReady);
+                         .AddTransition(refillState, idleState, () => refillState.IsExitReady);
 
             StateMachine.SetInitialState(idleState);
         }
@@ -70,7 +72,8 @@ namespace Core.Handlers
                 return false;
             }
 
-            Context.MoveQueue.Enqueue(new GridMove(GridMoveType.Tap, sourceCoord));
+            var inputSource = new InputSource(GridInputType.Tap, sourceCoord);
+            Context.Inputs.Enqueue(inputSource);
             return true;
         }
 
@@ -92,7 +95,7 @@ namespace Core.Handlers
                 return false;
             }
 
-            Context.MoveQueue.Enqueue(new GridMove(GridMoveType.Swap, sourceCoord, targetCoord));
+            Context.Inputs.Enqueue(new InputSource(GridInputType.Swap, sourceCoord, targetCoord));
             return true;
         }
 

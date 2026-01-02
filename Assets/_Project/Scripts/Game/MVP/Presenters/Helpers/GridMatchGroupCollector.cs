@@ -5,39 +5,48 @@ using UnityEngine;
 namespace Core.Utils
 {
     public static class GridMatchGroupCollector
-    {
-        public static List<Vector2Int> CollectGroupFromMask(bool[,] matchMask, bool[,] visited, IGridModel model, Vector2Int coord, int id)
+    { 
+        public static List<Vector2Int> CollectGroupFromMask(IGridModel model, bool[,] matchMask, bool[,] visited, Vector2Int start)
         {
-            var grid = model.BuildTypeDataGrid();
-            var group = new List<Vector2Int>(16);
+            var result = new List<Vector2Int>();
+            var stack = new Stack<Vector2Int>();
 
-            if (!model.IsInRange(coord)) return group;
-            if (!matchMask[coord.x, coord.y]) return group;
-            if (visited[coord.x, coord.y]) return group;
-            if (!GridMatchRules.IsCellMatched(model, grid, coord.x, coord.y, id)) return group;
+            var startObj = model.GetGridObject(start.x, start.y);
+            if (!startObj || !GridMatchRules.IsRegularItem(startObj.ObjectType)) return result;
 
-            var q = new Queue<Vector2Int>(16);
-            q.Enqueue(coord);
+            var typeId = startObj.TypeId;
 
-            while (q.Count > 0)
+            stack.Push(start);
+            visited[start.x, start.y] = true;
+
+            while (stack.Count > 0)
             {
-                var c = q.Dequeue();
+                var p = stack.Pop();
+                result.Add(p);
 
-                if (!model.IsInRange(c)) continue;
-                if (visited[c.x, c.y]) continue;
-                if (!matchMask[c.x, c.y]) continue;
-                if (!GridMatchRules.IsCellMatched(model, grid, c.x, c.y, id)) continue;
-
-                visited[c.x, c.y] = true;
-                group.Add(c);
-
-                q.Enqueue(new Vector2Int(c.x + 1, c.y));
-                q.Enqueue(new Vector2Int(c.x - 1, c.y));
-                q.Enqueue(new Vector2Int(c.x, c.y + 1));
-                q.Enqueue(new Vector2Int(c.x, c.y - 1));
+                TryPush(p.x + 1, p.y);
+                TryPush(p.x - 1, p.y);
+                TryPush(p.x, p.y + 1);
+                TryPush(p.x, p.y - 1);
             }
 
-            return group;
+            return result;
+
+            void TryPush(int x, int y)
+            {
+                if (!model.IsInRange(x, y)) return;
+                if (visited[x, y]) return;
+                if (!matchMask[x, y]) return;
+
+                var obj = model.GetGridObject(x, y);
+                if (!obj) return;
+
+                if (!GridMatchRules.IsRegularItem(obj.ObjectType)) return;
+                if (obj.TypeId != typeId) return;
+
+                visited[x, y] = true;
+                stack.Push(new Vector2Int(x, y));
+            }
         }
     }
 }

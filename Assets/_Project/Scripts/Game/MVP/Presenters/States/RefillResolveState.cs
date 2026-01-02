@@ -10,24 +10,24 @@ namespace Core.Handlers
         
         private readonly IRefillStrategyHandler _strategyHandler;
         
-        public RefillResolveState(IRefillStrategyHandler strategyHandler, GridStateContext context, bool showLogs = true) : base(context, showLogs)
+        public RefillResolveState(IRefillStrategyHandler strategyHandler, GridStateContext context) : base(context)
         {
             _strategyHandler = strategyHandler;
         }
 
         protected override void OnEnter()
         {
-            Context.RefillInProgress = true;
-            Run().Forget();
+            RefillAsync().Forget();
             RequestExit();
         }
 
-        private async UniTask Run()
+        private async UniTask RefillAsync()
         {
+            Context.RefillInProgress = true;
             var strategy = _strategyHandler.SelectStrategy(Context.Model);
-            await strategy.Execute(Context);
+            await strategy.ExecuteAsync(Context);
             Context.RefillInProgress = false;
-            Context.RefillResolveRequested = GridMatchRules.HasAnyRegularMatchOnBoard(Context.Model);
+            Context.MatchResolveRequested = GridMatchRules.HasAnyRegularMatchOnBoard(Context.Model);
         }
     }
 }
