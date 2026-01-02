@@ -12,6 +12,7 @@ namespace Core.Handlers
     {
         public override bool NeedsExitPermission => true;
         public BoosterResolveState(GridStateContext context) : base(context) { }
+
         protected override void OnEnter()
         {
             ApplyPendingActions();

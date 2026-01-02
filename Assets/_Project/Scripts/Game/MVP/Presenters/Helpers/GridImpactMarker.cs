@@ -22,7 +22,7 @@ namespace Core.Utils
 
             if (obj is IDamageableItem)
             {
-                cell.MarkDamage(1, DamageSource.Booster);
+                cell.AddDamage(1, DamageSource.Booster);
             }
         }
         
@@ -65,7 +65,7 @@ namespace Core.Utils
 
             if (isDamageable)
             {
-                cell.MarkDamage(damageAmount, DamageSource.Booster);
+                cell.AddDamage(damageAmount, DamageSource.Booster);
             }
 
             if (trigger != null)
