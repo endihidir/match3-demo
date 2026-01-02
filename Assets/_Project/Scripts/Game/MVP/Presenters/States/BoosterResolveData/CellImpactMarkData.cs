@@ -1,4 +1,5 @@
 using Core.Item;
+using UnityEngine;
 
 namespace Core.Handlers
 {
@@ -11,12 +12,13 @@ namespace Core.Handlers
         
         public void MarkRemove() => Remove = true;
         public void UnMarkRemove() => Remove = false;
-        public void MarkDamage(int damageAmount, DamageSource damageSource)
+        public void AddDamage(int damageAmount, DamageSource damageSource)
         {
-            DamageAmount = damageAmount;
+            DamageAmount += damageAmount;
             DamageSource |= damageSource;
         }
-        public void UnmarkDamage()
+        
+        public void ResetDamage()
         {
             DamageAmount = 0;
             DamageSource = DamageSource.None;
@@ -25,7 +27,7 @@ namespace Core.Handlers
         public void Dispose()
         {
             UnMarkRemove();
-            UnmarkDamage();
+            ResetDamage();
         }
     }
 }
