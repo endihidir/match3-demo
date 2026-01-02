@@ -15,5 +15,5 @@ MonoBehaviour:
   <ShiftDurationMultiplier>k__BackingField: 0.1
   <ShiftDelayMultiplier>k__BackingField: 0.05
   <SpawnSettings>k__BackingField:
-    <AllowImmediateMatch>k__BackingField: 0
-    <NearMatchPenalty>k__BackingField: 0
+    <ImmediateMatchChance>k__BackingField: 0
+    <NearMatchAvoidance>k__BackingField: 100
