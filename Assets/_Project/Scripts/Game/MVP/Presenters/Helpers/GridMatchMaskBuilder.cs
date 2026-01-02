@@ -5,14 +5,9 @@ namespace Core.Utils
 {
     public static class GridMatchMaskBuilder
     {
-        public static bool[,] BuildMatchMask(IGridModel gridModel, out bool anyMatch)
+        public static bool TryBuildMatchMask(IGridModel gridModel, out bool[,] mask)
         {
             var grid = gridModel.BuildTypeDataGrid();
-            return BuildMatchMask(gridModel, grid, out anyMatch);
-        }
-        
-        private static bool[,] BuildMatchMask(IGridModel gridModel, GridObjectType[,] grid, out bool anyMatch)
-        {
             var remove = new bool[gridModel.Width, gridModel.Height];
             var any = false;
 
@@ -20,8 +15,8 @@ namespace Core.Utils
             ScanRuns(gridModel, grid, remove, dx: 0, dy: 1, ref any);
             ScanSquares(gridModel, grid, remove, ref any);
 
-            anyMatch = any;
-            return remove;
+            mask = remove;
+            return any;
         }
 
         private static void ScanRuns(IGridModel gridModel, GridObjectType[,] grid, bool[,] remove, int dx, int dy, ref bool any)

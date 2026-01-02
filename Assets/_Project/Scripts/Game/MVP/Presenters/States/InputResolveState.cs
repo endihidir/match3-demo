@@ -11,28 +11,25 @@ namespace Core.Handlers
     public sealed class InputResolveState : StateBase<GridStateContext>
     { 
         public override bool NeedsExitPermission => true;
-        public InputResolveState(GridStateContext context, bool showLogs = true) : base(context, showLogs)
-        {
-            
-        }
+        public InputResolveState(GridStateContext context) : base(context) { }
 
         protected override void OnEnter()
         {
-            if (Context.MoveQueue.Count == 0)
+            if (Context.Inputs.Count == 0)
             {
                 RequestExit();
                 return;
             }
 
-            var move = Context.MoveQueue.Dequeue();
+            var inputSource = Context.Inputs.Dequeue();
 
-            switch (move.MoveType)
+            switch (inputSource.InputType)
             {
-                case GridMoveType.Tap:
-                    HandleTap(move);
+                case GridInputType.Tap:
+                    HandleTap(inputSource);
                     return;
-                case GridMoveType.Swap:
-                    HandleSwap(move);
+                case GridInputType.Swap:
+                    HandleSwap(inputSource);
                     return;
                 default:
                     RequestExit();
@@ -40,7 +37,7 @@ namespace Core.Handlers
             }
         }
 
-        private void HandleTap(in GridMove move)
+        private void HandleTap(in InputSource move)
         {
             var sourceCoord = move.SourceCoord;
             
@@ -60,11 +57,10 @@ namespace Core.Handlers
             }
 
             AddSingleBoosterEffect(sourceCoord, booster);
-            Context.RefillResolveRequested = true;
             RequestExit();
         }
 
-        private void HandleSwap(in GridMove move)
+        private void HandleSwap(in InputSource move)
         {
             var sourceCoord = move.SourceCoord;
             var targetCoord = move.TargetCoord;
@@ -80,7 +76,7 @@ namespace Core.Handlers
            
             if (sourceObj is BoosterObject || targetObj is BoosterObject)
             {
-                PlaySwapAndCommit(sourceObj, targetObj, sourceCoord, targetCoord, false).Forget();
+                PlaySwapAndCommit(sourceObj, targetObj, false).Forget();
                 return;
             }
             
@@ -91,7 +87,7 @@ namespace Core.Handlers
                 return;
             }
             
-            PlaySwapAndCommit(sourceObj, targetObj, sourceCoord, targetCoord, true).Forget();
+            PlaySwapAndCommit(sourceObj, targetObj, true).Forget();
         }
 
         private async UniTask PlaySwapAndBack(BaseGridObject sourceObj, BaseGridObject targetObj, Vector2Int sourceCoord, Vector2Int targetCoord)
@@ -109,10 +105,13 @@ namespace Core.Handlers
             RequestExit();
         }
 
-        private async UniTask PlaySwapAndCommit(BaseGridObject sourceObj, BaseGridObject targetObj, Vector2Int sourceCoord, Vector2Int targetCoord, bool forceBoosterSpawnCoord)
+        private async UniTask PlaySwapAndCommit(BaseGridObject sourceObj, BaseGridObject targetObj, bool forceBoosterSpawnCoord)
         {
             var tasks = new List<UniTask>();
 
+            var sourceCoord = sourceObj.Coord;
+            var targetCoord = targetObj.Coord;
+            
             var tweenA = sourceObj.ItemAnimation.Move(Context.View.GridToWorld(targetCoord));
             var tweenB = targetObj.ItemAnimation.Move(Context.View.GridToWorld(sourceCoord));
 
@@ -129,36 +128,35 @@ namespace Core.Handlers
                 Context.ForcedBoosterSpawnCoord = targetCoord;
             }
 
-            AfterSwapCommitted(sourceCoord, targetCoord);
+            AfterSwapCommitted(sourceObj, targetObj);
 
             RequestExit();
         }
 
-        private void AfterSwapCommitted(Vector2Int sourceCoord, Vector2Int targetCoord)
+        private void AfterSwapCommitted(BaseGridObject sourceObj, BaseGridObject targetObj)
         {
-            var sourceObj = Context.Model.GetGridObject(sourceCoord);
-            var targetObj = Context.Model.GetGridObject(targetCoord);
-
+            var sourceCoord = sourceObj.Coord;
+            var targetCoord = targetObj.Coord;
+            
             if (sourceObj is BoosterObject sourceBooster && targetObj is BoosterObject targetBooster)
             {
-                AddMergedEffects(targetCoord, sourceBooster.BoosterType, targetBooster.BoosterType);
-                Context.RefillResolveRequested = true;
+                AddMergedEffects(sourceCoord, sourceBooster.BoosterType, targetBooster.BoosterType);
                 return;
             }
 
             if (targetObj is BoosterObject movedBoosterToB)
             {
                 AddSingleBoosterEffect(targetCoord, movedBoosterToB);
-                Context.RefillResolveRequested = true;
                 return;
             }
 
             if (sourceObj is BoosterObject movedBoosterToA)
             {
                 AddSingleBoosterEffect(sourceCoord, movedBoosterToA);
+                return;
             }
-
-            Context.RefillResolveRequested = true;
+            
+            Context.MatchResolveRequested = true;
         }
 
         private void AddSingleBoosterEffect(Vector2Int originCoord, BoosterObject booster)

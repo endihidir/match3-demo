@@ -1,6 +1,6 @@
 namespace Core.Handlers
 {
-    public enum GridMoveType
+    public enum GridInputType
     {
         Swap = 0,
         Tap = 1

@@ -6,6 +6,6 @@ namespace Core.Handlers
     public interface IRefillStrategy
     {
         bool CanRefill(IGridModel model);
-        UniTask Execute(GridStateContext context);
+        UniTask ExecuteAsync(GridStateContext context);
     }
 }

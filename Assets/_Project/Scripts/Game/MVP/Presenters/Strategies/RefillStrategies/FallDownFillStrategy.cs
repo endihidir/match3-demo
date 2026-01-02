@@ -17,10 +17,10 @@ namespace Core.Handlers
 
         public FallDownRefillStrategy(GameplayConfigContainer configContainer)
         {
-            _refillSettingsSo = configContainer.ItemConfigContainerSo.RefillSettingsSo;
+            _refillSettingsSo = configContainer.ItemConfigContainer.RefillSettingsSo;
         }
 
-        public async UniTask Execute(GridStateContext context)
+        public async UniTask ExecuteAsync(GridStateContext context)
         {
             _refillTasks.Clear();
             var model = context.Model;

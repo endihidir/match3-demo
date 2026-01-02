@@ -32,7 +32,7 @@ namespace Core.Item.Factories
         public GridItemFactory(IObjectPoolService objectPoolService, GameplayConfigContainer gameplayConfigContainer)
         {
             _objectPoolService = objectPoolService;
-            _ıtemConfigContainerSo = gameplayConfigContainer.ItemConfigContainerSo;
+            _ıtemConfigContainerSo = gameplayConfigContainer.ItemConfigContainer;
         }
         
         public T GetItem<T>(GridObjectType typeData) where T : BaseGridObject

@@ -10,29 +10,11 @@ namespace Core.Handlers
 {
     public class BoosterResolveState : StateBase<GridStateContext>
     {
-        public BoosterResolveState(GridStateContext context, bool showLogs = true) : base(context, showLogs)
-        {
-            
-        }
-
         public override bool NeedsExitPermission => true;
+        public BoosterResolveState(GridStateContext context) : base(context) { }
         protected override void OnEnter()
         {
-            Context.RefillResolveRequested = false;
-            ResolveBoosters();
-        }
-
-        private void ResolveBoosters()
-        {
-            var hasActions = Context.PendingBoosterActions is { Count: > 0 };
-
-            if (hasActions)
-            {
-                ApplyPendingActions();
-            }
-
-            Context.ResolvedAnyBooster = hasActions;
-            
+            ApplyPendingActions();
             RequestExit();
         }
         

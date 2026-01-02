@@ -125,7 +125,8 @@ namespace Core.StateMachineCore
 
         public void Update(float deltaTime)
         {
-            CurrentState?.Update(deltaTime);
+            if(CurrentState is IUpdatableState updatableState)
+                updatableState.Update(deltaTime);
 
             if (_pending != null)
             {
@@ -169,8 +170,18 @@ namespace Core.StateMachineCore
             ApplyTransition(selected);
         }
 
-        public void FixedUpdate(float deltaTime) => CurrentState?.FixedUpdate(deltaTime);
-        public void LateUpdate(float deltaTime) => CurrentState?.LateUpdate(deltaTime);
+        public void FixedUpdate(float deltaTime)
+        {
+            if(CurrentState is IFixedUpdatableState fixedUpdatableState)
+                fixedUpdatableState.FixedUpdate(deltaTime);
+        }
+
+        public void LateUpdate(float deltaTime)
+        {
+            if(CurrentState is ILateUpdatableState lateUpdatableState)
+                lateUpdatableState.LateUpdate(deltaTime);
+        }
+
         public T CurrentAs<T>() where T : class, IState => CurrentState as T;
         
         public IStateMachine ForceState(IState state)

@@ -2,15 +2,15 @@ using UnityEngine;
 
 namespace Core.Handlers
 {
-    public readonly struct GridMove
+    public readonly struct InputSource
     {
-        public readonly GridMoveType MoveType;
+        public readonly GridInputType InputType;
         public readonly Vector2Int SourceCoord;
         public readonly Vector2Int TargetCoord;
 
-        public GridMove(GridMoveType moveType, Vector2Int sourceCoord, Vector2Int targetCoord = default)
+        public InputSource(GridInputType inputType, Vector2Int sourceCoord, Vector2Int targetCoord = default)
         {
-            MoveType = moveType;
+            InputType = inputType;
             SourceCoord = sourceCoord;
             TargetCoord = targetCoord;
         }
