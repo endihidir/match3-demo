@@ -1,5 +1,4 @@
 using Core.Item;
-using UnityEngine;
 
 namespace Core.Handlers
 {
@@ -10,10 +9,14 @@ namespace Core.Handlers
         public int DamageAmount { get; private set; }
         public DamageSource DamageSource { get; private set; }
         
+        private int _lastDamageGroupId;
+        
         public void MarkRemove() => Remove = true;
         public void UnMarkRemove() => Remove = false;
-        public void AddDamage(int damageAmount, DamageSource damageSource)
+        public void AddDamage(int groupId, int damageAmount, DamageSource damageSource)
         {
+            if (_lastDamageGroupId == groupId) return;
+            _lastDamageGroupId = groupId;
             DamageAmount += damageAmount;
             DamageSource |= damageSource;
         }
@@ -22,6 +25,7 @@ namespace Core.Handlers
         {
             DamageAmount = 0;
             DamageSource = DamageSource.None;
+            _lastDamageGroupId = 0;
         }
 
         public void Dispose()

@@ -1,17 +1,25 @@
 using Core.Config;
 using UnityEngine;
 
-namespace Core.Handlers
+public struct PendingBoosterAction
 {
-    public readonly struct PendingBoosterAction
+    public int GroupId { get; private set; }
+    public Vector2Int OriginCoord { get; private set; }
+    public BoosterActionBase BoosterAction { get; private set; }
+    
+    public PendingBoosterAction(Vector2Int originCoord, BoosterActionBase boosterAction)
     {
-        public readonly Vector2Int OriginCoord;
-        public readonly BoosterActionBase BoosterAction;
-
-        public PendingBoosterAction(Vector2Int originCoord, BoosterActionBase boosterAction)
-        {
-            OriginCoord = originCoord;
-            BoosterAction = boosterAction;
-        }
+        GroupId = 0;
+        OriginCoord = originCoord;
+        BoosterAction = boosterAction;
     }
+
+    public PendingBoosterAction(int groupId, Vector2Int originCoord, BoosterActionBase boosterAction)
+    {
+        GroupId = groupId;
+        OriginCoord = originCoord;
+        BoosterAction = boosterAction;
+    }
+    
+    public void SetGroupId(int groupId) => GroupId = groupId;
 }

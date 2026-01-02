@@ -24,6 +24,7 @@ namespace Core.Handlers
         public bool MatchResolveRequested { get; set; }
         public bool HasPendingBoosterActions => PendingBoosterActions.Count > 0;
         public bool HasAnyEmptyActiveCell => GridRefillCalcUtil.HasAnyEmptyActiveCell(Model);
+        public int GroupIdCounter { get; private set; }
 
         public GridStateContext(IGridModel model, IGridView view, IGridItemFactory factory, ItemConfigContainerSO configs)
         {
@@ -31,6 +32,13 @@ namespace Core.Handlers
             View = view;
             Factory = factory;
             Configs = configs;
+        }
+        
+        public int NextBoosterGroupId()
+        {
+            GroupIdCounter++;
+            if (GroupIdCounter == int.MaxValue) GroupIdCounter = 1;
+            return GroupIdCounter;
         }
     }
 }
