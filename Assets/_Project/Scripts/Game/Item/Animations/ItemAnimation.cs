@@ -14,17 +14,18 @@ namespace Core.Item
         private const float BaseShiftDuration = 0.15f;
         private const float BaseShiftDelay = 0.05f;
         private const float BaseMoveDuration = 0.15f;
+        private const float TotalShakeDuration = 0.25f;
+        private const float ShakeRotAngle = 10f;
 
         public void Shake()
         {
             _shakeTween?.Kill(true);
             
-            var duration = 0.25f / 3f;
-            var rotAngle = 10;
+            var duration = TotalShakeDuration / 3f;
 
             _shakeTween = DOTween.Sequence()
-                .Append(ItemHolder.transform.DORotate(Vector3.forward * rotAngle, duration))
-                .Append(ItemHolder.transform.DORotate(Vector3.back * rotAngle, duration))
+                .Append(ItemHolder.transform.DORotate(Vector3.forward * ShakeRotAngle, duration))
+                .Append(ItemHolder.transform.DORotate(Vector3.back * ShakeRotAngle, duration))
                 .Append(ItemHolder.transform.DORotate(Vector3.zero, duration))
                 .OnComplete(() => ItemHolder.transform.localRotation = Quaternion.identity)
                 .SetUpdate(UseUnscaledTime);
