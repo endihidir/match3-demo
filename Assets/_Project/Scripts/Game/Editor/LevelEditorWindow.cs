@@ -335,7 +335,7 @@ namespace Editor
 
         private string TryGetLevelsRootFolderAssetPath()
         {
-            var guids = AssetDatabase.FindAssets("t:LevelsRoot");
+            var guids = AssetDatabase.FindAssets("t:LevelsRootSO");
             if (guids == null || guids.Length == 0)
             {
                 return null;
