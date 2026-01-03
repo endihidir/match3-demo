@@ -7,7 +7,7 @@ namespace Core.Config
     public class ItemConfigContainerSO : ScriptableObject
     { 
         [field: SerializeField] private BaseItemConfigSO[] ItemConfigs { get; set; }
-        [field: SerializeField] public BoosterMergeConfigSO BoosterMergeConfigSo { get; private set; }
+        [field: SerializeField] public BoosterComboConfigSO BoosterComboConfigSo { get; private set; }
         [field: SerializeField] public RefillSettingsSO RefillSettingsSo { get; private set; }
 
         public T GetConfig<T>() where T : BaseItemConfigSO

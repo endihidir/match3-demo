@@ -141,7 +141,7 @@ namespace Core.Handlers
             
             if (sourceObj is BoosterObject sourceBooster && targetObj is BoosterObject targetBooster)
             {
-                AddMergedActions(sourceCoord, sourceBooster.BoosterType, targetBooster.BoosterType);
+                AddComboAction(sourceCoord, sourceBooster.BoosterType, targetBooster.BoosterType);
                 ReleaseItem(sourceObj, sourceCoord);
                 ReleaseItem(targetObj, targetCoord);
                 return;
@@ -171,11 +171,11 @@ namespace Core.Handlers
             Context.PendingBoosterActions.Add(new PendingBoosterAction(Context.NextBoosterGroupId(), originCoord, booster.BoosterAction));
         }
 
-        private void AddMergedActions(Vector2Int origin, BoosterType sourceBoosterType, BoosterType targetBoosterType)
+        private void AddComboAction(Vector2Int origin, BoosterType sourceBoosterType, BoosterType targetBoosterType)
         {
-            var boosterMergeConfig = Context.Configs.BoosterMergeConfigSo;
+            var boosterComboConfig = Context.Configs.BoosterComboConfigSo;
 
-            if (boosterMergeConfig && boosterMergeConfig.TryGetRule(sourceBoosterType, targetBoosterType, out var rule) && rule.Actions != null)
+            if (boosterComboConfig && boosterComboConfig.TryGetRule(sourceBoosterType, targetBoosterType, out var rule) && rule.Actions != null)
             {
                 var nextGroupId = Context.NextBoosterGroupId();
                 

@@ -4,13 +4,13 @@ using UnityEngine;
 namespace Core.Config
 {
     //[CreateAssetMenu(fileName = "BoosterMergeConfig", menuName = "Match3/ItemConfigs/BoosterMergeConfig", order = 0)]
-    public sealed class BoosterMergeConfigSO : ScriptableObject
+    public sealed class BoosterComboConfigSO : ScriptableObject
     {
-        [SerializeField] private MergeRule[] rules;
+        [SerializeField] private ComboRule[] rules;
 
-        public bool TryGetRule(BoosterType first, BoosterType second, out MergeRule rule)
+        public bool TryGetRule(BoosterType first, BoosterType second, out ComboRule rule)
         {
-            var key = BoosterMergeKey.Create(first, second);
+            var key = BoosterComboKey.Create(first, second);
 
             foreach (var mergeRule in rules)
             {
