@@ -16,7 +16,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a06a31c95e7d77a4683f121de75c8abb, type: 2}
   - {fileID: 11400000, guid: 742832dd9da827243926bb27794c6008, type: 2}
   - {fileID: 11400000, guid: 8327294c71b752e40be756f4525ff15a, type: 2}
-  <BoosterMergeConfigSo>k__BackingField: {fileID: 11400000, guid: cccd3d23ec1b86a4e8534d8e235742cd,
+  <BoosterComboConfigSo>k__BackingField: {fileID: 11400000, guid: cccd3d23ec1b86a4e8534d8e235742cd,
     type: 2}
   <RefillSettingsSo>k__BackingField: {fileID: 11400000, guid: 4640726bde3138b4ba2ba4961de0deca,
     type: 2}

@@ -4,9 +4,9 @@ using UnityEngine;
 namespace Core.Config
 {
     [Serializable]
-    public struct MergeRule
+    public struct ComboRule
     {
-        [field: SerializeField] public BoosterMergeKey Key { get; private set; }
+        [field: SerializeField] public BoosterComboKey Key { get; private set; }
         [field: SerializeReference] public BoosterActionBase[] Actions { get; private set; }
     }
 }

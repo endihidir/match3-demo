@@ -6,19 +6,19 @@ using UnityEngine;
 namespace Core.Config
 {
     [Serializable]
-    public struct BoosterMergeKey : IEquatable<BoosterMergeKey>
+    public struct BoosterComboKey : IEquatable<BoosterComboKey>
     {
         [field: SerializeField] public BoosterFamily First { get; private set; }
         [field: SerializeField] public BoosterFamily Second { get; private set; }
 
-        public static BoosterMergeKey Create(BoosterType a, BoosterType b)
+        public static BoosterComboKey Create(BoosterType a, BoosterType b)
         {
             var fa = a.ToFamily();
             var fb = b.ToFamily();
 
-            return (int)fa <= (int)fb ? new BoosterMergeKey { First = fa, Second = fb } : new BoosterMergeKey { First = fb, Second = fa };
+            return (int)fa <= (int)fb ? new BoosterComboKey { First = fa, Second = fb } : new BoosterComboKey { First = fb, Second = fa };
         }
 
-        public bool Equals(BoosterMergeKey other) => First == other.First && Second == other.Second;
+        public bool Equals(BoosterComboKey other) => First == other.First && Second == other.Second;
     }
 }

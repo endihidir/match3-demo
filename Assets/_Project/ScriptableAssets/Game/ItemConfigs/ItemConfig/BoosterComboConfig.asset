@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c5ff1acf36ee46a0b177f2e2bee0687c, type: 3}
-  m_Name: BoosterMergeConfig
+  m_Name: BoosterComboConfig
   m_EditorClassIdentifier: 
   rules:
   - <Key>k__BackingField:
