@@ -11,6 +11,10 @@ namespace Core.Item
         
         private Tween _shakeTween, _moveTween, _shiftTween;
 
+        private const float BaseShiftDuration = 0.15f;
+        private const float BaseShiftDelay = 0.05f;
+        private const float BaseMoveDuration = 0.15f;
+
         public void Shake()
         {
             _shakeTween?.Kill(true);
@@ -29,9 +33,12 @@ namespace Core.Item
         public Tween Shift(Vector3 worldPos, float durationMultiplier = 1f, float delay = 0f)
         {
             _shiftTween?.Kill();
+
+            var del = BaseShiftDelay + delay;
+            var duration = BaseShiftDuration * durationMultiplier;
             
             _shiftTween = DOTween.Sequence()
-                .Append(transform.DOMove(worldPos, 0.15f * durationMultiplier).SetEase(Ease.InOutQuad).SetDelay(0.05f + delay))
+                .Append(transform.DOMove(worldPos, duration).SetEase(Ease.InOutQuad).SetDelay(del))
                 .SetUpdate(UseUnscaledTime);
 
             return _shiftTween;
@@ -40,10 +47,12 @@ namespace Core.Item
         public Tween ShiftPath(Vector3[] worldPoints, float durationMultiplier = 1f, float delay = 0f)
         {
             _shiftTween?.Kill();
+            
+            var del = BaseShiftDelay + delay;
 
             var sequence = DOTween.Sequence()
                 .SetUpdate(UseUnscaledTime)
-                .SetDelay(0.05f + delay);
+                .SetDelay(del);
 
             var current = transform.position;
 
@@ -52,7 +61,8 @@ namespace Core.Item
                 var segDist = Mathf.Abs(current.y - next.y);
                 var distCells = segDist / 2f;
                 var durMul = 1f + distCells * durationMultiplier;
-                sequence.Append(transform.DOMove(next, 0.15f * durMul).SetEase(Ease.InOutQuad));
+                var duration = BaseShiftDuration * durMul;
+                sequence.Append(transform.DOMove(next, duration).SetEase(Ease.InOutQuad));
                 current = next;
             }
 
@@ -67,8 +77,8 @@ namespace Core.Item
             var defaultPos = transform.position;
 
             _moveTween = DOTween.Sequence()
-                                .Append(transform.DOMove(targetPos, 0.15f).SetEase(Ease.Linear))
-                                .Append(transform.DOMove(defaultPos, 0.15f).SetEase(Ease.Linear))
+                                .Append(transform.DOMove(targetPos, BaseMoveDuration).SetEase(Ease.Linear))
+                                .Append(transform.DOMove(defaultPos, BaseMoveDuration).SetEase(Ease.Linear))
                                 .SetUpdate(UseUnscaledTime);
             
             return _moveTween;
@@ -78,7 +88,7 @@ namespace Core.Item
         {
             _moveTween?.Kill();
             
-            _moveTween = transform.DOMove(worldPos, 0.15f)
+            _moveTween = transform.DOMove(worldPos, BaseMoveDuration)
                                   .SetEase(Ease.Linear)
                                   .SetUpdate(UseUnscaledTime);
 
