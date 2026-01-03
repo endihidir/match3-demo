@@ -339,9 +339,6 @@ namespace Core.Handlers
 
                     var delay = (waveIndex * _refillSettingsSo.ShiftDelayMultiplier);
 
-                    if (HasHorizontalStep(record.ItemCoordPath))
-                        delay = 0f;
-
                     // Build world points.
                     // For spawned items, prepend current position (spawnY) so it actually "falls" instead of instantly settling.
                     Vector3[] worldPoints;
@@ -371,17 +368,6 @@ namespace Core.Handlers
             }
 
             return UniTask.WhenAll(_animTasks);
-        }
-
-        private static bool HasHorizontalStep(Vector2Int[] path)
-        {
-            for (int i = 1; i < path.Length; i++)
-            {
-                if (path[i].x != path[i - 1].x)
-                    return true;
-            }
-
-            return false;
         }
 
         private static void AddPathStep(Dictionary<BaseGridObject, List<Vector2Int>> pathByItem, BaseGridObject item, Vector2Int step)
