@@ -77,6 +77,7 @@ namespace Core.Item
 
         public Tween Move(Vector3 worldPos)
         {
+            _shiftTween?.Kill();
             _moveTween?.Kill();
             
             _moveTween = transform.DOMove(worldPos, BaseMoveDuration)
