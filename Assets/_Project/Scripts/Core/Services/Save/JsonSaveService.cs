@@ -10,26 +10,24 @@ using UnityEngine;
 
 namespace Core.SaveSystem
 {
-    public interface IDataPersistenceService
+    public interface IJsonSaveService
     {
-        public void SaveToJson<T>(string key, T data, string path = null);
-        public T LoadFromJson<T>(string key, T defaultData = default, string path = null, bool autoSaveDefaultData = true);
+        public void SaveToTextFile<T>(string key, T data, string path = null);
+        public T LoadFromTextFile<T>(string key, T defaultData = default, string path = null, bool autoSaveDefaultData = true);
         public void SaveToPrefs<T>(string key, T data);
         public T LoadFromPrefs<T>(string key, T defaultData = default);
     }
-    public class DataPersistenceService : IDataPersistenceService
+    public sealed class JsonSaveService : IJsonSaveService
     {
-        private const string DIRECTORY_NAME = "GameData";
+        private const string DIRECTORY_NAME = "JsonGameData";
 
 #if UNITY_EDITOR
         private static string DirectoryPath => $"{Application.dataPath}/{DIRECTORY_NAME}[EditorOnly]";
 #else
         private static string DirectoryPath => $"{Application.persistentDataPath}/{DIRECTORY_NAME}";
 #endif
-        
-        public void Initialize() { }
 
-        public void SaveToJson<T>(string key, T data, string path = null)
+        public void SaveToTextFile<T>(string key, T data, string path = null)
         {
             EnsureDirectoryExists();
 
@@ -44,7 +42,7 @@ namespace Core.SaveSystem
 #endif
         }
 
-        public T LoadFromJson<T>(string key, T defaultData = default, string path = null, bool autoSaveDefaultData = true)
+        public T LoadFromTextFile<T>(string key, T defaultData = default, string path = null, bool autoSaveDefaultData = true)
         {
             EnsureDirectoryExists();
 
@@ -54,7 +52,7 @@ namespace Core.SaveSystem
             {
                 if (defaultData is not null && autoSaveDefaultData)
                 {
-                    SaveToJson(key, defaultData);
+                    SaveToTextFile(key, defaultData);
                 }
                 
                 return defaultData;
@@ -110,7 +108,8 @@ namespace Core.SaveSystem
 #endif
         }
         
+        [MenuItem("Edit/Clear All Json Data")]
+        public static void Clear() => ClearJsonData();
         private string GetFilePath(string key) => Path.Combine(DirectoryPath, $"{key}.json");
-        public void Dispose() { }
     }
 }
