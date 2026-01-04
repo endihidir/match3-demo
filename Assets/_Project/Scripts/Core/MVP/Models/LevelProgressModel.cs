@@ -23,18 +23,18 @@ namespace Core.Models
     {
         private const string SaveKey = "level_progress";
 
-        private readonly IDataPersistenceService _persistence;
+        private readonly IJsonSaveService _saveService;
         private readonly ILevelDataReader _levelDataReader;
 
         private LevelProgressData _levelProgressData;
         public int MaxLevel => _levelDataReader.LevelSize;
         public int CurrentLevelIndex => _levelProgressData.currentLevelIndex;
         public int DisplayLevelNumber => _levelProgressData.displayLevelNumber;
-        private bool ResetLevelOnLimit => true; //TODO: Get this form config
+        private bool ResetIndexOnLimit => true; //TODO: Get this form config
         public event Action OnProgressChanged;
-        public LevelProgressModel(IDataPersistenceService persistence, ILevelDataReader levelDataReader)
+        public LevelProgressModel(IJsonSaveService saveService, ILevelDataReader levelDataReader)
         {
-            _persistence = persistence;
+            _saveService = saveService;
             _levelDataReader = levelDataReader;
 
             var defaultState = new LevelProgressData
@@ -43,7 +43,7 @@ namespace Core.Models
                 displayLevelNumber = 1
             };
             
-            _levelProgressData = _persistence.LoadFromJson(SaveKey, defaultState);
+            _levelProgressData = _saveService.LoadFromTextFile(SaveKey, defaultState);
             
             _levelProgressData.currentLevelIndex = Mathf.Clamp(_levelProgressData.currentLevelIndex, 0, MaxLevel - 1);
         }
@@ -67,7 +67,7 @@ namespace Core.Models
 
             var next = _levelProgressData.currentLevelIndex + 1;
             
-            next = next >= MaxLevel ? (ResetLevelOnLimit ? 0 : MaxLevel - 1) : next;
+            next = next >= MaxLevel ? (ResetIndexOnLimit ? 0 : MaxLevel - 1) : next;
             
             _levelProgressData.currentLevelIndex = next;
             
@@ -85,7 +85,7 @@ namespace Core.Models
 
         private void RaiseChanged()
         {
-            _persistence.SaveToJson(SaveKey, _levelProgressData);
+            _saveService.SaveToTextFile(SaveKey, _levelProgressData);
             OnProgressChanged?.Invoke();
         }
 
