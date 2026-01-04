@@ -12,7 +12,7 @@ namespace Core.Item
         private Tween _shakeTween, _moveTween, _shiftTween;
 
         private const float BaseShiftDuration = 0.15f;
-        private const float BaseShiftDelay = 0.05f;
+        private const float BaseShiftDelay = 0.1f;
         private const float BaseMoveDuration = 0.15f;
         private const float TotalShakeDuration = 0.25f;
         private const float ShakeRotAngle = 10f;
