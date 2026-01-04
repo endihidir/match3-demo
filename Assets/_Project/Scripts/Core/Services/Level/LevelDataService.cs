@@ -31,6 +31,10 @@ namespace Core.Level
         public bool IsInitialized { get; private set; }
         public int LevelSize => LevelDefinitions?.Length ?? 0;
         public LevelDefinition[] LevelDefinitions { get; private set; }
+        
+        private bool PreventInitialMatches => _levelDataServiceConfig.preventInitialMatches;
+        private bool UseSeededPattern => _levelDataServiceConfig.useSeededPattern;
+        private int SeedOverride => _levelDataServiceConfig.seedOverride;
 
         public LevelDataService(AppConfigContainer appConfigContainer)
         {
@@ -58,21 +62,15 @@ namespace Core.Level
         private void InitializeFromResources()
         {
             var assets = Resources.LoadAll<TextAsset>(_levelDataServiceConfig.resourcesFolder);
-            
             var list = new List<LevelDefinition>(assets.Length);
-
-            var preventInitialMatches = _levelDataServiceConfig.preventInitialMatches;
-            var useSeededPattern  = _levelDataServiceConfig.useSeededPattern;
-            var seedOverride = _levelDataServiceConfig.seedOverride;
             
             foreach (var asset in assets)
             {
-                var levelDefinition = LevelJsonRuntimeUtils.ParseToLevelDefinition(asset, preventInitialMatches, useSeededPattern, seedOverride);
+                var levelDefinition = LevelJsonRuntimeUtils.ParseToLevelDefinition(asset, PreventInitialMatches, UseSeededPattern, SeedOverride);
                 list.Add(levelDefinition);
             }
             
             list.Sort(static (a, b) => a.LevelNumber.CompareTo(b.LevelNumber));
-            
             LevelDefinitions = list.ToArray();
         }
         
@@ -80,16 +78,13 @@ namespace Core.Level
         {
             try
             {
-                var preventInitialMatches = _levelDataServiceConfig.preventInitialMatches;
-                var useSeededPattern  = _levelDataServiceConfig.useSeededPattern;
-                var seedOverride = _levelDataServiceConfig.seedOverride;
                 var jsonFile = Resources.Load<TextAsset>(_levelDataServiceConfig.GetResourcePath(level));
-                return LevelJsonRuntimeUtils.ParseToLevelDefinition(jsonFile, preventInitialMatches, useSeededPattern, seedOverride);
+                return LevelJsonRuntimeUtils.ParseToLevelDefinition(jsonFile, PreventInitialMatches, UseSeededPattern, SeedOverride);
             }
             catch (Exception e)
             {
                 EditorLogger.LogError("JSON error:" + e);
-                throw;
+                return null;
             }
         }
         
