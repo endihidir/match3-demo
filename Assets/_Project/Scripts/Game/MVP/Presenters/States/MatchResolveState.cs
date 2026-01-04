@@ -72,6 +72,8 @@ namespace Core.Handlers
             var centerCoord = GridBoosterDecision.SelectMergeCenter(group, Context.HasForcedBoosterSpawnCoord, Context.ForcedBoosterSpawnCoord);
 
             Context.HasForcedBoosterSpawnCoord = false;
+            
+            await WaitForGroupShiftCompleteAsync(group);
 
             await PlayMergeAnimationAsync(group, centerCoord);
 
@@ -127,6 +129,32 @@ namespace Core.Handlers
                 }
             }
         }
+        
+        private async UniTask WaitForGroupShiftCompleteAsync(List<Vector2Int> group)
+        {
+            while (true)
+            {
+                var anyInProgress = false;
+
+                for (int i = 0; i < group.Count; i++)
+                {
+                    var obj = Context.Model.GetGridObject(group[i]);
+                    if (!obj) continue;
+
+                    if (obj.IsShiftInProgress)
+                    {
+                        anyInProgress = true;
+                        break;
+                    }
+                }
+
+                if (!anyInProgress)
+                    return;
+
+                await UniTask.Yield(PlayerLoopTiming.Update);
+            }
+        }
+
         
         private async UniTask PlayMergeAnimationAsync(List<Vector2Int> group, Vector2Int spawnCoord)
         {
