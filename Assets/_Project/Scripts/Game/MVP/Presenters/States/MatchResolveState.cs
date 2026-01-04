@@ -61,6 +61,8 @@ namespace Core.Handlers
 
         private async UniTask ResolveGroupAsync(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int id)
         {
+            await WaitForGroupShiftCompleteAsync(group);
+            
             var boosterType = GridBoosterDecision.DecideBoosterTypeFromGroup(model, matchMask, group, id);
 
             if (!boosterType.HasValue)
@@ -72,8 +74,6 @@ namespace Core.Handlers
             var centerCoord = GridBoosterDecision.SelectMergeCenter(group, Context.HasForcedBoosterSpawnCoord, Context.ForcedBoosterSpawnCoord);
 
             Context.HasForcedBoosterSpawnCoord = false;
-            
-            await WaitForGroupShiftCompleteAsync(group);
 
             await PlayMergeAnimationAsync(group, centerCoord);
 
