@@ -108,8 +108,16 @@ namespace Core.SaveSystem
 #endif
         }
         
-        [MenuItem("Edit/Clear All Json Data")]
-        public static void Clear() => ClearJsonData();
+        [MenuItem("Edit/Clear All Json Data", priority = 1)]
+        public static void ClearJson() => ClearJsonData();
+        
+        [MenuItem("Edit/Clear All", priority = 0)]
+        public static void ClearAll()
+        {
+            ClearJsonData();
+            PlayerPrefs.DeleteAll();
+        }
+
         private string GetFilePath(string key) => Path.Combine(DirectoryPath, $"{key}.json");
     }
 }
