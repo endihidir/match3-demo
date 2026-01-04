@@ -14,15 +14,13 @@ namespace Core.Handlers
     {
         private readonly List<SlideMoveRecord> _records = new(256);
         private readonly RefillSettingsSO _refillSettingsSo;
-        private readonly List<int> _stationaryYs = new(8);
-        private bool[] _blockSpawn;
         private UniTask _runningAnimations = UniTask.CompletedTask;
 
         public SlideDownRefillStrategy(GameplayConfigContainer configContainer) => _refillSettingsSo = configContainer.ItemConfigContainer.RefillSettingsSo;
 
         public bool CanRefill(IGridModel model) => GridRefillCalcUtil.HasStationaryAndBlocking(model);
 
-        public IRefillStrategy Execute(GridStateContext context)
+         public IRefillStrategy Execute(GridStateContext context)
         {
             _records.Clear();
 
@@ -33,22 +31,16 @@ namespace Core.Handlers
             var height = model.Height;
             var cellSize = view.GetCellSize();
 
-            _blockSpawn ??= new bool[height];
-
             for (int x = 0; x < width; x++)
             {
                 var wave = 0;
 
                 ShiftColumnLogic(context, x, height, cellSize, ref wave, _records);
 
-                if (GridRefillCalcUtil.TryGetSpawnCellCoord(model, x, height, out var spawnCell))
+                if (GridRefillCalcUtil.TryGetSpawnCellCoord(model, x, model.Height, out var spawnCell))
                 {
-                    BuildStationaryYs(model, x, height);
-                    FillBlockSpawn(height);
-
-                    SlideBands(context, x, height, cellSize, ref wave, _records);
                     var spawnY = view.GridToWorld(spawnCell).y + cellSize;
-                    SpawnColumn(context, x, height, cellSize, spawnY, ref wave, _records);
+                    RefillColumnLogic(context, x, height, cellSize, spawnY, ref wave, _records);
                 }
             }
 
@@ -57,8 +49,8 @@ namespace Core.Handlers
         }
 
         public UniTask WaitAnimationsAsync() => _runningAnimations;
-
-        private void ShiftColumnLogic(GridStateContext stateContext, int x, int height, float cellSize, ref int wave, List<SlideMoveRecord> records)
+        
+         private void ShiftColumnLogic(GridStateContext stateContext, int x, int height, float cellSize, ref int wave, List<SlideMoveRecord> records)
         {
             var model = stateContext.Model;
             var view = stateContext.View;
@@ -77,7 +69,8 @@ namespace Core.Handlers
                 var obj = model.GetGridObject(src);
 
                 if (!obj) continue;
-                if (obj.IsStationary) continue;
+                
+                if(obj.IsStationary) continue;
 
                 var startWorld = obj.transform.position;
                 var finalWorld = view.GridToWorld(coord);
@@ -94,44 +87,33 @@ namespace Core.Handlers
             }
         }
 
-        private void BuildStationaryYs(IGridModel model, int x, int height)
+        private void RefillColumnLogic(GridStateContext stateContext, int x, int height, float cellSize, float spawnY, ref int wave, List<SlideMoveRecord> records)
         {
-            _stationaryYs.Clear();
+            var model = stateContext.Model;
+            var view = stateContext.View;
 
+            // Collect stationary Ys in this column (bottom -> top)
+            var stationaryYs = new List<int>(4);
             for (int y = 0; y < height; y++)
             {
                 var c = new Vector2Int(x, y);
                 if (!model.IsCellActive(c)) continue;
 
                 var o = model.GetGridObject(c);
-                if (o && o.IsStationary)
-                    _stationaryYs.Add(y);
+                if (o && o.IsStationary) stationaryYs.Add(y);
             }
-        }
 
-        private void FillBlockSpawn(int height)
-        {
-            for (int y = 0; y < height; y++)
+            // Slide: process each stationary band separately so upper stationary donor never fills lower stationary band.
+            // Band definition: cells with y in (stationaryY, nextStationaryY)  (above this stationary, below next stationary)
+            for (int i = 0; i < stationaryYs.Count; i++)
             {
-                _blockSpawn[y] = false;
-            }
-        }
-
-        private void SlideBands(GridStateContext stateContext, int x, int height, float cellSize, ref int wave, List<SlideMoveRecord> records)
-        {
-            if (_stationaryYs.Count == 0) return;
-
-            var model = stateContext.Model;
-            var view = stateContext.View;
-
-            for (int i = 0; i < _stationaryYs.Count; i++)
-            {
-                var stationaryY = _stationaryYs[i];
-                var nextStationaryY = (i + 1 < _stationaryYs.Count) ? _stationaryYs[i + 1] : height;
+                var stationaryY = stationaryYs[i];
+                var nextStationaryY = (i + 1 < stationaryYs.Count) ? stationaryYs[i + 1] : height;
 
                 var finalCoord = new Vector2Int(int.MinValue, int.MinValue);
                 var slideCoord = new Vector2Int(int.MaxValue, int.MaxValue);
 
+                // Find empties in this band
                 for (int y = stationaryY + 1; y < nextStationaryY; y++)
                 {
                     var c = new Vector2Int(x, y);
@@ -144,6 +126,7 @@ namespace Core.Handlers
                 }
 
                 if (finalCoord.x == int.MinValue) continue;
+                if (slideCoord.x == int.MaxValue) continue;
 
                 var leftDonorCoord = new Vector2Int(x - 1, stationaryY);
                 var rightDonorCoord = new Vector2Int(x + 1, stationaryY);
@@ -165,39 +148,31 @@ namespace Core.Handlers
 
                 if (!donorObj) continue;
 
+                // Move donor -> final
                 model.SetGridObject(finalCoord, donorObj);
                 model.SetGridObject(donorCoord, null);
-
-                var startWorld = donorObj.transform.position;
+                
                 var finalWorld = view.GridToWorld(finalCoord);
-                var slidePos = (slideCoord.x == int.MaxValue) ? default : view.GridToWorld(slideCoord);
+                var slidePos = view.GridToWorld(slideCoord);
 
-                var dist = Mathf.Abs(finalWorld.y - startWorld.y) / cellSize;
-                var durMul = 1f + dist * _refillSettingsSo.ShiftDurationMultiplier;
-                var delay = wave * _refillSettingsSo.ShiftDelayMultiplier;
-
-                records.Add(new SlideMoveRecord(donorObj, slidePos, finalWorld, durMul, delay));
-                wave++;
+                records.Add(new SlideMoveRecord(donorObj, slidePos, finalWorld, 1.2f, 0.1f));
             }
-            
+
+            // Spawn: do NOT spawn into any cell that is above at least one stationary in this column (slide bands).
+            var blockSpawn = new bool[height];
             var seenStationary = false;
+
             for (int y = 0; y < height; y++)
             {
                 var c = new Vector2Int(x, y);
+
                 if (!model.IsCellActive(c)) continue;
 
                 var o = model.GetGridObject(c);
-                if (o && o.IsStationary)
-                    seenStationary = true;
+                if (o && o.IsStationary) seenStationary = true;
 
-                _blockSpawn[y] = seenStationary && y > 0;
+                blockSpawn[y] = seenStationary && y > 0;
             }
-        }
-
-        private void SpawnColumn(GridStateContext stateContext, int x, int height, float cellSize, float spawnY, ref int wave, List<SlideMoveRecord> records)
-        {
-            var model = stateContext.Model;
-            var view = stateContext.View;
 
             for (int y = height - 1; y >= 0; y--)
             {
@@ -205,7 +180,7 @@ namespace Core.Handlers
 
                 if (!model.IsCellActive(coord)) continue;
                 if (model.GetGridObject(coord)) continue;
-                if (_blockSpawn[y]) continue;
+                if (blockSpawn[y]) continue;
 
                 var itemType = SmartSpawnDecider.Decide(model, coord, _refillSettingsSo.SpawnSettings);
                 var item = stateContext.Factory.GetRegularItem(itemType);
