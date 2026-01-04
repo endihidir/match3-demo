@@ -104,58 +104,67 @@ namespace Core.Handlers
             }
 
             // Slide: process each stationary band separately so upper stationary donor never fills lower stationary band.
-            // Band definition: cells with y in (stationaryY, nextStationaryY)  (above this stationary, below next stationary)
+            // Band definition: cells with y in (stationaryY, nextStationaryY)
             for (int i = 0; i < stationaryYs.Count; i++)
             {
                 var stationaryY = stationaryYs[i];
                 var nextStationaryY = (i + 1 < stationaryYs.Count) ? stationaryYs[i + 1] : height;
 
-                var finalCoord = new Vector2Int(int.MinValue, int.MinValue);
-                var slideCoord = new Vector2Int(int.MaxValue, int.MaxValue);
-
-                // Find empties in this band
-                for (int y = stationaryY + 1; y < nextStationaryY; y++)
-                {
-                    var c = new Vector2Int(x, y);
-
-                    if (!model.IsCellActive(c)) continue;
-                    if (model.GetGridObject(c)) continue;
-
-                    if (y > finalCoord.y) finalCoord = c;
-                    if (y < slideCoord.y) slideCoord = c;
-                }
-
-                if (finalCoord.x == int.MinValue) continue;
-                if (slideCoord.x == int.MaxValue) continue;
-
                 var leftDonorCoord = new Vector2Int(x - 1, stationaryY);
                 var rightDonorCoord = new Vector2Int(x + 1, stationaryY);
 
-                BaseGridObject donorObj = null;
-                Vector2Int donorCoord = default;
-
-                if (model.IsInRange(leftDonorCoord))
+                while (true)
                 {
-                    var left = model.GetGridObject(leftDonorCoord);
-                    if (left && !left.IsStationary && !left.IsShiftInProgress) { donorObj = left; donorCoord = leftDonorCoord; }
+                    var finalCoord = new Vector2Int(int.MinValue, int.MinValue);
+                    var slideCoord = new Vector2Int(int.MaxValue, int.MaxValue);
+
+                    // Find empties in this band (recomputed each iteration)
+                    for (int y = stationaryY + 1; y < nextStationaryY; y++)
+                    {
+                        var c = new Vector2Int(x, y);
+
+                        if (!model.IsCellActive(c)) continue;
+                        if (model.GetGridObject(c)) continue;
+
+                        if (y > finalCoord.y) finalCoord = c;
+                        if (y < slideCoord.y) slideCoord = c;
+                    }
+
+                    if (finalCoord.x == int.MinValue) break;
+                    if (slideCoord.x == int.MaxValue) break;
+
+                    BaseGridObject donorObj = null;
+                    Vector2Int donorCoord = default;
+
+                    if (model.IsInRange(leftDonorCoord))
+                    {
+                        var left = model.GetGridObject(leftDonorCoord);
+                        if (left && !left.IsStationary && !left.IsShiftInProgress) { donorObj = left; donorCoord = leftDonorCoord; }
+                    }
+
+                    if (!donorObj && model.IsInRange(rightDonorCoord))
+                    {
+                        var right = model.GetGridObject(rightDonorCoord);
+                        if (right && !right.IsStationary && !right.IsShiftInProgress) { donorObj = right; donorCoord = rightDonorCoord; }
+                    }
+
+                    if (!donorObj) break;
+
+                    // Move donor -> final
+                    model.SetGridObject(finalCoord, donorObj);
+                    model.SetGridObject(donorCoord, null);
+
+                    var startWorld = donorObj.transform.position;
+                    var finalWorld = view.GridToWorld(finalCoord);
+                    var slidePos = view.GridToWorld(slideCoord);
+
+                    var dist = Mathf.Abs(finalWorld.y - startWorld.y) / cellSize;
+                    var durMul = 1f + dist * _refillSettingsSo.ShiftDurationMultiplier;
+                    var delay = wave * _refillSettingsSo.ShiftDelayMultiplier;
+
+                    records.Add(new SlideMoveRecord(donorObj, slidePos, finalWorld, durMul, delay));
+                    wave++;
                 }
-
-                if (!donorObj && model.IsInRange(rightDonorCoord))
-                {
-                    var right = model.GetGridObject(rightDonorCoord);
-                    if (right && !right.IsStationary && !right.IsShiftInProgress) { donorObj = right; donorCoord = rightDonorCoord; }
-                }
-
-                if (!donorObj) continue;
-
-                // Move donor -> final
-                model.SetGridObject(finalCoord, donorObj);
-                model.SetGridObject(donorCoord, null);
-                
-                var finalWorld = view.GridToWorld(finalCoord);
-                var slidePos = view.GridToWorld(slideCoord);
-
-                records.Add(new SlideMoveRecord(donorObj, slidePos, finalWorld, 1.2f, 0.1f));
             }
 
             // Spawn: do NOT spawn into any cell that is above at least one stationary in this column (slide bands).
@@ -203,7 +212,7 @@ namespace Core.Handlers
             }
         }
 
-        private UniTask PlayAnimations(List<SlideMoveRecord> records)
+        private static UniTask PlayAnimations(List<SlideMoveRecord> records)
         {
             var count = 0;
 
