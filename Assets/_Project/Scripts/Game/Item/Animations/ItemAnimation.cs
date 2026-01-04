@@ -1,3 +1,4 @@
+using System;
 using DG.Tweening;
 using UnityEngine;
 
@@ -58,6 +59,29 @@ namespace Core.Item
                 .SetDelay(del)
                 .SetUpdate(UseUnscaledTime);
             
+            return _shiftTween;
+        }
+        
+        public Tween ShiftPath(Vector3[] worldPoints, float durationMultiplier = 1f, float delay = 0f)
+        {
+            _shiftTween?.Kill();
+
+            var sequence = DOTween.Sequence()
+                .SetUpdate(UseUnscaledTime)
+                .SetDelay(0.05f + delay);
+
+            var current = transform.position;
+
+            foreach (var next in worldPoints)
+            {
+                var segDist = Mathf.Abs(current.y - next.y);
+                var distCells = segDist / 2f;
+                var durMul = 1f + distCells * durationMultiplier;
+                sequence.Append(transform.DOMove(next, 0.15f * durMul).SetEase(Ease.InOutQuad));
+                current = next;
+            }
+
+            _shiftTween = sequence;
             return _shiftTween;
         }
 
