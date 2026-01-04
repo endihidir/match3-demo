@@ -30,7 +30,7 @@ namespace Core.Utils
             if (hLen >= 5 || vLen >= 5)
             {
                 // TODO: SELECT ORB
-                return hLen >= vLen ? BoosterType.RocketHorizontal : BoosterType.RocketVertical;
+                return hLen >= vLen ? BoosterType.RocketVertical : BoosterType.RocketHorizontal;
             }
 
             if (hLen >= 3 && vLen >= 3)
@@ -40,7 +40,7 @@ namespace Core.Utils
 
             if (hLen == 4 || vLen == 4)
             {
-                return hLen >= vLen ? BoosterType.RocketHorizontal : BoosterType.RocketVertical;
+                return hLen >= vLen ? BoosterType.RocketVertical : BoosterType.RocketHorizontal;
             }
 
             if (hasSquare)
