@@ -37,9 +37,10 @@ namespace Core.Item
 
             var del = BaseShiftDelay + delay;
             var duration = BaseShiftDuration * durationMultiplier;
-            
-            _shiftTween = DOTween.Sequence()
-                .Append(transform.DOMove(worldPos, duration).SetEase(Ease.InOutQuad).SetDelay(del))
+
+            _shiftTween = transform.DOMove(worldPos, duration)
+                .SetEase(Ease.InOutQuad)
+                .SetDelay(del)
                 .SetUpdate(UseUnscaledTime);
 
             return _shiftTween;
@@ -57,32 +58,6 @@ namespace Core.Item
                 .SetDelay(del)
                 .SetUpdate(UseUnscaledTime);
             
-            return _shiftTween;
-        }
-        
-        public Tween ShiftPath(Vector3[] worldPoints, float durationMultiplier = 1f, float delay = 0f)
-        {
-            _shiftTween?.Kill();
-            
-            var del = BaseShiftDelay + delay;
-
-            var sequence = DOTween.Sequence()
-                .SetUpdate(UseUnscaledTime)
-                .SetDelay(del);
-
-            var current = transform.position;
-
-            foreach (var next in worldPoints)
-            {
-                var segDist = Mathf.Abs(current.y - next.y);
-                var distCells = segDist / 2f;
-                var durMul = 1f + distCells * durationMultiplier;
-                var duration = BaseShiftDuration * durMul;
-                sequence.Append(transform.DOMove(next, duration).SetEase(Ease.InOutQuad));
-                current = next;
-            }
-
-            _shiftTween = sequence;
             return _shiftTween;
         }
 
