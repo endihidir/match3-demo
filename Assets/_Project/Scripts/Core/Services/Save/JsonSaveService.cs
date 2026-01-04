@@ -108,10 +108,10 @@ namespace Core.SaveSystem
 #endif
         }
         
-        [MenuItem("Edit/Clear All Json Data", priority = 1)]
+        [MenuItem("Edit/Clear All Json Data")]
         public static void ClearJson() => ClearJsonData();
         
-        [MenuItem("Edit/Clear All", priority = 0)]
+        [MenuItem("Edit/Clear All")]
         public static void ClearAll()
         {
             ClearJsonData();
