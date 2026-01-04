@@ -121,17 +121,43 @@ namespace Core.Handlers
             }
         }
 
-        private async UniTask PlayAnimations(List<FallMoveRecord> records)
+        private UniTask PlayAnimations(List<FallMoveRecord> records)
         {
-            _animTasks.Clear();
+            var count = 0;
+            for (int i = 0; i < records.Count; i++)
+            {
+                if (records[i].Obj) count++;
+            }
+
+            if (count == 0)
+                return UniTask.CompletedTask;
+
+            var tcs = new UniTaskCompletionSource();
+            var remaining = count;
+
             for (int i = 0; i < records.Count; i++)
             {
                 var r = records[i];
                 if (!r.Obj) continue;
+
                 var tween = r.Obj.ItemAnimation.Shift(r.FinalWorld, r.DurMul, r.Delay);
-                _animTasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
+
+                var done = false;
+                void CompleteOne()
+                {
+                    if (done) return;
+                    done = true;
+
+                    remaining--;
+                    if (remaining <= 0)
+                        tcs.TrySetResult();
+                }
+
+                tween.OnComplete(CompleteOne);
+                tween.OnKill(CompleteOne);
             }
-            await UniTask.WhenAll(_animTasks);
+
+            return tcs.Task;
         }
     }
 }
