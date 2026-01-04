@@ -143,6 +143,11 @@ namespace Core.Handlers
                 var tween = r.Obj.ItemAnimation.Shift(r.FinalWorld, r.DurMul, r.Delay);
 
                 var done = false;
+
+                tween.OnComplete(CompleteOne);
+                tween.OnKill(CompleteOne);
+                continue;
+
                 void CompleteOne()
                 {
                     if (done) return;
@@ -152,9 +157,6 @@ namespace Core.Handlers
                     if (remaining <= 0)
                         tcs.TrySetResult();
                 }
-
-                tween.OnComplete(CompleteOne);
-                tween.OnKill(CompleteOne);
             }
 
             return tcs.Task;
