@@ -121,7 +121,7 @@ namespace Core.Handlers
             }
         }
 
-        private async UniTask PlayAnimations(List<FallMoveRecord> records)
+        private UniTask PlayAnimations(List<FallMoveRecord> records)
         {
             _animTasks.Clear();
             for (int i = 0; i < records.Count; i++)
@@ -131,7 +131,7 @@ namespace Core.Handlers
                 var tween = r.Obj.ItemAnimation.Shift(r.FinalWorld, r.DurMul, r.Delay);
                 _animTasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
             }
-            await UniTask.WhenAll(_animTasks);
+            return UniTask.WhenAll(_animTasks);
         }
     }
 }
