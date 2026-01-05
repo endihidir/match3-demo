@@ -92,7 +92,7 @@ namespace Core.Handlers
         {
             var model = stateContext.Model;
             var view = stateContext.View;
-
+            
             // Collect stationary Ys in this column (bottom -> top)
             var stationaryYs = new List<int>(4);
             for (int y = 0; y < height; y++)
@@ -103,7 +103,7 @@ namespace Core.Handlers
                 var o = model.GetGridObject(c);
                 if (o && o.IsStationary) stationaryYs.Add(y);
             }
-
+            
             // Slide: process each stationary band separately so upper stationary donor never fills lower stationary band.
             // Band definition: cells with y in (stationaryY, nextStationaryY)
             for (int i = 0; i < stationaryYs.Count; i++)
