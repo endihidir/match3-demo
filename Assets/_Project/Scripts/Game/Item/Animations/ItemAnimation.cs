@@ -1,4 +1,5 @@
 using System;
+using Core.Utils;
 using DG.Tweening;
 using UnityEngine;
 
@@ -46,19 +47,20 @@ namespace Core.Item
 
             return _shiftTween;
         }
-
-        public Tween SlideAndShift(Vector3 slidePos, Vector3 shiftPos, float durationMultiplier = 1f, float delay = 0f)
+        
+        public Tween SlideAndShift(Vector3 slidePos, Vector3 shiftPos, float durationMultiplier = 1f, float slideDelay = 0f)
         {
             _shiftTween?.Kill();
-            var del = BaseShiftDelay + delay;
-            var duration = BaseShiftDuration * durationMultiplier;
 
-            _shiftTween = DOTween.Sequence()
-                .Append(transform.DOMove(slidePos, duration).SetEase(Ease.InOutQuad))
-                .Append(transform.DOMove(shiftPos, duration).SetEase(Ease.InOutQuad))
-                .SetDelay(del)
-                .SetUpdate(UseUnscaledTime);
+            var slideDuration = BaseShiftDuration * durationMultiplier;
+            var shiftDuration = BaseShiftDuration * durationMultiplier;
             
+            _shiftTween = DOTween.Sequence()
+                .AppendInterval(BaseShiftDelay + slideDelay)
+                .Append(transform.DOMove(slidePos, slideDuration).SetEase(Ease.InOutQuad))
+                .Append(transform.DOMove(shiftPos, shiftDuration).SetEase(Ease.InOutQuad))
+                .SetUpdate(UseUnscaledTime);
+
             return _shiftTween;
         }
         
