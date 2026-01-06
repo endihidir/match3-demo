@@ -185,8 +185,7 @@ namespace Core.Handlers
 
             void FlushSegment()
             {
-                if (_spawnCoords.Count == 0)
-                    return;
+                if (_spawnCoords.Count == 0) return;
 
                 // Spawn from this segment's top (FallDown-style): all spawns start from same spawnY.
                 var spawnY = view.GridToWorld(segmentTop).y + cellSize;
