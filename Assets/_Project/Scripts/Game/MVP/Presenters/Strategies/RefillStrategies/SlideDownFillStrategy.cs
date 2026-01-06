@@ -27,7 +27,7 @@ namespace Core.Handlers
             _settings = config.ItemConfigContainer.RefillSettingsSo;
         }
 
-        public bool CanRefill(IGridModel model) => GridRefillCalcUtil.HasAnyEmptyActiveCell(model);
+        public bool CanRefill(IGridModel model) => GridRefillCalcUtil.HasStationaryAndBlocking(model);
 
         public IRefillStrategy Execute(GridStateContext context)
         {

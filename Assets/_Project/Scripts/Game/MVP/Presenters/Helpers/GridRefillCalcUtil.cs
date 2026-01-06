@@ -16,42 +16,38 @@ namespace Core.Utils
                     if (!TryGetActiveObject(model, x, y, out var obj)) continue;
                     if (!obj.IsStationary) continue;
 
-                    // Stationary at bottom cannot block anything
-                    if (y >= model.Height - 1) continue;
-
-                    int gapY = y + 1;
-
-                    // If the cell directly below is not active, there is no "blocked gap" to fill
-                    if (!model.IsCellActive(new Vector2Int(x, gapY))) continue;
-
-                    // Strategy is only meaningful if at least one side column can structurally donate at row y
-                    if (CanColumnStructurallyDonateAtRow(model, x - 1, y) ||
-                        CanColumnStructurallyDonateAtRow(model, x + 1, y))
-                    {
+                    if (CanPassUnderStationary(model, x, y))
                         return true;
-                    }
                 }
             }
 
             return false;
         }
 
-        private static bool CanColumnStructurallyDonateAtRow(IGridModel model, int donorX, int rowY)
+        private static bool CanPassUnderStationary(IGridModel model, int x, int stationaryY)
         {
-            // Out of bounds
-            if (donorX < 0 || donorX >= model.Width) return false;
-
-            // Donor cell at the stationary row must exist (active)
-            if (!model.IsCellActive(new Vector2Int(donorX, rowY))) return false;
-
-            // Donor column must be structurally continuous (no inactive holes) from top to rowY
-            // This encodes "it can be filled up to the stationary row" regardless of current occupancy.
-            for (int y = 0; y <= rowY; y++)
+            // Scan downwards in the same column.
+            for (int y = stationaryY + 1; y < model.Height; y++)
             {
-                if (!model.IsCellActive(new Vector2Int(donorX, y))) return false;
+                var c = new Vector2Int(x, y);
+
+                // If the column segment ends, there is nothing "under" to pass into.
+                if (!model.IsCellActive(c))
+                    return false;
+
+                // Empty active cell under stationary => pass/slide is possible.
+                if (!TryGetActiveObject(model, x, y, out var obj))
+                    return true;
+
+                // Non-stationary under stationary => eventually something can move / space can be created.
+                if (!obj.IsStationary)
+                    return true;
+
+                // Still stationary, keep scanning.
             }
 
-            return true;
+            // Reached bottom and everything below was stationary.
+            return false;
         }
         
         public static bool DestinationBlockedByStationaryAbove(IGridModel model, Vector2Int empty)
@@ -177,30 +173,13 @@ namespace Core.Utils
             {
                 var c = new Vector2Int(src.x, sy);
 
-                if (!model.IsCellActive(c))
-                    return false;
+                if (!model.IsCellActive(c)) return false;
 
                 var obj = model.GetGridObject(c);
 
                 if (obj && obj.IsStationary) return false;
 
                 if (!obj) return true;
-            }
-
-            return false;
-        }
-
-        public static bool HasAnyEmptyActiveCell(IGridModel model)
-        {
-            for (int y = 0; y < model.Height; y++)
-            {
-                for (int x = 0; x < model.Width; x++)
-                {
-                    var coord = new Vector2Int(x, y);
-
-                    if (!model.IsCellActive(coord)) continue;
-                    if (!model.GetGridObject(coord)) return true;
-                }
             }
 
             return false;
