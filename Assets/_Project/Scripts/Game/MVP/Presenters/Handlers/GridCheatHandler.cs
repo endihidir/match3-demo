@@ -44,8 +44,18 @@ namespace Core.Handlers
                     EditorLogger.LogError(_gridStateHandler.StateMachine.CurrentState.StateID);
                 }
             }
+
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                RemoveAtMousePos();
+            }
+
+            if (Input.GetKeyDown(KeyCode.F))
+            {
+                ForceRefill();
+            }
         }
-        
+
         public void CleanupBoosters()
         {
             var context = _gridStateHandler.Context;
@@ -89,6 +99,30 @@ namespace Core.Handlers
                 newObj.SetSpriteSize(context.View.GetCellSize());
                 newObj.SetParent(context.View.GridObjectsParent);
             }
+        }
+        
+        private void RemoveAtMousePos()
+        {
+            var context = _gridStateHandler.Context;
+            var stateMachine = _gridStateHandler.StateMachine;
+            
+            if(context == null || stateMachine == null)  return;
+            
+            var pos = context.View.ScreenToGridCoordinate(Input.mousePosition);
+            var actPos = context.View.InputDirectionToGridDirection(pos);
+            var obj = context.Model.GetGridObject(actPos);
+            if (obj)
+            {
+                context.Factory.ReleaseItem(obj);
+                context.Model.SetGridObject(actPos, null);
+            }
+        }
+        
+        private void ForceRefill()
+        {
+            var stateMachine = _gridStateHandler.StateMachine;
+
+            stateMachine?.ForceState<RefillResolveState>();
         }
     }
 }
