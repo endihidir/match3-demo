@@ -18,7 +18,7 @@ namespace Core.Handlers
         private readonly Dictionary<BaseGridObject, List<Vector2Int>> _pathByItem = new(256);
         private readonly HashSet<BaseGridObject> _spawned = new(128);
         private readonly List<UniTask> _animTasks = new(128);
-        private UniTask _running;
+        private UniTask _runningAnimations;
 
         // Reused buffer (segment-local coords)
         private readonly List<Vector2Int> _spawnCoords = new(64);
@@ -123,11 +123,11 @@ namespace Core.Handlers
                 }
             }
 
-            _running = PlayAnimations(context);
+            _runningAnimations = PlayAnimations(context);
             return this;
         }
 
-        public UniTask WaitAnimationsAsync() => _running;
+        public UniTask WaitAnimationsAsync() => _runningAnimations;
 
         private bool SpawnTopOpenSegmentsInColumn(GridStateContext context, IGridView view, int x, int height)
         {
@@ -231,8 +231,7 @@ namespace Core.Handlers
 
                 var obj = model.GetGridObject(c);
 
-                if (obj == null)
-                    continue;
+                if (!obj) continue;
 
                 if (obj.IsStationary)
                 {
@@ -254,13 +253,11 @@ namespace Core.Handlers
             {
                 var c = new Vector2Int(empty.x, sy);
 
-                if (!model.IsCellActive(c))
-                    return false;
+                if (!model.IsCellActive(c)) return false;
 
                 var obj = model.GetGridObject(c);
 
-                if (obj == null)
-                    continue;
+                if (!obj) continue;
 
                 return obj.IsStationary;
             }
@@ -274,11 +271,9 @@ namespace Core.Handlers
 
             var src = new Vector2Int(empty.x + dirX, empty.y - 1);
 
-            if (!model.IsInRange(src))
-                return false;
+            if (!model.IsInRange(src)) return false;
 
-            if (!model.IsCellActive(src))
-                return false;
+            if (!model.IsCellActive(src)) return false;
 
             var item = model.GetGridObject(src);
             if (!item || item.IsStationary)
@@ -303,20 +298,17 @@ namespace Core.Handlers
         {
             var sideOfSource = new Vector2Int(src.x - dirX, src.y);
 
-            if (!model.IsInRange(sideOfSource))
-                return false;
+            if (!model.IsInRange(sideOfSource)) return false;
 
             var sideObj = model.GetGridObject(sideOfSource);
-            if (sideObj == null || !sideObj.IsStationary)
-                return false;
+            if (!sideObj || !sideObj.IsStationary) return false;
 
             var slideSide = new Vector2Int(src.x + dirX, src.y);
 
             if (model.IsInRange(slideSide))
             {
                 var slideSideObj = model.GetGridObject(slideSide);
-                if (slideSideObj != null && slideSideObj.IsStationary)
-                    return false;
+                if (slideSideObj && slideSideObj.IsStationary) return false;
             }
 
             return true;
@@ -328,13 +320,11 @@ namespace Core.Handlers
             {
                 var c = new Vector2Int(src.x, sy);
 
-                if (!model.IsCellActive(c))
-                    return false;
+                if (!model.IsCellActive(c)) return false;
 
                 var obj = model.GetGridObject(c);
 
-                if (obj == null)
-                    continue;
+                if (!obj) continue;
 
                 return obj.IsStationary;
             }
@@ -348,16 +338,13 @@ namespace Core.Handlers
             {
                 var c = new Vector2Int(src.x, sy);
 
-                if (!model.IsCellActive(c))
-                    return false;
+                if (!model.IsCellActive(c)) return false;
 
                 var obj = model.GetGridObject(c);
 
-                if (obj != null && obj.IsStationary)
-                    return false;
+                if (obj && obj.IsStationary) return false;
 
-                if (obj == null)
-                    return true;
+                if (!obj) return true;
             }
 
             return false;
