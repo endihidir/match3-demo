@@ -20,10 +20,8 @@ namespace Core.Handlers
         public Vector2Int ForcedBoosterSpawnCoord { get; set; }
         public List<PendingBoosterAction> PendingBoosterActions { get; } = new();
         
-        public bool RefillInProgress { get; set; }
         public bool MatchResolveRequested { get; set; }
         public bool HasPendingBoosterActions => PendingBoosterActions.Count > 0;
-        public bool HasAnyEmptyActiveCell => GridRefillCalcUtil.HasAnyEmptyActiveCell(Model);
         public int GroupIdCounter { get; private set; }
 
         public GridStateContext(IGridModel model, IGridView view, IGridItemFactory factory, ItemConfigContainerSO configs)

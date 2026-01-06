@@ -1,5 +1,3 @@
-using System;
-using Core.Utils;
 using DG.Tweening;
 using UnityEngine;
 
@@ -48,22 +46,6 @@ namespace Core.Item
             return _shiftTween;
         }
         
-        public Tween SlideAndShift(Vector3 slidePos, Vector3 shiftPos, float durationMultiplier = 1f, float slideDelay = 0f)
-        {
-            _shiftTween?.Kill();
-
-            var slideDuration = BaseShiftDuration * durationMultiplier;
-            var shiftDuration = BaseShiftDuration * durationMultiplier;
-            
-            _shiftTween = DOTween.Sequence()
-                .AppendInterval(BaseShiftDelay + slideDelay)
-                .Append(transform.DOMove(slidePos, slideDuration).SetEase(Ease.InOutQuad))
-                .Append(transform.DOMove(shiftPos, shiftDuration).SetEase(Ease.InOutQuad))
-                .SetUpdate(UseUnscaledTime);
-
-            return _shiftTween;
-        }
-        
         public Tween ShiftPath(Vector3[] worldPoints, float durationMultiplier = 1f, float delay = 0f)
         {
             _shiftTween?.Kill();
@@ -103,7 +85,6 @@ namespace Core.Item
 
         public Tween Move(Vector3 worldPos)
         {
-            _shiftTween?.Kill();
             _moveTween?.Kill();
             
             _moveTween = transform.DOMove(worldPos, BaseMoveDuration)

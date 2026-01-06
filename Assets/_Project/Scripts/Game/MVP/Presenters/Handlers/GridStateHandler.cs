@@ -16,9 +16,7 @@ namespace Core.Handlers
         public GridStateContext Context { get; }
         private bool HasAnyInput => Context.Inputs.Count > 0;
         private bool HasPendingBoosterActions => Context.HasPendingBoosterActions;
-        private bool HasAnyEmptyActiveCell => Context.HasAnyEmptyActiveCell;
         private bool MatchResolveRequested => Context.MatchResolveRequested;
-        private bool RefillInProgress => Context.RefillInProgress;
 
         public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory, GameplayConfigContainer configContainer, IRefillStrategyHandler strategyHandler)
         {
@@ -35,8 +33,7 @@ namespace Core.Handlers
             StateMachine.Register(states);
 
             StateMachine.AddTransition(idleState, inputState, () => HasAnyInput)
-                         .AddTransition(idleState, matchState, () => MatchResolveRequested && !RefillInProgress)
-                         .AddTransition(idleState, refillState, () => HasAnyEmptyActiveCell && !HasAnyInput && !MatchResolveRequested)
+                         .AddTransition(idleState, matchState, () => MatchResolveRequested)
                          
                          .AddTransition(inputState, boosterState, () => inputState.IsExitReady && HasPendingBoosterActions)
                          .AddTransition(inputState, matchState, () => inputState.IsExitReady && MatchResolveRequested && !HasPendingBoosterActions)

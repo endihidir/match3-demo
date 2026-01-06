@@ -35,7 +35,7 @@ namespace Core.Utils
             return false;
         }
 
-        private static bool CanColumnStructurallyDonateAtRow(IGridModel model, int donorX, int rowY)
+        public static bool CanColumnStructurallyDonateAtRow(IGridModel model, int donorX, int rowY)
         {
             // Out of bounds
             if (donorX < 0 || donorX >= model.Width) return false;
