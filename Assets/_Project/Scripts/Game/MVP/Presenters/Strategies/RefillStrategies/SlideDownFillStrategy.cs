@@ -55,7 +55,7 @@ namespace Core.Handlers
 
                         if (!GridRefillCalcUtil.IsEmptyActiveCell(model, dst)) continue;
 
-                        if (!CanFallVertically(model, x, y, out var src)) continue;
+                        if (!GridRefillCalcUtil.CanFallVertically(model, x, y, out var src)) continue;
 
                         var item = model.GetGridObject(src);
                         
@@ -77,15 +77,15 @@ namespace Core.Handlers
 
                         if (!GridRefillCalcUtil.IsEmptyActiveCell(model, empty)) continue;
 
-                        if (CanFallVertically(model, x, y, out _)) continue;
+                        if (GridRefillCalcUtil.CanFallVertically(model, x, y, out _)) continue;
 
-                        if (!DestinationBlockedByStationaryAbove(model, empty)) continue;
+                        if (!GridRefillCalcUtil.DestinationBlockedByStationaryAbove(model, empty)) continue;
 
-                        if (TryCollectDiagonalSlide(model, empty, -1, out var left))
-                            slides.Add(left);
-
-                        if (TryCollectDiagonalSlide(model, empty, +1, out var right))
+                        if (GridRefillCalcUtil.TryCollectDiagonalSlide(model, empty, 1, out var right))
                             slides.Add(right);
+
+                        if (GridRefillCalcUtil.TryCollectDiagonalSlide(model, empty, -1, out var left))
+                            slides.Add(left);
                     }
                 }
 
@@ -178,142 +178,6 @@ namespace Core.Handlers
             return true;
         }
 
-        private static bool CanFallVertically(IGridModel model, int x, int y, out Vector2Int source)
-        {
-            for (int sy = y - 1; sy >= 0; sy--)
-            {
-                var c = new Vector2Int(x, sy);
-
-                if (!model.IsCellActive(c))
-                {
-                    source = default;
-                    return false;
-                }
-
-                var obj = model.GetGridObject(c);
-
-                if (!obj) continue;
-
-                if (obj.IsStationary)
-                {
-                    source = default;
-                    return false;
-                }
-
-                source = c;
-                return true;
-            }
-
-            source = default;
-            return false;
-        }
-
-        private static bool DestinationBlockedByStationaryAbove(IGridModel model, Vector2Int empty)
-        {
-            for (int sy = empty.y - 1; sy >= 0; sy--)
-            {
-                var c = new Vector2Int(empty.x, sy);
-
-                if (!model.IsCellActive(c)) return false;
-
-                var obj = model.GetGridObject(c);
-
-                if (!obj) continue;
-
-                return obj.IsStationary;
-            }
-
-            return false;
-        }
-
-        private static bool TryCollectDiagonalSlide(IGridModel model, Vector2Int empty, int dirX, out SlideMoveRecord slide)
-        {
-            slide = default;
-
-            var src = new Vector2Int(empty.x + dirX, empty.y - 1);
-
-            if (!model.IsInRange(src)) return false;
-
-            if (!model.IsCellActive(src)) return false;
-
-            var item = model.GetGridObject(src);
-            
-            if (!item || item.IsStationary) return false;
-
-            if (IsBlockerSideSource(model, src, dirX))
-            {
-                slide = new SlideMoveRecord(item, src, empty);
-                return true;
-            }
-
-            if (IsBlockerShadowSandSource(model, src) && !HasEmptyBelowInSegment(model, src))
-            {
-                slide = new SlideMoveRecord(item, src, empty);
-                return true;
-            }
-
-            return false;
-        }
-
-        private static bool IsBlockerSideSource(IGridModel model, Vector2Int src, int dirX)
-        {
-            var sideOfSource = new Vector2Int(src.x - dirX, src.y);
-
-            if (!model.IsInRange(sideOfSource)) return false;
-
-            var sideObj = model.GetGridObject(sideOfSource);
-            
-            if (!sideObj || !sideObj.IsStationary) return false;
-
-            var slideSide = new Vector2Int(src.x + dirX, src.y);
-
-            if (model.IsInRange(slideSide))
-            {
-                var slideSideObj = model.GetGridObject(slideSide);
-                
-                if (slideSideObj && slideSideObj.IsStationary) return false;
-            }
-
-            return true;
-        }
-
-        private static bool IsBlockerShadowSandSource(IGridModel model, Vector2Int src)
-        {
-            for (int sy = src.y - 1; sy >= 0; sy--)
-            {
-                var c = new Vector2Int(src.x, sy);
-
-                if (!model.IsCellActive(c)) return false;
-
-                var obj = model.GetGridObject(c);
-
-                if (!obj) continue;
-
-                return obj.IsStationary;
-            }
-
-            return false;
-        }
-
-        private static bool HasEmptyBelowInSegment(IGridModel model, Vector2Int src)
-        {
-            for (int sy = src.y + 1; sy < model.Height; sy++)
-            {
-                var c = new Vector2Int(src.x, sy);
-
-                if (!model.IsCellActive(c))
-                    return false;
-
-                var obj = model.GetGridObject(c);
-
-                if (obj && obj.IsStationary) return false;
-
-                if (!obj) return true;
-            }
-
-            return false;
-        }
-
         private void ApplyMove(IGridModel model, BaseGridObject item, Vector2Int from, Vector2Int to)
         {
             model.SetGridObject(from, null);
@@ -372,6 +236,7 @@ namespace Core.Handlers
                 });
 
                 var nonSpawnCount = 0;
+                
                 for (int i = 0; i < list.Count; i++)
                 {
                     if (!list[i].spawned)

@@ -1,3 +1,4 @@
+using Core.Handlers;
 using Core.Item;
 using Core.Models;
 using UnityEngine;
@@ -35,7 +36,7 @@ namespace Core.Utils
             return false;
         }
 
-        public static bool CanColumnStructurallyDonateAtRow(IGridModel model, int donorX, int rowY)
+        private static bool CanColumnStructurallyDonateAtRow(IGridModel model, int donorX, int rowY)
         {
             // Out of bounds
             if (donorX < 0 || donorX >= model.Width) return false;
@@ -51,6 +52,142 @@ namespace Core.Utils
             }
 
             return true;
+        }
+        
+        public static bool DestinationBlockedByStationaryAbove(IGridModel model, Vector2Int empty)
+        {
+            for (int sy = empty.y - 1; sy >= 0; sy--)
+            {
+                var c = new Vector2Int(empty.x, sy);
+
+                if (!model.IsCellActive(c)) return false;
+
+                var obj = model.GetGridObject(c);
+
+                if (!obj) continue;
+
+                return obj.IsStationary;
+            }
+
+            return false;
+        }
+        
+        public static bool CanFallVertically(IGridModel model, int x, int y, out Vector2Int source)
+        {
+            for (int sy = y - 1; sy >= 0; sy--)
+            {
+                var c = new Vector2Int(x, sy);
+
+                if (!model.IsCellActive(c))
+                {
+                    source = default;
+                    return false;
+                }
+
+                var obj = model.GetGridObject(c);
+
+                if (!obj) continue;
+
+                if (obj.IsStationary)
+                {
+                    source = default;
+                    return false;
+                }
+
+                source = c;
+                return true;
+            }
+
+            source = default;
+            return false;
+        }
+        
+        public static bool TryCollectDiagonalSlide(IGridModel model, Vector2Int empty, int dirX, out SlideMoveRecord slide)
+        {
+            slide = default;
+
+            var src = new Vector2Int(empty.x + dirX, empty.y - 1);
+
+            if (!model.IsInRange(src)) return false;
+
+            if (!model.IsCellActive(src)) return false;
+
+            var item = model.GetGridObject(src);
+            
+            if (!item || item.IsStationary) return false;
+
+            if (IsBlockerSideSource(model, src, dirX))
+            {
+                slide = new SlideMoveRecord(item, src, empty);
+                return true;
+            }
+
+            if (IsBlockerShadowSandSource(model, src) && !HasEmptyBelowInSegment(model, src))
+            {
+                slide = new SlideMoveRecord(item, src, empty);
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool IsBlockerSideSource(IGridModel model, Vector2Int src, int dirX)
+        {
+            var sideOfSource = new Vector2Int(src.x - dirX, src.y);
+
+            if (!model.IsInRange(sideOfSource)) return false;
+
+            var sideObj = model.GetGridObject(sideOfSource);
+            
+            if (!sideObj || !sideObj.IsStationary) return false;
+
+            var slideSide = new Vector2Int(src.x + dirX, src.y);
+
+            if (model.IsInRange(slideSide))
+            {
+                var slideSideObj = model.GetGridObject(slideSide);
+                
+                if (slideSideObj && slideSideObj.IsStationary) return false;
+            }
+
+            return true;
+        }
+
+        private static bool IsBlockerShadowSandSource(IGridModel model, Vector2Int src)
+        {
+            for (int sy = src.y - 1; sy >= 0; sy--)
+            {
+                var c = new Vector2Int(src.x, sy);
+
+                if (!model.IsCellActive(c)) return false;
+
+                var obj = model.GetGridObject(c);
+
+                if (!obj) continue;
+
+                return obj.IsStationary;
+            }
+
+            return false;
+        }
+
+        private static bool HasEmptyBelowInSegment(IGridModel model, Vector2Int src)
+        {
+            for (int sy = src.y + 1; sy < model.Height; sy++)
+            {
+                var c = new Vector2Int(src.x, sy);
+
+                if (!model.IsCellActive(c))
+                    return false;
+
+                var obj = model.GetGridObject(c);
+
+                if (obj && obj.IsStationary) return false;
+
+                if (!obj) return true;
+            }
+
+            return false;
         }
 
         public static bool HasAnyEmptyActiveCell(IGridModel model)
@@ -73,68 +210,6 @@ namespace Core.Utils
         {
             if (!model.IsCellActive(coord)) return false;
             return !model.GetGridObject(coord);
-        }
-
-        public static bool IsBarrierAtColumnTop(IGridModel model, int x, int barrierY)
-        {
-            for (int y = barrierY - 1; y >= 0; y--)
-            {
-                var cell = new Vector2Int(x, y);
-                if (!model.IsCellActive(cell)) continue;
-                return false;
-            }
-
-            return true;
-        }
-
-        public static bool CanFallStraightDown(IGridModel model, Vector2Int coord)
-        {
-            // Falling direction is +Y (Y increases downward)
-            int belowY = coord.y + 1;
-
-            if (belowY < 0 || belowY >= model.Height) return false;
-
-            var belowCoord = new Vector2Int(coord.x, belowY);
-
-            if (!model.IsCellActive(belowCoord)) return false;
-
-            return !model.GetGridObject(belowCoord);
-        }
-
-        public static bool TryFindVerticalSource(IGridModel model, int x, int destY, out Vector2Int sourceCoord)
-        {
-            // Scan upward (decreasing Y) until we find a movable object.
-            // Stationary blocks stop the scan.
-            for (int y = destY - 1; y >= 0; y--)
-            {
-                if (!TryGetActiveObject(model, x, y, out var obj)) continue;
-
-                if (obj.IsStationary) break;
-
-                sourceCoord = new Vector2Int(x, y);
-                return true;
-            }
-
-            sourceCoord = default;
-            return false;
-        }
-
-        public static bool TryGetBarrierYAbove(IGridModel model, int x, int destY, out int barrierY)
-        {
-            // Scan upward (decreasing Y) for the first stationary object.
-            for (int y = destY - 1; y >= 0; y--)
-            {
-                if (!TryGetActiveObject(model, x, y, out var obj)) continue;
-
-                if (obj.IsStationary)
-                {
-                    barrierY = y;
-                    return true;
-                }
-            }
-
-            barrierY = -1;
-            return false;
         }
 
         public static bool TryGetSpawnCellCoord(IGridModel model, int x, int height, out Vector2Int cellCoord)
