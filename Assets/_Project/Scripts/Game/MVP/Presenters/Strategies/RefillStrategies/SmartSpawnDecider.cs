@@ -18,12 +18,24 @@ namespace Core.Handlers
     public static class SmartSpawnDecider
     {
         private static readonly ItemType[] AllSpawnableTypes = BuildAllSpawnableTypes();
+
         /// <summary>
         /// Main entry point.
         /// Decides which item type should be spawned at the given cell.
         /// External safety bias (long refill chains etc.)
         /// </summary>
         public static ItemType Decide(IGridModel model, Vector2Int coord, SpawnSettings settings, float safetyBoost = 0f)
+        {
+            return Decide(model, coord, coord, settings, safetyBoost);
+        }
+
+        /// <summary>
+        /// Advanced entry point.
+        /// Allows evaluating spawn quality at a different "effective" cell.
+        /// This is useful for refill strategies where the spawned item is likely to fall further
+        /// (eg. SlideDown), so the decision better matches the final settled neighborhood.
+        /// </summary>
+        public static ItemType Decide(IGridModel model, Vector2Int spawnCoord, Vector2Int evalCoord, SpawnSettings settings, float safetyBoost = 0f)
         {
             var types = AllSpawnableTypes;
             if (types.Length == 0)
@@ -34,15 +46,24 @@ namespace Core.Handlers
             var safeCount = 0;
             var matchCount = 0;
 
+            var checkSpawn = spawnCoord != evalCoord;
+
             for (int i = 0; i < types.Length; i++)
             {
                 var type = types[i];
 
-                // Avoid vertical stacks regardless of fill order (above OR below)
-                if (IsSame(model, coord.x, coord.y + 1, type) || IsSame(model, coord.x, coord.y - 1, type))
+                // Avoid vertical stacks at the evaluation point (settled neighborhood)
+                if (IsSame(model, evalCoord.x, evalCoord.y + 1, type) || IsSame(model, evalCoord.x, evalCoord.y - 1, type))
                     continue;
 
-                if (CreatesImmediateMatch(model, coord, type))
+                // Also avoid vertical stacks at the actual spawn point (helps top-open segments)
+                if (checkSpawn && (IsSame(model, spawnCoord.x, spawnCoord.y + 1, type) || IsSame(model, spawnCoord.x, spawnCoord.y - 1, type)))
+                    continue;
+
+                var createsAtEval = CreatesImmediateMatch(model, evalCoord, type);
+                var createsAtSpawn = checkSpawn && CreatesImmediateMatch(model, spawnCoord, type);
+
+                if (createsAtEval || createsAtSpawn)
                     match[matchCount++] = type;
                 else
                     safe[safeCount++] = type;
@@ -60,9 +81,10 @@ namespace Core.Handlers
             else if (matchCount > 0)
                 pickMatch = true;
 
+            // PickBest uses evalCoord so the "near match" risk is aligned with the settled neighborhood.
             return pickMatch
-                ? PickBest(model, coord, match, matchCount, settings)
-                : PickBest(model, coord, safe, safeCount, settings);
+                ? PickBest(model, evalCoord, match, matchCount, settings)
+                : PickBest(model, evalCoord, safe, safeCount, settings);
         }
 
         private static ItemType PickBest(IGridModel model, Vector2Int cell, Span<ItemType> types, int count, SpawnSettings settings)
