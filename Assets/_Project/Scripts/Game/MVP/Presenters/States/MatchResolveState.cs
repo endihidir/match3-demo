@@ -61,8 +61,6 @@ namespace Core.Handlers
 
         private async UniTask ResolveGroupAsync(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int id)
         {
-            await WaitForGroupShiftCompleteAsync(group);
-            
             var boosterType = GridBoosterDecision.DecideBoosterTypeFromGroup(model, matchMask, group, id);
 
             if (!boosterType.HasValue)
@@ -129,32 +127,6 @@ namespace Core.Handlers
                 }
             }
         }
-        
-        private async UniTask WaitForGroupShiftCompleteAsync(List<Vector2Int> group)
-        {
-            while (true)
-            {
-                var anyInProgress = false;
-
-                for (int i = 0; i < group.Count; i++)
-                {
-                    var obj = Context.Model.GetGridObject(group[i]);
-                    if (!obj) continue;
-
-                    if (obj.IsShiftInProgress)
-                    {
-                        anyInProgress = true;
-                        break;
-                    }
-                }
-
-                if (!anyInProgress)
-                    return;
-
-                await UniTask.Yield(PlayerLoopTiming.Update);
-            }
-        }
-
         
         private async UniTask PlayMergeAnimationAsync(List<Vector2Int> group, Vector2Int spawnCoord)
         {

@@ -23,12 +23,9 @@ namespace Core.Handlers
 
         private async UniTaskVoid RefillGrid()
         {
-            Context.RefillInProgress = true;
             var strategy = _strategyHandler.SelectStrategy(Context.Model);
             await strategy.Execute(Context).WaitAnimationsAsync();
-            Context.RefillInProgress = false;
             Context.MatchResolveRequested = GridMatchRules.HasAnyRegularMatchOnBoard(Context.Model);
-            //RequestExit();
         }
     }
 }

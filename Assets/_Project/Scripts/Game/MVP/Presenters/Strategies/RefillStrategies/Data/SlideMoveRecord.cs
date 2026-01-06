@@ -3,24 +3,17 @@ using UnityEngine;
 
 namespace Core.Handlers
 {
-    public readonly struct SlideMovePlan
+    public readonly struct SlideMoveRecord
     {
+        public readonly BaseGridObject Item;
         public readonly Vector2Int From;
         public readonly Vector2Int To;
-        public readonly BaseGridObject Item;
-        public readonly bool HasSlide;
 
-        public SlideMovePlan(Vector2Int from, Vector2Int to, BaseGridObject item, bool hasSlide)
+        public SlideMoveRecord(BaseGridObject item, Vector2Int from, Vector2Int to)
         {
+            Item = item;
             From = from;
             To = to;
-            Item = item;
-            HasSlide = hasSlide;
         }
-    }
-        
-    public struct SlideMoveRecord
-    {
-        public Vector2Int[] ItemCoordPath;
     }
 }
