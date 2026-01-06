@@ -126,7 +126,60 @@ namespace Core.Utils
 
             return false;
         }
+        
+        public static bool IsEmptyActiveCell(IGridModel model, Vector2Int coord)
+        {
+            if (!model.IsCellActive(coord)) return false;
+            return !model.GetGridObject(coord);
+        }
 
+        public static bool TryGetSpawnCellCoord(IGridModel model, int x, int height, out Vector2Int cellCoord)
+        {
+            // Scan from top to bottom (y = 0 is top)
+            for (int y = 0; y < height; y++)
+            {
+                var coord = new Vector2Int(x, y);
+
+                if (!model.IsCellActive(coord))
+                    continue;
+
+                cellCoord = coord;
+                return true;
+            }
+
+            cellCoord = default;
+            return false;
+        }
+
+        public static int FindFallSourceY(IGridModel model, int x, int startY)
+        {
+            // Scan upward (decreasing Y) for the first active cell that has an object.
+            if (x < 0 || x >= model.Width) return -1;
+
+            for (int y = startY; y >= 0; y--)
+            {
+                if (!TryGetActiveObject(model, x, y, out _)) continue;
+                return y;
+            }
+
+            return -1;
+        }
+
+        private static bool TryGetActiveObject(IGridModel model, int x, int y, out BaseGridObject obj)
+        {
+            obj = null;
+
+            if (!model.IsInRange(x, y)) return false;
+
+            var coord = new Vector2Int(x, y);
+
+            if (!model.IsCellActive(coord)) return false;
+
+            obj = model.GetGridObject(coord);
+            
+            return obj;
+        }
+        
         private static bool IsBlockerSideSource(IGridModel model, Vector2Int src, int dirX)
         {
             var sideOfSource = new Vector2Int(src.x - dirX, src.y);
@@ -185,57 +238,5 @@ namespace Core.Utils
             return false;
         }
 
-        public static bool IsEmptyActiveCell(IGridModel model, Vector2Int coord)
-        {
-            if (!model.IsCellActive(coord)) return false;
-            return !model.GetGridObject(coord);
-        }
-
-        public static bool TryGetSpawnCellCoord(IGridModel model, int x, int height, out Vector2Int cellCoord)
-        {
-            // Scan from top to bottom (y = 0 is top)
-            for (int y = 0; y < height; y++)
-            {
-                var coord = new Vector2Int(x, y);
-
-                if (!model.IsCellActive(coord))
-                    continue;
-
-                cellCoord = coord;
-                return true;
-            }
-
-            cellCoord = default;
-            return false;
-        }
-
-        public static int FindFallSourceY(IGridModel model, int x, int startY)
-        {
-            // Scan upward (decreasing Y) for the first active cell that has an object.
-            if (x < 0 || x >= model.Width) return -1;
-
-            for (int y = startY; y >= 0; y--)
-            {
-                if (!TryGetActiveObject(model, x, y, out _)) continue;
-                return y;
-            }
-
-            return -1;
-        }
-
-        private static bool TryGetActiveObject(IGridModel model, int x, int y, out BaseGridObject obj)
-        {
-            obj = null;
-
-            if (!model.IsInRange(x, y)) return false;
-
-            var coord = new Vector2Int(x, y);
-
-            if (!model.IsCellActive(coord)) return false;
-
-            obj = model.GetGridObject(coord);
-            
-            return obj;
-        }
     }
 }

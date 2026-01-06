@@ -12,7 +12,6 @@ namespace Core.Item
         private Tween _shakeTween, _moveTween, _shiftTween;
 
         private const float BaseShiftDuration = 0.15f;
-        private const float BaseShiftDelay = 0.1f;
         private const float BaseMoveDuration = 0.15f;
         private const float TotalShakeDuration = 0.25f;
         private const float ShakeRotAngle = 10f;
@@ -34,13 +33,12 @@ namespace Core.Item
         public Tween Shift(Vector3 worldPos, float durationMultiplier = 1f, float delay = 0f)
         {
             _shiftTween?.Kill();
-
-            var del = BaseShiftDelay + delay;
+            
             var duration = BaseShiftDuration * durationMultiplier;
 
             _shiftTween = transform.DOMove(worldPos, duration)
                 .SetEase(Ease.InOutQuad)
-                .SetDelay(del)
+                .SetDelay(delay)
                 .SetUpdate(UseUnscaledTime);
 
             return _shiftTween;
@@ -49,10 +47,10 @@ namespace Core.Item
         public Tween ShiftPath(Vector3[] worldPoints, float durationMultiplier = 1f, float delay = 0f)
         {
             _shiftTween?.Kill();
-
+            
             var sequence = DOTween.Sequence()
                 .SetUpdate(UseUnscaledTime)
-                .SetDelay(0.05f + delay);
+                .AppendInterval(delay);
 
             var current = transform.position;
 
