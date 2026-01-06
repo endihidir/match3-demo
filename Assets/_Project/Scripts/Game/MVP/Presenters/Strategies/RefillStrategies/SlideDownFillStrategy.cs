@@ -27,10 +27,7 @@ namespace Core.Handlers
             _settings = config.ItemConfigContainer.RefillSettingsSo;
         }
 
-        public bool CanRefill(IGridModel model)
-        {
-            return GridRefillCalcUtil.HasAnyEmptyActiveCell(model);
-        }
+        public bool CanRefill(IGridModel model) => GridRefillCalcUtil.HasAnyEmptyActiveCell(model);
 
         public IRefillStrategy Execute(GridStateContext context)
         {
@@ -56,15 +53,13 @@ namespace Core.Handlers
                     {
                         var dst = new Vector2Int(x, y);
 
-                        if (!GridRefillCalcUtil.IsEmptyActiveCell(model, dst))
-                            continue;
+                        if (!GridRefillCalcUtil.IsEmptyActiveCell(model, dst)) continue;
 
-                        if (!CanFallVertically(model, x, y, out var src))
-                            continue;
+                        if (!CanFallVertically(model, x, y, out var src)) continue;
 
                         var item = model.GetGridObject(src);
-                        if (!item || item.IsStationary)
-                            continue;
+                        
+                        if (!item || item.IsStationary) continue;
 
                         ApplyMove(model, item, src, dst);
                         movedAny = true;
@@ -80,14 +75,11 @@ namespace Core.Handlers
                     {
                         var empty = new Vector2Int(x, y);
 
-                        if (!GridRefillCalcUtil.IsEmptyActiveCell(model, empty))
-                            continue;
+                        if (!GridRefillCalcUtil.IsEmptyActiveCell(model, empty)) continue;
 
-                        if (CanFallVertically(model, x, y, out _))
-                            continue;
+                        if (CanFallVertically(model, x, y, out _)) continue;
 
-                        if (!DestinationBlockedByStationaryAbove(model, empty))
-                            continue;
+                        if (!DestinationBlockedByStationaryAbove(model, empty)) continue;
 
                         if (TryCollectDiagonalSlide(model, empty, -1, out var left))
                             slides.Add(left);
@@ -105,8 +97,7 @@ namespace Core.Handlers
                     {
                         var slide = slides[i];
 
-                        if (!usedTargets.Add(slide.To))
-                            continue;
+                        if (!usedTargets.Add(slide.To)) continue;
 
                         ApplyMove(model, slide.Item, slide.From, slide.To);
                         movedAny = true;
@@ -150,12 +141,11 @@ namespace Core.Handlers
 
                 if (obj)
                 {
-                    segmentBlocked = true;
+                    segmentBlocked = true; 
                     continue;
                 }
 
-                if (segmentBlocked)
-                    continue;
+                if (segmentBlocked) continue;
 
                 _spawnCoords.Add(c);
             }
@@ -202,8 +192,7 @@ namespace Core.Handlers
 
                 var obj = model.GetGridObject(c);
 
-                if (obj == null)
-                    continue;
+                if (!obj) continue;
 
                 if (obj.IsStationary)
                 {
@@ -225,13 +214,11 @@ namespace Core.Handlers
             {
                 var c = new Vector2Int(empty.x, sy);
 
-                if (!model.IsCellActive(c))
-                    return false;
+                if (!model.IsCellActive(c)) return false;
 
                 var obj = model.GetGridObject(c);
 
-                if (obj == null)
-                    continue;
+                if (!obj) continue;
 
                 return obj.IsStationary;
             }
@@ -245,15 +232,13 @@ namespace Core.Handlers
 
             var src = new Vector2Int(empty.x + dirX, empty.y - 1);
 
-            if (!model.IsInRange(src))
-                return false;
+            if (!model.IsInRange(src)) return false;
 
-            if (!model.IsCellActive(src))
-                return false;
+            if (!model.IsCellActive(src)) return false;
 
             var item = model.GetGridObject(src);
-            if (!item || item.IsStationary)
-                return false;
+            
+            if (!item || item.IsStationary) return false;
 
             if (IsBlockerSideSource(model, src, dirX))
             {
@@ -274,20 +259,19 @@ namespace Core.Handlers
         {
             var sideOfSource = new Vector2Int(src.x - dirX, src.y);
 
-            if (!model.IsInRange(sideOfSource))
-                return false;
+            if (!model.IsInRange(sideOfSource)) return false;
 
             var sideObj = model.GetGridObject(sideOfSource);
-            if (sideObj == null || !sideObj.IsStationary)
-                return false;
+            
+            if (!sideObj || !sideObj.IsStationary) return false;
 
             var slideSide = new Vector2Int(src.x + dirX, src.y);
 
             if (model.IsInRange(slideSide))
             {
                 var slideSideObj = model.GetGridObject(slideSide);
-                if (slideSideObj != null && slideSideObj.IsStationary)
-                    return false;
+                
+                if (slideSideObj && slideSideObj.IsStationary) return false;
             }
 
             return true;
@@ -299,13 +283,11 @@ namespace Core.Handlers
             {
                 var c = new Vector2Int(src.x, sy);
 
-                if (!model.IsCellActive(c))
-                    return false;
+                if (!model.IsCellActive(c)) return false;
 
                 var obj = model.GetGridObject(c);
 
-                if (obj == null)
-                    continue;
+                if (!obj) continue;
 
                 return obj.IsStationary;
             }
@@ -324,11 +306,9 @@ namespace Core.Handlers
 
                 var obj = model.GetGridObject(c);
 
-                if (obj != null && obj.IsStationary)
-                    return false;
+                if (obj && obj.IsStationary) return false;
 
-                if (obj == null)
-                    return true;
+                if (!obj) return true;
             }
 
             return false;
@@ -386,8 +366,7 @@ namespace Core.Handlers
 
                 list.Sort((a, b) =>
                 {
-                    if (a.spawned != b.spawned)
-                        return a.spawned ? 1 : -1;
+                    if (a.spawned != b.spawned) return a.spawned ? 1 : -1;
 
                     return b.finalY.CompareTo(a.finalY);
                 });
