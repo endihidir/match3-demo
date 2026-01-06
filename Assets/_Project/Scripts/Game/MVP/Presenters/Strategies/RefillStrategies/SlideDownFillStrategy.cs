@@ -18,9 +18,8 @@ namespace Core.Handlers
         private readonly Dictionary<BaseGridObject, List<Vector2Int>> _pathByItem = new(256);
         private readonly HashSet<BaseGridObject> _spawned = new(128);
         private readonly List<UniTask> _animTasks = new(128);
-        private UniTask _runningAnimations;
+        private UniTask _running;
 
-        // Reused buffer (segment-local coords)
         private readonly List<Vector2Int> _spawnCoords = new(64);
 
         public SlideDownFillStrategy(GameplayConfigContainer config)
@@ -84,7 +83,6 @@ namespace Core.Handlers
                         if (!GridRefillCalcUtil.IsEmptyActiveCell(model, empty))
                             continue;
 
-                        // If it can be filled vertically, do not slide into it.
                         if (CanFallVertically(model, x, y, out _))
                             continue;
 
@@ -115,7 +113,7 @@ namespace Core.Handlers
                     }
                 }
 
-                // 3) Spawn into top-open segments (FallDown-like spawnY, but per segment)
+                // 3) Spawn into top-open segments (MIN PATCH: single spawnY per column pass)
                 for (int x = 0; x < width; x++)
                 {
                     if (SpawnTopOpenSegmentsInColumn(context, view, x, height))
@@ -123,97 +121,71 @@ namespace Core.Handlers
                 }
             }
 
-            _runningAnimations = PlayAnimations(context);
+            _running = PlayAnimations(context);
             return this;
         }
 
-        public UniTask WaitAnimationsAsync() => _runningAnimations;
+        public UniTask WaitAnimationsAsync() => _running;
 
         private bool SpawnTopOpenSegmentsInColumn(GridStateContext context, IGridView view, int x, int height)
         {
             var model = context.Model;
             var cellSize = view.GetCellSize();
 
-            var spawnedAny = false;
-
-            // Segment state
             _spawnCoords.Clear();
-            var segmentHasStarted = false;
-            var segmentBlockedByObject = false;
-            var segmentTop = default(Vector2Int);
+
+            var segmentBlocked = false;
 
             for (int y = 0; y < height; y++)
             {
                 var c = new Vector2Int(x, y);
 
-                // Inactive cuts the column into segments
                 if (!model.IsCellActive(c))
                 {
-                    FlushSegment();
-
-                    segmentHasStarted = false;
-                    segmentBlockedByObject = false;
-                    segmentTop = default;
+                    segmentBlocked = false;
                     continue;
-                }
-
-                if (!segmentHasStarted)
-                {
-                    segmentHasStarted = true;
-                    segmentTop = c;
                 }
 
                 var obj = model.GetGridObject(c);
 
-                // Any object blocks further spawns in this segment (we only spawn into the "top-open" part)
                 if (obj)
                 {
-                    FlushSegment();
-                    segmentBlockedByObject = true;
+                    segmentBlocked = true;
                     continue;
                 }
 
-                if (segmentBlockedByObject)
+                if (segmentBlocked)
                     continue;
 
-                // Empty + top-open => spawn candidate
                 _spawnCoords.Add(c);
             }
 
-            FlushSegment();
-            return spawnedAny;
+            if (_spawnCoords.Count == 0)
+                return false;
 
-            void FlushSegment()
+            // MIN PATCH: all spawns start from a single Y (FallDown-like), not per-target-cell Y.
+            var spawnY = view.GridToWorld(_spawnCoords[0]).y + cellSize;
+
+            for (int i = 0; i < _spawnCoords.Count; i++)
             {
-                if (_spawnCoords.Count == 0) return;
+                var coord = _spawnCoords[i];
 
-                // Spawn from this segment's top (FallDown-style): all spawns start from same spawnY.
-                var spawnY = view.GridToWorld(segmentTop).y + cellSize;
+                var type = SmartSpawnDecider.Decide(model, coord, _settings.SpawnSettings);
+                var item = context.Factory.GetRegularItem(type);
 
-                for (int i = 0; i < _spawnCoords.Count; i++)
-                {
-                    var coord = _spawnCoords[i];
+                item.SetParent(view.GridObjectsParent);
+                item.SetSpriteSize(cellSize);
 
-                    var type = SmartSpawnDecider.Decide(model, coord, _settings.SpawnSettings);
-                    var item = context.Factory.GetRegularItem(type);
+                var w = view.GridToWorld(coord);
+                item.SetPosition(new Vector3(w.x, spawnY, w.z));
 
-                    item.SetParent(view.GridObjectsParent);
-                    item.SetSpriteSize(cellSize);
+                model.SetGridObject(coord, item);
+                _spawned.Add(item);
 
-                    var target = view.GridToWorld(coord);
-                    var start = new Vector3(target.x, spawnY, target.z);
-
-                    item.SetPosition(start);
-
-                    model.SetGridObject(coord, item);
-                    _spawned.Add(item);
-
-                    AddPath(item, coord);
-                }
-
-                _spawnCoords.Clear();
-                spawnedAny = true;
+                AddPath(item, coord);
             }
+
+            return true;
         }
 
         private static bool CanFallVertically(IGridModel model, int x, int y, out Vector2Int source)
@@ -230,7 +202,8 @@ namespace Core.Handlers
 
                 var obj = model.GetGridObject(c);
 
-                if (!obj) continue;
+                if (obj == null)
+                    continue;
 
                 if (obj.IsStationary)
                 {
@@ -252,11 +225,13 @@ namespace Core.Handlers
             {
                 var c = new Vector2Int(empty.x, sy);
 
-                if (!model.IsCellActive(c)) return false;
+                if (!model.IsCellActive(c))
+                    return false;
 
                 var obj = model.GetGridObject(c);
 
-                if (!obj) continue;
+                if (obj == null)
+                    continue;
 
                 return obj.IsStationary;
             }
@@ -270,9 +245,11 @@ namespace Core.Handlers
 
             var src = new Vector2Int(empty.x + dirX, empty.y - 1);
 
-            if (!model.IsInRange(src)) return false;
+            if (!model.IsInRange(src))
+                return false;
 
-            if (!model.IsCellActive(src)) return false;
+            if (!model.IsCellActive(src))
+                return false;
 
             var item = model.GetGridObject(src);
             if (!item || item.IsStationary)
@@ -297,17 +274,20 @@ namespace Core.Handlers
         {
             var sideOfSource = new Vector2Int(src.x - dirX, src.y);
 
-            if (!model.IsInRange(sideOfSource)) return false;
+            if (!model.IsInRange(sideOfSource))
+                return false;
 
             var sideObj = model.GetGridObject(sideOfSource);
-            if (!sideObj || !sideObj.IsStationary) return false;
+            if (sideObj == null || !sideObj.IsStationary)
+                return false;
 
             var slideSide = new Vector2Int(src.x + dirX, src.y);
 
             if (model.IsInRange(slideSide))
             {
                 var slideSideObj = model.GetGridObject(slideSide);
-                if (slideSideObj && slideSideObj.IsStationary) return false;
+                if (slideSideObj != null && slideSideObj.IsStationary)
+                    return false;
             }
 
             return true;
@@ -319,11 +299,13 @@ namespace Core.Handlers
             {
                 var c = new Vector2Int(src.x, sy);
 
-                if (!model.IsCellActive(c)) return false;
+                if (!model.IsCellActive(c))
+                    return false;
 
                 var obj = model.GetGridObject(c);
 
-                if (!obj) continue;
+                if (obj == null)
+                    continue;
 
                 return obj.IsStationary;
             }
@@ -337,13 +319,16 @@ namespace Core.Handlers
             {
                 var c = new Vector2Int(src.x, sy);
 
-                if (!model.IsCellActive(c)) return false;
+                if (!model.IsCellActive(c))
+                    return false;
 
                 var obj = model.GetGridObject(c);
 
-                if (obj && obj.IsStationary) return false;
+                if (obj != null && obj.IsStationary)
+                    return false;
 
-                if (!obj) return true;
+                if (obj == null)
+                    return true;
             }
 
             return false;
