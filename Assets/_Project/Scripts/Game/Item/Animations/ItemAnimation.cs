@@ -94,22 +94,7 @@ namespace Core.Item
         {
             _shiftTween?.Kill();
         
-            if (worldPoints == null || worldPoints.Length == 0)
-                return null;
-        
-            var current = transform.position;
-            var totalDuration = 0f;
-            
-            for (int i = 0; i < worldPoints.Length; i++)
-            {
-                var next = worldPoints[i];
-                var distCells = Mathf.Abs(current.y - next.y) / cellSize;
-                var segMul = .5f + distCells * durationMultiplier;
-                totalDuration += BaseShiftDuration * segMul;
-                current = next;
-            }
-        
-            _shiftTween = transform.DOPath(worldPoints, totalDuration, PathType.Linear, PathMode.Ignore)
+            _shiftTween = transform.DOPath(worldPoints, BaseShiftDuration * durationMultiplier, PathType.Linear, PathMode.Ignore)
                 .SetEase(Ease.InQuad)
                 .SetDelay(delay)
                 .OnComplete(Spring)
