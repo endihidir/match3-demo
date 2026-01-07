@@ -11,68 +11,29 @@ namespace Core.Handlers
     public sealed class GridCheatHandler : IGridCheatHandler, ITickable
     {
         private readonly IGridStateHandler _gridStateHandler;
-        
-        public GridCheatHandler(IGridStateHandler gridStateHandler)
-        {
-            _gridStateHandler = gridStateHandler;
-        }
+        public GridCheatHandler(IGridStateHandler gridStateHandler) => _gridStateHandler = gridStateHandler;
 
         public void Tick()
         {
-#if UNITY_EDITOR
-            
-            if (Input.GetKeyDown(KeyCode.P))
-            {
-                EditorApplication.isPaused = !EditorApplication.isPaused;
-            }
-#endif
-            if (Input.GetKeyDown(KeyCode.B))
-            {
-                GenerateObstacleAtMousePos(ObstacleType.Box);
-            }
-            
-            if (Input.GetKeyDown(KeyCode.N))
-            {
-                GenerateObstacleAtMousePos(ObstacleType.Vase);
-            }
-            
-            if (Input.GetKeyDown(KeyCode.T))
-            {
-                GenerateBoosterAtMousePos(BoosterType.Bomb);
-            }
-            
-            if (Input.GetKeyDown(KeyCode.H))
-            {
-                GenerateBoosterAtMousePos(BoosterType.RocketHorizontal);
-            }
-            
-            if (Input.GetKeyDown(KeyCode.V))
-            {
-                GenerateBoosterAtMousePos(BoosterType.RocketVertical);
-            }
-            
-            if (Input.GetKeyDown(KeyCode.C))
-            {
-                CleanupBoosters();
-            }
+            if (Input.GetKeyDown(KeyCode.B)) GenerateObstacleAtMousePos(ObstacleType.Box);
+            if (Input.GetKeyDown(KeyCode.N)) GenerateObstacleAtMousePos(ObstacleType.Vase);
+            if (Input.GetKeyDown(KeyCode.T)) GenerateBoosterAtMousePos(BoosterType.Bomb);
+            if (Input.GetKeyDown(KeyCode.H)) GenerateBoosterAtMousePos(BoosterType.RocketHorizontal);
+            if (Input.GetKeyDown(KeyCode.V)) GenerateBoosterAtMousePos(BoosterType.RocketVertical);
+            if (Input.GetKeyDown(KeyCode.C)) CleanupBoosters();
+            if (Input.GetKeyDown(KeyCode.R)) RemoveAtMousePos();
+            if (Input.GetKeyDown(KeyCode.F)) ForceRefill();
             
             if (Input.GetKeyDown(KeyCode.L))
             {
-                if (_gridStateHandler != null)
-                {
+                if (_gridStateHandler != null) 
                     EditorLogger.LogError(_gridStateHandler.StateMachine.CurrentState.StateID);
-                }
             }
 
-            if (Input.GetKeyDown(KeyCode.R))
-            {
-                RemoveAtMousePos();
-            }
-
-            if (Input.GetKeyDown(KeyCode.F))
-            {
-                ForceRefill();
-            }
+#if UNITY_EDITOR
+            
+            if (Input.GetKeyDown(KeyCode.P)) EditorApplication.isPaused = !EditorApplication.isPaused;
+#endif
         }
 
         public void CleanupBoosters()
@@ -123,11 +84,8 @@ namespace Core.Handlers
             ClearCell(context, coord);
         }
 
-        public void ForceRefill()
-        {
-            _gridStateHandler.StateMachine?.ForceState<RefillResolveState>();
-        }
-        
+        public void ForceRefill() => _gridStateHandler.StateMachine?.ForceState<RefillResolveState>();
+
         private bool TryGetContext(out GridStateContext context)
         {
             context = _gridStateHandler.Context;
