@@ -197,16 +197,14 @@ namespace Core.Handlers
                 list.Add(step);
         }
 
-        private UniTask PlayAnimations(GridStateContext context)
+       private UniTask PlayAnimations(GridStateContext context)
         {
             _animTasks.Clear();
 
             var view = context.View;
             var cellSize = view.GetCellSize();
 
-            var durationMul = _settings.ShiftDurationMultiplier * (2f / Mathf.Max(0.0001f, cellSize));
-
-            var byColumn = new Dictionary<int, List<(BaseGridObject item, List<Vector2Int> path, bool spawned, int finalY)>>(16);
+            var all = new List<(BaseGridObject item, List<Vector2Int> path, bool spawned, int finalY, int finalX)>(_pathByItem.Count);
 
             foreach (var kv in _pathByItem)
             {
@@ -215,56 +213,81 @@ namespace Core.Handlers
                 if (path == null || path.Count == 0) continue;
 
                 var final = path[^1];
-                if (!byColumn.TryGetValue(final.x, out var list))
-                {
-                    list = new List<(BaseGridObject, List<Vector2Int>, bool, int)>(16);
-                    byColumn[final.x] = list;
-                }
+                all.Add((item, path, _spawned.Contains(item), final.y, final.x));
+            }
+            
+            all.Sort((a, b) =>
+            {
+                if (a.spawned != b.spawned) return a.spawned ? 1 : -1;
+                var y = b.finalY.CompareTo(a.finalY);
+                if (y != 0) return y;
+                return a.finalX.CompareTo(b.finalX);
+            });
 
-                list.Add((item, path, _spawned.Contains(item), final.y));
+            // 1) Count non-spawn moves per column (so spawns can start after them)
+            var nonSpawnCountByColumn = new Dictionary<int, int>(16);
+            for (int i = 0; i < all.Count; i++)
+            {
+                var (_, _, spawned, _, finalX) = all[i];
+                if (spawned) continue;
+
+                if (!nonSpawnCountByColumn.TryGetValue(finalX, out var c))
+                    c = 0;
+
+                nonSpawnCountByColumn[finalX] = c + 1;
             }
 
-            foreach (var col in byColumn)
+            // 2) Wave counters per column
+            var nonSpawnWaveByColumn = new Dictionary<int, int>(16);
+            var spawnWaveByColumn = new Dictionary<int, int>(16);
+
+            for (int i = 0; i < all.Count; i++)
             {
-                var list = col.Value;
+                var (item, path, spawned, _, finalX) = all[i];
+                if (!item) continue;
 
-                list.Sort((a, b) =>
+                var world = new Vector3[path.Count + (spawned ? 1 : 0)];
+                var idx = 0;
+
+                if (spawned)
+                    world[idx++] = item.transform.position;
+
+                for (int p = 0; p < path.Count; p++)
+                    world[idx++] = view.GridToWorld(path[p]);
+
+                var totalDuration = 0f;
+                var current = item.transform.position;
+
+                for (int w = 0; w < world.Length; w++)
                 {
-                    if (a.spawned != b.spawned) return a.spawned ? 1 : -1;
-
-                    return b.finalY.CompareTo(a.finalY);
-                });
-
-                var nonSpawnCount = 0;
+                    var next = world[w];
+                    var distCells = Mathf.Abs(current.y - next.y) / cellSize;
+                    var segMul = 1f + distCells * _settings.ShiftDurationMultiplier;
+                    totalDuration += segMul;
+                    current = next;
+                }
                 
-                for (int i = 0; i < list.Count; i++)
+                int wave;
+
+                if (!spawned)
                 {
-                    if (!list[i].spawned)
-                        nonSpawnCount++;
+                    var wv = nonSpawnWaveByColumn.GetValueOrDefault(finalX, 0);
+                    wave = wv;
+                    nonSpawnWaveByColumn[finalX] = wv + 1;
+                }
+                else
+                {
+                    var sw = spawnWaveByColumn.GetValueOrDefault(finalX, 0);
+
+                    nonSpawnCountByColumn.TryGetValue(finalX, out var nonSpawnCount);
+                    wave = nonSpawnCount + sw;
+                    spawnWaveByColumn[finalX] = sw + 1;
                 }
 
-                var nonSpawnWave = 0;
-                var spawnWave = 0;
+                var delay = wave * _settings.ShiftDelayMultiplier;
 
-                for (int i = 0; i < list.Count; i++)
-                {
-                    var (item, path, spawned, _) = list[i];
-
-                    var world = new Vector3[path.Count + (spawned ? 1 : 0)];
-                    var idx = 0;
-
-                    if (spawned)
-                        world[idx++] = item.transform.position;
-
-                    for (int p = 0; p < path.Count; p++)
-                        world[idx++] = view.GridToWorld(path[p]);
-
-                    var wave = spawned ? (nonSpawnCount + spawnWave++) : nonSpawnWave++;
-                    var delay = wave * _settings.ShiftDelayMultiplier;
-
-                    var tween = item.ItemAnimation.ShiftPath(world, durationMul, delay);
-                    _animTasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
-                }
+                var tween = item.ItemAnimation.ShiftPath(world, totalDuration, delay);
+                _animTasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
             }
 
             return UniTask.WhenAll(_animTasks);

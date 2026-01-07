@@ -1,6 +1,8 @@
 using Core.Item;
-using Core.StateMachineCore;
 using Core.Utils;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 using VContainer.Unity;
 
@@ -17,6 +19,13 @@ namespace Core.Handlers
 
         public void Tick()
         {
+#if UNITY_EDITOR
+            
+            if (Input.GetKeyDown(KeyCode.P))
+            {
+                EditorApplication.isPaused = !EditorApplication.isPaused;
+            }
+#endif
             if (Input.GetKeyDown(KeyCode.B))
             {
                 GenerateObstacleAtMousePos(ObstacleType.Box);
