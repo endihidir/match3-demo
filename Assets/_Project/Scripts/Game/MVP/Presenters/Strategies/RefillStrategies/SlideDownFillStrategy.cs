@@ -197,7 +197,7 @@ namespace Core.Handlers
                 list.Add(step);
         }
 
-       private UniTask PlayAnimations(GridStateContext context)
+        private UniTask PlayAnimations(GridStateContext context)
         {
             _animTasks.Clear();
 
@@ -215,7 +215,7 @@ namespace Core.Handlers
                 var final = path[^1];
                 all.Add((item, path, _spawned.Contains(item), final.y, final.x));
             }
-            
+
             all.Sort((a, b) =>
             {
                 if (a.spawned != b.spawned) return a.spawned ? 1 : -1;
@@ -223,27 +223,11 @@ namespace Core.Handlers
                 if (y != 0) return y;
                 return a.finalX.CompareTo(b.finalX);
             });
-
-            // 1) Count non-spawn moves per column (so spawns can start after them)
-            var nonSpawnCountByColumn = new Dictionary<int, int>(16);
+            
+            
             for (int i = 0; i < all.Count; i++)
             {
-                var (_, _, spawned, _, finalX) = all[i];
-                if (spawned) continue;
-
-                if (!nonSpawnCountByColumn.TryGetValue(finalX, out var c))
-                    c = 0;
-
-                nonSpawnCountByColumn[finalX] = c + 1;
-            }
-
-            // 2) Wave counters per column
-            var nonSpawnWaveByColumn = new Dictionary<int, int>(16);
-            var spawnWaveByColumn = new Dictionary<int, int>(16);
-
-            for (int i = 0; i < all.Count; i++)
-            {
-                var (item, path, spawned, _, finalX) = all[i];
+                var (item, path, spawned, finalY, _) = all[i];
                 if (!item) continue;
 
                 var world = new Vector3[path.Count + (spawned ? 1 : 0)];
@@ -255,6 +239,10 @@ namespace Core.Handlers
                 for (int p = 0; p < path.Count; p++)
                     world[idx++] = view.GridToWorld(path[p]);
 
+                var layerWave = (context.Model.Height - 1) - finalY;
+                if (spawned) layerWave += 1;
+                var delay = layerWave * _settings.ShiftDelayMultiplier;
+                
                 var totalDuration = 0f;
                 var current = item.transform.position;
 
@@ -262,35 +250,17 @@ namespace Core.Handlers
                 {
                     var next = world[w];
                     var distCells = Mathf.Abs(current.y - next.y) / cellSize;
-                    var segMul = 1f + distCells * _settings.ShiftDurationMultiplier;
+                    var segMul = 0.5f + distCells * _settings.ShiftDurationMultiplier;
                     totalDuration += segMul;
                     current = next;
                 }
                 
-                int wave;
-
-                if (!spawned)
-                {
-                    var wv = nonSpawnWaveByColumn.GetValueOrDefault(finalX, 0);
-                    wave = wv;
-                    nonSpawnWaveByColumn[finalX] = wv + 1;
-                }
-                else
-                {
-                    var sw = spawnWaveByColumn.GetValueOrDefault(finalX, 0);
-
-                    nonSpawnCountByColumn.TryGetValue(finalX, out var nonSpawnCount);
-                    wave = nonSpawnCount + sw;
-                    spawnWaveByColumn[finalX] = sw + 1;
-                }
-
-                var delay = wave * _settings.ShiftDelayMultiplier;
-
-                var tween = item.ItemAnimation.ShiftPath(world, totalDuration, delay);
+                var tween = item.ItemAnimation.ShiftPath(world, totalDuration, 0f); // TODO: Implement delay!
                 _animTasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
             }
 
             return UniTask.WhenAll(_animTasks);
         }
+
     }
 }
