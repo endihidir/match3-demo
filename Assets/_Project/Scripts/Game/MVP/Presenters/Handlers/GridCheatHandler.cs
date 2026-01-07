@@ -19,6 +19,16 @@ namespace Core.Handlers
         {
             if (Input.GetKeyDown(KeyCode.B))
             {
+                GenerateObstacleAtMousePos(ObstacleType.Box);
+            }
+            
+            if (Input.GetKeyDown(KeyCode.N))
+            {
+                GenerateObstacleAtMousePos(ObstacleType.Vase);
+            }
+            
+            if (Input.GetKeyDown(KeyCode.T))
+            {
                 GenerateBoosterAtMousePos(BoosterType.Bomb);
             }
             
@@ -94,6 +104,28 @@ namespace Core.Handlers
                 context.Factory.ReleaseItem(obj);
                 context.Model.SetGridObject(actPos, null);
                 var newObj = context.Factory.GetBoosterItem(boosterType);
+                context.Model.SetGridObject(actPos, newObj);
+                newObj.SetPosition(context.View.GridToWorld(actPos));
+                newObj.SetSpriteSize(context.View.GetCellSize());
+                newObj.SetParent(context.View.GridObjectsParent);
+            }
+        }
+        
+        public void GenerateObstacleAtMousePos(ObstacleType obstacleType)
+        {
+            var context = _gridStateHandler.Context;
+            var stateMachine = _gridStateHandler.StateMachine;
+            
+            if(context == null || stateMachine == null)  return;
+            
+            var pos = context.View.ScreenToGridCoordinate(Input.mousePosition);
+            var actPos = context.View.InputDirectionToGridDirection(pos);
+            var obj = context.Model.GetGridObject(actPos);
+            if (obj)
+            {
+                context.Factory.ReleaseItem(obj);
+                context.Model.SetGridObject(actPos, null);
+                var newObj = context.Factory.GetObstacleItem(obstacleType);
                 context.Model.SetGridObject(actPos, newObj);
                 newObj.SetPosition(context.View.GridToWorld(actPos));
                 newObj.SetSpriteSize(context.View.GetCellSize());
