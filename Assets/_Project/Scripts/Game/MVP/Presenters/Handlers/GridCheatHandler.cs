@@ -77,93 +77,84 @@ namespace Core.Handlers
 
         public void CleanupBoosters()
         {
-            var context = _gridStateHandler.Context;
-            var stateMachine = _gridStateHandler.StateMachine;
-            
-            if(context == null || stateMachine == null)  return;
-            
-            for (int i = 0; i < context.Model.Width; i++)
+            if (!TryGetContext(out var context)) return;
+
+            for (int x = 0; x < context.Model.Width; x++)
             {
-                for (int j = 0; j < context.Model.Height; j++)
+                for (int y = 0; y < context.Model.Height; y++)
                 {
-                    var coord = new Vector2Int(i, j);
-                    var obj = context.Model.GetGridObject(coord);
-                    if (obj is BoosterObject boosterObject)
+                    var coord = new Vector2Int(x, y);
+                    if (context.Model.GetGridObject(coord) is BoosterObject booster)
                     {
-                        context.Factory.ReleaseItem(boosterObject);
-                        context.Model.SetGridObject(coord, null);
-                        stateMachine.ForceState<RefillResolveState>();
+                        ClearCell(context, coord);
+                        _gridStateHandler.StateMachine.ForceState<RefillResolveState>();
                     }
                 }
             }
         }
 
-        public void GenerateBoosterAtMousePos(BoosterType boosterType)
+        public void GenerateBoosterAtMousePos(BoosterType type)
         {
-            var context = _gridStateHandler.Context;
-            var stateMachine = _gridStateHandler.StateMachine;
-            
-            if(context == null || stateMachine == null)  return;
-            
-            var pos = context.View.ScreenToGridCoordinate(Input.mousePosition);
-            var actPos = context.View.InputDirectionToGridDirection(pos);
-            var obj = context.Model.GetGridObject(actPos);
-            if (obj)
-            {
-                context.Factory.ReleaseItem(obj);
-                context.Model.SetGridObject(actPos, null);
-                var newObj = context.Factory.GetBoosterItem(boosterType);
-                context.Model.SetGridObject(actPos, newObj);
-                newObj.SetPosition(context.View.GridToWorld(actPos));
-                newObj.SetSpriteSize(context.View.GetCellSize());
-                newObj.SetParent(context.View.GridObjectsParent);
-            }
-        }
-        
-        public void GenerateObstacleAtMousePos(ObstacleType obstacleType)
-        {
-            var context = _gridStateHandler.Context;
-            var stateMachine = _gridStateHandler.StateMachine;
-            
-            if(context == null || stateMachine == null)  return;
-            
-            var pos = context.View.ScreenToGridCoordinate(Input.mousePosition);
-            var actPos = context.View.InputDirectionToGridDirection(pos);
-            var obj = context.Model.GetGridObject(actPos);
-            if (obj)
-            {
-                context.Factory.ReleaseItem(obj);
-                context.Model.SetGridObject(actPos, null);
-                var newObj = context.Factory.GetObstacleItem(obstacleType);
-                context.Model.SetGridObject(actPos, newObj);
-                newObj.SetPosition(context.View.GridToWorld(actPos));
-                newObj.SetSpriteSize(context.View.GetCellSize());
-                newObj.SetParent(context.View.GridObjectsParent);
-            }
-        }
-        
-        private void RemoveAtMousePos()
-        {
-            var context = _gridStateHandler.Context;
-            var stateMachine = _gridStateHandler.StateMachine;
-            
-            if(context == null || stateMachine == null)  return;
-            
-            var pos = context.View.ScreenToGridCoordinate(Input.mousePosition);
-            var actPos = context.View.InputDirectionToGridDirection(pos);
-            var obj = context.Model.GetGridObject(actPos);
-            if (obj)
-            {
-                context.Factory.ReleaseItem(obj);
-                context.Model.SetGridObject(actPos, null);
-            }
-        }
-        
-        private void ForceRefill()
-        {
-            var stateMachine = _gridStateHandler.StateMachine;
+            if (!TryGetContext(out var context)) return;
 
-            stateMachine?.ForceState<RefillResolveState>();
+            var coord = GetMouseGridCoord(context);
+            ClearCell(context, coord);
+
+            var booster = context.Factory.GetBoosterItem(type);
+            PlaceItem(context, coord, booster);
+        }
+
+        public void GenerateObstacleAtMousePos(ObstacleType type)
+        {
+            if (!TryGetContext(out var context)) return;
+
+            var coord = GetMouseGridCoord(context);
+            ClearCell(context, coord);
+
+            var obstacle = context.Factory.GetObstacleItem(type);
+            PlaceItem(context, coord, obstacle);
+        }
+
+        public void RemoveAtMousePos()
+        {
+            if (!TryGetContext(out var context)) return;
+
+            var coord = GetMouseGridCoord(context);
+            ClearCell(context, coord);
+        }
+
+        public void ForceRefill()
+        {
+            _gridStateHandler.StateMachine?.ForceState<RefillResolveState>();
+        }
+        
+        private bool TryGetContext(out GridStateContext context)
+        {
+            context = _gridStateHandler.Context;
+            return context != null && _gridStateHandler.StateMachine != null;
+        }
+
+        private Vector2Int GetMouseGridCoord(GridStateContext context)
+        {
+            var screen = context.View.ScreenToGridCoordinate(Input.mousePosition);
+            return context.View.InputDirectionToGridDirection(screen);
+        }
+
+        private void ClearCell(GridStateContext context, Vector2Int coord)
+        {
+            var obj = context.Model.GetGridObject(coord);
+            if (!obj) return;
+
+            context.Factory.ReleaseItem(obj);
+            context.Model.SetGridObject(coord, null);
+        }
+
+        private void PlaceItem(GridStateContext context, Vector2Int coord, BaseGridObject item)
+        {
+            context.Model.SetGridObject(coord, item);
+            item.SetPosition(context.View.GridToWorld(coord));
+            item.SetSpriteSize(context.View.GetCellSize());
+            item.SetParent(context.View.GridObjectsParent);
         }
     }
 }

@@ -6,5 +6,8 @@ namespace Core.Handlers
     {
         void CleanupBoosters();
         void GenerateBoosterAtMousePos(BoosterType boosterType);
+        void GenerateObstacleAtMousePos(ObstacleType type);
+        void RemoveAtMousePos();
+        void ForceRefill();
     }
 }
