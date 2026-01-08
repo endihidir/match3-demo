@@ -80,7 +80,7 @@ namespace Core.Handlers
                 model.SetGridObject(src, null);
 
                 var dist = Mathf.Abs(finalWorld.y - startWorld.y) / cellSize;
-                var durMul = 1f + dist * _refillSettingsSo.ShiftDurationMultiplier;
+                var durMul = .5f + dist * _refillSettingsSo.ShiftDurationMultiplier;
                 var delay = wave * _refillSettingsSo.ShiftDelayMultiplier;
 
                 records.Add(new FallMoveRecord(obj, finalWorld, durMul, delay));

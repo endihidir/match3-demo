@@ -17,6 +17,7 @@ namespace Core.Handlers
 
         protected override void OnEnter()
         {
+            EditorLogger.LogError("AAAA");
             RefillGrid().Forget();
             RequestExit();
         }

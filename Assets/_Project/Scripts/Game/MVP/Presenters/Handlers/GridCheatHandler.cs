@@ -20,7 +20,8 @@ namespace Core.Handlers
             if (Input.GetKeyDown(KeyCode.T)) GenerateBoosterAtMousePos(BoosterType.Bomb);
             if (Input.GetKeyDown(KeyCode.H)) GenerateBoosterAtMousePos(BoosterType.RocketHorizontal);
             if (Input.GetKeyDown(KeyCode.V)) GenerateBoosterAtMousePos(BoosterType.RocketVertical);
-            if (Input.GetKeyDown(KeyCode.C)) CleanupBoosters();
+            if (Input.GetKeyDown(KeyCode.C)) Cleanup<BoosterObject>();
+            if (Input.GetKeyDown(KeyCode.O)) Cleanup<ObstacleObject>();
             if (Input.GetKeyDown(KeyCode.R)) RemoveAtMousePos();
             if (Input.GetKeyDown(KeyCode.F)) ForceRefill();
             
@@ -36,7 +37,7 @@ namespace Core.Handlers
 #endif
         }
 
-        public void CleanupBoosters()
+        public void Cleanup<T>() where T : BaseGridObject
         {
             if (!TryGetContext(out var context)) return;
 
@@ -45,7 +46,7 @@ namespace Core.Handlers
                 for (int y = 0; y < context.Model.Height; y++)
                 {
                     var coord = new Vector2Int(x, y);
-                    if (context.Model.GetGridObject(coord) is BoosterObject booster)
+                    if (context.Model.GetGridObject(coord) is T itemObject)
                     {
                         ClearCell(context, coord);
                         _gridStateHandler.StateMachine.ForceState<RefillResolveState>();
