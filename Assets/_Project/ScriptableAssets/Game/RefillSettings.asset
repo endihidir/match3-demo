@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: RefillSettings
   m_EditorClassIdentifier: 
   <ShiftDurationMultiplier>k__BackingField: 0.2
-  <ShiftDelayMultiplier>k__BackingField: 0.1
+  <ShiftDelayMultiplier>k__BackingField: 0.075
   <SpawnSettings>k__BackingField:
     <ImmediateMatchChance>k__BackingField: 0
     <NearMatchAvoidance>k__BackingField: 100

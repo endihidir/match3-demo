@@ -16,3 +16,5 @@ MonoBehaviour:
     type: 2}
   <ItemConfigContainer>k__BackingField: {fileID: 11400000, guid: b073fd11c439b684f8cf60ca66481a9b,
     type: 2}
+  <RefillSettings>k__BackingField: {fileID: 11400000, guid: 4640726bde3138b4ba2ba4961de0deca,
+    type: 2}
