@@ -243,11 +243,11 @@ namespace Core.Handlers
                 var startX = path[0].x;
                 var isSlide = startX != finalX;
 
-                var delayMultiplier = isSlide ? (_settings.ShiftDelayMultiplier / 5f) : _settings.ShiftDelayMultiplier;
+                var delayMultiplier = isSlide ? (_settings.ShiftDelayMultiplier) : _settings.ShiftDelayMultiplier;
 
                 var colIndex = isSlide
-                    ? slideColumnCounter.GetValueOrDefault(finalX, 0)
-                    : columnCounter.GetValueOrDefault(finalX, 0);
+                    ? slideColumnCounter.GetValueOrDefault(finalX, spawned ? 1 : 2)
+                    : columnCounter.GetValueOrDefault(finalX, spawned ? 2 : 1);
 
                 var colDelay = colIndex * delayMultiplier;
 
@@ -263,11 +263,11 @@ namespace Core.Handlers
                 {
                     var next = world[w];
                     var distCells = Mathf.Abs(current.y - next.y) / cellSize;
-                    var segMul = 0.5f + distCells * _settings.ShiftDurationMultiplier;
+                    var segMul = .5f + distCells * _settings.ShiftDurationMultiplier;
                     totalDuration += segMul;
                     current = next;
                 }
-
+                
                 var tween = item.ItemAnimation.ShiftPath(world, totalDuration, colDelay);
                 _animTasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
             }
