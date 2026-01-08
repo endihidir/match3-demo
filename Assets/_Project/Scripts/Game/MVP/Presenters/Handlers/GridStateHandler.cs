@@ -18,7 +18,7 @@ namespace Core.Handlers
         private bool HasPendingBoosterActions => Context.HasPendingBoosterActions;
         private bool MatchResolveRequested => Context.MatchResolveRequested;
 
-        public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory, GameplayConfigContainer configContainer, IRefillStrategyHandler strategyHandler)
+        public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory, GameplayConfigContainer configContainer, IRefillStrategyHandler refillStrategyHandler)
         {
             Context = new GridStateContext(model, view, factory, configContainer.ItemConfigContainer);
 
@@ -26,23 +26,22 @@ namespace Core.Handlers
             var inputState = new InputResolveState(Context);
             var boosterState = new BoosterResolveState(Context);
             var matchState = new MatchResolveState(Context);
-            var refillState = new RefillResolveState(strategyHandler, Context);
+            var refillState = new RefillResolveState(refillStrategyHandler, Context);
 
             var states = new StateBase<GridStateContext>[] { idleState, inputState, boosterState, matchState, refillState };
             
             StateMachine.Register(states);
 
             StateMachine.AddTransition(idleState, inputState, () => HasAnyInput)
-                         .AddTransition(idleState, matchState, () => MatchResolveRequested)
+                        .AddTransition(idleState, matchState, () => MatchResolveRequested)
                          
-                         .AddTransition(inputState, boosterState, () => inputState.IsExitReady && HasPendingBoosterActions)
-                         .AddTransition(inputState, matchState, () => inputState.IsExitReady && MatchResolveRequested && !HasPendingBoosterActions)
-                         .AddTransition(inputState, idleState, () => inputState.IsExitReady)
+                        .AddTransition(inputState, boosterState, () => inputState.IsExitReady && HasPendingBoosterActions)
+                        .AddTransition(inputState, matchState, () => inputState.IsExitReady && MatchResolveRequested && !HasPendingBoosterActions)
+                        .AddTransition(inputState, idleState, () => inputState.IsExitReady)
                          
-                         .AddTransition(boosterState, refillState, () => boosterState.IsExitReady)
-                         .AddTransition(matchState, refillState, () => matchState.IsExitReady)
-                         
-                         .AddTransition(refillState, idleState, () => refillState.IsExitReady);
+                        .AddTransition(boosterState, refillState, () => boosterState.IsExitReady)
+                        .AddTransition(matchState, refillState, () => matchState.IsExitReady)
+                        .AddTransition(refillState, idleState, () => refillState.IsExitReady);
 
             StateMachine.SetInitialState(idleState);
         }
