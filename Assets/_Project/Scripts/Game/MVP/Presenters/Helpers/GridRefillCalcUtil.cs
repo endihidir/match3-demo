@@ -50,11 +50,11 @@ namespace Core.Utils
             return false;
         }
         
-        public static bool DestinationBlockedByStationaryAbove(IGridModel model, Vector2Int empty)
+        public static bool DestinationBlockedByStationaryAbove(IGridModel model, Vector2Int targetCoord)
         {
-            for (int sy = empty.y - 1; sy >= 0; sy--)
+            for (int sy = targetCoord.y - 1; sy >= 0; sy--)
             {
-                var c = new Vector2Int(empty.x, sy);
+                var c = new Vector2Int(targetCoord.x, sy);
 
                 if (!model.IsCellActive(c)) return false;
 
@@ -98,11 +98,11 @@ namespace Core.Utils
             return false;
         }
         
-        public static bool TryCollectDiagonalSlide(IGridModel model, Vector2Int empty, int dirX, out SlideMoveRecord slide)
+        public static bool TryCollectDiagonalSlide(IGridModel model, Vector2Int targetCoord, int dirX, out SlideMoveRecord slide)
         {
             slide = default;
 
-            var src = new Vector2Int(empty.x + dirX, empty.y - 1);
+            var src = new Vector2Int(targetCoord.x + dirX, targetCoord.y - 1);
 
             if (!model.IsInRange(src)) return false;
 
@@ -114,13 +114,13 @@ namespace Core.Utils
 
             if (IsBlockerSideSource(model, src, dirX))
             {
-                slide = new SlideMoveRecord(item, src, empty);
+                slide = new SlideMoveRecord(item, src, targetCoord);
                 return true;
             }
 
             if (IsBlockerShadowSandSource(model, src) && !HasEmptyBelowInSegment(model, src))
             {
-                slide = new SlideMoveRecord(item, src, empty);
+                slide = new SlideMoveRecord(item, src, targetCoord);
                 return true;
             }
 
