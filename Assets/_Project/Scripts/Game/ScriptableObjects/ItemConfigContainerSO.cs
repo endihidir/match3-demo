@@ -8,7 +8,6 @@ namespace Core.Config
     { 
         [field: SerializeField] private BaseItemConfigSO[] ItemConfigs { get; set; }
         [field: SerializeField] public BoosterComboConfigSO BoosterComboConfigSo { get; private set; }
-        [field: SerializeField] public RefillSettingsSO RefillSettingsSo { get; private set; }
 
         public T GetConfig<T>() where T : BaseItemConfigSO
         {

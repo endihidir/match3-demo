@@ -24,7 +24,7 @@ namespace Core.Handlers
 
         public SlideDownFillStrategy(GameplayConfigContainer config)
         {
-            _settings = config.ItemConfigContainer.RefillSettingsSo;
+            _settings = config.RefillSettings;
         }
 
         public bool CanRefill(IGridModel model) => GridRefillCalcUtil.HasStationaryAndBlocking(model);

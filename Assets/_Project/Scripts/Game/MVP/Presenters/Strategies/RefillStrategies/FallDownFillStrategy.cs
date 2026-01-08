@@ -20,7 +20,7 @@ namespace Core.Handlers
 
         public FallDownRefillStrategy(GameplayConfigContainer configContainer)
         {
-            _refillSettingsSo = configContainer.ItemConfigContainer.RefillSettingsSo;
+            _refillSettingsSo = configContainer.RefillSettings;
         }
 
         public IRefillStrategy Execute(GridStateContext context)
