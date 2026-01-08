@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Core.Config;
 using Core.Configs;
 using Core.Models;
@@ -13,8 +15,8 @@ namespace Core.Handlers
     {
         private readonly RefillSettingsSO _refillSettingsSo;
         private readonly List<FallMoveRecord> _records = new(256);
-        private readonly List<UniTask> _animTasks = new(128);
-        private UniTask _runningAnimations;
+        private Task[] _animTasks = new Task[128];
+        private Task _runningAnimations;
 
         public bool CanRefill(IGridModel model) => !GridRefillCalcUtil.HasStationaryAndBlocking(model);
 
@@ -51,7 +53,7 @@ namespace Core.Handlers
             return this;
         }
         
-        public UniTask WaitAnimationsAsync() => _runningAnimations;
+        public UniTask WaitAnimationsAsync() => _runningAnimations.AsUniTask();
 
         private void ShiftColumnLogic(GridStateContext stateContext, int x, int height, float cellSize, ref int wave, List<FallMoveRecord> records)
         {
@@ -80,7 +82,7 @@ namespace Core.Handlers
                 model.SetGridObject(src, null);
 
                 var dist = Mathf.Abs(finalWorld.y - startWorld.y) / cellSize;
-                var durMul = .5f + dist * _refillSettingsSo.ShiftDurationMultiplier;
+                var durMul = 1f + dist * _refillSettingsSo.ShiftDurationMultiplier;
                 var delay = wave * _refillSettingsSo.ShiftDelayMultiplier;
 
                 records.Add(new FallMoveRecord(obj, finalWorld, durMul, delay));
@@ -113,7 +115,7 @@ namespace Core.Handlers
                 model.SetGridObject(coord, item);
 
                 var dist = Mathf.Abs(target.y - start.y) / cellSize;
-                var durMul = 1f + dist * _refillSettingsSo.ShiftDurationMultiplier;
+                var durMul = .5f + dist * _refillSettingsSo.ShiftDurationMultiplier;
                 var delay = wave * _refillSettingsSo.ShiftDelayMultiplier;
 
                 records.Add(new FallMoveRecord(item, target, durMul, delay));
@@ -121,17 +123,20 @@ namespace Core.Handlers
             }
         }
 
-        private UniTask PlayAnimations(List<FallMoveRecord> records)
+        private Task PlayAnimations(List<FallMoveRecord> records)
         {
-            _animTasks.Clear();
-            for (int i = 0; i < records.Count; i++)
+            var length = records.Count;
+            Array.Resize(ref _animTasks, length);
+            
+            for (int i = 0; i < length; i++)
             {
                 var r = records[i];
                 if (!r.Obj) continue;
                 var tween = r.Obj.ItemAnimation.Shift(r.FinalWorld, r.DurMul, r.Delay);
-                _animTasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
+                _animTasks[i] = tween.AsyncWaitForCompletion();
             }
-            return UniTask.WhenAll(_animTasks);
+            
+            return length == 0 ? Task.CompletedTask : Task.WhenAll(_animTasks);
         }
     }
 }

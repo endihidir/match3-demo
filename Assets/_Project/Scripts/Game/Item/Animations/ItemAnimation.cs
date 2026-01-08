@@ -9,7 +9,7 @@ namespace Core.Item
         [field: SerializeField] private ItemAnimationSettings Settings { get; set; }
         [field: SerializeField] private Transform ItemHolder { get; set; }
         
-        public bool IsShiftInProgress => _shiftTween.IsActive();
+        public bool IsShiftInProgress => _shiftTween != null && _shiftTween.IsActive() && _shiftTween.IsPlaying();
         
         private Tween _shakeTween, _moveTween, _shiftTween, _springTween;
 
@@ -19,7 +19,7 @@ namespace Core.Item
         {
             _itemHolderDefaultPos = ItemHolder.localPosition;
         }
-        private void Start()
+        public void InitAnimations()
         {
             CreateShakeTween();
             CreateSpringTween();
@@ -29,43 +29,38 @@ namespace Core.Item
         {
             var duration = Settings.ShakeDuration / 3f;
 
+            if(_shakeTween != null) return;
+            
+            _shakeTween?.Kill(); 
+            
             _shakeTween = DOTween.Sequence()
-                .Append(ItemHolder.transform.DORotate(Vector3.forward * Settings.ShakeRotAngle, duration))
-                .Append(ItemHolder.transform.DORotate(Vector3.back * Settings.ShakeRotAngle, duration))
-                .Append(ItemHolder.transform.DORotate(Vector3.zero, duration))
-                .OnComplete(() => ItemHolder.transform.localRotation = Quaternion.identity)
                 .SetAutoKill(false)
+                .Append(ItemHolder.transform.DOLocalRotate(Vector3.forward * Settings.ShakeRotAngle, duration))
+                .Append(ItemHolder.transform.DOLocalRotate(Vector3.back * Settings.ShakeRotAngle, duration))
+                .Append(ItemHolder.transform.DOLocalRotate(Vector3.zero, duration))
+                .OnComplete(() => ItemHolder.transform.localRotation = Quaternion.identity)
                 .Pause()
                 .SetUpdate(Settings.UseUnscaledTime);
         }
 
         private void CreateSpringTween()
         {
+            if(_springTween != null) return;
+            
+            _springTween?.Kill();
+            
             _springTween = DOTween.Sequence()
+                .SetAutoKill(false)
                 .Append(ItemHolder.transform.DOScale(Settings.SpringScale, Settings.SpringDuration).SetEase(Ease.OutQuad))
                 .Join(ItemHolder.transform.DOLocalMoveY(_itemHolderDefaultPos.y - Settings.SpringYMove, Settings.SpringDuration).SetEase(Ease.OutQuad))
                 .Append(ItemHolder.transform.DOScale(Vector3.one, Settings.SpringDuration).SetEase(Ease.InQuad))
                 .Join(ItemHolder.transform.DOLocalMoveY(_itemHolderDefaultPos.y, Settings.SpringDuration).SetEase(Ease.InQuad))
-                .SetAutoKill(false)
                 .Pause()
                 .SetUpdate(Settings.UseUnscaledTime);
         }
 
-        public void Shake()
-        {
-            if (_shakeTween == null || !_shakeTween.IsActive())
-                CreateShakeTween();
-            
-            _shakeTween?.Restart();
-        }
-
-        private void Spring()
-        {
-            if (_springTween == null || !_springTween.IsActive())
-                CreateSpringTween();
-            
-            _springTween?.Restart();
-        }
+        public void Shake() => _shakeTween?.Restart();
+        private void Spring() => _springTween?.Restart();
 
         public Tween Shift(Vector3 worldPos, float durationMultiplier = 1f, float delay = 0f)
         {
@@ -82,16 +77,20 @@ namespace Core.Item
             return _shiftTween;
         }
         
-        public Tween ShiftPath(Vector3[] worldPoints, float durationMultiplier = 1f, float delay = 0f)
+        public Tween ShiftPath(Vector3[] points, int length, float totalDuration = 1f, float delay = 0f)
         {
             _shiftTween?.Kill();
-        
-            _shiftTween = transform.DOPath(worldPoints, Settings.BaseShiftDuration * durationMultiplier, PathType.Linear, PathMode.Ignore)
-                .SetEase(Ease.InQuad)
+
+            var seq = DOTween.Sequence()
                 .SetDelay(Settings.BaseShiftDelay + delay)
-                .OnComplete(Spring)
                 .SetUpdate(Settings.UseUnscaledTime);
-        
+
+            var durationPerItem = totalDuration / length;
+            
+            for (int i = 0; i < length; i++)
+                seq.Append(transform.DOMove(points[i], Settings.BaseShiftDuration * durationPerItem).SetEase(Ease.InQuad));
+
+            _shiftTween = seq.OnComplete(Spring);
             return _shiftTween;
         }
 
@@ -124,10 +123,14 @@ namespace Core.Item
         {
             _shiftTween?.Kill();
             _moveTween?.Kill();
+        }
+
+        private void OnDestroy()
+        {
+            Dispose();
+            
             _shakeTween?.Kill();
             _springTween?.Kill();
         }
-
-        private void OnDestroy() => Dispose();
     }
 }

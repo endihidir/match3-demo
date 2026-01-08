@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Core.Config;
 using Core.Configs;
 using Core.Item;
@@ -17,10 +19,16 @@ namespace Core.Handlers
 
         private readonly Dictionary<BaseGridObject, List<Vector2Int>> _pathByItem = new(256);
         private readonly HashSet<BaseGridObject> _spawned = new(128);
-        private readonly List<UniTask> _animTasks = new(128);
-        private UniTask _running;
-
         private readonly List<Vector2Int> _spawnCoords = new(64);
+
+        private Task[] _animTasks = new Task[128];
+        private Task _runningAnimations;
+        
+        private readonly List<SlideMoveRecord> _slides = new(128);
+        private readonly HashSet<Vector2Int> _usedTargets = new();
+        private readonly List<(BaseGridObject item, List<Vector2Int> path, bool spawned, int finalY, int finalX)> _allMoves = new(256);
+        private readonly Dictionary<int, int> _columnCounter = new(16);
+        private readonly Dictionary<int, int> _slideColumnCounter = new(16);
 
         public SlideDownFillStrategy(GameplayConfigContainer config)
         {
@@ -67,7 +75,7 @@ namespace Core.Handlers
                 }
 
                 // 2) Diagonal slide candidates
-                var slides = new List<SlideMoveRecord>(64);
+                _slides.Clear();
 
                 for (int y = height - 1; y >= 1; y--)
                 {
@@ -82,22 +90,22 @@ namespace Core.Handlers
                         if (!GridRefillCalcUtil.DestinationBlockedByStationaryAbove(model, targetCoord)) continue;
 
                         if (GridRefillCalcUtil.TryCollectDiagonalSlide(model, targetCoord, 1, out var right))
-                            slides.Add(right);
+                            _slides.Add(right);
 
                         if (GridRefillCalcUtil.TryCollectDiagonalSlide(model, targetCoord, -1, out var left))
-                            slides.Add(left);
+                            _slides.Add(left);
                     }
                 }
 
-                if (slides.Count > 0)
+                if (_slides.Count > 0)
                 {
-                    var usedTargets = new HashSet<Vector2Int>();
+                    _usedTargets.Clear();
 
-                    for (int i = 0; i < slides.Count; i++)
+                    for (int i = 0; i < _slides.Count; i++)
                     {
-                        var slide = slides[i];
+                        var slide = _slides[i];
 
-                        if (!usedTargets.Add(slide.To)) continue;
+                        if (!_usedTargets.Add(slide.To)) continue;
 
                         ApplyMove(model, slide.Item, slide.From, slide.To);
                         movedAny = true;
@@ -112,11 +120,11 @@ namespace Core.Handlers
                 }
             }
 
-            _running = PlayAnimations(context);
+            _runningAnimations = PlayAnimations(view);
             return this;
         }
 
-        public UniTask WaitAnimationsAsync() => _running;
+        public UniTask WaitAnimationsAsync() => _runningAnimations.AsUniTask();
 
         private bool SpawnTopOpenSegmentsInColumn(GridStateContext context, IGridView view, int x, int height)
         {
@@ -150,10 +158,8 @@ namespace Core.Handlers
                 _spawnCoords.Add(c);
             }
 
-            if (_spawnCoords.Count == 0)
-                return false;
-
-            // MIN PATCH: all spawns start from a single Y (FallDown-like), not per-target-cell Y.
+            if (_spawnCoords.Count == 0) return false;
+            
             var spawnY = view.GridToWorld(_spawnCoords[0]).y + cellSize;
 
             for (int i = 0; i < _spawnCoords.Count; i++)
@@ -197,43 +203,55 @@ namespace Core.Handlers
                 list.Add(step);
         }
 
-        private UniTask PlayAnimations(GridStateContext context)
+        private Task PlayAnimations(IGridView view)
         {
-            _animTasks.Clear();
-
-            var view = context.View;
             var cellSize = view.GetCellSize();
 
-            var all = new List<(BaseGridObject item, List<Vector2Int> path, bool spawned, int finalY, int finalX)>(_pathByItem.Count);
+            _allMoves.Clear();
 
-            foreach (var kv in _pathByItem)
+            foreach (var (item, path) in _pathByItem)
             {
-                var item = kv.Key;
-                var path = kv.Value;
                 if (path == null || path.Count == 0) continue;
-
                 var final = path[^1];
-                all.Add((item, path, _spawned.Contains(item), final.y, final.x));
+                _allMoves.Add((item, path, _spawned.Contains(item), final.y, final.x));
             }
 
-            all.Sort((a, b) =>
+            _allMoves.Sort((a, b) =>
             {
                 if (a.spawned != b.spawned) return a.spawned ? 1 : -1;
                 var y = b.finalY.CompareTo(a.finalY);
-                if (y != 0) return y;
-                return a.finalX.CompareTo(b.finalX);
+                return y != 0 ? y : a.finalX.CompareTo(b.finalX);
             });
+            
+            if (_animTasks.Length < _allMoves.Count)
+                Array.Resize(ref _animTasks, _allMoves.Count);
 
-            var columnCounter = new Dictionary<int, int>(16);
-            var slideColumnCounter = new Dictionary<int, int>(16);
+            _columnCounter.Clear();
+            _slideColumnCounter.Clear();
+            var taskCount = 0;
+            var slideCounter = 0;
 
-            foreach (var (item, path, spawned, finalY, finalX) in all)
+            foreach (var (item, path, spawned, finalY, finalX) in _allMoves)
             {
                 if (!item) continue;
 
-                var world = new Vector3[path.Count + (spawned ? 1 : 0)];
-                var idx = 0;
+                var startX = path[0].x;
+                var isSlide = startX != finalX;
+                if (isSlide)
+                {
+                    slideCounter++;
+                }
+                    
+            }
 
+            foreach (var (item, path, spawned, finalY, finalX) in _allMoves)
+            {
+                if (!item) continue;
+
+                var length = path.Count + (spawned ? 1 : 0);
+                var world = new Vector3[length];
+                
+                var idx = 0;
                 if (spawned)
                     world[idx++] = item.transform.position;
 
@@ -243,36 +261,40 @@ namespace Core.Handlers
                 var startX = path[0].x;
                 var isSlide = startX != finalX;
 
-                var delayMultiplier = isSlide ? (_settings.ShiftDelayMultiplier) : _settings.ShiftDelayMultiplier;
-
-                var colIndex = isSlide
-                    ? slideColumnCounter.GetValueOrDefault(finalX, spawned ? 1 : 2)
-                    : columnCounter.GetValueOrDefault(finalX, spawned ? 2 : 1);
-
-                var colDelay = colIndex * delayMultiplier;
-
+                int colIndex;
                 if (isSlide)
-                    slideColumnCounter[finalX] = colIndex + 1;
+                {
+                    colIndex = _slideColumnCounter.GetValueOrDefault(finalX, 0);
+                    _slideColumnCounter[finalX] = colIndex + 1;
+                }
                 else
-                    columnCounter[finalX] = colIndex + 1;
+                {
+                    colIndex = _columnCounter.GetValueOrDefault(finalX, spawned ? slideCounter : 0);
+                    _columnCounter[finalX] = colIndex + 1;
+                }
+
+                var minus = spawned ? 3 : 0;
+                var colDelay = (colIndex - minus) * _settings.ShiftDelayMultiplier;
 
                 var totalDuration = 0f;
                 var current = item.transform.position;
 
-                for (int w = 0; w < world.Length; w++)
+                for (int w = 0; w < length; w++)
                 {
                     var next = world[w];
                     var distCells = Mathf.Abs(current.y - next.y) / cellSize;
-                    var segMul = .5f + distCells * _settings.ShiftDurationMultiplier;
+                    var segMul = .9f + distCells * _settings.ShiftDurationMultiplier;
                     totalDuration += segMul;
                     current = next;
                 }
-                
-                var tween = item.ItemAnimation.ShiftPath(world, totalDuration, colDelay);
-                _animTasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
+          
+                var tween = item.ItemAnimation.ShiftPath(world, length, totalDuration, colDelay);
+                _animTasks[taskCount++] = tween.AsyncWaitForCompletion();
+               
             }
 
-            return UniTask.WhenAll(_animTasks);
+            return taskCount == 0 ? Task.CompletedTask : Task.WhenAll(_animTasks.AsSpan(0, taskCount).ToArray());
         }
+
     }
 }
