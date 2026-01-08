@@ -223,11 +223,12 @@ namespace Core.Handlers
                 if (y != 0) return y;
                 return a.finalX.CompareTo(b.finalX);
             });
-            
-            
-            for (int i = 0; i < all.Count; i++)
+
+            var columnCounter = new Dictionary<int, int>(16);
+            var slideColumnCounter = new Dictionary<int, int>(16);
+
+            foreach (var (item, path, spawned, finalY, finalX) in all)
             {
-                var (item, path, spawned, finalY, _) = all[i];
                 if (!item) continue;
 
                 var world = new Vector3[path.Count + (spawned ? 1 : 0)];
@@ -239,10 +240,22 @@ namespace Core.Handlers
                 for (int p = 0; p < path.Count; p++)
                     world[idx++] = view.GridToWorld(path[p]);
 
-                var layerWave = (context.Model.Height - 1) - finalY;
-                if (spawned) layerWave += 1;
-                var delay = layerWave * _settings.ShiftDelayMultiplier;
-                
+                var startX = path[0].x;
+                var isSlide = startX != finalX;
+
+                var delayMultiplier = isSlide ? (_settings.ShiftDelayMultiplier / 5f) : _settings.ShiftDelayMultiplier;
+
+                var colIndex = isSlide
+                    ? slideColumnCounter.GetValueOrDefault(finalX, 0)
+                    : columnCounter.GetValueOrDefault(finalX, 0);
+
+                var colDelay = colIndex * delayMultiplier;
+
+                if (isSlide)
+                    slideColumnCounter[finalX] = colIndex + 1;
+                else
+                    columnCounter[finalX] = colIndex + 1;
+
                 var totalDuration = 0f;
                 var current = item.transform.position;
 
@@ -254,13 +267,14 @@ namespace Core.Handlers
                     totalDuration += segMul;
                     current = next;
                 }
-                
-                var tween = item.ItemAnimation.ShiftPath(world, totalDuration, 0f); // TODO: Implement delay!
+
+                var tween = item.ItemAnimation.ShiftPath(world, totalDuration, colDelay);
                 _animTasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
             }
 
             return UniTask.WhenAll(_animTasks);
         }
+
 
     }
 }
