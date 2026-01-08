@@ -73,18 +73,18 @@ namespace Core.Handlers
                 {
                     for (int x = 0; x < width; x++)
                     {
-                        var empty = new Vector2Int(x, y);
+                        var targetCoord = new Vector2Int(x, y);
 
-                        if (!GridRefillCalcUtil.IsEmptyActiveCell(model, empty)) continue;
+                        if (!GridRefillCalcUtil.IsEmptyActiveCell(model, targetCoord)) continue;
 
                         if (GridRefillCalcUtil.CanFallVertically(model, x, y, out _)) continue;
 
-                        if (!GridRefillCalcUtil.DestinationBlockedByStationaryAbove(model, empty)) continue;
+                        if (!GridRefillCalcUtil.DestinationBlockedByStationaryAbove(model, targetCoord)) continue;
 
-                        if (GridRefillCalcUtil.TryCollectDiagonalSlide(model, empty, 1, out var right))
+                        if (GridRefillCalcUtil.TryCollectDiagonalSlide(model, targetCoord, 1, out var right))
                             slides.Add(right);
 
-                        if (GridRefillCalcUtil.TryCollectDiagonalSlide(model, empty, -1, out var left))
+                        if (GridRefillCalcUtil.TryCollectDiagonalSlide(model, targetCoord, -1, out var left))
                             slides.Add(left);
                     }
                 }
@@ -160,7 +160,7 @@ namespace Core.Handlers
             {
                 var coord = _spawnCoords[i];
 
-                var type = SmartSpawnDecider.Decide(model, coord, _settings.SpawnSettings);
+                var type = SmartSpawnDecider.Decide(model, coord, _settings.SpawnSettings, 0f);
                 var item = context.Factory.GetRegularItem(type);
 
                 item.SetParent(view.GridObjectsParent);
@@ -274,7 +274,5 @@ namespace Core.Handlers
 
             return UniTask.WhenAll(_animTasks);
         }
-
-
     }
 }
