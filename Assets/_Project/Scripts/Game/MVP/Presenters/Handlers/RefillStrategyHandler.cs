@@ -6,12 +6,12 @@ namespace Core.Handlers
 {
     public sealed class RefillStrategyHandler : IRefillStrategyHandler
     {
-        private readonly IEnumerable<IRefillStrategy> _refillStrategies;
-        public RefillStrategyHandler(IEnumerable<IRefillStrategy> refillStrategies)
+        private readonly IEnumerable<IFillStrategy> _refillStrategies;
+        public RefillStrategyHandler(IEnumerable<IFillStrategy> refillStrategies)
         {
             _refillStrategies = refillStrategies;
         }
 
-        public IRefillStrategy SelectStrategy(IGridModel model) => _refillStrategies.FirstOrDefault(refillStrategy => refillStrategy.CanRefill(model));
+        public IFillStrategy SelectStrategy(IGridModel model) => _refillStrategies.FirstOrDefault(refillStrategy => refillStrategy.CanRefill(model));
     }
 }
