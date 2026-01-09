@@ -77,18 +77,18 @@ namespace Core.Item
             return _shiftTween;
         }
         
-        public Tween ShiftPath(Vector3[] points, int length, float totalDuration = 1f, float delay = 0f)
+        public Tween Slide(Vector3[] points, int length, float totalDurationMultiplier = 1f, float delay = 0f)
         {
             _shiftTween?.Kill();
 
             var seq = DOTween.Sequence()
-                .SetDelay(Settings.BaseShiftDelay + delay)
+                .SetDelay(Settings.BaseSlideDelay + delay)
                 .SetUpdate(Settings.UseUnscaledTime);
 
-            var durationPerItem = totalDuration / length;
+            var durationMultiplier = totalDurationMultiplier / length;
             
             for (int i = 0; i < length; i++)
-                seq.Append(transform.DOMove(points[i], Settings.BaseShiftDuration * durationPerItem).SetEase(Ease.InQuad));
+                seq.Append(transform.DOMove(points[i], Settings.BaseSlideDuration * durationMultiplier).SetEase(Ease.InQuad));
 
             _shiftTween = seq.OnComplete(Spring);
             return _shiftTween;

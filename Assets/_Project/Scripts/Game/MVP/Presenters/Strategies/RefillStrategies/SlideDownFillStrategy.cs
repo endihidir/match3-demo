@@ -262,8 +262,30 @@ namespace Core.Handlers
                 ref var state = ref _waveByX[finalX];
 
                 int delayIndex;
-
-                if (moveRecord.IsSlide)
+                
+                if (!moveRecord.IsSlide)
+                {
+                    if (moveRecord.IsSpawn)
+                    {
+                        delayIndex = state.Fall + state.Slide + state.SpawnFall;
+                        state.SpawnFall++;
+                    }
+                    else
+                    {
+                        delayIndex = state.Fall;
+                        state.Fall++;
+                    }
+             
+                    var delay = delayIndex * _settings.ShiftDelayMultiplier;
+                    var finalWorld = view.GridToWorld(moveRecord.Final);
+                    var startWorld = moveRecord.Item.transform.position;
+                    var distCells = Mathf.Abs(finalWorld.y - startWorld.y) / cellSize;
+                    var durMul = 1f + distCells * _settings.ShiftDurationMultiplier;
+                    
+                    var tween = moveRecord.Item.ItemAnimation.Shift(finalWorld, durMul, delay);
+                    _animTasks[taskCount++] = tween.AsyncWaitForCompletion();
+                }
+                else
                 {
                     if (moveRecord.IsSpawn)
                     {
@@ -274,50 +296,36 @@ namespace Core.Handlers
                     {
                         delayIndex = state.Slide;
                         state.Slide++;
-                        state.NonSpawnSlideCount++;
                     }
-                }
-                else
-                {
+                    
+                    var delay = delayIndex * _settings.SlideDelayMultiplier;
+                    
+                    var length = moveRecord.Path.Count + (moveRecord.IsSpawn ? 1 : 0);
+                    var world = ArrayPool<Vector3>.Shared.Rent(length);
+
+                    int filled = 0;
                     if (moveRecord.IsSpawn)
+                        world[filled++] = moveRecord.Item.transform.position;
+
+                    for (int p = 0; p < moveRecord.Path.Count; p++)
+                        world[filled++] = view.GridToWorld(moveRecord.Path[p]);
+
+                    var totalDurationMultiplier = 0f;
+                    var current = moveRecord.Item.transform.position;
+
+                    for (int w = 0; w < length; w++)
                     {
-                        delayIndex = state.NonSpawnSlideCount + state.SpawnFall;
-                        state.SpawnFall++;
+                        var next = world[w];
+                        var distCells = Mathf.Abs(current.y - next.y) / cellSize;
+                        var segMul = .5f + distCells * _settings.SlideDurationMultiplier;
+                        totalDurationMultiplier += segMul;
+                        current = next;
                     }
-                    else
-                    {
-                        delayIndex = state.Fall;
-                        state.Fall++;
-                    }
+
+                    var pathTween = moveRecord.Item.ItemAnimation.Slide(world, length, totalDurationMultiplier, delay);
+                    _animTasks[taskCount++] = WaitTweenAndReturnArray(pathTween, world);
                 }
-
-                var length = moveRecord.Path.Count + (moveRecord.IsSpawn ? 1 : 0);
-                var world = ArrayPool<Vector3>.Shared.Rent(length);
-
-                int filled = 0;
-                if (moveRecord.IsSpawn)
-                    world[filled++] = moveRecord.Item.transform.position;
-
-                for (int p = 0; p < moveRecord.Path.Count; p++)
-                    world[filled++] = view.GridToWorld(moveRecord.Path[p]);
-
-                var delay = delayIndex * _settings.ShiftDelayMultiplier;
-
-                var totalDuration = 0f;
-                var current = moveRecord.Item.transform.position;
-
-                for (int w = 0; w < length; w++)
-                {
-                    var next = world[w];
-                    var distCells = Mathf.Abs(current.y - next.y) / cellSize;
-                    var segMul = 1f + distCells * _settings.ShiftDurationMultiplier;
-                    totalDuration += segMul;
-                    current = next;
-                }
-
-                var tween = moveRecord.Item.ItemAnimation.ShiftPath(world, length, totalDuration, delay);
-
-                _animTasks[taskCount++] = WaitTweenAndReturnArray(tween, world);
+                
             }
 
             return taskCount == 0 ? Task.CompletedTask : Task.WhenAll(_animTasks.AsSpan(0, taskCount).ToArray());
