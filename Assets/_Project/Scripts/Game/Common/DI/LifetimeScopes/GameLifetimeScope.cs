@@ -34,8 +34,8 @@ namespace Core.LifetimeScopes
             builder.Register<GridCheatHandler>(Lifetime.Scoped).As<IGridCheatHandler, ITickable>();
             
             builder.Register<RefillStrategyHandler>(Lifetime.Scoped).As<IRefillStrategyHandler>();
-            builder.Register<FallDownRefillStrategy>(Lifetime.Scoped).As<IRefillStrategy>();
-            builder.Register<SlideDownFillStrategy>(Lifetime.Scoped).As<IRefillStrategy>();
+            builder.Register<FallDownFillStrategy>(Lifetime.Scoped).As<IFillStrategy>();
+            builder.Register<SlideDownFillStrategy>(Lifetime.Scoped).As<IFillStrategy>();
         }
 
         private void Start()

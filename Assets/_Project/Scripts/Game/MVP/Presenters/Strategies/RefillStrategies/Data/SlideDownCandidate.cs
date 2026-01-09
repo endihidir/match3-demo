@@ -3,13 +3,13 @@ using UnityEngine;
 
 namespace Core.Handlers
 {
-    public readonly struct SlideMoveRecord
+    public readonly struct SlideDownCandidate
     {
         public readonly BaseGridObject Item;
         public readonly Vector2Int From;
         public readonly Vector2Int To;
 
-        public SlideMoveRecord(BaseGridObject item, Vector2Int from, Vector2Int to)
+        public SlideDownCandidate(BaseGridObject item, Vector2Int from, Vector2Int to)
         {
             Item = item;
             From = from;

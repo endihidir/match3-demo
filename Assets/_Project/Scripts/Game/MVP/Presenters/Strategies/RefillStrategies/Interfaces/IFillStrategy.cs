@@ -3,10 +3,10 @@ using Cysharp.Threading.Tasks;
 
 namespace Core.Handlers
 {
-    public interface IRefillStrategy
+    public interface IFillStrategy
     {
         bool CanRefill(IGridModel model);
-        IRefillStrategy Execute(GridStateContext context);
+        IFillStrategy Execute(GridStateContext context);
         UniTask WaitAnimationsAsync();
     }
 }

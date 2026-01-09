@@ -4,6 +4,6 @@ namespace Core.Handlers
 {
     public interface IRefillStrategyHandler
     {
-        IRefillStrategy SelectStrategy(IGridModel model);
+        IFillStrategy SelectStrategy(IGridModel model);
     }
 }

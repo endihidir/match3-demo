@@ -98,7 +98,7 @@ namespace Core.Utils
             return false;
         }
         
-        public static bool TryCollectDiagonalSlide(IGridModel model, Vector2Int targetCoord, int dirX, out SlideMoveRecord slide)
+        public static bool TryCollectDiagonalSide(IGridModel model, Vector2Int targetCoord, int dirX, out SlideDownCandidate slide)
         {
             slide = default;
 
@@ -114,13 +114,13 @@ namespace Core.Utils
 
             if (IsBlockerSideSource(model, src, dirX))
             {
-                slide = new SlideMoveRecord(item, src, targetCoord);
+                slide = new SlideDownCandidate(item, src, targetCoord);
                 return true;
             }
 
             if (IsBlockerShadowSandSource(model, src) && !HasEmptyBelowInSegment(model, src))
             {
-                slide = new SlideMoveRecord(item, src, targetCoord);
+                slide = new SlideDownCandidate(item, src, targetCoord);
                 return true;
             }
 

@@ -11,21 +11,23 @@ using UnityEngine;
 
 namespace Core.Handlers
 {
-    public sealed class FallDownRefillStrategy : IRefillStrategy
+    public sealed class FallDownFillStrategy : IFillStrategy
     {
         private readonly RefillSettingsSO _refillSettingsSo;
-        private readonly List<FallMoveRecord> _records = new(256);
+
+        private readonly List<FallDownMoveRecord> _records = new(256);
         private Task[] _animTasks = new Task[128];
+        private int[] _waveByColumn = Array.Empty<int>();
         private Task _runningAnimations;
 
         public bool CanRefill(IGridModel model) => !GridRefillCalcUtil.HasStationaryAndBlocking(model);
 
-        public FallDownRefillStrategy(GameplayConfigContainer configContainer)
+        public FallDownFillStrategy(GameplayConfigContainer configContainer)
         {
             _refillSettingsSo = configContainer.RefillSettings;
         }
 
-        public IRefillStrategy Execute(GridStateContext context)
+        public IFillStrategy Execute(GridStateContext context)
         {
             _records.Clear();
 
@@ -38,24 +40,22 @@ namespace Core.Handlers
 
             for (int x = 0; x < width; x++)
             {
-                var wave = 0;
-
-                ShiftColumnLogic(context, x, height, cellSize, ref wave, _records);
+                ShiftColumnLogic(context, x, height, _records);
 
                 if (GridRefillCalcUtil.TryGetSpawnCellCoord(model, x, model.Height, out var spawnCell))
                 {
                     var spawnY = view.GridToWorld(spawnCell).y + cellSize;
-                    RefillColumnLogic(context, x, height, cellSize, spawnY, ref wave, _records);
+                    RefillColumnLogic(context, x, height, cellSize, spawnY, _records);
                 }
             }
 
-            _runningAnimations = PlayAnimations(_records);
+            _runningAnimations = PlayAnimations(context, _records);
             return this;
         }
-        
+
         public UniTask WaitAnimationsAsync() => _runningAnimations.AsUniTask();
 
-        private void ShiftColumnLogic(GridStateContext stateContext, int x, int height, float cellSize, ref int wave, List<FallMoveRecord> records)
+        private void ShiftColumnLogic(GridStateContext stateContext, int x, int height, List<FallDownMoveRecord> records)
         {
             var model = stateContext.Model;
             var view = stateContext.View;
@@ -75,22 +75,16 @@ namespace Core.Handlers
 
                 if (!obj) continue;
 
-                var startWorld = obj.transform.position;
                 var finalWorld = view.GridToWorld(coord);
 
                 model.SetGridObject(coord, obj);
                 model.SetGridObject(src, null);
 
-                var dist = Mathf.Abs(finalWorld.y - startWorld.y) / cellSize;
-                var durMul = 1f + dist * _refillSettingsSo.ShiftDurationMultiplier;
-                var delay = wave * _refillSettingsSo.ShiftDelayMultiplier;
-
-                records.Add(new FallMoveRecord(obj, finalWorld, durMul, delay));
-                wave++;
+                records.Add(new FallDownMoveRecord(obj, finalWorld, x, false));
             }
         }
 
-        private void RefillColumnLogic(GridStateContext stateContext, int x, int height, float cellSize, float spawnY, ref int wave, List<FallMoveRecord> records)
+        private void RefillColumnLogic(GridStateContext stateContext, int x, int height, float cellSize, float spawnY, List<FallDownMoveRecord> records)
         {
             var model = stateContext.Model;
             var view = stateContext.View;
@@ -114,29 +108,45 @@ namespace Core.Handlers
                 item.SetPosition(start);
                 model.SetGridObject(coord, item);
 
-                var dist = Mathf.Abs(target.y - start.y) / cellSize;
-                var durMul = .5f + dist * _refillSettingsSo.ShiftDurationMultiplier;
-                var delay = wave * _refillSettingsSo.ShiftDelayMultiplier;
-
-                records.Add(new FallMoveRecord(item, target, durMul, delay));
-                wave++;
+                records.Add(new FallDownMoveRecord(item, target, x, true));
             }
         }
 
-        private Task PlayAnimations(List<FallMoveRecord> records)
+        private Task PlayAnimations(GridStateContext context, List<FallDownMoveRecord> records)
         {
-            var length = records.Count;
-            Array.Resize(ref _animTasks, length);
-            
-            for (int i = 0; i < length; i++)
+            var view = context.View;
+            var cellSize = view.GetCellSize();
+            var width = context.Model.Width;
+
+            if (_waveByColumn.Length != width)
+                _waveByColumn = new int[width];
+            else
+                Array.Clear(_waveByColumn, 0, width);
+
+            if (_animTasks.Length < records.Count)
+                Array.Resize(ref _animTasks, records.Count);
+
+            var taskCount = 0;
+
+            for (int i = 0; i < records.Count; i++)
             {
                 var r = records[i];
                 if (!r.Obj) continue;
-                var tween = r.Obj.ItemAnimation.Shift(r.FinalWorld, r.DurMul, r.Delay);
-                _animTasks[i] = tween.AsyncWaitForCompletion();
+
+                var wave = _waveByColumn[r.ColumnX]++;
+                var delay = wave * _refillSettingsSo.ShiftDelayMultiplier;
+
+                var startWorld = r.Obj.transform.position;
+                var dist = Mathf.Abs(r.FinalWorld.y - startWorld.y) / Mathf.Max(0.0001f, cellSize);
+
+                var baseMul = r.IsSpawn ? .5f : 1f;
+                var durMul = baseMul + dist * _refillSettingsSo.ShiftDurationMultiplier;
+
+                var tween = r.Obj.ItemAnimation.Shift(r.FinalWorld, durMul, delay);
+                _animTasks[taskCount++] = tween.AsyncWaitForCompletion();
             }
-            
-            return length == 0 ? Task.CompletedTask : Task.WhenAll(_animTasks);
+
+            return taskCount == 0 ? Task.CompletedTask : Task.WhenAll(_animTasks.AsSpan(0, taskCount).ToArray());
         }
     }
 }
