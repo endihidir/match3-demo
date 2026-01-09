@@ -6,6 +6,5 @@ namespace Core.Handlers
         public int Slide;
         public int SpawnFall;
         public int SpawnSlide;
-        public int NonSpawnSlideCount;
     }
 }

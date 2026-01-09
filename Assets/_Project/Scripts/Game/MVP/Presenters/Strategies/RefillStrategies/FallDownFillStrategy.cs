@@ -137,12 +137,10 @@ namespace Core.Handlers
                 var delay = wave * _refillSettingsSo.ShiftDelayMultiplier;
 
                 var startWorld = r.Obj.transform.position;
-                var dist = Mathf.Abs(r.FinalWorld.y - startWorld.y) / Mathf.Max(0.0001f, cellSize);
-
-                var baseMul = r.IsSpawn ? .5f : 1f;
-                var durMul = baseMul + dist * _refillSettingsSo.ShiftDurationMultiplier;
-
-                var tween = r.Obj.ItemAnimation.Shift(r.FinalWorld, durMul, delay);
+                var distCells = Mathf.Abs(r.FinalWorld.y - startWorld.y) / cellSize;
+                var durationByDistance = 1f + distCells * _refillSettingsSo.ShiftDurationMultiplier;
+                
+                var tween = r.Obj.ItemAnimation.Shift(r.FinalWorld, durationByDistance, delay);
                 _animTasks[taskCount++] = tween.AsyncWaitForCompletion();
             }
 
