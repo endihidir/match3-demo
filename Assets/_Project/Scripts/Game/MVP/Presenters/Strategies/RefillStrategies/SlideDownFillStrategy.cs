@@ -155,88 +155,83 @@ namespace Core.Handlers
         }
 
        private bool SpawnTopOpenSegment(GridStateContext context, IGridView view, int x, int height)
-        {
-            var model = context.Model;
-            var cellSize = view.GetCellSize();
+       { 
+           var model = context.Model;
+           var cellSize = view.GetCellSize();
 
-            var spawnedAny = false;
-            var segmentBlocked = false;
-            var segmentStartY = -1;
-            var segmentTopWorldY = 0f;
+           var spawnedAny = false;
 
-            for (int y = 0; y < height; y++)
-            {
-                var c = new Vector2Int(x, y);
+           var segmentStartY = -1;
+           var blockedInSegment = false;
+           var segmentTopWorldY = 0f;
 
-                if (!model.IsCellActive(c))
-                {
-                    segmentBlocked = false;
-                    segmentStartY = -1;
-                    continue;
-                }
+           for (int y = 0; y < height; y++)
+           {
+               var c = new Vector2Int(x, y);
 
-                if (segmentStartY < 0)
-                {
-                    segmentStartY = y;
-                    var topCellWorld = view.GridToWorld(new Vector2Int(x, segmentStartY));
-                    segmentTopWorldY = topCellWorld.y + cellSize;
-                }
+               if (!model.IsCellActive(c))
+               {
+                   segmentStartY = -1;
+                   blockedInSegment = false;
+                   continue;
+               }
 
-                var obj = model.GetGridObject(c);
+               if (segmentStartY < 0)
+               {
+                   segmentStartY = y;
+                   segmentTopWorldY = view.GridToWorld(new Vector2Int(x, y)).y + cellSize;
+               }
 
-                if (obj)
-                {
-                    segmentBlocked = true;
-                    continue;
-                }
+               var obj = model.GetGridObject(c);
 
-                if (segmentBlocked) continue;
+               if (obj)
+               {
+                   blockedInSegment = true;
+                   continue;
+               }
 
-                int spawnCount = 0;
-                for (int scanY = y; scanY < height; scanY++)
-                {
-                    var sc = new Vector2Int(x, scanY);
+               if (blockedInSegment) continue;
 
-                    if (!model.IsCellActive(sc)) break;
-                    if (model.GetGridObject(sc)) break;
+               var spawnCount = GridRefillCalcUtil.CountEmptiesDown(model, x, y, height);
+               if (spawnCount <= 0) continue;
 
-                    spawnCount++;
-                }
+               SpawnInto(model, context, view, x, y, spawnCount, segmentTopWorldY, cellSize);
 
-                var baseStack = _spawnStackByX[x];
-
-                for (int i = 0; i < spawnCount; i++)
-                {
-                    var tc = new Vector2Int(x, y + i);
-
-                    var type = SmartSpawnDecider.Decide(model, tc, _settings.SpawnSettings, 0f);
-                    var item = context.Factory.GetRegularItem(type);
-
-                    item.SetParent(view.GridObjectsParent);
-                    item.SetSpriteSize(cellSize);
-
-                    var targetWorld = view.GridToWorld(tc);
-
-                    var reverseIndex = (spawnCount - 1) - i;
-                    var stack = baseStack + reverseIndex;
-
-                    var spawnY = segmentTopWorldY + stack * cellSize;
-
-                    item.SetPosition(new Vector3(targetWorld.x, spawnY, targetWorld.z));
-
-                    model.SetGridObject(tc, item);
-                    AddStep(item, tc, true);
-
-                    spawnedAny = true;
-                }
-
-                _spawnStackByX[x] = baseStack + spawnCount;
-
-                y += (spawnCount - 1);
+               spawnedAny = true;
+               y += spawnCount - 1;
             }
 
             return spawnedAny;
         }
+
+        private void SpawnInto(IGridModel model, GridStateContext context, IGridView view, int x, int startY, int spawnCount, float segmentTopWorldY, float cellSize)
+        {
+            var baseStack = _spawnStackByX[x];
+
+            for (int i = 0; i < spawnCount; i++)
+            {
+                var tc = new Vector2Int(x, startY + i);
+
+                var type = SmartSpawnDecider.Decide(model, tc, _settings.SpawnSettings, 0f);
+                var item = context.Factory.GetRegularItem(type);
+
+                item.SetParent(view.GridObjectsParent);
+                item.SetSpriteSize(cellSize);
+
+                var w = view.GridToWorld(tc);
+
+                var reverseIndex = (spawnCount - 1) - i;
+                var spawnY = segmentTopWorldY + (baseStack + reverseIndex) * cellSize;
+
+                item.SetPosition(new Vector3(w.x, spawnY, w.z));
+
+                model.SetGridObject(tc, item);
+                AddStep(item, tc, true);
+            }
+
+            _spawnStackByX[x] = baseStack + spawnCount;
+        }
+
 
         private void AddStep(BaseGridObject item, Vector2Int step, bool isSpawn)
         {
@@ -288,46 +283,6 @@ namespace Core.Handlers
 
             var cellSize = view.GetCellSize();
             var taskCount = 0;
-            var slideIndex = 0;
-            var shiftIndex = 0;
-
-            for (int i = 0; i < _moves.Count; i++)
-            {
-                var moveRecord = _moves[i];
-
-                if (!moveRecord.IsSlide)
-                {
-                    var finalX = moveRecord.Final.x;
-                    ref var state = ref _waveByX[finalX];
-
-                    if (moveRecord.IsSpawn)
-                    {
-                        shiftIndex = state.SpawnFall + state.SpawnSlide;
-                        state.SpawnFall++;
-                    }
-                    else
-                    {
-                        shiftIndex = state.Fall;
-                        state.Fall++;
-                    }
-                }
-                else
-                {
-                    var startX = moveRecord.Start.x;
-                    ref var state = ref _waveByX[startX];
-
-                    if (moveRecord.IsSpawn)
-                    {
-                        slideIndex = state.SpawnSlide + state.Slide;
-                        state.SpawnSlide++;
-                    }
-                    else
-                    {
-                        slideIndex = state.Slide + state.Fall;
-                        state.Slide++;
-                    }
-                }
-            }
 
             for (int i = 0; i < _moves.Count; i++)
             {
@@ -336,7 +291,23 @@ namespace Core.Handlers
 
                 if (!moveRecord.IsSlide)
                 {
-                    var delay = shiftIndex * _settings.ShiftDelayMultiplier;
+                    var finalX = moveRecord.Final.x;
+                    ref var state = ref _waveByX[finalX];
+
+                    var shiftWave = 0;
+                    
+                    if (moveRecord.IsSpawn)
+                    {
+                        shiftWave = state.SpawnFall + state.Fall + state.SpawnSlide + state.Slide;
+                        state.SpawnFall++;
+                    }
+                    else
+                    {
+                        shiftWave = state.Fall;
+                        state.Fall++;
+                    }
+                    
+                    var delay = shiftWave * _settings.ShiftDelayMultiplier;
 
                     var finalWorld = view.GridToWorld(moveRecord.Final);
                     var startWorld = moveRecord.Item.transform.position;
@@ -348,7 +319,22 @@ namespace Core.Handlers
                 }
                 else
                 {
-                    var delay = slideIndex * _settings.SlideDelayMultiplier;
+                    var startX = moveRecord.Start.x;
+                    ref var state = ref _waveByX[startX];
+
+                    var slideWave = 0;
+                    if (moveRecord.IsSpawn)
+                    {
+                        slideWave = state.SpawnSlide + state.Slide;
+                        state.SpawnSlide++;
+                    }
+                    else
+                    {
+                        slideWave = state.Slide + state.Fall;
+                        state.Slide++;
+                    }
+                    
+                    var delay = slideWave * _settings.SlideDelayMultiplier;
 
                     var length = moveRecord.Path.Count + (moveRecord.IsSpawn ? 1 : 0);
 
