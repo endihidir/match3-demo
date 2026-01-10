@@ -378,6 +378,5 @@ namespace Core.Handlers
                 ArrayPool<float>.Shared.Return(cells);
             }
         }
-
     }
 }
