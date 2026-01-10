@@ -8,35 +8,35 @@ namespace Core.Utils
 {
     public static class GridImpactMarker
     {
-        public static void MarkLinearArea(IGridModel model, PendingBoosterAction boosterAction, CellImpactMarkData[,] markData, int damageAmount, int lineCount, Vector2Int[] directions, Action<PendingBoosterAction> enqueue)
+        public static void MarkLinearArea(IGridModel model, BoosterActionContext boosterActionContext, CellImpactMarkData[,] markData, int damageAmount, int lineCount, Vector2Int[] directions, Action<BoosterActionContext> enqueue)
         {
             foreach (var dir in directions)
             {
-                VisitLineExceptSelf(model, boosterAction.OriginCoord, dir, lineCount, 
-                    obj => MarkVisitedObject(obj, boosterAction.GroupId, markData, damageAmount, enqueue));
+                VisitLineExceptSelf(model, boosterActionContext.OriginCoord, dir, lineCount, 
+                    obj => MarkVisitedObject(obj, boosterActionContext.GroupId, markData, damageAmount, enqueue));
             }
         }
 
-        public static void MarkSquareArea(IGridModel model, PendingBoosterAction boosterAction, CellImpactMarkData[,] markData, int damageAmount, int radius, Action<PendingBoosterAction> enqueue)
+        public static void MarkSquareArea(IGridModel model, BoosterActionContext boosterActionContext, CellImpactMarkData[,] markData, int damageAmount, int radius, Action<BoosterActionContext> enqueue)
         {
             for (int r = 1; r <= radius; r++)
             {
-                VisitRingExceptSelf(model, boosterAction.OriginCoord, r, 
-                    obj => MarkVisitedObject(obj, boosterAction.GroupId, markData, damageAmount, enqueue));
+                VisitRingExceptSelf(model, boosterActionContext.OriginCoord, r, 
+                    obj => MarkVisitedObject(obj, boosterActionContext.GroupId, markData, damageAmount, enqueue));
             }
         }
         
-        public static void MarkAllAreaFromOrigin(IGridModel model, PendingBoosterAction boosterAction, CellImpactMarkData[,] markData, int damageAmount, Action<PendingBoosterAction> enqueue)
+        public static void MarkAllAreaFromOrigin(IGridModel model, BoosterActionContext boosterActionContext, CellImpactMarkData[,] markData, int damageAmount, Action<BoosterActionContext> enqueue)
         {
             var maxRadius = Mathf.Max(model.Width, model.Height);
 
             for (int r = 1; r <= maxRadius; r++)
             {
-                VisitRingExceptSelf(model, boosterAction.OriginCoord, r, obj => MarkVisitedObject(obj, boosterAction.GroupId, markData, damageAmount, enqueue));
+                VisitRingExceptSelf(model, boosterActionContext.OriginCoord, r, obj => MarkVisitedObject(obj, boosterActionContext.GroupId, markData, damageAmount, enqueue));
             }
         }
 
-        private static void MarkVisitedObject(BaseGridObject obj, int actionGroupId, CellImpactMarkData[,] markData, int damageAmount, Action<PendingBoosterAction> enqueue)
+        private static void MarkVisitedObject(BaseGridObject obj, int actionGroupId, CellImpactMarkData[,] markData, int damageAmount, Action<BoosterActionContext> enqueue)
         {
             var coord = obj.Coord;
             

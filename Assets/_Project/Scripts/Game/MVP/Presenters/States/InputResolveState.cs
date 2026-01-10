@@ -168,7 +168,7 @@ namespace Core.Handlers
         {
             if (!booster || booster.BoosterAction == null) return;
 
-            Context.PendingBoosterActions.Add(new PendingBoosterAction(Context.NextBoosterGroupId(), originCoord, booster.BoosterAction));
+            Context.PendingBoosterActions.Add(new BoosterActionContext(Context.NextBoosterGroupId(), originCoord, booster.BoosterAction));
         }
 
         private void AddComboAction(Vector2Int origin, BoosterType sourceBoosterType, BoosterType targetBoosterType)
@@ -184,7 +184,7 @@ namespace Core.Handlers
                     var boosterEffectBase = rule.Actions[i];
                     if (boosterEffectBase == null) continue;
 
-                    Context.PendingBoosterActions.Add(new PendingBoosterAction(nextGroupId, origin, boosterEffectBase));
+                    Context.PendingBoosterActions.Add(new BoosterActionContext(nextGroupId, origin, boosterEffectBase));
                 }
             }
             else

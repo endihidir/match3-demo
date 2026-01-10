@@ -17,7 +17,7 @@ namespace Core.Item
         public bool IsEmpty
         {
             get => _isEmpty;
-            set
+            private set
             {
                 _isEmpty = value;
                 SpriteRenderer.enabled = !_isEmpty;
