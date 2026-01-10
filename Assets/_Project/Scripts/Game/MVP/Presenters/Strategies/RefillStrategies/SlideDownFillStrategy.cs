@@ -137,7 +137,7 @@ namespace Core.Handlers
             return this;
         }
 
-        public UniTask WaitAnimationsAsync() => _runningAnimations.AsUniTask();
+        public Task WaitAnimationsAsync() => _runningAnimations;
 
         private void EnsureBuffers(int width, int height)
         {
