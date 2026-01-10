@@ -17,7 +17,6 @@ namespace Core.Handlers
 
         private readonly List<FallDownMoveRecord> _records = new(256);
         private Task[] _animTasks = new Task[128];
-        private int[] _waveByColumn = Array.Empty<int>();
         private Task _runningAnimations;
 
         public bool CanRefill(IGridModel model) => !GridRefillCalcUtil.HasStationaryAndBlocking(model);
@@ -89,6 +88,8 @@ namespace Core.Handlers
             var model = stateContext.Model;
             var view = stateContext.View;
 
+            var stack = 0;
+
             for (int y = height - 1; y >= 0; y--)
             {
                 var coord = new Vector2Int(x, y);
@@ -103,12 +104,14 @@ namespace Core.Handlers
                 item.SetSpriteSize(cellSize);
 
                 var target = view.GridToWorld(coord);
-                var start = new Vector3(target.x, spawnY, target.z);
+                var start = new Vector3(target.x, spawnY + (stack * cellSize), target.z);
 
                 item.SetPosition(start);
                 model.SetGridObject(coord, item);
 
                 records.Add(new FallDownMoveRecord(item, target, x, true));
+
+                stack++;
             }
         }
 
@@ -118,30 +121,50 @@ namespace Core.Handlers
             var cellSize = view.GetCellSize();
             var width = context.Model.Width;
 
-            if (_waveByColumn.Length != width)
-                _waveByColumn = new int[width];
-            else
-                Array.Clear(_waveByColumn, 0, width);
-
             if (_animTasks.Length < records.Count)
                 Array.Resize(ref _animTasks, records.Count);
 
             var taskCount = 0;
 
-            for (int i = 0; i < records.Count; i++)
+            for (int x = 0; x < width; x++)
             {
-                var r = records[i];
-                if (!r.Obj) continue;
+                var wave = 0;
 
-                var wave = _waveByColumn[r.ColumnX]++;
-                var delay = wave * _refillSettingsSo.ShiftDelayMultiplier;
+                for (int i = 0; i < records.Count; i++)
+                {
+                    var r = records[i];
+                    if (!r.Obj) continue;
+                    if (r.ColumnX != x) continue;
+                    if (r.IsSpawn) continue;
 
-                var startWorld = r.Obj.transform.position;
-                var distCells = Mathf.Abs(r.FinalWorld.y - startWorld.y) / cellSize;
-                var durationByDistance = 1f + distCells * _refillSettingsSo.ShiftDurationMultiplier;
-                
-                var tween = r.Obj.ItemAnimation.Shift(r.FinalWorld, durationByDistance, delay);
-                _animTasks[taskCount++] = tween.AsyncWaitForCompletion();
+                    var delay = wave * _refillSettingsSo.ShiftDelayMultiplier;
+
+                    var startWorld = r.Obj.transform.position;
+                    var distCells = Mathf.Abs(r.FinalWorld.y - startWorld.y) / cellSize;
+
+                    var tween = r.Obj.ItemAnimation.Shift(r.FinalWorld, distCells, delay);
+                    _animTasks[taskCount++] = tween.AsyncWaitForCompletion();
+
+                    wave++;
+                }
+
+                for (int i = 0; i < records.Count; i++)
+                {
+                    var r = records[i];
+                    if (!r.Obj) continue;
+                    if (r.ColumnX != x) continue;
+                    if (!r.IsSpawn) continue;
+
+                    var delay = wave * _refillSettingsSo.ShiftDelayMultiplier;
+
+                    var startWorld = r.Obj.transform.position;
+                    var distCells = Mathf.Abs(r.FinalWorld.y - startWorld.y) / cellSize;
+
+                    var tween = r.Obj.ItemAnimation.Shift(r.FinalWorld, distCells, delay);
+                    _animTasks[taskCount++] = tween.AsyncWaitForCompletion();
+
+                    wave++;
+                }
             }
 
             return taskCount == 0 ? Task.CompletedTask : Task.WhenAll(_animTasks.AsSpan(0, taskCount).ToArray());

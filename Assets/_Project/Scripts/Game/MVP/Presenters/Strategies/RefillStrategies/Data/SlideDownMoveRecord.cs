@@ -8,14 +8,16 @@ namespace Core.Handlers
     {
         public readonly BaseGridObject Item;
         public readonly List<Vector2Int> Path;
+        public readonly Vector2Int Start;
         public readonly Vector2Int Final;
         public readonly bool IsSpawn;
         public readonly bool IsSlide;
 
-        public SlideDownMoveRecord(BaseGridObject item, List<Vector2Int> path, Vector2Int final, bool isSpawn, bool isSlide)
+        public SlideDownMoveRecord(BaseGridObject item, List<Vector2Int> path, Vector2Int start, Vector2Int final, bool isSpawn, bool isSlide)
         {
             Item = item;
             Path = path;
+            Start = start;
             Final = final;
             IsSpawn = isSpawn;
             IsSlide = isSlide;
