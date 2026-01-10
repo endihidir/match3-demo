@@ -52,7 +52,7 @@ namespace Core.Handlers
             return this;
         }
 
-        public UniTask WaitAnimationsAsync() => _runningAnimations.AsUniTask();
+        public Task WaitAnimationsAsync() => _runningAnimations;
 
         private void ShiftColumnLogic(GridStateContext stateContext, int x, int height, List<FallDownMoveRecord> records)
         {
