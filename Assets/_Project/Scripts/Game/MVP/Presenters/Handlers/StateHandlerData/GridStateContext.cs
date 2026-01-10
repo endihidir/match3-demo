@@ -18,7 +18,7 @@ namespace Core.Handlers
         
         public bool HasForcedBoosterSpawnCoord { get; set; }
         public Vector2Int ForcedBoosterSpawnCoord { get; set; }
-        public List<PendingBoosterAction> PendingBoosterActions { get; } = new();
+        public List<BoosterActionContext> PendingBoosterActions { get; } = new();
         
         public bool MatchResolveRequested { get; set; }
         public bool HasPendingBoosterActions => PendingBoosterActions.Count > 0;

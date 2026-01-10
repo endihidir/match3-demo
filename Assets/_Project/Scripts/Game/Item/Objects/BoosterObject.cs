@@ -30,15 +30,15 @@ namespace Core.Item
                 BoosterAction = boosterConfigData.BoosterAction;
             }
         }
-        public bool TryBuildAction(Vector2Int origin, out PendingBoosterAction boosterAction)
+        public bool TryBuildAction(Vector2Int origin, out BoosterActionContext boosterActionContext)
         {
             if (BoosterAction == null)
             {
-                boosterAction = default;
+                boosterActionContext = default;
                 return false;
             }
 
-            boosterAction = new PendingBoosterAction(origin, BoosterAction);
+            boosterActionContext = new BoosterActionContext(origin, BoosterAction);
 
             return true;
         }

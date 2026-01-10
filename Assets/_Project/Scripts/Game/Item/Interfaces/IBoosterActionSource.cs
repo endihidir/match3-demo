@@ -5,6 +5,6 @@ namespace Core.Item
 {
     public interface IBoosterActionSource
     {
-        bool TryBuildAction(Vector2Int origin, out PendingBoosterAction boosterAction);
+        bool TryBuildAction(Vector2Int origin, out BoosterActionContext boosterActionContext);
     }
 }

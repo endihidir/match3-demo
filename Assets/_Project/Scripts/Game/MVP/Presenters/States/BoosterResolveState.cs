@@ -29,7 +29,7 @@ namespace Core.Handlers
         private void MarkPendingActions(IGridModel model, out CellImpactMarkData[,] markData)
         {
             markData = new CellImpactMarkData[model.Width, model.Height]; 
-            var queue = new Queue<PendingBoosterAction>();
+            var queue = new Queue<BoosterActionContext>();
             var seen = new HashSet<BoosterActionKey>();
             
             for (int i = 0; i < Context.PendingBoosterActions.Count; i++)
@@ -64,16 +64,16 @@ namespace Core.Handlers
             
             return;
             
-            void EnqueueIfNew(PendingBoosterAction boosterAction)
+            void EnqueueIfNew(BoosterActionContext boosterActionContext)
             {
-                var key = new BoosterActionKey(boosterAction.OriginCoord, boosterAction.BoosterAction);
+                var key = new BoosterActionKey(boosterActionContext.OriginCoord, boosterActionContext.BoosterAction);
                 
                 if (!seen.Add(key)) return;
                 
-                if (boosterAction.GroupId == 0)
-                    boosterAction.SetGroupId(Context.NextBoosterGroupId());
+                if (boosterActionContext.GroupId == 0)
+                    boosterActionContext.SetGroupId(Context.NextBoosterGroupId());
                 
-                queue.Enqueue(boosterAction);
+                queue.Enqueue(boosterActionContext);
             }
         }
         
