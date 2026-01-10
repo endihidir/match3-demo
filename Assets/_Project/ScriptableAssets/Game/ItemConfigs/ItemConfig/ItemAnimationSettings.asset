@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: ItemAnimationSettings
   m_EditorClassIdentifier: 
   <UseUnscaledTime>k__BackingField: 0
-  <BaseShiftDuration>k__BackingField: 0.15
+  <BaseShiftDuration>k__BackingField: 0.21
   <BaseShiftDelay>k__BackingField: 0.1
-  <BaseSlideDuration>k__BackingField: 0.05
-  <BaseSlideDelay>k__BackingField: 0
+  <BaseSlideDuration>k__BackingField: 0.07
+  <BaseSlideDelay>k__BackingField: 0.1
   <BaseMoveDuration>k__BackingField: 0.15
   <ShakeDuration>k__BackingField: 0.25
   <ShakeRotAngle>k__BackingField: 5

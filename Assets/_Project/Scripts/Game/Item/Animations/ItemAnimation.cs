@@ -66,7 +66,8 @@ namespace Core.Item
         {
             _shiftTween?.Kill();
 
-            var duration = Settings.BaseShiftDuration + (cellDistance * 0.05f);
+            var distanceMultiplier = Settings.ShiftDistanceMultiplier;
+            var duration = Settings.BaseShiftDuration + (cellDistance * distanceMultiplier);
 
             _shiftTween = transform.DOMove(worldPos, duration)
                 .SetEase(Ease.InQuad)
@@ -85,8 +86,9 @@ namespace Core.Item
                 .SetDelay(Settings.BaseSlideDelay + delay)
                 .SetUpdate(Settings.UseUnscaledTime);
 
+            var distanceMultiplier = Settings.SlideDistanceMultiplier;
             for (int i = 0; i < length; i++)
-                seq.Append(transform.DOMove(points[i], Settings.BaseSlideDuration + (cellDistances[i] * .05f)).SetEase(Ease.InQuad));
+                seq.Append(transform.DOMove(points[i], Settings.BaseSlideDuration + (cellDistances[i] * distanceMultiplier)).SetEase(Ease.InQuad));
 
             _shiftTween = seq.OnComplete(Spring);
             return _shiftTween;

@@ -219,6 +219,23 @@ namespace Core.Utils
 
             return false;
         }
+        
+        public static int CountEmptiesDown(IGridModel model, int x, int y, int height)
+        {
+            var count = 0;
+
+            for (int yy = y; yy < height; yy++)
+            {
+                var c = new Vector2Int(x, yy);
+
+                if (!model.IsCellActive(c)) break;
+                if (model.GetGridObject(c)) break;
+
+                count++;
+            }
+
+            return count;
+        }
 
         private static bool HasEmptyBelowInSegment(IGridModel model, Vector2Int src)
         {
