@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <UseUnscaledTime>k__BackingField: 0
   <BaseShiftDuration>k__BackingField: 0.15
-  <BaseShiftDelay>k__BackingField: 0.2
+  <BaseShiftDelay>k__BackingField: 0.1
   <BaseSlideDuration>k__BackingField: 0.05
   <BaseSlideDelay>k__BackingField: 0
   <BaseMoveDuration>k__BackingField: 0.15

@@ -153,9 +153,6 @@ namespace Core.Handlers
             else
                 Array.Clear(_spawnStackByX, 0, width);
         }
-        
-
-        private const int ExtraSpawnOffsetCells = 0;
 
        private bool SpawnTopOpenSegment(GridStateContext context, IGridView view, int x, int height)
         {
@@ -163,7 +160,6 @@ namespace Core.Handlers
             var cellSize = view.GetCellSize();
 
             var spawnedAny = false;
-
             var segmentBlocked = false;
             var segmentStartY = -1;
             var segmentTopWorldY = 0f;
@@ -222,7 +218,7 @@ namespace Core.Handlers
                     var targetWorld = view.GridToWorld(tc);
 
                     var reverseIndex = (spawnCount - 1) - i;
-                    var stack = baseStack + reverseIndex + ExtraSpawnOffsetCells;
+                    var stack = baseStack + reverseIndex;
 
                     var spawnY = segmentTopWorldY + stack * cellSize;
 
@@ -241,8 +237,6 @@ namespace Core.Handlers
 
             return spawnedAny;
         }
-
-
 
         private void AddStep(BaseGridObject item, Vector2Int step, bool isSpawn)
         {
