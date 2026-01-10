@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b83a5e34fa142daba3f92b23839eeb8, type: 3}
   m_Name: ItemAnimationSettings
   m_EditorClassIdentifier: 
-  <UseUnscaledTime>k__BackingField: 1
+  <UseUnscaledTime>k__BackingField: 0
   <BaseShiftDuration>k__BackingField: 0.15
-  <BaseShiftDelay>k__BackingField: 0.1
-  <BaseSlideDuration>k__BackingField: 0.15
-  <BaseSlideDelay>k__BackingField: 0.1
+  <BaseShiftDelay>k__BackingField: 0.2
+  <BaseSlideDuration>k__BackingField: 0.05
+  <BaseSlideDelay>k__BackingField: 0
   <BaseMoveDuration>k__BackingField: 0.15
   <ShakeDuration>k__BackingField: 0.25
   <ShakeRotAngle>k__BackingField: 5

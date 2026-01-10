@@ -62,11 +62,11 @@ namespace Core.Item
         public void Shake() => _shakeTween?.Restart();
         private void Spring() => _springTween?.Restart();
 
-        public Tween Shift(Vector3 worldPos, float durationMultiplier = 1f, float delay = 0f)
+        public Tween Shift(Vector3 worldPos, float cellDistance, float delay = 0f)
         {
             _shiftTween?.Kill();
-            
-            var duration = Settings.BaseShiftDuration * durationMultiplier;
+
+            var duration = Settings.BaseShiftDuration + (cellDistance * 0.05f);
 
             _shiftTween = transform.DOMove(worldPos, duration)
                 .SetEase(Ease.InQuad)
@@ -76,8 +76,8 @@ namespace Core.Item
 
             return _shiftTween;
         }
-        
-        public Tween Slide(Vector3[] points, int length, float totalDurationMultiplier = 1f, float delay = 0f)
+
+        public Tween Slide(Vector3[] points, int length, float[] cellDistances, float delay = 0f)
         {
             _shiftTween?.Kill();
 
@@ -85,10 +85,8 @@ namespace Core.Item
                 .SetDelay(Settings.BaseSlideDelay + delay)
                 .SetUpdate(Settings.UseUnscaledTime);
 
-            var durationMultiplier = totalDurationMultiplier / length;
-            
             for (int i = 0; i < length; i++)
-                seq.Append(transform.DOMove(points[i], Settings.BaseSlideDuration * durationMultiplier).SetEase(Ease.InQuad));
+                seq.Append(transform.DOMove(points[i], Settings.BaseSlideDuration + (cellDistances[i] * .05f)).SetEase(Ease.InQuad));
 
             _shiftTween = seq.OnComplete(Spring);
             return _shiftTween;

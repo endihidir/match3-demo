@@ -30,6 +30,7 @@ namespace Core.Handlers
 
         private SlideDownColumnWaveState[] _waveByX = Array.Empty<SlideDownColumnWaveState>();
         private int[] _usedTargetStamp = Array.Empty<int>();
+        private int[] _spawnStackByX = Array.Empty<int>();
         private int _usedTargetStampId = 1;
 
         private Task[] _animTasks = new Task[128];
@@ -53,7 +54,7 @@ namespace Core.Handlers
             var height = model.Height;
 
             EnsureBuffers(width, height);
-
+            
             var movedAny = true;
 
             while (movedAny)
@@ -124,7 +125,7 @@ namespace Core.Handlers
                         movedAny = true;
                     }
                 }
-
+                
                 for (int x = 0; x < width; x++)
                 {
                     if (SpawnTopOpenSegment(context, view, x, height))
@@ -146,18 +147,26 @@ namespace Core.Handlers
             var cellCount = width * height;
             if (_usedTargetStamp.Length < cellCount)
                 _usedTargetStamp = new int[cellCount];
+            
+            if (_spawnStackByX.Length < width)
+                _spawnStackByX = new int[width];
+            else
+                Array.Clear(_spawnStackByX, 0, width);
         }
+        
 
-        private bool SpawnTopOpenSegment(GridStateContext context, IGridView view, int x, int height)
+        private const int ExtraSpawnOffsetCells = 0;
+
+       private bool SpawnTopOpenSegment(GridStateContext context, IGridView view, int x, int height)
         {
             var model = context.Model;
             var cellSize = view.GetCellSize();
 
-            var segmentBlocked = false;
             var spawnedAny = false;
 
-            var spawnY = 0f;
-            var hasSpawnY = false;
+            var segmentBlocked = false;
+            var segmentStartY = -1;
+            var segmentTopWorldY = 0f;
 
             for (int y = 0; y < height; y++)
             {
@@ -166,7 +175,15 @@ namespace Core.Handlers
                 if (!model.IsCellActive(c))
                 {
                     segmentBlocked = false;
+                    segmentStartY = -1;
                     continue;
+                }
+
+                if (segmentStartY < 0)
+                {
+                    segmentStartY = y;
+                    var topCellWorld = view.GridToWorld(new Vector2Int(x, segmentStartY));
+                    segmentTopWorldY = topCellWorld.y + cellSize;
                 }
 
                 var obj = model.GetGridObject(c);
@@ -179,29 +196,53 @@ namespace Core.Handlers
 
                 if (segmentBlocked) continue;
 
-                if (!hasSpawnY)
+                int spawnCount = 0;
+                for (int scanY = y; scanY < height; scanY++)
                 {
-                    spawnY = view.GridToWorld(c).y + cellSize;
-                    hasSpawnY = true;
+                    var sc = new Vector2Int(x, scanY);
+
+                    if (!model.IsCellActive(sc)) break;
+                    if (model.GetGridObject(sc)) break;
+
+                    spawnCount++;
                 }
 
-                var type = SmartSpawnDecider.Decide(model, c, _settings.SpawnSettings, 0f);
-                var item = context.Factory.GetRegularItem(type);
+                var baseStack = _spawnStackByX[x];
 
-                item.SetParent(view.GridObjectsParent);
-                item.SetSpriteSize(cellSize);
+                for (int i = 0; i < spawnCount; i++)
+                {
+                    var tc = new Vector2Int(x, y + i);
 
-                var w = view.GridToWorld(c);
-                item.SetPosition(new Vector3(w.x, spawnY, w.z));
+                    var type = SmartSpawnDecider.Decide(model, tc, _settings.SpawnSettings, 0f);
+                    var item = context.Factory.GetRegularItem(type);
 
-                model.SetGridObject(c, item);
+                    item.SetParent(view.GridObjectsParent);
+                    item.SetSpriteSize(cellSize);
 
-                AddStep(item, c, true);
-                spawnedAny = true;
+                    var targetWorld = view.GridToWorld(tc);
+
+                    var reverseIndex = (spawnCount - 1) - i;
+                    var stack = baseStack + reverseIndex + ExtraSpawnOffsetCells;
+
+                    var spawnY = segmentTopWorldY + stack * cellSize;
+
+                    item.SetPosition(new Vector3(targetWorld.x, spawnY, targetWorld.z));
+
+                    model.SetGridObject(tc, item);
+                    AddStep(item, tc, true);
+
+                    spawnedAny = true;
+                }
+
+                _spawnStackByX[x] = baseStack + spawnCount;
+
+                y += (spawnCount - 1);
             }
 
             return spawnedAny;
         }
+
+
 
         private void AddStep(BaseGridObject item, Vector2Int step, bool isSpawn)
         {
@@ -232,10 +273,11 @@ namespace Core.Handlers
                 var path = track.Path;
                 if (path == null || path.Count == 0) continue;
 
+                var start = view.WorldToGrid(item.transform.position);
                 var final = path[^1];
-                var isSlide = path[0].x != final.x;
+                var isSlide = start.x != final.x;
 
-                _moves.Add(new SlideDownMoveRecord(item, path, final, track.IsSpawn, isSlide));
+                _moves.Add(new SlideDownMoveRecord(item, path, start, final, track.IsSpawn, isSlide));
             }
 
             _moves.Sort((a, b) =>
@@ -252,86 +294,99 @@ namespace Core.Handlers
 
             var cellSize = view.GetCellSize();
             var taskCount = 0;
+            var slideIndex = 0;
+            var shiftIndex = 0;
+
+            for (int i = 0; i < _moves.Count; i++)
+            {
+                var moveRecord = _moves[i];
+
+                if (!moveRecord.IsSlide)
+                {
+                    var finalX = moveRecord.Final.x;
+                    ref var state = ref _waveByX[finalX];
+
+                    if (moveRecord.IsSpawn)
+                    {
+                        shiftIndex = state.SpawnFall + state.SpawnSlide;
+                        state.SpawnFall++;
+                    }
+                    else
+                    {
+                        shiftIndex = state.Fall;
+                        state.Fall++;
+                    }
+                }
+                else
+                {
+                    var startX = moveRecord.Start.x;
+                    ref var state = ref _waveByX[startX];
+
+                    if (moveRecord.IsSpawn)
+                    {
+                        slideIndex = state.SpawnSlide + state.Slide;
+                        state.SpawnSlide++;
+                    }
+                    else
+                    {
+                        slideIndex = state.Slide + state.Fall;
+                        state.Slide++;
+                    }
+                }
+            }
 
             for (int i = 0; i < _moves.Count; i++)
             {
                 var moveRecord = _moves[i];
                 if (!moveRecord.Item) continue;
 
-                var finalX = moveRecord.Final.x;
-                ref var state = ref _waveByX[finalX];
-
-                int delayIndex;
-                
                 if (!moveRecord.IsSlide)
                 {
-                    if (moveRecord.IsSpawn)
-                    {
-                        delayIndex = state.Fall + state.Slide + state.SpawnFall;
-                        state.SpawnFall++;
-                    }
-                    else
-                    {
-                        delayIndex = state.Fall;
-                        state.Fall++;
-                    }
-             
-                    var delay = delayIndex * _settings.ShiftDelayMultiplier;
+                    var delay = shiftIndex * _settings.ShiftDelayMultiplier;
+
                     var finalWorld = view.GridToWorld(moveRecord.Final);
                     var startWorld = moveRecord.Item.transform.position;
+
                     var distCells = Mathf.Abs(finalWorld.y - startWorld.y) / cellSize;
-                    var durMul = 1f + distCells * _settings.ShiftDurationMultiplier;
-                    
-                    var tween = moveRecord.Item.ItemAnimation.Shift(finalWorld, durMul, delay);
+
+                    var tween = moveRecord.Item.ItemAnimation.Shift(finalWorld, distCells, delay);
                     _animTasks[taskCount++] = tween.AsyncWaitForCompletion();
                 }
                 else
                 {
-                    if (moveRecord.IsSpawn)
-                    {
-                        delayIndex = state.SpawnSlide;
-                        state.SpawnSlide++;
-                    }
-                    else
-                    {
-                        delayIndex = state.Slide;
-                        state.Slide++;
-                    }
-                    
-                    var delay = delayIndex * _settings.SlideDelayMultiplier;
-                    
+                    var delay = slideIndex * _settings.SlideDelayMultiplier;
+
                     var length = moveRecord.Path.Count + (moveRecord.IsSpawn ? 1 : 0);
+
                     var world = ArrayPool<Vector3>.Shared.Rent(length);
+                    var cells = ArrayPool<float>.Shared.Rent(length);
 
                     int filled = 0;
+
                     if (moveRecord.IsSpawn)
                         world[filled++] = moveRecord.Item.transform.position;
 
                     for (int p = 0; p < moveRecord.Path.Count; p++)
                         world[filled++] = view.GridToWorld(moveRecord.Path[p]);
 
-                    var totalDurationMultiplier = 0f;
                     var current = moveRecord.Item.transform.position;
 
-                    for (int w = 0; w < length; w++)
+                    for (int s = 0; s < length; s++)
                     {
-                        var next = world[w];
-                        var distCells = Mathf.Abs(current.y - next.y) / cellSize;
-                        var segMul = .5f + distCells * _settings.SlideDurationMultiplier;
-                        totalDurationMultiplier += segMul;
+                        var next = world[s];
+                        cells[s] = Mathf.Abs(next.y - current.y) / cellSize;
                         current = next;
                     }
 
-                    var pathTween = moveRecord.Item.ItemAnimation.Slide(world, length, totalDurationMultiplier, delay);
-                    _animTasks[taskCount++] = WaitTweenAndReturnArray(pathTween, world);
+                    var tween = moveRecord.Item.ItemAnimation.Slide(world, length, cells, delay);
+                    _animTasks[taskCount++] = WaitTweenAndReturnArrays(tween, world, cells);
                 }
-                
             }
 
             return taskCount == 0 ? Task.CompletedTask : Task.WhenAll(_animTasks.AsSpan(0, taskCount).ToArray());
         }
 
-        private static async Task WaitTweenAndReturnArray(Tween tween, Vector3[] rented)
+        private static async Task WaitTweenAndReturnArrays(Tween tween, Vector3[] world, float[] cells)
         {
             try
             {
@@ -339,8 +394,10 @@ namespace Core.Handlers
             }
             finally
             {
-                ArrayPool<Vector3>.Shared.Return(rented);
+                ArrayPool<Vector3>.Shared.Return(world);
+                ArrayPool<float>.Shared.Return(cells);
             }
         }
+
     }
 }
