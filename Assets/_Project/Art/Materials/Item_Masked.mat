@@ -30,7 +30,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _StencilComp: 8
+    - _StencilComp: 3
     - _StencilRef: 1
     - _UseMask: 1
     - _ZWrite: 0
