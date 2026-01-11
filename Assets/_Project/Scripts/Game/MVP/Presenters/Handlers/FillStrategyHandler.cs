@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Core.Models;
 
 namespace Core.Handlers
@@ -12,6 +11,17 @@ namespace Core.Handlers
             _refillStrategies = refillStrategies;
         }
 
-        public IFillStrategy SelectStrategy(IGridModel model) => _refillStrategies.FirstOrDefault(refillStrategy => refillStrategy.CanRefill(model));
+        public IFillStrategy SelectStrategy(IGridModel model)
+        {
+            foreach (var refillStrategy in _refillStrategies)
+            {
+                if (refillStrategy.CanRefill(model))
+                {
+                    return refillStrategy;
+                }
+            }
+            
+            return null;
+        }
     }
 }
