@@ -24,7 +24,16 @@ namespace Core.Handlers
         private async UniTaskVoid RefillGrid()
         {
             var strategy = _strategyHandler.SelectStrategy(Context.Model);
+            
+            if (strategy == null)
+            {   
+                EditorLogger.LogError("Fill strategy not found!");
+                await UniTask.CompletedTask;
+                return;
+            }
+            
             await strategy.Execute(Context).WaitAnimationsAsync();
+            
             Context.MatchResolveRequested = GridMatchRules.HasAnyRegularMatchOnBoard(Context.Model);
         }
     }
