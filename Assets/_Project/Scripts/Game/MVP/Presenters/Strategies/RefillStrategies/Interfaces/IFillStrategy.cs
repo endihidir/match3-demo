@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Core.Models;
+using Cysharp.Threading.Tasks;
 
 namespace Core.Handlers
 {
@@ -7,6 +8,6 @@ namespace Core.Handlers
     {
         bool CanRefill(IGridModel model);
         IFillStrategy Execute(GridStateContext context);
-        Task WaitAnimationsAsync();
+        UniTask WaitAnimationsAsync();
     }
 }

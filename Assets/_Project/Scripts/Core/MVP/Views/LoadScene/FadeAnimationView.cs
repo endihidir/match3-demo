@@ -43,9 +43,7 @@ namespace Core.Views
             
             _fadeTween = Graphic ? Graphic.DOFade(1f, duration) : CanvasGroup.DOFade(1f, duration);
             
-            _fadeTween.SetEase(Ease.Linear).SetDelay(delay);
-            
-            await _fadeTween.AsyncWaitForCompletion();
+            await _fadeTween.SetEase(Ease.Linear).SetDelay(delay);
             
             onComplete?.Invoke();
         }
@@ -56,9 +54,7 @@ namespace Core.Views
             
             _fadeTween = Graphic ? Graphic.DOFade(0f, duration) : CanvasGroup.DOFade(0f, duration);
 
-            _fadeTween.SetEase(Ease.Linear).SetDelay(delay);
-            
-            await _fadeTween.AsyncWaitForCompletion();
+            await _fadeTween.SetEase(Ease.Linear).SetDelay(delay);
             
             SetInteractable(false);
             
