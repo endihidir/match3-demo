@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Core.Item;
 using Core.Models;
 using Core.StateMachineCore;
@@ -12,12 +13,12 @@ namespace Core.Handlers
     public sealed class MatchResolveState : StateBase<GridStateContext>
     {
         public override bool NeedsExitPermission => true;
+
         public MatchResolveState(GridStateContext context) : base(context) { }
-        
+
         protected override void OnEnter()
         {
             Context.MatchResolveRequested = false;
-            
             ResolveMatchesAsync().Forget();
         }
 
@@ -27,7 +28,7 @@ namespace Core.Handlers
             {
                 await ResolveMaskAsync(matchMask);
             }
-            
+
             RequestExit();
         }
 
@@ -36,8 +37,33 @@ namespace Core.Handlers
             var model = Context.Model;
             var width = model.Width;
             var height = model.Height;
-            
+
             var visited = new bool[width, height];
+
+            if (Context.HasForcedBoosterSpawnCoord)
+            {
+                var forcedCoord = Context.ForcedBoosterSpawnCoord;
+
+                if (model.IsInRange(forcedCoord) && matchMask[forcedCoord.x, forcedCoord.y] && !visited[forcedCoord.x, forcedCoord.y])
+                {
+                    var forcedObj = model.GetGridObject(forcedCoord);
+
+                    if (forcedObj)
+                    {
+                        var forcedGroup = GridMatchGroupCollector.CollectGroupFromMask(model, matchMask, visited, forcedCoord);
+
+                        if (forcedGroup is { Count: > 2 })
+                        {
+                            var forcedId = forcedObj.TypeId;
+
+                            if (forcedId > 0)
+                            {
+                                await ResolveGroupAsync(model, matchMask, forcedGroup, forcedId);
+                            }
+                        }
+                    }
+                }
+            }
 
             for (int y = 0; y < height; y++)
             {
@@ -51,9 +77,11 @@ namespace Core.Handlers
 
                     var coord = new Vector2Int(x, y);
                     var group = GridMatchGroupCollector.CollectGroupFromMask(model, matchMask, visited, coord);
-                    if (group == null || group.Count == 0) continue;
+                    if (group == null || group.Count < 3) continue;
+
                     var id = obj.TypeId;
                     if (id <= 0) continue;
+
                     await ResolveGroupAsync(model, matchMask, group, id);
                 }
             }
@@ -62,23 +90,27 @@ namespace Core.Handlers
         private async UniTask ResolveGroupAsync(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int id)
         {
             var boosterType = GridBoosterDecision.DecideBoosterTypeFromGroup(model, matchMask, group, id);
-
+            
             if (!boosterType.HasValue)
             {
                 ReleaseGroup(model, group, true);
                 return;
             }
 
-            var centerCoord = GridBoosterDecision.SelectMergeCenter(group, Context.HasForcedBoosterSpawnCoord, Context.ForcedBoosterSpawnCoord);
-
-            Context.HasForcedBoosterSpawnCoord = false;
-
-            await PlayMergeAnimationAsync(group, centerCoord);
-
-            ReleaseGroup(model, group, false, centerCoord);
+            var anyForced = TryConsumeForcedCenterCoord(group, out var forcedCoord);
+            
+            var centerCoord = anyForced ? forcedCoord : GridBoosterDecision.SelectMergeCenter(group);
+            
+            var mergeObjs = GridMatchResolveUtil.GetMergedGroupObject(group, model, centerCoord);
+            
+            GridMatchResolveUtil.SetNullMergedObjectCoords(model, group, centerCoord);
+            
+            await PlayMergeAnimationAsync(mergeObjs, centerCoord);
+            
+            ReleaseMergedObjects(mergeObjs);
 
             var centerObj = model.GetGridObject(centerCoord);
-            
+
             if (centerObj)
             {
                 Context.Factory.ReleaseItem(centerObj);
@@ -88,6 +120,39 @@ namespace Core.Handlers
             SpawnBooster(centerCoord, boosterType.Value);
         }
         
+        private bool TryConsumeForcedCenterCoord(List<Vector2Int> group, out Vector2Int forcedCoord)
+        {
+            if (!Context.HasForcedBoosterSpawnCoord)
+            {
+                forcedCoord = default;
+                return false;
+            }
+
+            var forced = Context.ForcedBoosterSpawnCoord;
+
+            for (int i = 0; i < group.Count; i++)
+            {
+                if (group[i] != forced) continue;
+
+                Context.HasForcedBoosterSpawnCoord = false;
+                forcedCoord = forced;
+                return true;
+            }
+
+            forcedCoord = default;
+            return false;
+        }
+
+        private void ReleaseMergedObjects(BaseGridObject[] mergeObjs)
+        {
+            for (int i = 0; i < mergeObjs.Length; i++)
+            {
+                var obj = mergeObjs[i];
+                if (!obj) continue;
+                Context.Factory.ReleaseItem(obj);
+            }
+        }
+
         private void ReleaseGroup(IGridModel model, List<Vector2Int> group, bool hasDamage = false, Vector2Int? exceptCoord = null)
         {
             for (int i = 0; i < group.Count; i++)
@@ -99,12 +164,12 @@ namespace Core.Handlers
                 if (!obj) continue;
 
                 if (hasDamage) ApplyNeighbourDamage(model, coord);
-                
+
                 Context.Factory.ReleaseItem(obj);
                 model.SetGridObject(coord, null);
             }
         }
-        
+
         private void ApplyNeighbourDamage(IGridModel model, Vector2Int origin)
         {
             foreach (var linearDirection in DirectionLookup.LinearDirections)
@@ -128,31 +193,28 @@ namespace Core.Handlers
             }
         }
         
-        private async UniTask PlayMergeAnimationAsync(List<Vector2Int> group, Vector2Int spawnCoord)
+        private async Task PlayMergeAnimationAsync(BaseGridObject[] mergeObjs, Vector2Int centerCoord)
         {
-            var tasks = new List<UniTask>(group.Count);
-            var targetWorld = Context.View.GridToWorld(spawnCoord);
-            
-            for (int i = 0; i < group.Count; i++)
+            var targetWorld = Context.View.GridToWorld(centerCoord);
+            var tasks = new Task[mergeObjs.Length];
+
+            for (int i = 0; i < mergeObjs.Length; i++)
             {
-                var coord = group[i];
-                if (coord == spawnCoord) continue;
-                var obj = Context.Model.GetGridObject(coord);
+                var obj = mergeObjs[i];
                 if (!obj) continue;
                 var tween = obj.ItemAnimation.Move(targetWorld);
-                tasks.Add(tween.AsyncWaitForCompletion().AsUniTask());
+                tasks[i] = tween.AsyncWaitForCompletion();
             }
 
-            if (tasks.Count > 0) 
-                await UniTask.WhenAll(tasks);
+            await Task.WhenAll(tasks);
         }
 
         private void SpawnBooster(Vector2Int pos, BoosterType boosterType)
         {
-            var booster = Context.Factory.GetBoosterItem(boosterType); 
-            Context.Model.SetGridObject(pos, booster); 
-            booster.SetPosition(Context.View.GridToWorld(pos)); 
-            booster.SetSpriteSize(Context.View.GetCellSize()); 
+            var booster = Context.Factory.GetBoosterItem(boosterType);
+            Context.Model.SetGridObject(pos, booster);
+            booster.SetPosition(Context.View.GridToWorld(pos));
+            booster.SetSpriteSize(Context.View.GetCellSize());
             booster.SetParent(Context.View.GridObjectsParent);
         }
     }
