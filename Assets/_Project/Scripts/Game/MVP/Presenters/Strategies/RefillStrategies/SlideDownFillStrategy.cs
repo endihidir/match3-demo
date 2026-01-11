@@ -33,8 +33,8 @@ namespace Core.Handlers
         private int[] _spawnStackByX = Array.Empty<int>();
         private int _usedTargetStampId = 1;
 
-        private Task[] _animTasks = new Task[128];
-        private Task _runningAnimations = Task.CompletedTask;
+        private UniTask[] _animTasks = new UniTask[128];
+        private UniTask _runningAnimations = UniTask.CompletedTask;
 
         public SlideDownFillStrategy(GameplayConfigContainer config)
         {
@@ -137,7 +137,7 @@ namespace Core.Handlers
             return this;
         }
 
-        public Task WaitAnimationsAsync() => _runningAnimations;
+        public UniTask WaitAnimationsAsync() => _runningAnimations;
 
         private void EnsureBuffers(int width, int height)
         {
@@ -248,7 +248,7 @@ namespace Core.Handlers
                 path.Add(step);
         }
 
-        private Task PlayAnimations(IGridView view, int width)
+        private UniTask PlayAnimations(IGridView view, int width)
         {
             _moves.Clear();
 
@@ -315,7 +315,7 @@ namespace Core.Handlers
                     var distCells = Mathf.Abs(finalWorld.y - startWorld.y) / cellSize;
 
                     var tween = moveRecord.Item.ItemAnimation.Shift(finalWorld, distCells, delay);
-                    _animTasks[taskCount++] = tween.AsyncWaitForCompletion();
+                    _animTasks[taskCount++] = tween.ToUniTask();
                 }
                 else
                 {
@@ -363,14 +363,14 @@ namespace Core.Handlers
                 }
             }
 
-            return taskCount == 0 ? Task.CompletedTask : Task.WhenAll(_animTasks.AsSpan(0, taskCount).ToArray());
+            return taskCount == 0 ? UniTask.CompletedTask : UniTask.WhenAll(_animTasks.AsSpan(0, taskCount).ToArray());
         }
 
-        private static async Task WaitTweenAndReturnArrays(Tween tween, Vector3[] world, float[] cells)
+        private static async UniTask WaitTweenAndReturnArrays(Tween tween, Vector3[] world, float[] cells)
         {
             try
             {
-                await tween.AsyncWaitForCompletion();
+                await tween.ToUniTask();
             }
             finally
             {

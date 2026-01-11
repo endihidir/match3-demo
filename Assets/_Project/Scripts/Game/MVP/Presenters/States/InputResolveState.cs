@@ -94,9 +94,9 @@ namespace Core.Handlers
             var sourcePos = Context.View.GridToWorld(sourceCoord);
             var targetPos = Context.View.GridToWorld(targetCoord);
             
-            sourceObj.ItemAnimation.PingPongMove(targetPos);
-            var tween = targetObj.ItemAnimation.PingPongMove(sourcePos);
-            await tween.AsyncWaitForCompletion();
+            _ = sourceObj.ItemAnimation.PingPongMove(targetPos);
+            await targetObj.ItemAnimation.PingPongMove(sourcePos);
+           
             RequestExit();
         }
 
@@ -108,9 +108,8 @@ namespace Core.Handlers
             var sourcePos = Context.View.GridToWorld(sourceCoord);
             var targetPos = Context.View.GridToWorld(targetCoord);
             
-            sourceObj.ItemAnimation.Move(targetPos);
-            var tween = targetObj.ItemAnimation.Move(sourcePos);
-            await tween.AsyncWaitForCompletion();
+            _ = sourceObj.ItemAnimation.Move(targetPos);
+            await targetObj.ItemAnimation.Move(sourcePos);
             
             Context.Model.Swap(sourceCoord, targetCoord);
 

@@ -1,11 +1,9 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Core.Item;
 using Core.Models;
 using Core.StateMachineCore;
 using Core.Utils;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
 using UnityEngine;
 
 namespace Core.Handlers
@@ -193,20 +191,25 @@ namespace Core.Handlers
             }
         }
         
-        private async Task PlayMergeAnimationAsync(BaseGridObject[] mergeObjs, Vector2Int centerCoord)
+        private async UniTask PlayMergeAnimationAsync(BaseGridObject[] mergeObjs, Vector2Int centerCoord)
         {
             var targetWorld = Context.View.GridToWorld(centerCoord);
-            var tasks = new Task[mergeObjs.Length];
+            var tasks = new UniTask[mergeObjs.Length];
 
             for (int i = 0; i < mergeObjs.Length; i++)
             {
                 var obj = mergeObjs[i];
-                if (!obj) continue;
-                var tween = obj.ItemAnimation.Move(targetWorld);
-                tasks[i] = tween.AsyncWaitForCompletion();
+                
+                if (!obj)
+                {
+                    tasks[i] = UniTask.CompletedTask;
+                    continue;
+                }
+                
+                tasks[i] = obj.ItemAnimation.Move(targetWorld).ToUniTask();
             }
 
-            await Task.WhenAll(tasks);
+            await UniTask.WhenAll(tasks);
         }
 
         private void SpawnBooster(Vector2Int pos, BoosterType boosterType)

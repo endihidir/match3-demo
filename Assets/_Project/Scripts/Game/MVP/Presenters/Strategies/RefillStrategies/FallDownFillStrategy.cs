@@ -16,8 +16,8 @@ namespace Core.Handlers
         private readonly RefillSettingsSO _refillSettingsSo;
 
         private readonly List<FallDownMoveRecord> _records = new(256);
-        private Task[] _animTasks = new Task[128];
-        private Task _runningAnimations;
+        private UniTask[] _animTasks = new UniTask[128];
+        private UniTask _runningAnimations;
 
         public bool CanRefill(IGridModel model) => !GridRefillCalcUtil.HasStationaryAndBlocking(model);
 
@@ -52,7 +52,7 @@ namespace Core.Handlers
             return this;
         }
 
-        public Task WaitAnimationsAsync() => _runningAnimations;
+        public UniTask WaitAnimationsAsync() => _runningAnimations;
 
         private void ShiftColumnLogic(GridStateContext stateContext, int x, int height, List<FallDownMoveRecord> records)
         {
@@ -115,7 +115,7 @@ namespace Core.Handlers
             }
         }
 
-        private Task PlayAnimations(GridStateContext context, List<FallDownMoveRecord> records)
+        private UniTask PlayAnimations(GridStateContext context, List<FallDownMoveRecord> records)
         {
             var view = context.View;
             var cellSize = view.GetCellSize();
@@ -143,7 +143,7 @@ namespace Core.Handlers
                     var distCells = Mathf.Abs(r.FinalWorld.y - startWorld.y) / cellSize;
 
                     var tween = r.Obj.ItemAnimation.Shift(r.FinalWorld, distCells, delay);
-                    _animTasks[taskCount++] = tween.AsyncWaitForCompletion();
+                    _animTasks[taskCount++] = tween.ToUniTask();
 
                     wave++;
                 }
@@ -161,13 +161,13 @@ namespace Core.Handlers
                     var distCells = Mathf.Abs(r.FinalWorld.y - startWorld.y) / cellSize;
 
                     var tween = r.Obj.ItemAnimation.Shift(r.FinalWorld, distCells, delay);
-                    _animTasks[taskCount++] = tween.AsyncWaitForCompletion();
+                    _animTasks[taskCount++] = tween.ToUniTask();
 
                     wave++;
                 }
             }
 
-            return taskCount == 0 ? Task.CompletedTask : Task.WhenAll(_animTasks.AsSpan(0, taskCount).ToArray());
+            return taskCount == 0 ? UniTask.CompletedTask : UniTask.WhenAll(_animTasks.AsSpan(0, taskCount).ToArray());
         }
     }
 }
