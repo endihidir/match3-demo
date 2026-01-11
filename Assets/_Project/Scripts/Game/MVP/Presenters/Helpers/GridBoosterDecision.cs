@@ -7,20 +7,6 @@ namespace Core.Utils
 {
     public static class GridBoosterDecision
     {
-        public static Vector2Int SelectMergeCenter(List<Vector2Int> group, bool hasForcedCoord, Vector2Int forcedCoord)
-        {
-            if (hasForcedCoord)
-            {
-                for (int i = 0; i < group.Count; i++)
-                {
-                    if (group[i] == forcedCoord)
-                        return forcedCoord;
-                }
-            }
-
-            return SelectMergeCenter(group);
-        }
-        
         public static BoosterType? DecideBoosterTypeFromGroup(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int id)
         {
             GetGroupLineLengths(group, out var hLen, out var vLen);
@@ -52,7 +38,7 @@ namespace Core.Utils
             return null;
         }
         
-        private static Vector2Int SelectMergeCenter(List<Vector2Int> group)
+        public static Vector2Int SelectMergeCenter(List<Vector2Int> group)
         {
             GetGroupBounds(group, out var minX, out var maxX, out var minY, out var maxY);
 

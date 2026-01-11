@@ -15,7 +15,7 @@ namespace Core.StateMachineCore
         {
             From = from;
             To = to;
-            _condition = condition ?? (() => false);
+            _condition = condition ?? (() => true);
             Priority = priority;
             OneShot = oneShot;
         }

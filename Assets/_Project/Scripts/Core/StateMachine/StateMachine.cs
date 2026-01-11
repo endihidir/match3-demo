@@ -116,18 +116,26 @@ namespace Core.StateMachineCore
             return this;
         }
 
-        public IStateMachine AddTransition<TFrom, TTo>(TFrom from, TTo to, Func<bool> condition, int priority = 0, bool oneShot = false)
+        public IStateMachine AddTransition<TFrom, TTo>(TFrom from, TTo to, Func<bool> condition = null, int priority = 0, bool oneShot = false)
             where TFrom : class, IState
             where TTo : class, IState
         {
             return AddTransition((IState)from, (IState)to, condition, priority, oneShot);
         }
 
+        // Main FSM update loop. Runs once per frame.
+        // Order is important: the current state is updated first,
+        // then pending transitions are resolved, and only then new transitions are evaluated.
         public void Update(float deltaTime)
         {
+            // 1) Let the active state run its per-frame logic.
+            //    This allows the state to update timers, async flags,
+            //    and gameplay conditions that may affect transitions.
             if(CurrentState is IUpdatableState updatableState)
                 updatableState.Update(deltaTime);
 
+            // 2) If there is a pending transition waiting for the state to become exit-ready,
+            //    check if it is now allowed to leave. If so, apply it and stop processing.
             if (_pending != null)
             {
                 if (_pending.From.IsExitReady)
@@ -138,8 +146,12 @@ namespace Core.StateMachineCore
                 return;
             }
 
+            // 3) If no state is active, nothing to do.
             if (CurrentState == null) return;
 
+            // 4) Find the best valid transition from the current state.
+            //    All transitions whose condition is true are candidates;
+            //    the one with the lowest priority value wins.
             ITransition selected = null;
             var bestPriority = int.MaxValue;
 
@@ -147,10 +159,13 @@ namespace Core.StateMachineCore
             {
                 var t = _transitions[i];
 
+                // Only transitions that originate from the current (or active) state are considered.
                 if (t.From != CurrentState && !t.From.IsActive) continue;
 
+                // The transition’s condition must be true to be considered.
                 if (!t.RequestTransition()) continue;
 
+                // Choose the transition with the highest priority (lowest numeric value).
                 if (t.Priority < bestPriority)
                 {
                     bestPriority = t.Priority;
@@ -158,8 +173,12 @@ namespace Core.StateMachineCore
                 }
             }
 
+            // 5) If no transition is valid this frame, stay in the current state.
             if (selected == null) return;
 
+            // 6) If the state requires exit permission and is not ready yet,
+            //    register this transition as pending and ask the state to prepare for exit.
+            //    The actual transition will be applied once IsExitReady becomes true.
             if (selected.From.NeedsExitPermission && !selected.From.IsExitReady)
             {
                 _pending = selected;
@@ -167,6 +186,7 @@ namespace Core.StateMachineCore
                 return;
             }
 
+            // 7) If the state is already allowed to exit, apply the transition immediately.
             ApplyTransition(selected);
         }
 

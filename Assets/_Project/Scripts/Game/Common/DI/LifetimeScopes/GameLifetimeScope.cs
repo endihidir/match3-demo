@@ -33,7 +33,7 @@ namespace Core.LifetimeScopes
             builder.Register<GridPresenter>(Lifetime.Scoped).As<IInitializable>();
             builder.Register<GridCheatHandler>(Lifetime.Scoped).As<IGridCheatHandler, ITickable>();
             
-            builder.Register<RefillStrategyHandler>(Lifetime.Scoped).As<IRefillStrategyHandler>();
+            builder.Register<FillStrategyHandler>(Lifetime.Scoped).As<IFillStrategyHandler>();
             builder.Register<FallDownFillStrategy>(Lifetime.Scoped).As<IFillStrategy>();
             builder.Register<SlideDownFillStrategy>(Lifetime.Scoped).As<IFillStrategy>();
         }

@@ -4,10 +4,10 @@ using Core.Models;
 
 namespace Core.Handlers
 {
-    public sealed class RefillStrategyHandler : IRefillStrategyHandler
+    public sealed class FillStrategyHandler : IFillStrategyHandler
     {
         private readonly IEnumerable<IFillStrategy> _refillStrategies;
-        public RefillStrategyHandler(IEnumerable<IFillStrategy> refillStrategies)
+        public FillStrategyHandler(IEnumerable<IFillStrategy> refillStrategies)
         {
             _refillStrategies = refillStrategies;
         }

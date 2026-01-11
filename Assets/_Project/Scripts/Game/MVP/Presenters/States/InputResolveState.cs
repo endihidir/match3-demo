@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Core.Item;
 using Core.StateMachineCore;
 using Core.Utils;
@@ -81,8 +80,7 @@ namespace Core.Handlers
                 return;
             }
             
-            if (!GridMatchDetectUtil.IsRegularItem(sourceObj.ObjectType) || !GridMatchDetectUtil.IsRegularItem(targetObj.ObjectType) ||
-                !IsCellsMatched(sourceCoord, targetCoord, sourceObj.ObjectType.TypeId, targetObj.ObjectType.TypeId))
+            if (!IsCellsRegular(sourceObj, targetObj) || !IsCellsMatched(sourceCoord, targetCoord, sourceObj.ObjectType.TypeId, targetObj.ObjectType.TypeId))
             {
                 PlaySwapAndBack(sourceObj, targetObj, sourceCoord, targetCoord).Forget();
                 return;
@@ -93,34 +91,27 @@ namespace Core.Handlers
 
         private async UniTask PlaySwapAndBack(BaseGridObject sourceObj, BaseGridObject targetObj, Vector2Int sourceCoord, Vector2Int targetCoord)
         {
-            var tasks = new List<UniTask>();
-
-            var tweenA = sourceObj.ItemAnimation.PingPongMove(Context.View.GridToWorld(targetCoord));
-            var tweenB = targetObj.ItemAnimation.PingPongMove(Context.View.GridToWorld(sourceCoord));
-
-            tasks.Add(tweenA.AsyncWaitForCompletion().AsUniTask());
-            tasks.Add(tweenB.AsyncWaitForCompletion().AsUniTask());
-
-            await UniTask.WhenAll(tasks);
-
+            var sourcePos = Context.View.GridToWorld(sourceCoord);
+            var targetPos = Context.View.GridToWorld(targetCoord);
+            
+            sourceObj.ItemAnimation.PingPongMove(targetPos);
+            var tween = targetObj.ItemAnimation.PingPongMove(sourcePos);
+            await tween.AsyncWaitForCompletion();
             RequestExit();
         }
 
         private async UniTask PlaySwapAndCommit(BaseGridObject sourceObj, BaseGridObject targetObj, bool forceBoosterSpawnCoord)
         {
-            var tasks = new List<UniTask>();
-
             var sourceCoord = sourceObj.Coord;
             var targetCoord = targetObj.Coord;
             
-            var tweenA = sourceObj.ItemAnimation.Move(Context.View.GridToWorld(targetCoord));
-            var tweenB = targetObj.ItemAnimation.Move(Context.View.GridToWorld(sourceCoord));
-
-            tasks.Add(tweenA.AsyncWaitForCompletion().AsUniTask());
-            tasks.Add(tweenB.AsyncWaitForCompletion().AsUniTask());
-
-            await UniTask.WhenAll(tasks);
-
+            var sourcePos = Context.View.GridToWorld(sourceCoord);
+            var targetPos = Context.View.GridToWorld(targetCoord);
+            
+            sourceObj.ItemAnimation.Move(targetPos);
+            var tween = targetObj.ItemAnimation.Move(sourcePos);
+            await tween.AsyncWaitForCompletion();
+            
             Context.Model.Swap(sourceCoord, targetCoord);
 
             if (forceBoosterSpawnCoord)
@@ -178,10 +169,9 @@ namespace Core.Handlers
             if (boosterComboConfig && boosterComboConfig.TryGetRule(sourceBoosterType, targetBoosterType, out var rule) && rule.Actions != null)
             {
                 var nextGroupId = Context.NextBoosterGroupId();
-                
-                for (int i = 0; i < rule.Actions.Length; i++)
+
+                foreach (var boosterEffectBase in rule.Actions)
                 {
-                    var boosterEffectBase = rule.Actions[i];
                     if (boosterEffectBase == null) continue;
 
                     Context.PendingBoosterActions.Add(new BoosterActionContext(nextGroupId, origin, boosterEffectBase));
@@ -197,6 +187,13 @@ namespace Core.Handlers
         {
             Context.Factory.ReleaseItem(sourceObj);
             Context.Model.SetGridObject(sourceCoord, null);
+        }
+
+        private bool IsCellsRegular(BaseGridObject sourceObj, BaseGridObject targetObj)
+        {
+            var isSourceRegular = GridMatchDetectUtil.IsRegularItem(sourceObj.ObjectType);
+            var isTargetRegular = GridMatchDetectUtil.IsRegularItem(targetObj.ObjectType);
+            return isSourceRegular && isTargetRegular;
         }
         
         private bool IsCellsMatched(Vector2Int coordA, Vector2Int coordB, int typeA, int typeB)

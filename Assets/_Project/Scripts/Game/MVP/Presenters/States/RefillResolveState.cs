@@ -8,9 +8,9 @@ namespace Core.Handlers
     {
         public override bool NeedsExitPermission => true;
         
-        private readonly IRefillStrategyHandler _strategyHandler;
+        private readonly IFillStrategyHandler _strategyHandler;
         
-        public RefillResolveState(IRefillStrategyHandler strategyHandler, GridStateContext context) : base(context)
+        public RefillResolveState(IFillStrategyHandler strategyHandler, GridStateContext context) : base(context)
         {
             _strategyHandler = strategyHandler;
         }
