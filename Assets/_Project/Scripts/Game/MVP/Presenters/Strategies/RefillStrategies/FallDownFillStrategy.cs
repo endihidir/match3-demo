@@ -12,7 +12,7 @@ namespace Core.Handlers
     public sealed class FallDownFillStrategy : IFillStrategy
     {
         private readonly RefillSettingsSO _refillSettingsSo;
-        private readonly IFillSpawnPicker _fillSpawnPicker;
+        private readonly IFillItemDecider _itemDecider;
 
         private readonly List<FallDownMoveRecord> _records = new(256);
         private UniTask[] _animTasks = new UniTask[128];
@@ -20,10 +20,10 @@ namespace Core.Handlers
 
         public bool CanHandle(IGridModel model) => !GridFillCalcUtil.HasStationaryAndBlocking(model);
 
-        public FallDownFillStrategy(GameplayConfigContainer configContainer, IFillSpawnPicker fillSpawnPicker)
+        public FallDownFillStrategy(GameplayConfigContainer configContainer, IFillItemDecider itemDecider)
         {
             _refillSettingsSo = configContainer.RefillSettings;
-            _fillSpawnPicker = fillSpawnPicker;
+            _itemDecider = itemDecider;
         }
 
         public IFillStrategy Execute(GridStateContext context)
@@ -97,7 +97,7 @@ namespace Core.Handlers
                 if (!model.IsCellActive(coord)) continue;
                 if (model.GetGridObject(coord)) continue;
 
-                var itemType = _fillSpawnPicker.Decide(model, coord);
+                var itemType = _itemDecider.Decide(model, coord);
                 var item = stateContext.Factory.GetRegularItem(itemType);
 
                 item.SetParent(view.GridObjectsParent);

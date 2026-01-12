@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Core.Handlers
 {
-    public interface IFillSpawnPicker
+    public interface IFillItemDecider
     {
         ItemType Decide(IGridModel model, Vector2Int targetCoord);
         public void SetSeed(int seed);

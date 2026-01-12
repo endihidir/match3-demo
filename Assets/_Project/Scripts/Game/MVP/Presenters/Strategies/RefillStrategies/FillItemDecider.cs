@@ -18,7 +18,7 @@ namespace Core.Handlers
     /// - Be deterministic when seeded; otherwise use Unity RNG
     /// </summary>
     
-    public class FillSpawnPicker : IFillSpawnPicker
+    public class FillItemDecider : IFillItemDecider
     {
         private readonly ItemType[] _allSpawnableTypes = GridFillPickerUtil.BuildAllSpawnableTypes();
         
@@ -27,7 +27,7 @@ namespace Core.Handlers
         private System.Random _rng;
         public float SafetyBoost { get; private set; }
         
-        public FillSpawnPicker(GameplayConfigContainer gameplayConfigContainer)
+        public FillItemDecider(GameplayConfigContainer gameplayConfigContainer)
         {
             _spawnSettings = gameplayConfigContainer.SpawnSettings;
             _rng = null;
