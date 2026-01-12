@@ -9,8 +9,9 @@ namespace Core.Configs
     {
         [field: SerializeField, Required] public GameplayBootstrapperConfig GameplayBootstrapperConfig { get; private set; }
         [field: SerializeField, Required] public ItemConfigContainerSO ItemConfigContainer { get; private set; }
-        
         [field: SerializeField] public RefillSettingsSO RefillSettings { get; private set; }
+        
+        [field: SerializeField] public SpawnSettingsSO SpawnSettings { get; private set; }
         public void Initialize()
         {
             

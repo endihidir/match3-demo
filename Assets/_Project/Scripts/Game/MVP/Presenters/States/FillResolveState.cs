@@ -4,15 +4,15 @@ using Cysharp.Threading.Tasks;
 
 namespace Core.Handlers
 {
-    public sealed class RefillResolveState : StateBase<GridStateContext>
+    public sealed class FillResolveState : StateBase<GridStateContext>
     {
         public override bool NeedsExitPermission => true;
         
-        private readonly IFillStrategyHandler _strategyHandler;
+        private readonly IFillStrategyResolver _strategyResolver;
         
-        public RefillResolveState(IFillStrategyHandler strategyHandler, GridStateContext context) : base(context)
+        public FillResolveState(GridStateContext context, IFillStrategyResolver strategyResolver) : base(context)
         {
-            _strategyHandler = strategyHandler;
+            _strategyResolver = strategyResolver;
         }
 
         protected override void OnEnter()
@@ -21,9 +21,9 @@ namespace Core.Handlers
             RequestExit();
         }
 
-        private async UniTaskVoid RefillGrid()
+        private async UniTask RefillGrid()
         {
-            var strategy = _strategyHandler.SelectStrategy(Context.Model);
+            var strategy = _strategyResolver.ResolveStrategy(Context.Model);
             
             if (strategy == null)
             {   

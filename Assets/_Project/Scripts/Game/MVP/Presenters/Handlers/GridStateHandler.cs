@@ -18,7 +18,7 @@ namespace Core.Handlers
         private bool HasPendingBoosterActions => Context.HasPendingBoosterActions;
         private bool MatchResolveRequested => Context.MatchResolveRequested;
 
-        public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory, GameplayConfigContainer configContainer, IFillStrategyHandler fillStrategyHandler)
+        public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory, GameplayConfigContainer configContainer, IFillStrategyResolver fillStrategyResolver)
         {
             Context = new GridStateContext(model, view, factory, configContainer.ItemConfigContainer);
 
@@ -26,7 +26,7 @@ namespace Core.Handlers
             var inputState = new InputResolveState(Context);
             var boosterState = new BoosterResolveState(Context);
             var matchState = new MatchResolveState(Context);
-            var fillState = new RefillResolveState(fillStrategyHandler, Context);
+            var fillState = new FillResolveState(Context, fillStrategyResolver);
 
             var states = new StateBase<GridStateContext>[] { idleState, inputState, boosterState, matchState, fillState };
             

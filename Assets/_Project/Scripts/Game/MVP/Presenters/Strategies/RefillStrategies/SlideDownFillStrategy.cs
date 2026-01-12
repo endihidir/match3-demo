@@ -24,7 +24,7 @@ namespace Core.Handlers
         }
 
         private readonly RefillSettingsSO _settings;
-
+        private readonly IFillSpawnPicker _fillSpawnPicker;
         private readonly Dictionary<BaseGridObject, SlideDownTrack> _trackByItem = new(256);
         private readonly List<SlideDownCandidate> _candidates = new(128);
         private readonly List<SlideDownMoveRecord> _moves = new(256);
@@ -39,12 +39,13 @@ namespace Core.Handlers
         private UniTask[] _animTasks = new UniTask[128];
         private UniTask _runningAnimations = UniTask.CompletedTask;
 
-        public SlideDownFillStrategy(GameplayConfigContainer config)
+        public SlideDownFillStrategy(GameplayConfigContainer config, IFillSpawnPicker fillSpawnPicker)
         {
             _settings = config.RefillSettings;
+            _fillSpawnPicker = fillSpawnPicker;
         }
 
-        public bool CanRefill(IGridModel model) => GridRefillCalcUtil.HasStationaryAndBlocking(model);
+        public bool CanHandle(IGridModel model) => GridFillCalcUtil.HasStationaryAndBlocking(model);
 
         public IFillStrategy Execute(GridStateContext context)
         {
@@ -70,8 +71,8 @@ namespace Core.Handlers
                     {
                         var dst = new Vector2Int(x, y);
 
-                        if (!GridRefillCalcUtil.IsEmptyActiveCell(model, dst)) continue;
-                        if (!GridRefillCalcUtil.CanFallVertically(model, x, y, out var src)) continue;
+                        if (!GridFillCalcUtil.IsEmptyActiveCell(model, dst)) continue;
+                        if (!GridFillCalcUtil.CanFallVertically(model, x, y, out var src)) continue;
 
                         var item = model.GetGridObject(src);
                         if (!item || item.IsStationary) continue;
@@ -92,14 +93,14 @@ namespace Core.Handlers
                     {
                         var target = new Vector2Int(x, y);
 
-                        if (!GridRefillCalcUtil.IsEmptyActiveCell(model, target)) continue;
-                        if (GridRefillCalcUtil.CanFallVertically(model, x, y, out _)) continue;
-                        if (!GridRefillCalcUtil.HasStationaryAboveInSameSegment(model, target)) continue;
+                        if (!GridFillCalcUtil.IsEmptyActiveCell(model, target)) continue;
+                        if (GridFillCalcUtil.CanFallVertically(model, x, y, out _)) continue;
+                        if (!GridFillCalcUtil.HasStationaryAboveInSameSegment(model, target)) continue;
 
-                        if (GridRefillCalcUtil.TryCollectDiagonalSide(model, target, 1, out var right))
+                        if (GridFillCalcUtil.TryCollectDiagonalSide(model, target, 1, out var right))
                             _candidates.Add(right);
 
-                        if (GridRefillCalcUtil.TryCollectDiagonalSide(model, target, -1, out var left))
+                        if (GridFillCalcUtil.TryCollectDiagonalSide(model, target, -1, out var left))
                             _candidates.Add(left);
                     }
                 }
@@ -206,7 +207,7 @@ namespace Core.Handlers
 
                if (blockedInSegment) continue;
 
-               var spawnCount = GridRefillCalcUtil.CountEmptiesDown(model, x, y, height);
+               var spawnCount = GridFillCalcUtil.CountEmptiesDown(model, x, y, height);
                if (spawnCount <= 0) continue;
 
                SpawnInto(model, context, view, x, y, spawnCount, segmentTopWorldY, cellSize);
@@ -224,23 +225,23 @@ namespace Core.Handlers
 
             for (int i = 0; i < spawnCount; i++)
             {
-                var tc = new Vector2Int(x, startY + i);
+                var targetCoord = new Vector2Int(x, startY + i);
 
-                var type = SmartSpawnDecider.Decide(model, tc, _settings.SpawnSettings, 0f);
+                var type = _fillSpawnPicker.Decide(model, targetCoord);
                 var item = context.Factory.GetRegularItem(type);
 
                 item.SetParent(view.GridObjectsParent);
                 item.SetSpriteSize(cellSize);
 
-                var w = view.GridToWorld(tc);
+                var w = view.GridToWorld(targetCoord);
 
                 var reverseIndex = (spawnCount - 1) - i;
                 var spawnY = segmentTopWorldY + (baseStack + reverseIndex) * cellSize;
 
                 item.SetPosition(new Vector3(w.x, spawnY, w.z));
 
-                model.SetGridObject(tc, item);
-                AddStep(item, tc, true);
+                model.SetGridObject(targetCoord, item);
+                AddStep(item, targetCoord, true);
             }
 
             _spawnStackByX[x] = baseStack + spawnCount;
