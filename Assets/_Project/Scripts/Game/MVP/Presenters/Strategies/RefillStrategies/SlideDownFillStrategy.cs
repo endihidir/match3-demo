@@ -6,6 +6,7 @@ using Core.Config;
 using Core.Configs;
 using Core.Item;
 using Core.Models;
+using Core.Pool;
 using Core.Utils;
 using Core.Views;
 using Cysharp.Threading.Tasks;
@@ -335,7 +336,8 @@ namespace Core.Handlers
                     var startX = moveRecord.Start.x;
                     ref var state = ref _waveByX[startX];
 
-                    var slideWave = 0;
+                    int slideWave;
+                    
                     if (moveRecord.IsSpawn)
                     {
                         slideWave = state.SpawnSlide + state.Slide;
@@ -351,45 +353,32 @@ namespace Core.Handlers
 
                     var length = moveRecord.Path.Count + (moveRecord.IsSpawn ? 1 : 0);
 
-                    var world = ArrayPool<Vector3>.Shared.Rent(length);
-                    var cells = ArrayPool<float>.Shared.Rent(length);
+                    using var pathWorldPoints = new PooledArray<Vector3>(length);
+                    using var segmentCellDistances = new PooledArray<float>(length);
 
-                    int filled = 0;
+                    var filled = 0;
 
                     if (moveRecord.IsSpawn)
-                        world[filled++] = moveRecord.Item.transform.position;
+                        pathWorldPoints .Array[filled++] = moveRecord.Item.transform.position;
 
                     for (int p = 0; p < moveRecord.Path.Count; p++)
-                        world[filled++] = view.GridToWorld(moveRecord.Path[p]);
+                        pathWorldPoints .Array[filled++] = view.GridToWorld(moveRecord.Path[p]);
 
                     var current = moveRecord.Item.transform.position;
 
                     for (int s = 0; s < length; s++)
                     {
-                        var next = world[s];
-                        cells[s] = Mathf.Abs(next.y - current.y) / cellSize;
+                        var next = pathWorldPoints .Array[s];
+                        segmentCellDistances.Array[s] = Mathf.Abs(next.y - current.y) / cellSize;
                         current = next;
                     }
 
-                    var tween = moveRecord.Item.ItemAnimation.Slide(world, length, cells, delay);
-                    _animTasks[taskCount++] = WaitTweenAndReturnArrays(tween, world, cells);
+                    var tween = moveRecord.Item.ItemAnimation.Slide(pathWorldPoints .Array, length, segmentCellDistances.Array, delay);
+                    _animTasks[taskCount++] = tween.ToUniTask();
                 }
             }
 
             return taskCount == 0 ? UniTask.CompletedTask : UniTask.WhenAll(_animTasks.AsSpan(0, taskCount).ToArray());
-        }
-
-        private static async UniTask WaitTweenAndReturnArrays(Tween tween, Vector3[] world, float[] cells)
-        {
-            try
-            {
-                await tween.ToUniTask();
-            }
-            finally
-            {
-                ArrayPool<Vector3>.Shared.Return(world);
-                ArrayPool<float>.Shared.Return(cells);
-            }
         }
     }
 }
