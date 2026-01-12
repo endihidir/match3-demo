@@ -6,8 +6,8 @@ namespace Core.Config
     /// External configuration for spawn behavior.
     /// All tuning is done via this struct.
     /// </summary>
-    [CreateAssetMenu(fileName = "SpawnSettings", menuName = "Match3/ItemConfigs/SpawnSettings", order = 0)]
-    public class SpawnSettingsSO : ScriptableObject
+    [CreateAssetMenu(fileName = "FillItemDecisionSettings", menuName = "Match3/ItemConfigs/FillItemDecisionSettings", order = 0)]
+    public class FillItemDecisionSettingsSO : ScriptableObject
     {
         // 0 = never allow immediate match (if possible)
         // 100 = fully allow immediate match
