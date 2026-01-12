@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Core.Config;
 using Core.Configs;
 using Core.Models;
 using Core.Utils;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
 using UnityEngine;
 
 namespace Core.Handlers
@@ -14,16 +12,18 @@ namespace Core.Handlers
     public sealed class FallDownFillStrategy : IFillStrategy
     {
         private readonly RefillSettingsSO _refillSettingsSo;
+        private readonly IFillSpawnPicker _fillSpawnPicker;
 
         private readonly List<FallDownMoveRecord> _records = new(256);
         private UniTask[] _animTasks = new UniTask[128];
         private UniTask _runningAnimations;
 
-        public bool CanRefill(IGridModel model) => !GridRefillCalcUtil.HasStationaryAndBlocking(model);
+        public bool CanHandle(IGridModel model) => !GridFillCalcUtil.HasStationaryAndBlocking(model);
 
-        public FallDownFillStrategy(GameplayConfigContainer configContainer)
+        public FallDownFillStrategy(GameplayConfigContainer configContainer, IFillSpawnPicker fillSpawnPicker)
         {
             _refillSettingsSo = configContainer.RefillSettings;
+            _fillSpawnPicker = fillSpawnPicker;
         }
 
         public IFillStrategy Execute(GridStateContext context)
@@ -41,7 +41,7 @@ namespace Core.Handlers
             {
                 ShiftColumnLogic(context, x, height, _records);
 
-                if (GridRefillCalcUtil.TryGetSpawnCellCoord(model, x, model.Height, out var spawnCell))
+                if (GridFillCalcUtil.TryGetSpawnCellCoord(model, x, model.Height, out var spawnCell))
                 {
                     var spawnY = view.GridToWorld(spawnCell).y + cellSize;
                     RefillColumnLogic(context, x, height, cellSize, spawnY, _records);
@@ -66,7 +66,7 @@ namespace Core.Handlers
                 if (!model.IsCellActive(coord)) continue;
                 if (model.GetGridObject(coord)) continue;
 
-                var srcY = GridRefillCalcUtil.FindFallSourceY(model, x, y - 1);
+                var srcY = GridFillCalcUtil.FindFallSourceY(model, x, y - 1);
                 if (srcY < 0) continue;
 
                 var src = new Vector2Int(x, srcY);
@@ -97,7 +97,7 @@ namespace Core.Handlers
                 if (!model.IsCellActive(coord)) continue;
                 if (model.GetGridObject(coord)) continue;
 
-                var itemType = SmartSpawnDecider.Decide(model, coord, _refillSettingsSo.SpawnSettings);
+                var itemType = _fillSpawnPicker.Decide(model, coord);
                 var item = stateContext.Factory.GetRegularItem(itemType);
 
                 item.SetParent(view.GridObjectsParent);

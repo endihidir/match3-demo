@@ -49,7 +49,7 @@ namespace Core.Handlers
                     if (context.Model.GetGridObject(coord) is T itemObject)
                     {
                         ClearCell(context, coord);
-                        _gridStateHandler.StateMachine.ForceState<RefillResolveState>();
+                        _gridStateHandler.StateMachine.ForceState<FillResolveState>();
                     }
                 }
             }
@@ -85,7 +85,7 @@ namespace Core.Handlers
             ClearCell(context, coord);
         }
 
-        public void ForceRefill() => _gridStateHandler.StateMachine?.ForceState<RefillResolveState>();
+        public void ForceRefill() => _gridStateHandler.StateMachine?.ForceState<FillResolveState>();
 
         private bool TryGetContext(out GridStateContext context)
         {

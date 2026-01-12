@@ -7,6 +7,5 @@ namespace Core.Config
     {
         [field: SerializeField] public float ShiftDelayMultiplier { get; private set; } = 0.01f;
         [field: SerializeField] public float SlideDelayMultiplier { get; private set; } = 0.01f;
-        [field: SerializeField] public SpawnSettings SpawnSettings { get; private set; }
     }
 }
