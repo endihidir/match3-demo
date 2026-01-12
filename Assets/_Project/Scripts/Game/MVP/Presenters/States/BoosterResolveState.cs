@@ -56,9 +56,6 @@ namespace Core.Handlers
                     case BombAction bAction:
                         GridImpactMarker.MarkSquareArea(model, action, markData, bAction.DamageAmount, bAction.Radius, EnqueueIfNew);
                         break;
-                    case FullGridRemoveAction fullRemoveAction:
-                        GridImpactMarker.MarkAllAreaFromOrigin(model, action, markData, fullRemoveAction.DamageAmount, EnqueueIfNew);
-                        break;
                 }
             }
             

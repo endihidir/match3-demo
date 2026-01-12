@@ -11,7 +11,7 @@ namespace Core.Handlers
 {
     public sealed class FallDownFillStrategy : IFillStrategy
     {
-        private readonly RefillSettingsSO _refillSettingsSo;
+        private readonly FillStrategySettingsSO _strategySettings;
         private readonly IFillItemDecider _itemDecider;
 
         private readonly List<FallDownMoveRecord> _records = new(256);
@@ -22,7 +22,7 @@ namespace Core.Handlers
 
         public FallDownFillStrategy(GameplayConfigContainer configContainer, IFillItemDecider itemDecider)
         {
-            _refillSettingsSo = configContainer.RefillSettings;
+            _strategySettings = configContainer.FillStrategySettings;
             _itemDecider = itemDecider;
         }
 
@@ -137,7 +137,7 @@ namespace Core.Handlers
                     if (r.ColumnX != x) continue;
                     if (r.IsSpawn) continue;
 
-                    var delay = wave * _refillSettingsSo.ShiftDelayMultiplier;
+                    var delay = wave * _strategySettings.ShiftDelayMultiplier;
 
                     var startWorld = r.Obj.transform.position;
                     var distCells = Mathf.Abs(r.FinalWorld.y - startWorld.y) / cellSize;
@@ -155,7 +155,7 @@ namespace Core.Handlers
                     if (r.ColumnX != x) continue;
                     if (!r.IsSpawn) continue;
 
-                    var delay = wave * _refillSettingsSo.ShiftDelayMultiplier;
+                    var delay = wave * _strategySettings.ShiftDelayMultiplier;
 
                     var startWorld = r.Obj.transform.position;
                     var distCells = Mathf.Abs(r.FinalWorld.y - startWorld.y) / cellSize;

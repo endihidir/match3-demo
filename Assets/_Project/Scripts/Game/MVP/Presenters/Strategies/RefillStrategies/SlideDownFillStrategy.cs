@@ -23,8 +23,8 @@ namespace Core.Handlers
             public bool IsSpawn;
         }
 
-        private readonly RefillSettingsSO _settings;
-        private readonly IFillItemDecider _ıtemDecider;
+        private readonly FillStrategySettingsSO _strategySettings;
+        private readonly IFillItemDecider _itemDecider;
         private readonly Dictionary<BaseGridObject, SlideDownTrack> _trackByItem = new(256);
         private readonly List<SlideDownCandidate> _candidates = new(128);
         private readonly List<SlideDownMoveRecord> _moves = new(256);
@@ -39,10 +39,10 @@ namespace Core.Handlers
         private UniTask[] _animTasks = new UniTask[128];
         private UniTask _runningAnimations = UniTask.CompletedTask;
 
-        public SlideDownFillStrategy(GameplayConfigContainer config, IFillItemDecider ıtemDecider)
+        public SlideDownFillStrategy(GameplayConfigContainer config, IFillItemDecider itemDecider)
         {
-            _settings = config.RefillSettings;
-            _ıtemDecider = ıtemDecider;
+            _strategySettings = config.FillStrategySettings;
+            _itemDecider = itemDecider;
         }
 
         public bool CanHandle(IGridModel model) => GridFillCalcUtil.HasStationaryAndBlocking(model);
@@ -227,7 +227,7 @@ namespace Core.Handlers
             {
                 var targetCoord = new Vector2Int(x, startY + i);
 
-                var type = _ıtemDecider.Decide(model, targetCoord);
+                var type = _itemDecider.Decide(model, targetCoord);
                 var item = context.Factory.GetRegularItem(type);
 
                 item.SetParent(view.GridObjectsParent);
@@ -322,7 +322,7 @@ namespace Core.Handlers
                         state.Fall++;
                     }
                     
-                    var delay = shiftWave * _settings.ShiftDelayMultiplier;
+                    var delay = shiftWave * _strategySettings.ShiftDelayMultiplier;
 
                     var finalWorld = view.GridToWorld(moveRecord.Final);
                     var startWorld = moveRecord.Item.transform.position;
@@ -350,7 +350,7 @@ namespace Core.Handlers
                         state.Slide++;
                     }
                     
-                    var delay = slideWave * _settings.SlideDelayMultiplier;
+                    var delay = slideWave * _strategySettings.SlideDelayMultiplier;
 
                     var length = moveRecord.Path.Count + (moveRecord.IsSpawn ? 1 : 0);
 

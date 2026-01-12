@@ -22,14 +22,14 @@ namespace Core.Handlers
     {
         private readonly ItemType[] _allSpawnableTypes = GridFillPickerUtil.BuildAllSpawnableTypes();
         
-        private readonly SpawnSettingsSO _spawnSettings;
+        private readonly FillItemDecisionSettingsSO _decisionSettings;
         
         private System.Random _rng;
         public float SafetyBoost { get; private set; }
         
         public FillItemDecider(GameplayConfigContainer gameplayConfigContainer)
         {
-            _spawnSettings = gameplayConfigContainer.SpawnSettings;
+            _decisionSettings = gameplayConfigContainer.FillItemDecisionSettings;
             _rng = null;
         }
         
@@ -75,7 +75,7 @@ namespace Core.Handlers
             if (safeCount == 0 && matchCount == 0)
                 return types[NextInt(0, types.Length)];
 
-            var immediateChance01 = Mathf.Clamp01((_spawnSettings.ImmediateMatchChance - SafetyBoost) / 100f);
+            var immediateChance01 = Mathf.Clamp01((_decisionSettings.ImmediateMatchChance - SafetyBoost) / 100f);
 
             var pickMatch = false;
 
@@ -85,8 +85,8 @@ namespace Core.Handlers
                 pickMatch = true;
 
             return pickMatch
-                ? GridFillPickerUtil.PickBest(model, targetCoord, match, matchCount, _spawnSettings, Next01)
-                : GridFillPickerUtil.PickBest(model, targetCoord, safe, safeCount, _spawnSettings, Next01);
+                ? GridFillPickerUtil.PickBest(model, targetCoord, match, matchCount, _decisionSettings, Next01)
+                : GridFillPickerUtil.PickBest(model, targetCoord, safe, safeCount, _decisionSettings, Next01);
         }
     }
 }

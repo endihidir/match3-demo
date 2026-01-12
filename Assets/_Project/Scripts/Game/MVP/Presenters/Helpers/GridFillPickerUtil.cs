@@ -8,7 +8,7 @@ namespace Core.Utils
 {
     public static class GridFillPickerUtil
     {
-        public static ItemType PickBest(IGridModel model, Vector2Int cell, Span<ItemType> types, int count, SpawnSettingsSO settings, Func<float> rnd01)
+        public static ItemType PickBest(IGridModel model, Vector2Int cell, Span<ItemType> types, int count, FillItemDecisionSettingsSO settings, Func<float> rnd01)
         {
             var best = types[0];
             var bestScore = float.MaxValue;
