@@ -24,7 +24,7 @@ namespace Core.Handlers
         }
 
         private readonly RefillSettingsSO _settings;
-        private readonly IFillSpawnPicker _fillSpawnPicker;
+        private readonly IFillItemDecider _ıtemDecider;
         private readonly Dictionary<BaseGridObject, SlideDownTrack> _trackByItem = new(256);
         private readonly List<SlideDownCandidate> _candidates = new(128);
         private readonly List<SlideDownMoveRecord> _moves = new(256);
@@ -39,10 +39,10 @@ namespace Core.Handlers
         private UniTask[] _animTasks = new UniTask[128];
         private UniTask _runningAnimations = UniTask.CompletedTask;
 
-        public SlideDownFillStrategy(GameplayConfigContainer config, IFillSpawnPicker fillSpawnPicker)
+        public SlideDownFillStrategy(GameplayConfigContainer config, IFillItemDecider ıtemDecider)
         {
             _settings = config.RefillSettings;
-            _fillSpawnPicker = fillSpawnPicker;
+            _ıtemDecider = ıtemDecider;
         }
 
         public bool CanHandle(IGridModel model) => GridFillCalcUtil.HasStationaryAndBlocking(model);
@@ -227,7 +227,7 @@ namespace Core.Handlers
             {
                 var targetCoord = new Vector2Int(x, startY + i);
 
-                var type = _fillSpawnPicker.Decide(model, targetCoord);
+                var type = _ıtemDecider.Decide(model, targetCoord);
                 var item = context.Factory.GetRegularItem(type);
 
                 item.SetParent(view.GridObjectsParent);
