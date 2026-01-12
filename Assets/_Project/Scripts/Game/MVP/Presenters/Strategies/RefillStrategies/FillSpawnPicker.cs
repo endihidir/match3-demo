@@ -20,7 +20,7 @@ namespace Core.Handlers
     
     public class FillSpawnPicker : IFillSpawnPicker
     {
-        private readonly ItemType[] _allSpawnableTypes = GridMatchPatternUtil.BuildAllSpawnableTypes();
+        private readonly ItemType[] _allSpawnableTypes = GridFillPickerUtil.BuildAllSpawnableTypes();
         
         private readonly SpawnSettingsSO _spawnSettings;
         
@@ -61,11 +61,11 @@ namespace Core.Handlers
                 var type = types[i];
 
                 // Avoid vertical stacks regardless of fill order (above OR below)
-                if (GridMatchPatternUtil.IsSame(model, targetCoord.x, targetCoord.y + 1, type) ||
-                    GridMatchPatternUtil.IsSame(model, targetCoord.x, targetCoord.y - 1, type))
+                if (GridFillPickerUtil.IsSame(model, targetCoord.x, targetCoord.y + 1, type) ||
+                    GridFillPickerUtil.IsSame(model, targetCoord.x, targetCoord.y - 1, type))
                     continue;
 
-                if (GridMatchPatternUtil.CreatesImmediateMatch(model, targetCoord, type))
+                if (GridFillPickerUtil.CreatesImmediateMatch(model, targetCoord, type))
                     match[matchCount++] = type;
                 else
                     safe[safeCount++] = type;
@@ -85,8 +85,8 @@ namespace Core.Handlers
                 pickMatch = true;
 
             return pickMatch
-                ? GridMatchPatternUtil.PickBest(model, targetCoord, match, matchCount, _spawnSettings, Next01())
-                : GridMatchPatternUtil.PickBest(model, targetCoord, safe, safeCount, _spawnSettings, Next01());
+                ? GridFillPickerUtil.PickBest(model, targetCoord, match, matchCount, _spawnSettings, Next01)
+                : GridFillPickerUtil.PickBest(model, targetCoord, safe, safeCount, _spawnSettings, Next01);
         }
     }
 }
