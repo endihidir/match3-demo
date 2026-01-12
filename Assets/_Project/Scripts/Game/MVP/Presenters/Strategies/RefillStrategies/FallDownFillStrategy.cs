@@ -162,7 +162,6 @@ namespace Core.Handlers
 
                     var tween = r.Obj.ItemAnimation.Shift(r.FinalWorld, distCells, delay);
                     _animTasks[taskCount++] = tween.ToUniTask();
-
                     wave++;
                 }
             }
