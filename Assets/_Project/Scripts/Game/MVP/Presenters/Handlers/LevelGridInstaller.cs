@@ -1,24 +1,16 @@
-using System;
 using Core.Item;
 using Core.Item.Factories;
-using Core.SceneService;
 using Core.Utils;
 
 namespace Core.Handlers
 {
-    public class GridItemFactoryHandler : IGridItemFactoryHandler, IDisposable
+    public class LevelGridInstaller : ILevelGridInstaller
     {
         private readonly IGridItemFactory _gridItemFactory;
-        private readonly ISceneLoadContext _sceneLoadContext;
         
-        public GridItemFactoryHandler(IGridItemFactory gridItemFactory, ISceneLoadContext sceneLoadContext)
-        {
-            _gridItemFactory = gridItemFactory;
-            _sceneLoadContext = sceneLoadContext;
-            _sceneLoadContext.OnLoadStart += OnSceneUnload;
-        }
+        public LevelGridInstaller(IGridItemFactory gridItemFactory) => _gridItemFactory = gridItemFactory;
 
-        public void PopulateGridWith(GridObjectType[,] gridObjectTypes, out BaseGridObject[,] itemObjects)
+        public void PopulateGrid(GridObjectType[,] gridObjectTypes, out BaseGridObject[,] itemObjects)
         {
             var width = gridObjectTypes.GetLength(0);
             var height = gridObjectTypes.GetLength(1);
@@ -45,15 +37,5 @@ namespace Core.Handlers
             GridItemKind.Obstacle => _gridItemFactory.GetItem<ObstacleObject>(typeData),
             _ => null
         };
-        
-        private void OnSceneUnload()
-        {
-            _gridItemFactory.ReleaseAllItems();
-        }
-
-        public void Dispose()
-        {
-            _sceneLoadContext.OnLoadStart -= OnSceneUnload;
-        }
     }
 }
