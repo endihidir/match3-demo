@@ -1,6 +1,7 @@
 using Core.Handlers;
 using Core.Level;
 using Core.Models;
+using Core.Presenters;
 using Core.Services;
 using Core.Views;
 using DG.Tweening;
@@ -9,13 +10,22 @@ using VContainer.Unity;
 
 namespace Core.Bootstrapper
 {
-    public class GameplayBootstrapper : IPostInitializable
+    public class GameplayBootstrapper : IInitializable, IPostInitializable
     {
+        [Inject] private readonly GridPresenter _gridPresenter;
+        [Inject] private readonly GameplayFactoryCleaner _factoryCleaner;
+        
         [Inject] private readonly ILevelDefinitionProvider _levelDefinitionProvider;
-        [Inject] private readonly IGridItemFactoryHandler _gridItemFactoryHandler;
+        [Inject] private readonly ILevelGridInstaller _levelGridInstaller;
         [Inject] private readonly IGridModel _gridModel;
         [Inject] private readonly IGridView _gridView;
         [Inject] private readonly IInputService _inputService;
+        
+        public void Initialize()
+        {
+            _gridPresenter.Initialize();
+            _factoryCleaner.Initialize();
+        }
         
         public void PostInitialize()
         {
@@ -30,7 +40,8 @@ namespace Core.Bootstrapper
 
         private void GridSetup()
         {
-            _gridItemFactoryHandler.PopulateGridWith(_levelDefinitionProvider.GetGridObjectTypes(), out var gridItemObjects);
+            var gridObjectTypes = _levelDefinitionProvider.GetGridObjectTypes();
+            _levelGridInstaller.PopulateGrid(gridObjectTypes, out var gridItemObjects);
             var width = gridItemObjects.GetLength(0);
             var height = gridItemObjects.GetLength(1);
             _gridModel.Initialize(gridItemObjects, width, height, out var activeCells);

@@ -24,13 +24,14 @@ namespace Core.LifetimeScopes
             builder.Register<InputService>(Lifetime.Scoped).As<IInputService, ITickable>();
             builder.Register<LevelGoalModel>(Lifetime.Scoped).As<ILevelGoalModel>();
             
-            builder.Register<GridItemFactory>(Lifetime.Scoped).As<IGridItemFactory>();
-            builder.Register<GridItemFactoryHandler>(Lifetime.Scoped).As<IGridItemFactoryHandler>();
+            builder.Register<GameplayFactoryCleaner>(Lifetime.Scoped);
+            builder.Register<GridItemFactory>(Lifetime.Scoped).As<IGridItemFactory, IFactoryCleaner>();
+            builder.Register<LevelGridInstaller>(Lifetime.Scoped).As<ILevelGridInstaller>();
             
             builder.Register<GridStateHandler>(Lifetime.Scoped).As<IGridStateHandler, ITickable, IFixedTickable, ILateTickable>();
             builder.Register<GridModel>(Lifetime.Scoped).As<IGridModel>();
             builder.RegisterComponentInHierarchy<GridView>().As<IGridView>();
-            builder.Register<GridPresenter>(Lifetime.Scoped).As<IInitializable>();
+            builder.Register<GridPresenter>(Lifetime.Scoped);
             builder.Register<GridCheatHandler>(Lifetime.Scoped).As<IGridCheatHandler, ITickable>();
             
             builder.Register<FillStrategyResolver>(Lifetime.Scoped).As<IFillStrategyResolver>();

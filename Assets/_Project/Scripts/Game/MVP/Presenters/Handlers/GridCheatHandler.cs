@@ -46,10 +46,10 @@ namespace Core.Handlers
                 for (int y = 0; y < context.Model.Height; y++)
                 {
                     var coord = new Vector2Int(x, y);
-                    if (context.Model.GetGridObject(coord) is T itemObject)
+                    if (context.Model.GetGridObject(coord) is T)
                     {
                         ClearCell(context, coord);
-                        _gridStateHandler.StateMachine.ForceState<FillResolveState>();
+                        ForceRefill();
                     }
                 }
             }
