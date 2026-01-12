@@ -50,24 +50,38 @@ namespace Core.Utils
             return false;
         }
         
-        public static bool DestinationBlockedByStationaryAbove(IGridModel model, Vector2Int targetCoord)
+        public static int FindFallSourceY(IGridModel model, int x, int startY)
         {
-            for (int sy = targetCoord.y - 1; sy >= 0; sy--)
+            // Scan upward (decreasing Y) for the first active cell that has an object.
+            if (x < 0 || x >= model.Width) return -1;
+
+            for (int y = startY; y >= 0; y--)
             {
-                var c = new Vector2Int(targetCoord.x, sy);
-
-                if (!model.IsCellActive(c)) return false;
-
-                var obj = model.GetGridObject(c);
-
-                if (!obj) continue;
-
-                return obj.IsStationary;
+                if (!TryGetActiveObject(model, x, y, out _)) continue;
+                return y;
             }
 
-            return false;
+            return -1;
+        }
+
+        private static bool TryGetActiveObject(IGridModel model, int x, int y, out BaseGridObject obj)
+        {
+            obj = null;
+
+            if (!model.IsInRange(x, y)) return false;
+
+            var coord = new Vector2Int(x, y);
+
+            if (!model.IsCellActive(coord)) return false;
+
+            obj = model.GetGridObject(coord);
+            
+            return obj;
         }
         
+        public static bool HasStationaryAboveInSameSegment(IGridModel model, Vector2Int coord) => 
+            TryFindFirstObjectAboveInSameSegment(model, coord, out var obj) && obj.IsStationary;
+
         public static bool CanFallVertically(IGridModel model, int x, int y, out Vector2Int source)
         {
             for (int sy = y - 1; sy >= 0; sy--)
@@ -118,7 +132,13 @@ namespace Core.Utils
                 return true;
             }
 
-            if (IsBlockerShadowSandSource(model, src) && !HasEmptyBelowInSegment(model, src))
+            if (HasStationaryAboveInSameSegment(model, src) && !HasEmptyBelowInSegment(model, src))
+            {
+                slide = new SlideDownCandidate(item, src, targetCoord);
+                return true;
+            }
+            
+            if (DestinationBlockedByAdjacentRoof(model, targetCoord) && IsBlockedBelow(model, src))
             {
                 slide = new SlideDownCandidate(item, src, targetCoord);
                 return true;
@@ -150,35 +170,6 @@ namespace Core.Utils
             cellCoord = default;
             return false;
         }
-
-        public static int FindFallSourceY(IGridModel model, int x, int startY)
-        {
-            // Scan upward (decreasing Y) for the first active cell that has an object.
-            if (x < 0 || x >= model.Width) return -1;
-
-            for (int y = startY; y >= 0; y--)
-            {
-                if (!TryGetActiveObject(model, x, y, out _)) continue;
-                return y;
-            }
-
-            return -1;
-        }
-
-        private static bool TryGetActiveObject(IGridModel model, int x, int y, out BaseGridObject obj)
-        {
-            obj = null;
-
-            if (!model.IsInRange(x, y)) return false;
-
-            var coord = new Vector2Int(x, y);
-
-            if (!model.IsCellActive(coord)) return false;
-
-            obj = model.GetGridObject(coord);
-            
-            return obj;
-        }
         
         private static bool IsBlockerSideSource(IGridModel model, Vector2Int src, int dirX)
         {
@@ -200,24 +191,6 @@ namespace Core.Utils
             }
 
             return true;
-        }
-
-        private static bool IsBlockerShadowSandSource(IGridModel model, Vector2Int src)
-        {
-            for (int sy = src.y - 1; sy >= 0; sy--)
-            {
-                var c = new Vector2Int(src.x, sy);
-
-                if (!model.IsCellActive(c)) return false;
-
-                var obj = model.GetGridObject(c);
-
-                if (!obj) continue;
-
-                return obj.IsStationary;
-            }
-
-            return false;
         }
         
         public static int CountEmptiesDown(IGridModel model, int x, int y, int height)
@@ -254,6 +227,54 @@ namespace Core.Utils
 
             return false;
         }
+        
+        private static bool DestinationBlockedByAdjacentRoof(IGridModel model, Vector2Int targetCoord)
+        {
+            var roofY = targetCoord.y - 1;
+            if (roofY < 0) return false;
 
+            var lu = new Vector2Int(targetCoord.x - 1, roofY);
+            if (model.IsInRange(lu) && model.IsCellActive(lu))
+            {
+                var o = model.GetGridObject(lu);
+                if (o && o.IsStationary) return true;
+            }
+
+            var ru = new Vector2Int(targetCoord.x + 1, roofY);
+            if (model.IsInRange(ru) && model.IsCellActive(ru))
+            {
+                var o = model.GetGridObject(ru);
+                if (o && o.IsStationary) return true;
+            }
+
+            return false;
+        }
+
+        private static bool IsBlockedBelow(IGridModel model, Vector2Int c)
+        {
+            var below = new Vector2Int(c.x, c.y + 1);
+            if (!model.IsInRange(below)) return true;
+            if (!model.IsCellActive(below)) return true;
+
+            var obj = model.GetGridObject(below);
+            return obj != null;
+        }
+        
+        private static bool TryFindFirstObjectAboveInSameSegment(IGridModel model, Vector2Int from, out BaseGridObject obj)
+        {
+            obj = null;
+
+            for (int y = from.y - 1; y >= 0; y--)
+            {
+                var c = new Vector2Int(from.x, y);
+
+                if (!model.IsCellActive(c)) return false;
+
+                obj = model.GetGridObject(c);
+                if (obj) return true;
+            }
+
+            return false;
+        }
     }
 }

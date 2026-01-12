@@ -31,6 +31,8 @@ namespace Core.Handlers
         private SlideDownColumnWaveState[] _waveByX = Array.Empty<SlideDownColumnWaveState>();
         private int[] _usedTargetStamp = Array.Empty<int>();
         private int[] _spawnStackByX = Array.Empty<int>();
+        private int[] _usedSourceStamp = Array.Empty<int>();
+        private int _usedSourceStampId = 0;
         private int _usedTargetStampId = 1;
 
         private UniTask[] _animTasks = new UniTask[128];
@@ -91,7 +93,7 @@ namespace Core.Handlers
 
                         if (!GridRefillCalcUtil.IsEmptyActiveCell(model, target)) continue;
                         if (GridRefillCalcUtil.CanFallVertically(model, x, y, out _)) continue;
-                        if (!GridRefillCalcUtil.DestinationBlockedByStationaryAbove(model, target)) continue;
+                        if (!GridRefillCalcUtil.HasStationaryAboveInSameSegment(model, target)) continue;
 
                         if (GridRefillCalcUtil.TryCollectDiagonalSide(model, target, 1, out var right))
                             _candidates.Add(right);
@@ -101,29 +103,37 @@ namespace Core.Handlers
                     }
                 }
 
-                if (_candidates.Count > 0)
+                _usedTargetStampId++;
+                _usedSourceStampId++;
+
+                if (_usedTargetStampId == int.MaxValue || _usedSourceStampId == int.MaxValue)
                 {
-                    _usedTargetStampId++;
-                    if (_usedTargetStampId == int.MaxValue)
-                    {
-                        Array.Clear(_usedTargetStamp, 0, _usedTargetStamp.Length);
-                        _usedTargetStampId = 1;
-                    }
+                    Array.Clear(_usedTargetStamp, 0, _usedTargetStamp.Length);
+                    Array.Clear(_usedSourceStamp, 0, _usedSourceStamp.Length);
+                    _usedTargetStampId = 1;
+                    _usedSourceStampId = 1;
+                }
 
-                    for (int i = 0; i < _candidates.Count; i++)
-                    {
-                        var c = _candidates[i];
+                for (int i = 0; i < _candidates.Count; i++)
+                {
+                    var c = _candidates[i];
+                    
+                    if (model.GetGridObject(c.From) != c.Item) continue;
+                    if (model.GetGridObject(c.To) != null) continue;
 
-                        var ti = c.To.x + c.To.y * width;
-                        if (_usedTargetStamp[ti] == _usedTargetStampId) continue;
-                        _usedTargetStamp[ti] = _usedTargetStampId;
+                    var ti = c.To.x + c.To.y * width;
+                    if (_usedTargetStamp[ti] == _usedTargetStampId) continue;
+                    _usedTargetStamp[ti] = _usedTargetStampId;
 
-                        model.SetGridObject(c.From, null);
-                        model.SetGridObject(c.To, c.Item);
+                    var fi = c.From.x + c.From.y * width;
+                    if (_usedSourceStamp[fi] == _usedSourceStampId) continue;
+                    _usedSourceStamp[fi] = _usedSourceStampId;
 
-                        AddStep(c.Item, c.To, false);
-                        movedAny = true;
-                    }
+                    model.SetGridObject(c.From, null);
+                    model.SetGridObject(c.To, c.Item);
+
+                    AddStep(c.Item, c.To, false);
+                    movedAny = true;
                 }
                 
                 for (int x = 0; x < width; x++)
@@ -152,6 +162,9 @@ namespace Core.Handlers
                 _spawnStackByX = new int[width];
             else
                 Array.Clear(_spawnStackByX, 0, width);
+            
+            if (_usedSourceStamp.Length < cellCount)
+                _usedSourceStamp = new int[cellCount];
         }
 
        private bool SpawnTopOpenSegment(GridStateContext context, IGridView view, int x, int height)
