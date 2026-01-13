@@ -25,10 +25,9 @@ namespace Core.Models
         void SetGridObject(Vector2Int coord, T value);
 
         // Neighbour queries (safe)
+        bool TryGetNeighbourCoord(Vector2Int sourceCoord, Vector2Int direction, out Vector2Int neighbourCoord);
         bool TryGetNeighbour(Vector2Int sourceCoord, Vector2Int direction, out T neighbour);
-        bool TryGetNeighbours(Vector2Int sourceCoord, out T[] neighbours);
         bool TryGetNeighboursNonAlloc(Vector2Int sourceCoord, Span<T> resultBuffer, out int count);
-
         // Cell state
         bool IsCellActive(Vector2Int coord);
         bool IsInRange(Vector2Int coord);

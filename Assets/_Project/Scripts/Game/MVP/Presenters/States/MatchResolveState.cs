@@ -172,10 +172,10 @@ namespace Core.Handlers
         {
             foreach (var linearDirection in DirectionLookup.LinearDirections)
             {
-                var neighbour = origin + linearDirection;
-                if (!model.IsInRange(neighbour)) continue;
+                if (!model.TryGetNeighbourCoord(origin, linearDirection, out var neighbourCoord)) continue;
 
-                var obj = model.GetGridObject(neighbour);
+                var obj = model.GetGridObject(neighbourCoord);
+                
                 if (!obj) continue;
 
                 if (obj is IDamageableItem damageable)
@@ -185,7 +185,7 @@ namespace Core.Handlers
                     if (result == DamageResult.Destroyed)
                     {
                         Context.Factory.ReleaseItem(obj);
-                        model.SetGridObject(neighbour, null);
+                        model.SetGridObject(neighbourCoord, null);
                     }
                 }
             }

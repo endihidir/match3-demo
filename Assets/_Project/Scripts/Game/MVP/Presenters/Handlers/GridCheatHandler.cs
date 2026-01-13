@@ -15,17 +15,24 @@ namespace Core.Handlers
 
         public void Tick()
         {
+            if (Input.GetKeyDown(KeyCode.S)) GenerateItemAtMousePos(ItemType.Blue);
+            if (Input.GetKeyDown(KeyCode.L)) GenerateItemAtMousePos(ItemType.Green);
+            if (Input.GetKeyDown(KeyCode.A)) GenerateItemAtMousePos(ItemType.Red);
+            if (Input.GetKeyDown(KeyCode.X)) GenerateItemAtMousePos(ItemType.Yellow);
+            
             if (Input.GetKeyDown(KeyCode.B)) GenerateObstacleAtMousePos(ObstacleType.Box);
             if (Input.GetKeyDown(KeyCode.N)) GenerateObstacleAtMousePos(ObstacleType.Vase);
+            
             if (Input.GetKeyDown(KeyCode.T)) GenerateBoosterAtMousePos(BoosterType.Bomb);
             if (Input.GetKeyDown(KeyCode.H)) GenerateBoosterAtMousePos(BoosterType.RocketHorizontal);
             if (Input.GetKeyDown(KeyCode.V)) GenerateBoosterAtMousePos(BoosterType.RocketVertical);
+            
             if (Input.GetKeyDown(KeyCode.C)) Cleanup<BoosterObject>();
             if (Input.GetKeyDown(KeyCode.O)) Cleanup<ObstacleObject>();
             if (Input.GetKeyDown(KeyCode.R)) RemoveAtMousePos();
             if (Input.GetKeyDown(KeyCode.F)) ForceRefill();
             
-            if (Input.GetKeyDown(KeyCode.L))
+            if (Input.GetKeyDown(KeyCode.D))
             {
                 if (_gridStateHandler != null) 
                     EditorLogger.LogError(_gridStateHandler.StateMachine.CurrentState.StateID);
@@ -53,6 +60,17 @@ namespace Core.Handlers
                     }
                 }
             }
+        }
+        
+        public void GenerateItemAtMousePos(ItemType type)
+        {
+            if (!TryGetContext(out var context)) return;
+
+            var coord = GetMouseGridCoord(context);
+            ClearCell(context, coord);
+
+            var obstacle = context.Factory.GetRegularItem(type);
+            PlaceItem(context, coord, obstacle);
         }
 
         public void GenerateBoosterAtMousePos(BoosterType type)

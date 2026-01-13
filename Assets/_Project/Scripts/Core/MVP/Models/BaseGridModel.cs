@@ -1,5 +1,4 @@
 using System;
-using System.Buffers;
 using Core.Utils;
 using UnityEngine;
 
@@ -71,47 +70,31 @@ namespace Core.Models
             if (!IsInRange(coord.x, coord.y)) return;
             SetInternal(coord, value);
         }
+        
+        public bool TryGetNeighbourCoord(Vector2Int sourceCoord, Vector2Int direction, out Vector2Int neighbourCoord)
+        {
+            neighbourCoord = default;
+
+            if (direction == Vector2Int.zero) return false;
+
+            var targetCoord = sourceCoord + direction;
+            
+            if (!IsInRange(targetCoord.x, targetCoord.y)) return false;
+
+            neighbourCoord = targetCoord;
+            
+            return true;
+        }
 
         public bool TryGetNeighbour(Vector2Int sourceCoord, Vector2Int direction, out T neighbour)
         {
             neighbour = null;
 
-            if (direction == Vector2Int.zero) return false;
-
-            var targetCoord = sourceCoord + direction;
-            if (!IsInRange(targetCoord.x, targetCoord.y)) return false;
+            if (!TryGetNeighbourCoord(sourceCoord, direction, out var targetCoord)) return false;
 
             neighbour = GridArray[targetCoord.x, targetCoord.y];
+            
             return neighbour != null;
-        }
-
-        public bool TryGetNeighbours(Vector2Int sourceCoord, out T[] neighbours)
-        {
-            if (!IsInRange(sourceCoord.x, sourceCoord.y))
-            {
-                neighbours = Array.Empty<T>();
-                return false;
-            }
-
-            var buffer = ArrayPool<T>.Shared.Rent(8);
-            Array.Clear(buffer, 0, 8);
-
-            try
-            {
-                if (!TryGetNeighboursNonAlloc(sourceCoord, buffer.AsSpan(0, 8), out var count) || count == 0)
-                {
-                    neighbours = Array.Empty<T>();
-                    return false;
-                }
-
-                neighbours = new T[count];
-                Array.Copy(buffer, neighbours, count);
-                return true;
-            }
-            finally
-            {
-                ArrayPool<T>.Shared.Return(buffer, clearArray: true);
-            }
         }
 
         public bool TryGetNeighboursNonAlloc(Vector2Int sourceCoord, Span<T> resultBuffer, out int count)
@@ -149,10 +132,5 @@ namespace Core.Models
             if (raiseEvent)
                 OnUpdateCellData?.Invoke(value);
         }
-
-        // "Fast" erişim gerekiyorsa sadece derived class kullanabilsin diye protected bıraktım.
-        // Bounds garantisi sende olacak.
-        protected T GetGridObjectUnsafe(int x, int y) => GridArray[x, y];
-        protected bool IsCellActiveUnsafe(int x, int y) => ActiveCells[x, y];
     }
 }
