@@ -14,6 +14,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <ShiftDelayMultiplier>k__BackingField: 0.03
   <SlideDelayMultiplier>k__BackingField: 0.03
-  <SpawnSettings>k__BackingField:
-    <ImmediateMatchChance>k__BackingField: 0
-    <NearMatchAvoidance>k__BackingField: 100

@@ -73,9 +73,6 @@ namespace Core.Utils
             
             return obj;
         }
-        
-        public static bool HasStationaryAboveInSameSegment(IGridModel model, Vector2Int coord) => 
-            TryFindFirstObjectAboveInSameSegment(model, coord, out var obj) && obj.IsStationary;
 
         public static bool CanFallVertically(IGridModel model, int x, int y, out Vector2Int source)
         {
@@ -124,14 +121,14 @@ namespace Core.Utils
                 slide = new SlideDownCandidate(item, src, sourceCoord);
                 return true;
             }
-
+            
             if (HasStationaryAboveInSameSegment(model, src) && !HasEmptyBelowInSegment(model, src))
             {
                 slide = new SlideDownCandidate(item, src, sourceCoord);
                 return true;
             }
             
-            if (DestinationBlockedByAdjacentRoof(model, sourceCoord) && IsBlockedBelow(model, src))
+            if (DestinationBlockedByAdjacentRoof(model, sourceCoord) && IsStationaryBlockedBelow(model, src))
             {
                 slide = new SlideDownCandidate(item, src, sourceCoord);
                 return true;
@@ -163,6 +160,9 @@ namespace Core.Utils
             cellCoord = default;
             return false;
         }
+        
+        public static bool HasStationaryAboveInSameSegment(IGridModel model, Vector2Int coord) => 
+            TryFindFirstObjectAboveInSameSegment(model, coord, out var obj) && obj.IsStationary;
         
         private static bool IsBlockerSideSource(IGridModel model, Vector2Int src, int dirX)
         {
@@ -237,11 +237,13 @@ namespace Core.Utils
             return false;
         }
 
-        private static bool IsBlockedBelow(IGridModel model, Vector2Int sourceCoord)
+        private static bool IsStationaryBlockedBelow(IGridModel model, Vector2Int sourceCoord)
         {
             if (!model.TryGetNeighbourCoord(sourceCoord, new Vector2Int(0, 1), out var below)) return true;
             if (!model.IsCellActive(below)) return true;
-            return model.GetGridObject(below);
+
+            var obj = model.GetGridObject(below);
+            return obj && obj.IsStationary;
         }
         
         private static bool TryFindFirstObjectAboveInSameSegment(IGridModel model, Vector2Int from, out BaseGridObject obj)
