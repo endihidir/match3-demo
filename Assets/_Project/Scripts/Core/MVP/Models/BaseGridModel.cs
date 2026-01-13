@@ -115,14 +115,8 @@ namespace Core.Models
             return count > 0;
         }
 
-        public bool IsCellActive(Vector2Int coord)
-        {
-            if (!IsInRange(coord.x, coord.y)) return false;
-            return ActiveCells[coord.x, coord.y];
-        }
-
+        public bool IsCellActive(Vector2Int coord) => IsInRange(coord.x, coord.y) && ActiveCells[coord.x, coord.y];
         public bool IsInRange(Vector2Int coord) => IsInRange(coord.x, coord.y);
-
         public bool IsInRange(int x, int y) => x >= 0 && y >= 0 && x < Width && y < Height;
 
         protected virtual void SetInternal(Vector2Int coord, T value, bool raiseEvent = true)

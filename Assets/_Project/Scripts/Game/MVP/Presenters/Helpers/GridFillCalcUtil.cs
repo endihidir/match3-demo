@@ -15,9 +15,7 @@ namespace Core.Utils
                 {
                     if (!TryGetActiveObject(model, x, y, out var obj)) continue;
                     if (!obj.IsStationary) continue;
-
-                    if (CanPassUnderStationary(model, x, y))
-                        return true;
+                    if (CanPassUnderStationary(model, x, y)) return true;
                 }
             }
 
@@ -29,19 +27,16 @@ namespace Core.Utils
             // Scan downwards in the same column.
             for (int y = stationaryY + 1; y < model.Height; y++)
             {
-                var c = new Vector2Int(x, y);
+                var coord = new Vector2Int(x, y);
 
                 // If the column segment ends, there is nothing "under" to pass into.
-                if (!model.IsCellActive(c))
-                    return false;
+                if (!model.IsCellActive(coord)) return false;
 
                 // Empty active cell under stationary => pass/slide is possible.
-                if (!TryGetActiveObject(model, x, y, out var obj))
-                    return true;
+                if (!TryGetActiveObject(model, x, y, out var obj)) return true;
 
                 // Non-stationary under stationary => eventually something can move / space can be created.
-                if (!obj.IsStationary)
-                    return true;
+                if (!obj.IsStationary) return true;
 
                 // Still stationary, keep scanning.
             }
@@ -86,15 +81,15 @@ namespace Core.Utils
         {
             for (int sy = y - 1; sy >= 0; sy--)
             {
-                var c = new Vector2Int(x, sy);
+                var coord = new Vector2Int(x, sy);
 
-                if (!model.IsCellActive(c))
+                if (!model.IsCellActive(coord))
                 {
                     source = default;
                     return false;
                 }
 
-                var obj = model.GetGridObject(c);
+                var obj = model.GetGridObject(coord);
 
                 if (!obj) continue;
 
@@ -104,7 +99,7 @@ namespace Core.Utils
                     return false;
                 }
 
-                source = c;
+                source = coord;
                 return true;
             }
 
@@ -208,11 +203,11 @@ namespace Core.Utils
         {
             for (int sy = src.y + 1; sy < model.Height; sy++)
             {
-                var c = new Vector2Int(src.x, sy);
+                var coord = new Vector2Int(src.x, sy);
 
-                if (!model.IsCellActive(c)) return false;
+                if (!model.IsCellActive(coord)) return false;
 
-                var obj = model.GetGridObject(c);
+                var obj = model.GetGridObject(coord);
 
                 if (obj && obj.IsStationary) return false;
 
@@ -222,9 +217,9 @@ namespace Core.Utils
             return false;
         }
         
-        private static bool DestinationBlockedByAdjacentRoof(IGridModel model, Vector2Int targetCoord)
+        private static bool DestinationBlockedByAdjacentRoof(IGridModel model, Vector2Int sourceCoord)
         {
-            if (!model.TryGetNeighbourCoord(targetCoord, new Vector2Int(0, -1), out var roof)) return false;
+            if (!model.TryGetNeighbourCoord(sourceCoord, new Vector2Int(0, -1), out var roof)) return false;
             if (!model.IsCellActive(roof)) return false;
 
             if (model.TryGetNeighbourCoord(roof, new Vector2Int(-1, 0), out var lu) && model.IsCellActive(lu))
@@ -242,9 +237,9 @@ namespace Core.Utils
             return false;
         }
 
-        private static bool IsBlockedBelow(IGridModel model, Vector2Int c)
+        private static bool IsBlockedBelow(IGridModel model, Vector2Int sourceCoord)
         {
-            if (!model.TryGetNeighbourCoord(c, new Vector2Int(0, 1), out var below)) return true;
+            if (!model.TryGetNeighbourCoord(sourceCoord, new Vector2Int(0, 1), out var below)) return true;
             if (!model.IsCellActive(below)) return true;
             return model.GetGridObject(below);
         }
