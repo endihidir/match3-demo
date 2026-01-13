@@ -91,16 +91,16 @@ namespace Core.Handlers
                 {
                     for (int x = 0; x < width; x++)
                     {
-                        var target = new Vector2Int(x, y);
+                        var sourceCoord = new Vector2Int(x, y);
 
-                        if (!GridFillCalcUtil.IsEmptyActiveCell(model, target)) continue;
+                        if (!GridFillCalcUtil.IsEmptyActiveCell(model, sourceCoord)) continue;
                         if (GridFillCalcUtil.CanFallVertically(model, x, y, out _)) continue;
-                        if (!GridFillCalcUtil.HasStationaryAboveInSameSegment(model, target)) continue;
+                        if (!GridFillCalcUtil.HasStationaryAboveInSameSegment(model, sourceCoord)) continue;
 
-                        if (GridFillCalcUtil.TryCollectDiagonalSide(model, target, 1, out var right))
+                        if (GridFillCalcUtil.TryCollectDiagonalSide(model, sourceCoord, 1, out var right))
                             _candidates.Add(right);
 
-                        if (GridFillCalcUtil.TryCollectDiagonalSide(model, target, -1, out var left))
+                        if (GridFillCalcUtil.TryCollectDiagonalSide(model, sourceCoord, -1, out var left))
                             _candidates.Add(left);
                     }
                 }
@@ -118,23 +118,23 @@ namespace Core.Handlers
 
                 for (int i = 0; i < _candidates.Count; i++)
                 {
-                    var c = _candidates[i];
+                    var candidate = _candidates[i];
                     
-                    if (model.GetGridObject(c.From) != c.Item) continue;
-                    if (model.GetGridObject(c.To) != null) continue;
+                    if (model.GetGridObject(candidate.From) != candidate.Item) continue;
+                    if (model.GetGridObject(candidate.To) != null) continue;
 
-                    var ti = c.To.x + c.To.y * width;
+                    var ti = candidate.To.x + candidate.To.y * width;
                     if (_usedTargetStamp[ti] == _usedTargetStampId) continue;
                     _usedTargetStamp[ti] = _usedTargetStampId;
 
-                    var fi = c.From.x + c.From.y * width;
+                    var fi = candidate.From.x + candidate.From.y * width;
                     if (_usedSourceStamp[fi] == _usedSourceStampId) continue;
                     _usedSourceStamp[fi] = _usedSourceStampId;
 
-                    model.SetGridObject(c.From, null);
-                    model.SetGridObject(c.To, c.Item);
+                    model.SetGridObject(candidate.From, null);
+                    model.SetGridObject(candidate.To, candidate.Item);
 
-                    AddStep(c.Item, c.To, false);
+                    AddStep(candidate.Item, candidate.To, false);
                     movedAny = true;
                 }
                 

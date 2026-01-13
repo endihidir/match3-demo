@@ -24,10 +24,12 @@ namespace Core.Utils
                 var p = stack.Pop();
                 result.Add(p);
 
-                TryPush(p.x + 1, p.y);
-                TryPush(p.x - 1, p.y);
-                TryPush(p.x, p.y + 1);
-                TryPush(p.x, p.y - 1);
+                foreach (var dir in DirectionLookup.LinearDirections)
+                {
+                    if (!model.TryGetNeighbourCoord(p, dir, out var n)) continue;
+                    
+                    TryPush(n.x, n.y);
+                }
             }
 
             return result;
