@@ -5,10 +5,11 @@ using Core.Services;
 using Core.Utils;
 using Core.Views;
 using UnityEngine;
+using VContainer.Unity;
 
 namespace Core.Presenters
 {
-    public class GridPresenter : IDisposable
+    public class GridPresenter : IInitializable, IDisposable
     {
         private readonly IGridModel _gridModel;
         private readonly IGridView _gridView;

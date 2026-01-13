@@ -1,4 +1,3 @@
-using Core.Bootstrapper;
 using Core.Presenters;
 using Core.Views;
 using VContainer;
@@ -10,12 +9,8 @@ namespace Core.LifetimeScopes
     {
         protected override void Configure(IContainerBuilder builder)
         {
-            builder.RegisterEntryPoint<MenuBootstrapper>();
-            
+            builder.RegisterEntryPoint<MainMenuPresenter>();
             builder.RegisterComponentInHierarchy<PlayButtonView>().As<IPlayButtonView>();
-            builder.Register<MainMenuPresenter>(Lifetime.Scoped).As<IInitializable>();
         }
-
-        private void Start() => Build();
     }
 }

@@ -150,9 +150,9 @@ namespace Core.SceneService
                 await OnTransitionOut.Invoke();
             }
             
-            OnLoadComplete?.Invoke();
-            
             CurrentSceneGroupType = groupType;
+            
+            OnLoadComplete?.Invoke();
         }
 
         private async UniTask UnloadSceneAsync()

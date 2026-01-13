@@ -229,8 +229,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   parentReference:
-    TypeName: 
-  autoRun: 0
+    TypeName: Core.LifetimeScopes.AppLifetimeScope
+  autoRun: 1
   autoInjectGameObjects: []
   <GameplayConfigContainer>k__BackingField: {fileID: 11400000, guid: f503e54070851b94ebd161bb6103e266,
     type: 2}

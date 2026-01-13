@@ -20,29 +20,24 @@ namespace Core.LifetimeScopes
         {
             builder.RegisterInstance(GameplayConfigContainer);
             builder.RegisterEntryPoint<GameplayBootstrapper>();
+            builder.RegisterEntryPoint<GridPresenter>();
+            builder.RegisterEntryPoint<GameplayFactoryCleaner>();
             
             builder.Register<InputService>(Lifetime.Scoped).As<IInputService, ITickable>();
             builder.Register<LevelGoalModel>(Lifetime.Scoped).As<ILevelGoalModel>();
             
-            builder.Register<GameplayFactoryCleaner>(Lifetime.Scoped);
-            builder.Register<GridItemFactory>(Lifetime.Scoped).As<IGridItemFactory, IFactoryCleaner>();
             builder.Register<LevelGridInstaller>(Lifetime.Scoped).As<ILevelGridInstaller>();
+            builder.Register<GridItemFactory>(Lifetime.Scoped).As<IGridItemFactory, IFactoryCleaner>();
             
-            builder.Register<GridStateHandler>(Lifetime.Scoped).As<IGridStateHandler, ITickable, IFixedTickable, ILateTickable>();
             builder.Register<GridModel>(Lifetime.Scoped).As<IGridModel>();
             builder.RegisterComponentInHierarchy<GridView>().As<IGridView>();
-            builder.Register<GridPresenter>(Lifetime.Scoped);
+            builder.Register<GridStateHandler>(Lifetime.Scoped).As<IGridStateHandler, ITickable, IFixedTickable, ILateTickable>();
             builder.Register<GridCheatHandler>(Lifetime.Scoped).As<IGridCheatHandler, ITickable>();
             
             builder.Register<FillStrategyResolver>(Lifetime.Scoped).As<IFillStrategyResolver>();
             builder.Register<FallDownFillStrategy>(Lifetime.Scoped).As<IFillStrategy>();
             builder.Register<SlideDownFillStrategy>(Lifetime.Scoped).As<IFillStrategy>();
             builder.Register<FillItemDecider>(Lifetime.Scoped).As<IFillItemDecider>();
-        }
-
-        private void Start()
-        {
-            Build();
         }
     }
 }
