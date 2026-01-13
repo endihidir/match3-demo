@@ -14,7 +14,7 @@ namespace Core.Bootstrapper
 {
     public class GameplayBootstrapper : IInitializable, IDisposable
     {
-        [Inject] private readonly ISceneLoadContext _loadContext;
+        [Inject] private readonly ISceneLoadState _loadState;
         [Inject] private readonly ILevelDefinitionProvider _levelDefinitionProvider;
         [Inject] private readonly ILevelGridInstaller _levelGridInstaller;
         [Inject] private readonly IGridModel _gridModel;
@@ -23,12 +23,12 @@ namespace Core.Bootstrapper
         
         public void Initialize()
         {
-            _loadContext.OnLoadComplete += OnSceneReady;
+            _loadState.OnLoadComplete += OnSceneReady;
         }
 
         private void OnSceneReady()
         {
-            if(_loadContext.CurrentSceneGroupType != SceneGroupType.GameScene) return;
+            if(_loadState.CurrentSceneGroupType != SceneGroupType.GameScene) return;
             
             DOTween.SetTweensCapacity(2000, 500);
             
@@ -61,7 +61,7 @@ namespace Core.Bootstrapper
         private void EnableInput() => _inputService.Enable();
         public void Dispose()
         {
-            _loadContext.OnLoadComplete -= OnSceneReady;
+            _loadState.OnLoadComplete -= OnSceneReady;
         }
     }
 }

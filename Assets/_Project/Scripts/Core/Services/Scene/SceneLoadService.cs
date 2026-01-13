@@ -13,13 +13,13 @@ using VContainer.Unity;
 
 namespace Core.SceneService
 {
-    public interface ISceneLoadContext
+    public interface ISceneLoadState
     {
         event Action OnLoadStart;
         event Action OnScenesUnload; 
         event Action OnScenesLoad; 
         event Action OnScenesActivate; 
-        event Func<UniTask>  OnTransitionOut; 
+        event Func<UniTask> OnTransitionOut; 
         event Action OnLoadComplete;
         ProgressHandler Progress { get; }
         SceneGroupType CurrentSceneGroupType { get; }
@@ -35,7 +35,7 @@ namespace Core.SceneService
         UniTask LoadSceneGroupAsync(SceneGroupType groupType, bool useTransitionView = false, bool reloadDupScenes = false);
     }
 
-    public class SceneLoadService : ISceneLoadService, ISceneLoadContext, ITickable
+    public class SceneLoadService : ISceneLoadService, ISceneLoadState, ITickable
     {
         private readonly SceneLoadServiceConfig _sceneLoadConfig;
         private readonly AsyncOperationHandleGroup _handleGroup;

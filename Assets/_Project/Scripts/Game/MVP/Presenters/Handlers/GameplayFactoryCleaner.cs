@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Core.Generated;
 using Core.Item.Factories;
 using Core.SceneService;
 using VContainer.Unity;
@@ -8,22 +9,24 @@ namespace Core.Handlers
 {
     public class GameplayFactoryCleaner : IInitializable, IDisposable
     {
-        private readonly ISceneLoadContext _sceneLoadContext;
+        private readonly ISceneLoadState _sceneLoadState;
         private readonly IEnumerable<IFactoryCleaner> _factoryCleaners;
         
-        public GameplayFactoryCleaner(ISceneLoadContext sceneLoadContext, IEnumerable<IFactoryCleaner> factoryCleaners)
+        public GameplayFactoryCleaner(ISceneLoadState sceneLoadState, IEnumerable<IFactoryCleaner> factoryCleaners)
         {
-            _sceneLoadContext = sceneLoadContext;
+            _sceneLoadState = sceneLoadState;
             _factoryCleaners = factoryCleaners;
         }
         
         public void Initialize()
         {
-            _sceneLoadContext.OnLoadStart += OnSceneUnload;
+            _sceneLoadState.OnLoadStart += OnSceneUnload;
         }
         
         private void OnSceneUnload()
         {
+            if(_sceneLoadState.CurrentSceneGroupType != SceneGroupType.GameScene) return;
+            
             foreach (var cleaner in _factoryCleaners)
             {
                 cleaner.CleanupFactory();
@@ -32,7 +35,7 @@ namespace Core.Handlers
 
         public void Dispose()
         {
-            _sceneLoadContext.OnLoadStart -= OnSceneUnload;
+            _sceneLoadState.OnLoadStart -= OnSceneUnload;
         }
     }
 }

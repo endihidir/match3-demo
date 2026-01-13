@@ -10,22 +10,22 @@ namespace Core.Presenters
 {
     public class SceneTransitionPresenter : IInitializable, ITickable, IDisposable
     {
-        private readonly ISceneLoadContext _sceneLoadContext;
+        private readonly ISceneLoadState _sceneLoadState;
         private readonly ISceneTransitionModel _transitionModel;
         private readonly ISceneTransitionView _transitionView;
         private bool _isTransitionViewEnabled = false;
-        public SceneTransitionPresenter(ISceneLoadContext sceneLoadContext, ISceneTransitionModel sceneTransitionTransitionModel, ISceneTransitionView transitionView)
+        public SceneTransitionPresenter(ISceneLoadState sceneLoadState, ISceneTransitionModel sceneTransitionTransitionModel, ISceneTransitionView transitionView)
         {
-            _sceneLoadContext = sceneLoadContext;
+            _sceneLoadState = sceneLoadState;
             _transitionModel = sceneTransitionTransitionModel;
             _transitionView = transitionView;
         }
 
         public void Initialize()
         {
-            _sceneLoadContext.OnLoadStart += OnBeforeTransition;
-            _sceneLoadContext.Progress.Progressed += OnTransitionProgressed;
-            _sceneLoadContext.OnTransitionOut += OnBeforeTransitionOut;
+            _sceneLoadState.OnLoadStart += OnBeforeTransition;
+            _sceneLoadState.Progress.Progressed += OnTransitionProgressed;
+            _sceneLoadState.OnTransitionOut += OnBeforeTransitionOut;
             
             _transitionView.SetLabelText("Loading...");
             _transitionView.DisableAsync(0f, .25f).Forget();
@@ -46,7 +46,7 @@ namespace Core.Presenters
         
         private void OnBeforeTransition()
         {
-            _isTransitionViewEnabled = _sceneLoadContext.IsTransitionViewActivated;
+            _isTransitionViewEnabled = _sceneLoadState.IsTransitionViewActivated;
             
             if (!_isTransitionViewEnabled) return;
 
@@ -74,9 +74,9 @@ namespace Core.Presenters
         
         public void Dispose()
         {
-            _sceneLoadContext.OnLoadStart -= OnBeforeTransition;
-            _sceneLoadContext.Progress.Progressed -= OnTransitionProgressed;
-            _sceneLoadContext.OnTransitionOut -= OnBeforeTransitionOut;
+            _sceneLoadState.OnLoadStart -= OnBeforeTransition;
+            _sceneLoadState.Progress.Progressed -= OnTransitionProgressed;
+            _sceneLoadState.OnTransitionOut -= OnBeforeTransitionOut;
         }
     }
 }
