@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using Core.Item.Factories;
 using Core.SceneService;
+using VContainer.Unity;
 
 namespace Core.Handlers
 {
-    public class GameplayFactoryCleaner : IDisposable
+    public class GameplayFactoryCleaner : IInitializable, IDisposable
     {
         private readonly ISceneLoadContext _sceneLoadContext;
         private readonly IEnumerable<IFactoryCleaner> _factoryCleaners;

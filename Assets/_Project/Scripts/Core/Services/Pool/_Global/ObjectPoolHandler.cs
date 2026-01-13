@@ -59,23 +59,38 @@ namespace Core.Pool
             
             if (!_poolParent) CreatePoolParent();
             
-            IPooledObject pooledObject;
+            IPooledObject pooledObject = null;
             
             T component = null;
             
             if (_isUnique)
             {
-                if (!Pool.TryPeek(out pooledObject))
+                if (Pool.TryPeek(out var peeked))
                 {
-                    pooledObject = GetNewPooledObject();
+                    if (peeked is Component c && !c)
+                    {
+                        ClearPool();
+                    }
+                    else
+                    {
+                        pooledObject = peeked;
+                    }
                 }
             }
             else
             {
-                if (!Pool.TryDequeue(out pooledObject))
+                while (Pool.TryDequeue(out var candidate))
                 {
-                    pooledObject = GetNewPooledObject();
+                    if (candidate is Component c && !c) continue;
+
+                    pooledObject = candidate;
+                    break;
                 }
+            }
+            
+            if (pooledObject == null)
+            {
+                pooledObject = GetNewPooledObject();
             }
             
             if (activate) 
@@ -188,7 +203,15 @@ namespace Core.Pool
             onComplete?.Invoke();
         }
         
-        private bool HasAnyPooledMissing() => Pool.Any(pooledObject => pooledObject is null);
+        private bool HasAnyPooledMissing()
+        {
+            foreach (var po in Pool)
+            {
+                if (po == null) return true;
+                if (po is Component c && !c) return true;
+            }
+            return false;
+        }
 
         private void CreatePoolParent()
         {

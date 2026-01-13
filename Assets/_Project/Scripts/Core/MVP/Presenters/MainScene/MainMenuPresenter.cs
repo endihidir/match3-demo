@@ -1,5 +1,6 @@
 using System;
 using Core.Generated;
+using Core.Level;
 using Core.SceneService;
 using Core.Views;
 using Cysharp.Threading.Tasks;
@@ -9,17 +10,21 @@ namespace Core.Presenters
 {
     public sealed class MainMenuPresenter : IInitializable, IDisposable
     {
+        private readonly ILevelDefinitionProvider _levelDefinitionProvider;
         private readonly ISceneLoadService _sceneLoadService;
         private readonly IPlayButtonView _playButtonView;
         
-        public MainMenuPresenter(ISceneLoadService sceneLoadService, IPlayButtonView playButtonView)
+        public MainMenuPresenter(ILevelDefinitionProvider levelDefinitionProvider, ISceneLoadService sceneLoadService, IPlayButtonView playButtonView)
         {
+            _levelDefinitionProvider = levelDefinitionProvider;
             _sceneLoadService = sceneLoadService;
             _playButtonView = playButtonView;
         }
         
         public void Initialize()
         {
+            _playButtonView.SetLevelNumber(_levelDefinitionProvider.GetLevelNumber());
+            
             AddListeners();
         }
 

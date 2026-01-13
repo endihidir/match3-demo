@@ -634,7 +634,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   parentReference:
     TypeName: Core.LifetimeScopes.AppLifetimeScope
-  autoRun: 0
+  autoRun: 1
   autoInjectGameObjects: []
 --- !u!1 &1995734521
 GameObject:
