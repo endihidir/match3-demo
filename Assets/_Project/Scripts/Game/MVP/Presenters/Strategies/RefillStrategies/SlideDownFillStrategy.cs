@@ -55,13 +55,14 @@ namespace Core.Handlers
             var height = model.Height;
 
             EnsureBuffers(width, height);
-            
+
             var movedAny = true;
 
             while (movedAny)
             {
                 movedAny = false;
 
+                // 1) Vertical falls
                 for (int x = 0; x < width; x++)
                 {
                     for (int y = height - 1; y >= 0; y--)
@@ -82,26 +83,7 @@ namespace Core.Handlers
                     }
                 }
 
-                _candidates.Clear();
-
-                for (int y = height - 1; y >= 1; y--)
-                {
-                    for (int x = 0; x < width; x++)
-                    {
-                        var sourceCoord = new Vector2Int(x, y);
-
-                        if (!GridFillCalcUtil.IsEmptyActiveCell(model, sourceCoord)) continue;
-                        if (GridFillCalcUtil.CanFallVertically(model, x, y, out _)) continue;
-                        if (!GridFillCalcUtil.HasStationaryAboveInSameSegment(model, sourceCoord)) continue;
-
-                        if (GridFillCalcUtil.TryCollectDiagonalSide(model, sourceCoord, 1, out var right))
-                            _candidates.Add(right);
-
-                        if (GridFillCalcUtil.TryCollectDiagonalSide(model, sourceCoord, -1, out var left))
-                            _candidates.Add(left);
-                    }
-                }
-
+                // 2) Diagonal slides (NO snapshot list; apply immediately against current grid)
                 _usedTargetStampId++;
                 _usedSourceStampId++;
 
@@ -113,28 +95,30 @@ namespace Core.Handlers
                     _usedSourceStampId = 1;
                 }
 
-                for (int i = 0; i < _candidates.Count; i++)
+                for (int y = height - 1; y >= 1; y--)
                 {
-                    var candidate = _candidates[i];
-                    
-                    if (model.GetGridObject(candidate.From) != candidate.Item) continue;
-                    if (model.GetGridObject(candidate.To) != null) continue;
+                    for (int x = 0; x < width; x++)
+                    {
+                        var targetCoord = new Vector2Int(x, y);
 
-                    var ti = candidate.To.x + candidate.To.y * width;
-                    if (_usedTargetStamp[ti] == _usedTargetStampId) continue;
-                    _usedTargetStamp[ti] = _usedTargetStampId;
+                        if (!GridFillCalcUtil.IsEmptyActiveCell(model, targetCoord)) continue;
+                        if (GridFillCalcUtil.CanFallVertically(model, x, y, out _)) continue;
+                        if (!GridFillCalcUtil.HasStationaryAboveInSameSegment(model, targetCoord)) continue;
 
-                    var fi = candidate.From.x + candidate.From.y * width;
-                    if (_usedSourceStamp[fi] == _usedSourceStampId) continue;
-                    _usedSourceStamp[fi] = _usedSourceStampId;
+                        // Prefer right then left (keep your original priority)
+                        var firstDir = ((x ^ y ^ _usedTargetStampId) & 1) == 0 ? -1 : 1;
+                        var secondDir = -firstDir;
 
-                    model.SetGridObject(candidate.From, null);
-                    model.SetGridObject(candidate.To, candidate.Item);
-
-                    AddStep(candidate.Item, candidate.To, false);
-                    movedAny = true;
+                        if (TryApplySlideCandidate(model, width, targetCoord, firstDir, out var movedItem) ||
+                            TryApplySlideCandidate(model, width, targetCoord, secondDir, out movedItem))
+                        {
+                            AddStep(movedItem, targetCoord, false);
+                            movedAny = true;
+                        }
+                    }
                 }
-                
+
+                // 3) Spawns
                 for (int x = 0; x < width; x++)
                 {
                     if (SpawnTopOpenSegment(context, view, x, height))
@@ -145,8 +129,34 @@ namespace Core.Handlers
             _runningAnimations = PlayAnimations(view, width);
             return this;
         }
-
         public UniTask WaitAnimationsAsync() => _runningAnimations;
+
+        private bool TryApplySlideCandidate(IGridModel model, int width, Vector2Int targetCoord, int dirX, out BaseGridObject movedItem)
+        {
+            movedItem = null;
+
+            if (!GridFillCalcUtil.TryCollectDiagonalSide(model, targetCoord, dirX, out var candidate))
+                return false;
+
+            // Re-validate against CURRENT grid (important even though we don’t snapshot anymore)
+            if (model.GetGridObject(candidate.From) != candidate.Item) return false;
+            if (model.GetGridObject(candidate.To) != null) return false;
+
+            var ti = candidate.To.x + candidate.To.y * width;
+            if (_usedTargetStamp[ti] == _usedTargetStampId) return false;
+            _usedTargetStamp[ti] = _usedTargetStampId;
+
+            var fi = candidate.From.x + candidate.From.y * width;
+            if (_usedSourceStamp[fi] == _usedSourceStampId) return false;
+            _usedSourceStamp[fi] = _usedSourceStampId;
+
+            model.SetGridObject(candidate.From, null);
+            model.SetGridObject(candidate.To, candidate.Item);
+
+            movedItem = candidate.Item;
+            return true;
+        }
+
 
         private void EnsureBuffers(int width, int height)
         {
@@ -310,7 +320,7 @@ namespace Core.Handlers
                     
                     if (moveRecord.IsSpawn)
                     {
-                        shiftWave = state.SpawnFall + state.Fall + state.SpawnSlide + state.Slide;
+                        shiftWave = state.SpawnFall + state.SpawnSlide;
                         state.SpawnFall++;
                     }
                     else
@@ -331,8 +341,8 @@ namespace Core.Handlers
                 }
                 else
                 {
-                    var startX = moveRecord.Start.x;
-                    ref var state = ref _waveByX[startX];
+                    var finalX = moveRecord.Final.x;
+                    ref var state = ref _waveByX[finalX];
 
                     int slideWave;
                     
@@ -371,7 +381,7 @@ namespace Core.Handlers
                         current = next;
                     }
 
-                    var tween = moveRecord.Item.ItemAnimation.Slide(pathWorldPoints .Array, length, segmentCellDistances.Array, delay);
+                    var tween = moveRecord.Item.ItemAnimation.Slide(pathWorldPoints.Array, length, segmentCellDistances.Array, delay);
                     _animTasks[taskCount++] = tween.ToUniTask();
                 }
             }
