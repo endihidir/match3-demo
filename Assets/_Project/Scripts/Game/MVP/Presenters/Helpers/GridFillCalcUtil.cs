@@ -145,7 +145,6 @@ namespace Core.Utils
 
         public static bool TryGetSpawnCellCoord(IGridModel model, int x, int height, out Vector2Int cellCoord)
         {
-            // Scan from top to bottom (y = 0 is top)
             for (int y = 0; y < height; y++)
             {
                 var coord = new Vector2Int(x, y);
@@ -251,6 +250,7 @@ namespace Core.Utils
                 if (!model.IsCellActive(c)) return false;
 
                 obj = model.GetGridObject(c);
+                
                 if (obj) return true;
             }
 
