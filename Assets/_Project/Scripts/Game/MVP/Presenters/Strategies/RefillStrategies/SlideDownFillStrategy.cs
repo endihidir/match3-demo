@@ -104,8 +104,7 @@ namespace Core.Handlers
                         if (!GridFillCalcUtil.IsEmptyActiveCell(model, targetCoord)) continue;
                         if (GridFillCalcUtil.CanFallVertically(model, x, y, out _)) continue;
                         if (!GridFillCalcUtil.HasStationaryAboveInSameSegment(model, targetCoord)) continue;
-
-                        // Prefer right then left (keep your original priority)
+                        
                         var firstDir = ((x ^ y ^ _usedTargetStampId) & 1) == 0 ? -1 : 1;
                         var secondDir = -firstDir;
 
@@ -137,10 +136,9 @@ namespace Core.Handlers
 
             if (!GridFillCalcUtil.TryCollectDiagonalSide(model, targetCoord, dirX, out var candidate))
                 return false;
-
-            // Re-validate against CURRENT grid (important even though we don’t snapshot anymore)
+            
             if (model.GetGridObject(candidate.From) != candidate.Item) return false;
-            if (model.GetGridObject(candidate.To) != null) return false;
+            if (model.GetGridObject(candidate.To)) return false;
 
             var ti = candidate.To.x + candidate.To.y * width;
             if (_usedTargetStamp[ti] == _usedTargetStampId) return false;

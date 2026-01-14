@@ -104,33 +104,33 @@ namespace Core.Utils
             return false;
         }
         
-        public static bool TryCollectDiagonalSide(IGridModel model, Vector2Int sourceCoord, int dirX, out SlideDownCandidate slide)
+        public static bool TryCollectDiagonalSide(IGridModel model, Vector2Int targetCoord, int dirX, out SlideDownCandidate slide)
         {
             slide = default;
             
-            if (!model.TryGetNeighbourCoord(sourceCoord, new Vector2Int(dirX, -1), out var src)) return false;
+            if (!model.TryGetNeighbourCoord(targetCoord, new Vector2Int(dirX, -1), out var sourceCoord)) return false;
 
-            if (!model.IsCellActive(src)) return false;
+            if (!model.IsCellActive(sourceCoord)) return false;
 
-            var item = model.GetGridObject(src);
+            var item = model.GetGridObject(sourceCoord);
             
             if (!item || item.IsStationary) return false;
 
-            if (IsBlockerSideSource(model, src, dirX))
+            if (IsBlockerSideSource(model, sourceCoord, dirX))
             {
-                slide = new SlideDownCandidate(item, src, sourceCoord);
+                slide = new SlideDownCandidate(item, sourceCoord, targetCoord);
                 return true;
             }
             
-            if (HasStationaryAboveInSameSegment(model, src) && !HasEmptyBelowInSegment(model, src))
+            if (HasStationaryAboveInSameSegment(model, sourceCoord) && !HasEmptyBelowInSegment(model, sourceCoord))
             {
-                slide = new SlideDownCandidate(item, src, sourceCoord);
+                slide = new SlideDownCandidate(item, sourceCoord, targetCoord);
                 return true;
             }
             
-            if (DestinationBlockedByAdjacentRoof(model, sourceCoord) && IsStationaryBlockedBelow(model, src))
+            if (DestinationBlockedByAdjacentRoof(model, targetCoord))
             {
-                slide = new SlideDownCandidate(item, src, sourceCoord);
+                slide = new SlideDownCandidate(item, sourceCoord, targetCoord);
                 return true;
             }
 
@@ -217,33 +217,27 @@ namespace Core.Utils
             return false;
         }
         
-        private static bool DestinationBlockedByAdjacentRoof(IGridModel model, Vector2Int sourceCoord)
+        private static bool DestinationBlockedByAdjacentRoof(IGridModel model, Vector2Int targetCoord)
         {
-            if (!model.TryGetNeighbourCoord(sourceCoord, new Vector2Int(0, -1), out var roof)) return false;
+            if (!model.TryGetNeighbourCoord(targetCoord, new Vector2Int(0, -1), out var roof)) return false;
             if (!model.IsCellActive(roof)) return false;
+
+            var roofObj = model.GetGridObject(roof);
+            if (!roofObj || !roofObj.IsStationary) return false;
 
             if (model.TryGetNeighbourCoord(roof, new Vector2Int(-1, 0), out var lu) && model.IsCellActive(lu))
             {
-                var o = model.GetGridObject(lu);
-                if (o && o.IsStationary) return true;
+                var leftObject = model.GetGridObject(lu);
+                if (leftObject && leftObject.IsStationary) return true;
             }
 
             if (model.TryGetNeighbourCoord(roof, new Vector2Int(1, 0), out var ru) && model.IsCellActive(ru))
             {
-                var o = model.GetGridObject(ru);
-                if (o && o.IsStationary) return true;
+                var rightObject = model.GetGridObject(ru);
+                if (rightObject && rightObject.IsStationary) return true;
             }
 
             return false;
-        }
-
-        private static bool IsStationaryBlockedBelow(IGridModel model, Vector2Int sourceCoord)
-        {
-            if (!model.TryGetNeighbourCoord(sourceCoord, new Vector2Int(0, 1), out var below)) return true;
-            if (!model.IsCellActive(below)) return true;
-
-            var obj = model.GetGridObject(below);
-            return obj && obj.IsStationary;
         }
         
         private static bool TryFindFirstObjectAboveInSameSegment(IGridModel model, Vector2Int from, out BaseGridObject obj)
