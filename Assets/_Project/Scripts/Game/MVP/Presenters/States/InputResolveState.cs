@@ -56,7 +56,7 @@ namespace Core.Handlers
             }
 
             AddBoosterAction(sourceCoord, booster);
-            ReleaseItem(sourceObj, sourceCoord);
+            Context.ReleaseAndSetNull(sourceObj, sourceCoord);
             RequestExit();
         }
 
@@ -80,7 +80,8 @@ namespace Core.Handlers
                 return;
             }
             
-            if (!IsCellsRegular(sourceObj, targetObj) || !IsCellsMatched(sourceCoord, targetCoord, sourceObj.ObjectType.TypeId, targetObj.ObjectType.TypeId))
+            if (!GridMatchRules.IsCellsRegular(sourceObj, targetObj) || 
+                !IsCellsMatched(sourceCoord, targetCoord, sourceObj.ObjectType.TypeId, targetObj.ObjectType.TypeId))
             {
                 PlaySwapAndBack(sourceObj, targetObj, sourceCoord, targetCoord).Forget();
                 return;
@@ -132,22 +133,22 @@ namespace Core.Handlers
             if (sourceObj is BoosterObject sourceBooster && targetObj is BoosterObject targetBooster)
             {
                 AddComboAction(sourceCoord, sourceBooster.BoosterType, targetBooster.BoosterType);
-                ReleaseItem(sourceObj, sourceCoord);
-                ReleaseItem(targetObj, targetCoord);
+                Context.ReleaseAndSetNull(sourceObj, sourceCoord);
+                Context.ReleaseAndSetNull(targetObj, targetCoord);
                 return;
             }
 
             if (targetObj is BoosterObject movedBoosterToB)
             {
                 AddBoosterAction(targetCoord, movedBoosterToB);
-                ReleaseItem(targetObj, targetCoord);
+                Context.ReleaseAndSetNull(targetObj, targetCoord);
                 return;
             }
 
             if (sourceObj is BoosterObject movedBoosterToA)
             {
                 AddBoosterAction(sourceCoord, movedBoosterToA);
-                ReleaseItem(sourceObj, sourceCoord);
+                Context.ReleaseAndSetNull(sourceObj, sourceCoord);
                 return;
             }
             
@@ -158,7 +159,9 @@ namespace Core.Handlers
         {
             if (!booster || booster.BoosterAction == null) return;
 
-            Context.PendingBoosterActions.Add(new BoosterActionContext(Context.NextBoosterGroupId(), originCoord, booster.BoosterAction));
+            var boosterActionContext = new BoosterActionContext(Context.NextBoosterGroupId(), originCoord, booster.BoosterAction);
+
+            Context.PendingBoosterActions.Add(boosterActionContext);
         }
 
         private void AddComboAction(Vector2Int origin, BoosterType sourceBoosterType, BoosterType targetBoosterType)
@@ -173,26 +176,15 @@ namespace Core.Handlers
                 {
                     if (boosterEffectBase == null) continue;
 
-                    Context.PendingBoosterActions.Add(new BoosterActionContext(nextGroupId, origin, boosterEffectBase));
+                    var boosterActionContext = new BoosterActionContext(nextGroupId, origin, boosterEffectBase);
+
+                    Context.PendingBoosterActions.Add(boosterActionContext);
                 }
             }
             else
             {
                 EditorLogger.LogError($"{sourceBoosterType} - {targetBoosterType} merge rule does not exist!");
             }
-        }
-        
-        private void ReleaseItem(BaseGridObject sourceObj, Vector2Int sourceCoord)
-        {
-            Context.Factory.ReleaseItem(sourceObj);
-            Context.Model.SetGridObject(sourceCoord, null);
-        }
-
-        private bool IsCellsRegular(BaseGridObject sourceObj, BaseGridObject targetObj)
-        {
-            var isSourceRegular = GridMatchDetectUtil.IsRegularItem(sourceObj.ObjectType);
-            var isTargetRegular = GridMatchDetectUtil.IsRegularItem(targetObj.ObjectType);
-            return isSourceRegular && isTargetRegular;
         }
         
         private bool IsCellsMatched(Vector2Int coordA, Vector2Int coordB, int typeA, int typeB)

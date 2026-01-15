@@ -17,11 +17,11 @@ namespace Core.Handlers
 
         protected override void OnEnter()
         {
-            RefillGrid().Forget();
+            FillGridAsync().Forget();
             RequestExit();
         }
 
-        private async UniTask RefillGrid()
+        private async UniTask FillGridAsync()
         {
             var strategy = _strategyResolver.ResolveStrategy(Context.Model);
             

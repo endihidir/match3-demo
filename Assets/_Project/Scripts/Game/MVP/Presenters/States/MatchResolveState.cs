@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Core.Item;
 using Core.Models;
 using Core.StateMachineCore;
@@ -99,9 +100,9 @@ namespace Core.Handlers
             
             var centerCoord = anyForced ? forcedCoord : GridBoosterDecision.SelectMergeCenter(group);
             
-            var mergeObjs = GridMatchResolveUtil.GetMergedGroupObject(group, model, centerCoord);
+            var mergeObjs = GetMergedGroupObject(group, model, centerCoord);
             
-            GridMatchResolveUtil.SetNullMergedObjectCoords(model, group, centerCoord);
+            SetNullMergedObjectCoords(model, group, centerCoord);
             
             await PlayMergeAnimationAsync(mergeObjs, centerCoord);
             
@@ -111,8 +112,7 @@ namespace Core.Handlers
 
             if (centerObj)
             {
-                Context.Factory.ReleaseItem(centerObj);
-                model.SetGridObject(centerCoord, null);
+                Context.ReleaseAndSetNull(centerObj, centerCoord);
             }
 
             SpawnBooster(centerCoord, boosterType.Value);
@@ -128,10 +128,8 @@ namespace Core.Handlers
 
             var forced = Context.ForcedBoosterSpawnCoord;
 
-            for (int i = 0; i < group.Count; i++)
+            if (group.Any(t => t == forced))
             {
-                if (group[i] != forced) continue;
-
                 Context.HasForcedBoosterSpawnCoord = false;
                 forcedCoord = forced;
                 return true;
@@ -140,31 +138,54 @@ namespace Core.Handlers
             forcedCoord = default;
             return false;
         }
+        
+        private static BaseGridObject[] GetMergedGroupObject(List<Vector2Int> group, IGridModel model, Vector2Int centerCoord)
+        {
+            var mergeObjs = new BaseGridObject[group.Count - 1];
+            var index = 0;
+
+            foreach (var coord in group)
+            {
+                if (coord == centerCoord) continue;
+                var obj = model.GetGridObject(coord);
+                if (!obj) continue;
+                mergeObjs[index++] = obj;
+            }
+
+            return mergeObjs;
+        }
+        
+        private static void SetNullMergedObjectCoords(IGridModel model, List<Vector2Int> group, Vector2Int centerCoord)
+        {
+            foreach (var coord in group.Where(coord => coord != centerCoord))
+            {
+                model.SetGridObject(coord, null);
+            }
+        }
 
         private void ReleaseMergedObjects(BaseGridObject[] mergeObjs)
         {
-            for (int i = 0; i < mergeObjs.Length; i++)
+            foreach (var obj in mergeObjs)
             {
-                var obj = mergeObjs[i];
                 if (!obj) continue;
+                
                 Context.Factory.ReleaseItem(obj);
             }
         }
 
         private void ReleaseGroup(IGridModel model, List<Vector2Int> group, bool hasDamage = false, Vector2Int? exceptCoord = null)
         {
-            for (int i = 0; i < group.Count; i++)
+            foreach (var coord in group)
             {
-                var coord = group[i];
                 if (exceptCoord.HasValue && coord == exceptCoord.Value) continue;
 
                 var obj = model.GetGridObject(coord);
+                
                 if (!obj) continue;
 
                 if (hasDamage) ApplyNeighbourDamage(model, coord);
 
-                Context.Factory.ReleaseItem(obj);
-                model.SetGridObject(coord, null);
+                Context.ReleaseAndSetNull(obj, coord);
             }
         }
 
@@ -178,15 +199,13 @@ namespace Core.Handlers
                 
                 if (!obj) continue;
 
-                if (obj is IDamageableItem damageable)
-                {
-                    var result = damageable.TakeDamage(1, DamageSource.Match);
+                if (obj is not IDamageableItem damageable) continue;
+                
+                var result = damageable.TakeDamage(1, DamageSource.Match);
 
-                    if (result == DamageResult.Destroyed)
-                    {
-                        Context.Factory.ReleaseItem(obj);
-                        model.SetGridObject(neighbourCoord, null);
-                    }
+                if (result == DamageResult.Destroyed)
+                {
+                    Context.ReleaseAndSetNull(obj, neighbourCoord);
                 }
             }
         }

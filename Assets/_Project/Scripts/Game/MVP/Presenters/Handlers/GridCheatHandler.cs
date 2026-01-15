@@ -122,8 +122,7 @@ namespace Core.Handlers
             var obj = context.Model.GetGridObject(coord);
             if (!obj) return;
 
-            context.Factory.ReleaseItem(obj);
-            context.Model.SetGridObject(coord, null);
+            context.ReleaseAndSetNull(obj, coord);
         }
 
         private void PlaceItem(GridStateContext context, Vector2Int coord, BaseGridObject item)
