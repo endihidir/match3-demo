@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Core.Models;
 using Core.Utils;
 using Core.Views;
@@ -13,7 +12,8 @@ namespace Core.Handlers
         private readonly IFillItemDecider _itemDecider;
         private readonly IShiftAnimationScheduler _shiftAnimationScheduler;
 
-        private readonly List<FallDownMoveRecord> _records = new(256);
+        private FallDownMoveRecord[] _records = Array.Empty<FallDownMoveRecord>();
+        private int _recordCount;
 
         private ColumnWaveState[] _waveByX = Array.Empty<ColumnWaveState>();
         private UniTask[] _animTasks = new UniTask[128];
@@ -29,7 +29,7 @@ namespace Core.Handlers
 
         public IFillStrategy Execute(GridStateContext context)
         {
-            _records.Clear();
+            _recordCount = 0;
 
             var model = context.Model;
             var view = context.View;
@@ -42,16 +42,16 @@ namespace Core.Handlers
 
             for (int x = 0; x < width; x++)
             {
-                ShiftColumnLogic(model, x, height, _records);
+                ShiftColumnLogic(model, x, height);
 
                 if (GridFillCalcUtil.TryGetSpawnCellCoord(model, x, model.Height, out var spawnCell))
                 {
                     var spawnY = view.GridToWorld(spawnCell).y + cellSize;
-                    RefillColumnLogic(context, x, height, cellSize, spawnY, _records);
+                    RefillColumnLogic(context, x, height, cellSize, spawnY);
                 }
             }
 
-            _runningAnimations = PlayAnimations(context, _records);
+            _runningAnimations = PlayAnimations(context);
             return this;
         }
 
@@ -63,7 +63,21 @@ namespace Core.Handlers
                 _waveByX = new ColumnWaveState[width];
         }
 
-        private void ShiftColumnLogic(IGridModel model, int x, int height, List<FallDownMoveRecord> records)
+        private void EnsureRecordCapacity(int capacity)
+        {
+            if (_records.Length < capacity)
+                Array.Resize(ref _records, capacity);
+        }
+
+        private void AddRecord(in FallDownMoveRecord record)
+        {
+            if (_recordCount >= _records.Length)
+                Array.Resize(ref _records, _records.Length == 0 ? 256 : _records.Length * 2);
+
+            _records[_recordCount++] = record;
+        }
+
+        private void ShiftColumnLogic(IGridModel model, int x, int height)
         {
             for (int y = height - 1; y >= 0; y--)
             {
@@ -79,17 +93,16 @@ namespace Core.Handlers
                 var item = model.GetGridObject(src);
 
                 if (!item) continue;
-                
 
                 model.SetGridObject(coord, item);
                 model.SetGridObject(src, null);
-                
+
                 var fallMoveRecord = new FallDownMoveRecord(item, coord, false);
-                records.Add(fallMoveRecord);
+                AddRecord(fallMoveRecord);
             }
         }
 
-        private void RefillColumnLogic(GridStateContext stateContext, int x, int height, float cellSize, float spawnY, List<FallDownMoveRecord> records)
+        private void RefillColumnLogic(GridStateContext stateContext, int x, int height, float cellSize, float spawnY)
         {
             var model = stateContext.Model;
             var view = stateContext.View;
@@ -117,38 +130,38 @@ namespace Core.Handlers
                 model.SetGridObject(coord, item);
 
                 var fallMoveRecord = new FallDownMoveRecord(item, coord, true);
-                records.Add(fallMoveRecord);
+                AddRecord(fallMoveRecord);
                 stack++;
             }
         }
 
-        private UniTask PlayAnimations(GridStateContext context, List<FallDownMoveRecord> records)
+        private UniTask PlayAnimations(GridStateContext context)
         {
             var view = context.View;
             var width = context.Model.Width;
 
-            if (_animTasks.Length < records.Count)
-                Array.Resize(ref _animTasks, records.Count);
+            if (_animTasks.Length < _recordCount)
+                Array.Resize(ref _animTasks, _recordCount);
 
             Array.Clear(_waveByX, 0, width);
 
             var taskCount = 0;
 
-            ScheduleShift(view, width, records, false, _animTasks, ref taskCount);
-            ScheduleShift(view, width, records, true, _animTasks, ref taskCount);
+            ScheduleShift(view, width, false, _animTasks, ref taskCount);
+            ScheduleShift(view, width, true, _animTasks, ref taskCount);
 
             return taskCount == 0 ? UniTask.CompletedTask : UniTask.WhenAll(_animTasks.AsSpan(0, taskCount).ToArray());
         }
-        
-        private void ScheduleShift(IGridView view, int width, List<FallDownMoveRecord> records, bool passIsSpawn, UniTask[] animTasks, ref int taskCount)
+
+        private void ScheduleShift(IGridView view, int width, bool passIsSpawn, UniTask[] animTasks, ref int taskCount)
         {
             for (int x = 0; x < width; x++)
             {
                 ref var state = ref _waveByX[x];
 
-                for (int i = 0; i < records.Count; i++)
+                for (int i = 0; i < _recordCount; i++)
                 {
-                    var fallRecord = records[i];
+                    ref readonly var fallRecord = ref _records[i];
                     if (!fallRecord.Item) continue;
                     if (fallRecord.FinalCoord.x != x) continue;
                     if (fallRecord.IsSpawn != passIsSpawn) continue;

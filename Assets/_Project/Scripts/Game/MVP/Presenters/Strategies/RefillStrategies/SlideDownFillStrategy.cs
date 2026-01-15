@@ -376,15 +376,15 @@ namespace Core.Handlers
 
             for (int i = 0; i < _recordCount; i++)
             {
-                ref var r = ref _records[i];
+                ref var record = ref _records[i];
 
-                if (!r.Item || r.PathCount == 0) continue;
+                if (!record.Item || record.PathCount == 0) continue;
 
                 // Slide detection based on initial vs final x
-                var start = view.WorldToGrid(r.Item.transform.position);
-                r.IsSlide = start.x != r.FinalCoord.x;
+                var start = view.WorldToGrid(record.Item.transform.position);
+                record.IsSlide = start.x != record.FinalCoord.x;
 
-                var idx = r.FinalCoord.x + r.FinalCoord.y * width;
+                var idx = record.FinalCoord.x + record.FinalCoord.y * width;
                 _moveIndexByCell[idx] = i;
             }
         }
@@ -399,7 +399,8 @@ namespace Core.Handlers
                     var recordIndex = _moveIndexByCell[cellIndex];
                     if (recordIndex < 0) continue;
 
-                    var slideRecord = _records[recordIndex];
+                    ref readonly var slideRecord = ref _records[recordIndex];
+                    
                     if (!slideRecord.Item || slideRecord.IsSpawn != passIsSpawn) continue;
 
                     ref var columnWaveState = ref _waveByX[x];
