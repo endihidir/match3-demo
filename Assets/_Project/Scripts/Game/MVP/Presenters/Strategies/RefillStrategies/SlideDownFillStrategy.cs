@@ -408,11 +408,18 @@ namespace Core.Handlers
                     if (!slideRecord.IsSlide)
                     {
                         var fallRecord = new FallDownMoveRecord(slideRecord.Item, slideRecord.FinalCoord, slideRecord.IsSpawn);
-                        _shiftAnimationScheduler.Schedule(view, fallRecord, _animTasks, ref taskCount, ref columnWaveState);
+
+                        if (_shiftAnimationScheduler.TrySchedule(view, fallRecord, ref columnWaveState, out var task))
+                        { 
+                            _animTasks[taskCount++] = task;
+                        }
                     }
                     else
                     {
-                        _slideAnimationScheduler.Schedule(view, slideRecord, _pathCoord, _pathNext, _animTasks, ref taskCount, ref columnWaveState);
+                        if (_slideAnimationScheduler.TrySchedule(view, slideRecord, _pathCoord, _pathNext, ref columnWaveState, out var task))
+                        {
+                            _animTasks[taskCount++] = task;
+                        } 
                     }
                 }
             }

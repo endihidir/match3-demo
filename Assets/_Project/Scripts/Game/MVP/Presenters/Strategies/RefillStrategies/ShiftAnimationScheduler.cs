@@ -16,9 +16,11 @@ namespace Core.Handlers
         }
 
         // Schedules a vertical shift (fall/spawn-fall) using a minimal request.
-        public void Schedule(IGridView view, FallDownMoveRecord record, UniTask[] animTasks, ref int taskCount, ref ColumnWaveState state)
+        public bool TrySchedule(IGridView view, FallDownMoveRecord record, ref ColumnWaveState state, out UniTask task)
         {
-            if (!record.Item) return;
+            task = UniTask.CompletedTask;
+            
+            if (!record.Item) return false;
 
             var wave = record.IsSpawn ? state.SpawnFall + state.SpawnSlide + state.Slide + state.Fall : state.Fall;
 
@@ -34,7 +36,9 @@ namespace Core.Handlers
 
             var tween = record.Item.ItemAnimation.Shift(finalWorld, distCells, delay);
             
-            animTasks[taskCount++] = tween.ToUniTask();
+            task = tween.ToUniTask();
+
+            return true;
         }
     }
 }
