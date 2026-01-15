@@ -16,7 +16,7 @@ MonoBehaviour:
     type: 2}
   <ItemConfigContainer>k__BackingField: {fileID: 11400000, guid: b073fd11c439b684f8cf60ca66481a9b,
     type: 2}
-  <FillStrategySettings>k__BackingField: {fileID: 11400000, guid: 4640726bde3138b4ba2ba4961de0deca,
+  <FillAnimationSettings>k__BackingField: {fileID: 11400000, guid: 4640726bde3138b4ba2ba4961de0deca,
     type: 2}
   <FillItemDecisionSettings>k__BackingField: {fileID: 11400000, guid: becfe7e5b59c2dd4c9fc46fc0f2cdda3,
     type: 2}

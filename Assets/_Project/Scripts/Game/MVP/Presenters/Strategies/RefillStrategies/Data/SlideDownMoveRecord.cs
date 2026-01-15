@@ -1,26 +1,27 @@
-using System.Collections.Generic;
 using Core.Item;
 using UnityEngine;
 
 namespace Core.Handlers
 {
-    public readonly struct SlideDownMoveRecord
+    public struct SlideDownMoveRecord
     {
         public readonly BaseGridObject Item;
-        public readonly List<Vector2Int> Path;
-        public readonly Vector2Int Start;
-        public readonly Vector2Int Final;
-        public readonly bool IsSpawn;
-        public readonly bool IsSlide;
+        public int HeadNode;
+        public int TailNode;
+        public int PathCount;
+        public Vector2Int FinalCoord;
+        public bool IsSpawn;
+        public bool IsSlide;
 
-        public SlideDownMoveRecord(BaseGridObject item, List<Vector2Int> path, Vector2Int start, Vector2Int final, bool isSpawn, bool isSlide)
+        public SlideDownMoveRecord(BaseGridObject item)
         {
             Item = item;
-            Path = path;
-            Start = start;
-            Final = final;
-            IsSpawn = isSpawn;
-            IsSlide = isSlide;
+            HeadNode = -1;
+            TailNode = -1;
+            PathCount = 0;
+            FinalCoord = default;
+            IsSpawn = false;
+            IsSlide = false;
         }
     }
 }

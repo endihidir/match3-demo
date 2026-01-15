@@ -5,16 +5,14 @@ namespace Core.Handlers
 {
     public readonly struct FallDownMoveRecord
     {
-        public readonly BaseGridObject Obj;
-        public readonly Vector3 FinalWorld;
-        public readonly int ColumnX;
+        public readonly BaseGridObject Item;
+        public readonly Vector2Int FinalCoord;
         public readonly bool IsSpawn;
 
-        public FallDownMoveRecord(BaseGridObject obj, Vector3 finalWorld, int columnX, bool isSpawn)
+        public FallDownMoveRecord(BaseGridObject item, Vector2Int finalCoord, bool isSpawn)
         {
-            Obj = obj;
-            FinalWorld = finalWorld;
-            ColumnX = columnX;
+            Item = item;
+            FinalCoord = finalCoord;
             IsSpawn = isSpawn;
         }
     }

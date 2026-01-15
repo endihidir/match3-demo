@@ -1,6 +1,6 @@
 namespace Core.Handlers
 {
-    public struct SlideDownColumnWaveState
+    public struct ColumnWaveState
     {
         public int Fall; 
         public int Slide;

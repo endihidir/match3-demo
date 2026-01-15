@@ -37,6 +37,8 @@ namespace Core.LifetimeScopes
             builder.Register<FillStrategyResolver>(Lifetime.Scoped).As<IFillStrategyResolver>();
             builder.Register<FallDownFillStrategy>(Lifetime.Scoped).As<IFillStrategy>();
             builder.Register<SlideDownFillStrategy>(Lifetime.Scoped).As<IFillStrategy>();
+            builder.Register<ShiftAnimationScheduler>(Lifetime.Scoped).As<IShiftAnimationScheduler>();
+            builder.Register<SlideAnimationScheduler>(Lifetime.Scoped).As<ISlideAnimationScheduler>();
             builder.Register<FillItemDecider>(Lifetime.Scoped).As<IFillItemDecider>();
         }
     }
