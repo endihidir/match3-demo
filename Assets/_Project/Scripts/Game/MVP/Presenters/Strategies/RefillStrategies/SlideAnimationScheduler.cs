@@ -18,8 +18,12 @@ namespace Core.Handlers
         }
         
         // Schedules a slide along a path. Wave logic is the same as before.
-        public void Schedule(IGridView view, in SlideDownMoveRecord record, Vector2Int[] pathCoord, int[] pathNext, UniTask[] animTasks, ref int taskCount, ref ColumnWaveState state)
+        public bool TrySchedule(IGridView view, in SlideDownMoveRecord record, Vector2Int[] pathCoord, int[] pathNext, ref ColumnWaveState state, out UniTask task)
         {
+            task = UniTask.CompletedTask;
+            
+            if(!record.Item) return false;
+            
             var wave = record.IsSpawn ? state.SpawnSlide + state.Slide + state.Fall : state.Slide + state.Fall;
 
             if (record.IsSpawn) state.SpawnSlide++; else state.Slide++;
@@ -54,7 +58,8 @@ namespace Core.Handlers
             }
 
             var tween = record.Item.ItemAnimation.Slide(path.Array, length, seg.Array, delay);
-            animTasks[taskCount++] = tween.ToUniTask();
+            task = tween.ToUniTask();
+            return true;
         }
     }
 }

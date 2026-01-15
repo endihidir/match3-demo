@@ -6,6 +6,6 @@ namespace Core.Handlers
 {
     public interface ISlideAnimationScheduler
     {
-        void Schedule(IGridView view, in SlideDownMoveRecord record, Vector2Int[] pathCoord, int[] pathNext, UniTask[] animTasks, ref int taskCount, ref ColumnWaveState state);
+        bool TrySchedule(IGridView view, in SlideDownMoveRecord record, Vector2Int[] pathCoord, int[] pathNext, ref ColumnWaveState state, out UniTask task);
     }
 }

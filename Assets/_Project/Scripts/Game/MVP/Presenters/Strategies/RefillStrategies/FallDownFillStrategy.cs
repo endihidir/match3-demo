@@ -163,10 +163,17 @@ namespace Core.Handlers
                 for (int i = 0; i < _recordCount; i++)
                 {
                     ref readonly var fallRecord = ref _records[i];
+
                     if (!fallRecord.Item) continue;
+                        
                     if (fallRecord.FinalCoord.x != x) continue;
+                    
                     if (fallRecord.IsSpawn != passIsSpawn) continue;
-                    _shiftAnimationScheduler.Schedule(view, fallRecord, animTasks, ref taskCount, ref state);
+                    
+                    if (_shiftAnimationScheduler.TrySchedule(view, fallRecord, ref state, out var task))
+                    {
+                        animTasks[taskCount++] = task;
+                    }
                 }
             }
         }
