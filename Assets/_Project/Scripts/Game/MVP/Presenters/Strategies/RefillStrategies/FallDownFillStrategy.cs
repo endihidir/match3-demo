@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Core.Config;
-using Core.Configs;
 using Core.Models;
 using Core.Utils;
+using Core.Views;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -11,19 +10,21 @@ namespace Core.Handlers
 {
     public sealed class FallDownFillStrategy : IFillStrategy
     {
-        private readonly FillStrategySettingsSO _strategySettings;
         private readonly IFillItemDecider _itemDecider;
+        private readonly IShiftAnimationScheduler _shiftAnimationScheduler;
 
         private readonly List<FallDownMoveRecord> _records = new(256);
+
+        private ColumnWaveState[] _waveByX = Array.Empty<ColumnWaveState>();
         private UniTask[] _animTasks = new UniTask[128];
         private UniTask _runningAnimations;
 
         public bool CanHandle(IGridModel model) => !GridFillCalcUtil.HasStationaryAndBlocking(model);
 
-        public FallDownFillStrategy(GameplayConfigContainer configContainer, IFillItemDecider itemDecider)
+        public FallDownFillStrategy(IFillItemDecider itemDecider, IShiftAnimationScheduler shiftAnimationScheduler)
         {
-            _strategySettings = configContainer.FillStrategySettings;
             _itemDecider = itemDecider;
+            _shiftAnimationScheduler = shiftAnimationScheduler;
         }
 
         public IFillStrategy Execute(GridStateContext context)
@@ -37,9 +38,11 @@ namespace Core.Handlers
             var height = model.Height;
             var cellSize = view.GetCellSize();
 
+            EnsureBuffers(width);
+
             for (int x = 0; x < width; x++)
             {
-                ShiftColumnLogic(context, x, height, _records);
+                ShiftColumnLogic(model, x, height, _records);
 
                 if (GridFillCalcUtil.TryGetSpawnCellCoord(model, x, model.Height, out var spawnCell))
                 {
@@ -54,11 +57,14 @@ namespace Core.Handlers
 
         public UniTask WaitAnimationsAsync() => _runningAnimations;
 
-        private void ShiftColumnLogic(GridStateContext stateContext, int x, int height, List<FallDownMoveRecord> records)
+        private void EnsureBuffers(int width)
         {
-            var model = stateContext.Model;
-            var view = stateContext.View;
+            if (_waveByX.Length < width)
+                _waveByX = new ColumnWaveState[width];
+        }
 
+        private void ShiftColumnLogic(IGridModel model, int x, int height, List<FallDownMoveRecord> records)
+        {
             for (int y = height - 1; y >= 0; y--)
             {
                 var coord = new Vector2Int(x, y);
@@ -70,16 +76,16 @@ namespace Core.Handlers
                 if (srcY < 0) continue;
 
                 var src = new Vector2Int(x, srcY);
-                var obj = model.GetGridObject(src);
+                var item = model.GetGridObject(src);
 
-                if (!obj) continue;
+                if (!item) continue;
+                
 
-                var finalWorld = view.GridToWorld(coord);
-
-                model.SetGridObject(coord, obj);
+                model.SetGridObject(coord, item);
                 model.SetGridObject(src, null);
-
-                records.Add(new FallDownMoveRecord(obj, finalWorld, x, false));
+                
+                var fallMoveRecord = new FallDownMoveRecord(item, coord, false);
+                records.Add(fallMoveRecord);
             }
         }
 
@@ -103,14 +109,15 @@ namespace Core.Handlers
                 item.SetParent(view.GridObjectsParent);
                 item.SetSpriteSize(cellSize);
 
-                var target = view.GridToWorld(coord);
-                var start = new Vector3(target.x, spawnY + (stack * cellSize), target.z);
+                var worldPos = view.GridToWorld(coord);
+                var startY = spawnY + (stack * cellSize);
+                var start = new Vector3(worldPos.x, startY, worldPos.z);
 
                 item.SetPosition(start);
                 model.SetGridObject(coord, item);
 
-                records.Add(new FallDownMoveRecord(item, target, x, true));
-
+                var fallMoveRecord = new FallDownMoveRecord(item, coord, true);
+                records.Add(fallMoveRecord);
                 stack++;
             }
         }
@@ -118,55 +125,36 @@ namespace Core.Handlers
         private UniTask PlayAnimations(GridStateContext context, List<FallDownMoveRecord> records)
         {
             var view = context.View;
-            var cellSize = view.GetCellSize();
             var width = context.Model.Width;
 
             if (_animTasks.Length < records.Count)
                 Array.Resize(ref _animTasks, records.Count);
 
+            Array.Clear(_waveByX, 0, width);
+
             var taskCount = 0;
 
-            for (int x = 0; x < width; x++)
-            {
-                var wave = 0;
-
-                for (int i = 0; i < records.Count; i++)
-                {
-                    var r = records[i];
-                    if (!r.Obj) continue;
-                    if (r.ColumnX != x) continue;
-                    if (r.IsSpawn) continue;
-
-                    var delay = wave * _strategySettings.ShiftDelayMultiplier;
-
-                    var startWorld = r.Obj.transform.position;
-                    var distCells = Mathf.Abs(r.FinalWorld.y - startWorld.y) / cellSize;
-
-                    var tween = r.Obj.ItemAnimation.Shift(r.FinalWorld, distCells, delay);
-                    _animTasks[taskCount++] = tween.ToUniTask();
-
-                    wave++;
-                }
-
-                for (int i = 0; i < records.Count; i++)
-                {
-                    var r = records[i];
-                    if (!r.Obj) continue;
-                    if (r.ColumnX != x) continue;
-                    if (!r.IsSpawn) continue;
-
-                    var delay = wave * _strategySettings.ShiftDelayMultiplier;
-
-                    var startWorld = r.Obj.transform.position;
-                    var distCells = Mathf.Abs(r.FinalWorld.y - startWorld.y) / cellSize;
-
-                    var tween = r.Obj.ItemAnimation.Shift(r.FinalWorld, distCells, delay);
-                    _animTasks[taskCount++] = tween.ToUniTask();
-                    wave++;
-                }
-            }
+            ScheduleShift(view, width, records, false, _animTasks, ref taskCount);
+            ScheduleShift(view, width, records, true, _animTasks, ref taskCount);
 
             return taskCount == 0 ? UniTask.CompletedTask : UniTask.WhenAll(_animTasks.AsSpan(0, taskCount).ToArray());
+        }
+        
+        private void ScheduleShift(IGridView view, int width, List<FallDownMoveRecord> records, bool passIsSpawn, UniTask[] animTasks, ref int taskCount)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                ref var state = ref _waveByX[x];
+
+                for (int i = 0; i < records.Count; i++)
+                {
+                    var fallRecord = records[i];
+                    if (!fallRecord.Item) continue;
+                    if (fallRecord.FinalCoord.x != x) continue;
+                    if (fallRecord.IsSpawn != passIsSpawn) continue;
+                    _shiftAnimationScheduler.Schedule(view, fallRecord, animTasks, ref taskCount, ref state);
+                }
+            }
         }
     }
 }
