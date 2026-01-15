@@ -88,7 +88,7 @@ namespace Core.Handlers
 
                     if (data.Remove)
                     {
-                        ClearAndRelease(coord, obj);
+                        Context.ReleaseAndSetNull(obj, coord);
                         
                         if (obj is IBoosterActionSource source)
                         {
@@ -109,7 +109,7 @@ namespace Core.Handlers
                         }
                         else if (damageResult == DamageResult.Destroyed)
                         {
-                            ClearAndRelease(coord, obj);
+                            Context.ReleaseAndSetNull(obj, coord);
                             
                             if (obj is IBoosterActionSource source)
                             {
@@ -121,13 +121,6 @@ namespace Core.Handlers
                         continue;
                     }
                 }
-            }
-            return;
-            
-            void ClearAndRelease(Vector2Int coord, BaseGridObject obj)
-            {
-                model.SetGridObject(coord, null);
-                Context.Factory.ReleaseItem(obj);
             }
         }
     }

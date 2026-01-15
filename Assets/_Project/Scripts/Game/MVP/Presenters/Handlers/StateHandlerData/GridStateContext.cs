@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using Core.Config;
+using Core.Item;
 using Core.Item.Factories;
 using Core.Models;
-using Core.Utils;
 using Core.Views;
 using UnityEngine;
 
@@ -37,6 +37,12 @@ namespace Core.Handlers
             GroupIdCounter++;
             if (GroupIdCounter == int.MaxValue) GroupIdCounter = 1;
             return GroupIdCounter;
+        }
+        
+        public void ReleaseAndSetNull(BaseGridObject sourceObj, Vector2Int sourceCoord)
+        {
+            Factory.ReleaseItem(sourceObj);
+            Model.SetGridObject(sourceCoord, null);
         }
     }
 }

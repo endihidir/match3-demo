@@ -25,7 +25,7 @@ namespace Core.Handlers
         private int[] _pathNext = Array.Empty<int>();
         private int _pathNodeCount;
 
-        // Emit helpers
+        // Schedule helpers
         private int[] _moveIndexByCell = Array.Empty<int>();
         private ColumnWaveState[] _waveByX = Array.Empty<ColumnWaveState>();
         private UniTask[] _animTasks = new UniTask[128];
@@ -132,7 +132,8 @@ namespace Core.Handlers
                     var firstDir = ((x ^ y ^ _usedTargetStampId) & 1) == 0 ? -1 : 1;
                     var secondDir = -firstDir;
 
-                    if (TryApplySlideCandidate(model, width, target, firstDir, out var movedItem) || TryApplySlideCandidate(model, width, target, secondDir, out movedItem))
+                    if (TryApplySlideCandidate(model, width, target, firstDir, out var movedItem) || 
+                        TryApplySlideCandidate(model, width, target, secondDir, out movedItem))
                     {
                         AddStep(movedItem, target, false);
                         movedAny = true;
@@ -293,32 +294,31 @@ namespace Core.Handlers
                 _records[_recordCount++] = new SlideDownMoveRecord(item);
             }
 
-            ref var r = ref _records[index];
+            ref var record = ref _records[index];
 
-            r.IsSpawn |= isSpawn;
+            record.IsSpawn |= isSpawn;
 
             // Avoid pushing the same coord twice in a row
-            if (r.TailNode >= 0 && _pathCoord[r.TailNode] == step)
+            if (record.TailNode >= 0 && _pathCoord[record.TailNode] == step)
             {
-                r.FinalCoord = step;
+                record.FinalCoord = step;
                 return;
             }
 
             var node = AllocPathNode(step);
 
-            if (r.HeadNode < 0)
+            if (record.HeadNode < 0)
             {
-                r.HeadNode = node;
-                r.TailNode = node;
+                record.HeadNode = node;
             }
             else
             {
-                _pathNext[r.TailNode] = node;
-                r.TailNode = node;
+                _pathNext[record.TailNode] = node;
             }
 
-            r.PathCount++;
-            r.FinalCoord = step;
+            record.TailNode = node;
+            record.PathCount++;
+            record.FinalCoord = step;
         }
 
         private void EnsureRecordCapacity(int need)

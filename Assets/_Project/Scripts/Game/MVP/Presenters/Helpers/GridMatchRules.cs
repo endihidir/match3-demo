@@ -5,6 +5,24 @@ namespace Core.Utils
 {
     public static class GridMatchRules
     { 
+        
+        public static bool HasAnyRegularMatchOnBoard(IGridModel model)
+        {
+            var grid = model.BuildTypeDataGrid();
+            
+            for (int y = 0; y < model.Height; y++)
+            {
+                for (int x = 0; x < model.Width; x++)
+                {
+                    var data = grid[x, y];
+                    if (!IsRegularItem(data)) continue;
+                    if (IsCellMatched(model, grid, x, y, data.TypeId)) return true;
+                }
+            }
+
+            return false;
+        }
+        
         public static bool IsCellMatched(IGridModel model, GridObjectType[,] grid, int x, int y, int id)
         {
             if (!model.IsInRange(x, y)) return false;
@@ -26,23 +44,6 @@ namespace Core.Utils
 
             return false;
         }
-        
-        public static bool HasAnyRegularMatchOnBoard(IGridModel model)
-        {
-            var grid = model.BuildTypeDataGrid();
-            
-            for (int y = 0; y < model.Height; y++)
-            {
-                for (int x = 0; x < model.Width; x++)
-                {
-                    var data = grid[x, y];
-                    if (!IsRegularItem(data)) continue;
-                    if (IsCellMatched(model, grid, x, y, data.TypeId)) return true;
-                }
-            }
-
-            return false;
-        }
 
         public static bool Has2X2SquareAt(IGridModel model, GridObjectType[,] grid, int x, int y, int id)
         {
@@ -60,26 +61,6 @@ namespace Core.Utils
             if (!IsRegularItem(d) || d.TypeId != id) return false;
 
             return true;
-        }
-        
-        public static void GetLineLengthsAt(IGridModel gridModel, GridObjectType[,] grid, int x, int y, int id, bool assumeCenterIsId, out int horizontal, out int vertical)
-        {
-            if (!IsCenterOk(grid, x, y, id, assumeCenterIsId))
-            {
-                horizontal = 0;
-                vertical = 0;
-                return;
-            }
-
-            horizontal = 1 + CountSame(gridModel, grid, x, y, id, -1, 0) + CountSame(gridModel, grid, x, y, id, 1, 0);
-            vertical = 1 + CountSame(gridModel, grid, x, y, id, 0, -1) + CountSame(gridModel, grid, x, y, id, 0, 1);
-        }
-
-        private static bool IsCenterOk(GridObjectType[,] gridTypes, int x, int y, int id, bool assumeCenterIsId)
-        {
-            if (assumeCenterIsId) return true;
-            var data = gridTypes[x, y];
-            return IsRegularItem(data) && data.TypeId == id;
         }
 
         private static int CountSame(IGridModel gridModel, GridObjectType[,] grid, int x, int y, int id, int dx, int dy)
@@ -106,6 +87,13 @@ namespace Core.Utils
             }
 
             return count;
+        }
+        
+        public static bool IsCellsRegular(BaseGridObject sourceObj, BaseGridObject targetObj)
+        {
+            var isSourceRegular = IsRegularItem(sourceObj.ObjectType);
+            var isTargetRegular = IsRegularItem(targetObj.ObjectType);
+            return isSourceRegular && isTargetRegular;
         }
 
         public static bool IsRegularItem(GridObjectType data) => data is { ItemKind: GridItemKind.Regular, TypeId: > 0 };
