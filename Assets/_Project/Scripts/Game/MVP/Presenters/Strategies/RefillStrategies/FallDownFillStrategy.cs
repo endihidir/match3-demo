@@ -39,6 +39,7 @@ namespace Core.Handlers
             var cellSize = view.GetCellSize();
 
             EnsureBuffers(width);
+            EnsureRecordCapacity(width * height);
 
             for (int x = 0; x < width; x++)
             {
