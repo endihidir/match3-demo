@@ -160,7 +160,24 @@ namespace Core.Utils
             return false;
         }
         
-        public static bool HasStationaryAboveInSameSegment(IGridModel model, Vector2Int coord) => 
+        public static int CountEmptiesDown(IGridModel model, int x, int y, int height)
+        {
+            var count = 0;
+
+            for (int yy = y; yy < height; yy++)
+            {
+                var c = new Vector2Int(x, yy);
+
+                if (!model.IsCellActive(c)) break;
+                if (model.GetGridObject(c)) break;
+
+                count++;
+            }
+
+            return count;
+        }
+        
+        private static bool HasStationaryAboveInSameSegment(IGridModel model, Vector2Int coord) => 
             TryFindFirstObjectAboveInSameSegment(model, coord, out var obj) && obj.IsStationary;
         
         private static bool IsBlockerSideSource(IGridModel model, Vector2Int src, int dirX)
@@ -180,23 +197,6 @@ namespace Core.Utils
 
             return true;
         }
-        
-        public static int CountEmptiesDown(IGridModel model, int x, int y, int height)
-        {
-            var count = 0;
-
-            for (int yy = y; yy < height; yy++)
-            {
-                var c = new Vector2Int(x, yy);
-
-                if (!model.IsCellActive(c)) break;
-                if (model.GetGridObject(c)) break;
-
-                count++;
-            }
-
-            return count;
-        }
 
         private static bool HasEmptyBelowInSegment(IGridModel model, Vector2Int src)
         {
@@ -215,8 +215,8 @@ namespace Core.Utils
 
             return false;
         }
-        
-        public static bool HasStationaryShadow(IGridModel model, Vector2Int targetCoord)
+
+        private static bool HasStationaryShadow(IGridModel model, Vector2Int targetCoord)
         {
             if (HasStationaryAboveInSameSegment(model, targetCoord)) return true;
             
