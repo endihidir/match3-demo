@@ -27,7 +27,11 @@ namespace Core.Handlers
 
         // Schedule helpers
         private int[] _moveIndexByCell = Array.Empty<int>();
-        private ColumnWaveState[] _waveByX = Array.Empty<ColumnWaveState>();
+        private ColumnTimelineState[] _timelineByX = Array.Empty<ColumnTimelineState>();
+        private int[] _usedColumnStamp = Array.Empty<int>();
+        private int _usedColumnStampId = 1;
+        private int[] _order = Array.Empty<int>();
+        private int[] _usedColumnsByRecord = Array.Empty<int>();
         private UniTask[] _animTasks = new UniTask[128];
         private UniTask _runningAnimations = UniTask.CompletedTask;
 
@@ -52,20 +56,19 @@ namespace Core.Handlers
             ResetWorkspace();
 
             var model = context.Model;
-            var width = model.Width;
-            var height = model.Height;
 
-            EnsureBuffers(width, height);
+            EnsureBuffers(model.Width, model.Height);
 
             var movedAny = true;
 
             // Keep looping while we can apply any movement (vertical fall, diagonal slide, spawn)
             while (movedAny)
             {
-                movedAny = TryApplyAnyMove(context, width, height);
+                movedAny = TryApplyAnyMove(context);
             }
 
-            _runningAnimations = PlayAnimations(context.View, width, height);
+            _runningAnimations = PlayAnimations(context);
+            
             return this;
         }
 
@@ -75,8 +78,11 @@ namespace Core.Handlers
         // Simulation loop
         // =========================================================
 
-        private bool TryApplyAnyMove(GridStateContext context, int width, int height)
+        private bool TryApplyAnyMove(GridStateContext context)
         {
+            var height = context.Model.Height;
+            var width = context.Model.Width;
+            
             var movedAny = false;
             var movedByGravity = false;
             
@@ -138,8 +144,8 @@ namespace Core.Handlers
                     var firstDir = ((x ^ y ^ _usedTargetStampId) & 1) == 0 ? -1 : 1;
                     var secondDir = -firstDir;
 
-                    if (TryApplySlideCandidate(model, width, targetCoord, firstDir, out var movedItem) || 
-                        TryApplySlideCandidate(model, width, targetCoord, secondDir, out movedItem))
+                    if (TryApplySlideCandidate(model, width, targetCoord, firstDir) || 
+                        TryApplySlideCandidate(model, width, targetCoord, secondDir))
                     {
                         //AddStep(movedItem, target, false);
                         movedAny = true;
@@ -178,10 +184,8 @@ namespace Core.Handlers
             }
         }
 
-        private bool TryApplySlideCandidate(IGridModel model, int width, Vector2Int targetCoord, int dirX, out BaseGridObject movedItem)
+        private bool TryApplySlideCandidate(IGridModel model, int width, Vector2Int targetCoord, int dirX)
         {
-            movedItem = null;
-
             if (!GridFillCalcUtil.TryCollectDiagonalSide(model, targetCoord, dirX, out var candidate))
                 return false;
 
@@ -202,7 +206,6 @@ namespace Core.Handlers
             model.SetGridObject(candidate.To, candidate.Item);
             
             AddStep(candidate.Item, candidate.To, false);
-            movedItem = candidate.Item;
             return true;
         }
 
@@ -356,87 +359,151 @@ namespace Core.Handlers
         }
 
         // =========================================================
-        // Animation emit (scan order + spawn pass split preserved)
+        // Animation emit (column timeline scheduling)
         // =========================================================
 
-        private UniTask PlayAnimations(IGridView view, int width, int height)
+        private UniTask PlayAnimations(GridStateContext context)
         {
-            BuildIndex(width, height);
+            if (_recordCount == 0)
+                return UniTask.CompletedTask;
+
+            EnsureOrderCapacity(_recordCount);
+
+            // Update per-record flags (IsSlide) and build sort order.
+            for (int i = 0; i < _recordCount; i++)
+                _order[i] = i;
+
+            for (int i = 0; i < _recordCount; i++)
+            {
+                ref var record = ref _records[i];
+                if (!record.Item || record.PathCount == 0) continue;
+
+                var startCoord = _pathCoord[record.HeadNode];
+                record.IsSlide = startCoord.x != record.FinalCoord.x;
+            }
+
+            Array.Sort(_order, 0, _recordCount, new SlideMoveOrderComparer(_records));
 
             if (_animTasks.Length < _recordCount)
                 Array.Resize(ref _animTasks, _recordCount);
 
-            Array.Clear(_waveByX, 0, width);
-            
+            // Reset timelines.
+            var width = context.Model.Width;
+            for (int x = 0; x < width; x++)
+                _timelineByX[x].Time = 0f;
+
             var taskCount = 0;
 
-            ScheduleAnimations(view, width, height,false, ref taskCount);
-            ScheduleAnimations(view, width, height,true, ref taskCount);
+            var view = context.View;
+            ScheduleByTimeline(view, width, passIsSpawn: false, ref taskCount);
+            ScheduleByTimeline(view, width, passIsSpawn: true, ref taskCount);
 
-            if (taskCount == 0) 
+            if (taskCount == 0)
                 return UniTask.CompletedTask;
-            
+
             if (_animTasks.Length != taskCount)
                 Array.Resize(ref _animTasks, taskCount);
 
             return UniTask.WhenAll(_animTasks);
         }
 
-        private void BuildIndex(int width, int height)
+        private void EnsureOrderCapacity(int need)
         {
-            var cellCount = width * height;
+            if (_order.Length < need)
+                Array.Resize(ref _order, need);
+        }
 
-            for (int i = 0; i < cellCount; i++)
-                _moveIndexByCell[i] = -1;
-
+        private void ScheduleByTimeline(IGridView view, int width, bool passIsSpawn, ref int taskCount)
+        {
             for (int i = 0; i < _recordCount; i++)
             {
-                ref var record = ref _records[i];
+                var recordIndex = _order[i];
+                ref readonly var record = ref _records[recordIndex];
 
                 if (!record.Item || record.PathCount == 0) continue;
+                if (record.IsSpawn != passIsSpawn) continue;
 
-                // Slide detection based on initial vs final x
-                var startCoord = _pathCoord[record.HeadNode];
-                record.IsSlide = startCoord.x != record.FinalCoord.x;
+                var usedCount = CollectUsedColumns(width, in record);
+                var startTime = GetStartTime(usedCount);
 
-                var idx = record.FinalCoord.x + record.FinalCoord.y * width;
-                _moveIndexByCell[idx] = i;
+                if (!record.IsSlide)
+                {
+                    var fallRecord = new FallDownMoveRecord(record.Item, record.FinalCoord, record.IsSpawn);
+
+                    if (_shiftAnimationScheduler.TrySchedule(view, fallRecord, startTime, out var endTime, out var task))
+                    {
+                        UpdateTimeline(usedCount, endTime);
+                        _animTasks[taskCount++] = task;
+                    }
+                }
+                else
+                {
+                    if (_slideAnimationScheduler.TrySchedule(view, record, _pathCoord, _pathNext, startTime, out var endTime, out var task))
+                    {
+                        UpdateTimeline(usedCount, endTime);
+                        _animTasks[taskCount++] = task;
+                    }
+                }
             }
         }
 
-        private void ScheduleAnimations(IGridView view, int width, int height, bool passIsSpawn, ref int taskCount)
+        private int CollectUsedColumns(int width, in SlideDownMoveRecord record)
         {
-            for (int y = height - 1; y >= 0; y--)
+            // Reuse _usedColumnsByRecord as a dense list of used X values.
+            if (_usedColumnsByRecord.Length < width)
+                Array.Resize(ref _usedColumnsByRecord, width);
+
+            _usedColumnStampId++;
+            if (_usedColumnStampId == int.MaxValue)
             {
-                for (int x = 0; x < width; x++)
+                Array.Clear(_usedColumnStamp, 0, _usedColumnStamp.Length);
+                _usedColumnStampId = 1;
+            }
+
+            var count = 0;
+
+            void MarkX(int x)
+            {
+                if ((uint)x >= (uint)width) return;
+                if (_usedColumnStamp[x] == _usedColumnStampId) return;
+                _usedColumnStamp[x] = _usedColumnStampId;
+                _usedColumnsByRecord[count++] = x;
+            }
+
+            MarkX(record.FinalCoord.x);
+
+            if (record.IsSlide)
+            {
+                var node = record.HeadNode;
+                while (node >= 0)
                 {
-                    var cellIndex = x + y * width;
-                    var recordIndex = _moveIndexByCell[cellIndex];
-                    if (recordIndex < 0) continue;
-
-                    ref readonly var slideRecord = ref _records[recordIndex];
-                    
-                    if (!slideRecord.Item || slideRecord.IsSpawn != passIsSpawn) continue;
-
-                    ref var columnWaveState = ref _waveByX[x];
-
-                    if (!slideRecord.IsSlide)
-                    {
-                        var fallRecord = new FallDownMoveRecord(slideRecord.Item, slideRecord.FinalCoord, slideRecord.IsSpawn);
-
-                        if (_shiftAnimationScheduler.TrySchedule(view, fallRecord, ref columnWaveState, out var task))
-                        { 
-                            _animTasks[taskCount++] = task;
-                        }
-                    }
-                    else
-                    {
-                        if (_slideAnimationScheduler.TrySchedule(view, slideRecord, _pathCoord, _pathNext, ref columnWaveState, out var task))
-                        {
-                            _animTasks[taskCount++] = task;
-                        } 
-                    }
+                    MarkX(_pathCoord[node].x);
+                    node = _pathNext[node];
                 }
+            }
+
+            return count;
+        }
+
+        private float GetStartTime(int usedCount)
+        {
+            var start = 0f;
+            for (int i = 0; i < usedCount; i++)
+            {
+                var x = _usedColumnsByRecord[i];
+                var t = _timelineByX[x].Time;
+                if (t > start) start = t;
+            }
+
+            return start;
+        }
+
+        private void UpdateTimeline(int usedCount, float endTime)
+        {
+            for (int i = 0; i < usedCount; i++)
+            {
+                var x = _usedColumnsByRecord[i];
+                _timelineByX[x].Time = endTime;
             }
         }
 
@@ -446,8 +513,11 @@ namespace Core.Handlers
 
         private void EnsureBuffers(int width, int height)
         {
-            if (_waveByX.Length < width)
-                _waveByX = new ColumnWaveState[width];
+            if (_timelineByX.Length < width)
+                _timelineByX = new ColumnTimelineState[width];
+
+            if (_usedColumnStamp.Length < width)
+                _usedColumnStamp = new int[width];
 
             var cellCount = width * height;
 
