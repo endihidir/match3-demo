@@ -1,6 +1,5 @@
 using Core.Config;
 using Core.Configs;
-using Core.Item;
 using Core.Pool;
 using Core.Views;
 using Cysharp.Threading.Tasks;
@@ -17,18 +16,12 @@ namespace Core.Handlers
             _settings = config.FillAnimationSettings;
         }
         
-        // Schedules a slide along a path. Wave logic is the same as before.
-        public bool TrySchedule(IGridView view, in SlideDownMoveRecord record, Vector2Int[] pathCoord, int[] pathNext, ref ColumnWaveState state, out UniTask task)
+        public bool TrySchedule(IGridView view, in SlideDownMoveRecord record, Vector2Int[] pathCoord, int[] pathNext, float startTime, out float endTime, out UniTask task)
         {
             task = UniTask.CompletedTask;
+            endTime = startTime;
             
             if(!record.Item) return false;
-            
-            var wave = record.IsSpawn ? state.SpawnSlide + state.Slide + state.Fall : state.Slide + state.Fall;
-
-            if (record.IsSpawn) state.SpawnSlide++; else state.Slide++;
-
-            var delay = wave * _settings.SlideDelayMultiplier;
 
             var length = record.PathCount + (record.IsSpawn ? 1 : 0);
 
@@ -57,8 +50,9 @@ namespace Core.Handlers
                 current = next;
             }
 
-            var tween = record.Item.ItemAnimation.Slide(path.Array, length, seg.Array, delay);
+            var tween = record.Item.ItemAnimation.Slide(path.Array, length, seg.Array, startTime);
             task = tween.ToUniTask();
+            endTime = startTime + _settings.SlideDelay;
             return true;
         }
     }

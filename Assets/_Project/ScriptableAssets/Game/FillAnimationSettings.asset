@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2314602c931e44f2bdadca2e2a2cc750, type: 3}
   m_Name: FillAnimationSettings
   m_EditorClassIdentifier: 
-  <ShiftDelayMultiplier>k__BackingField: 0.03
-  <SlideDelayMultiplier>k__BackingField: 0.03
+  <ShiftDelay>k__BackingField: 0.05
+  <SlideDelay>k__BackingField: 0.1

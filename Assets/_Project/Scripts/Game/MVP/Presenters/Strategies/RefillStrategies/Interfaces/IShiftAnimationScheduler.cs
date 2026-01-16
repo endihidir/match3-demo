@@ -5,6 +5,6 @@ namespace Core.Handlers
 {
     public interface IShiftAnimationScheduler
     {
-        bool TrySchedule(IGridView view, FallDownMoveRecord record, ref ColumnWaveState state, out UniTask task);
+        bool TrySchedule(IGridView view, in FallDownMoveRecord record, float startTime, out float endTime, out UniTask task);
     }
 }

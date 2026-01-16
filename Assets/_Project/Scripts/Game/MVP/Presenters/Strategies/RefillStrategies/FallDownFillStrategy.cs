@@ -15,7 +15,8 @@ namespace Core.Handlers
         private FallDownMoveRecord[] _records = Array.Empty<FallDownMoveRecord>();
         private int _recordCount;
 
-        private ColumnWaveState[] _waveByX = Array.Empty<ColumnWaveState>();
+        private ColumnTimelineState[] _timelineByX = Array.Empty<ColumnTimelineState>();
+        private int[] _order = Array.Empty<int>();
         private UniTask[] _animTasks = new UniTask[128];
         private UniTask _runningAnimations;
 
@@ -60,8 +61,11 @@ namespace Core.Handlers
 
         private void EnsureBuffers(int width)
         {
-            if (_waveByX.Length < width)
-                _waveByX = new ColumnWaveState[width];
+            if (_timelineByX.Length < width)
+                _timelineByX = new ColumnTimelineState[width];
+
+            if (_order.Length < _recordCount)
+                Array.Resize(ref _order, _recordCount);
         }
 
         private void EnsureRecordCapacity(int capacity)
@@ -144,12 +148,20 @@ namespace Core.Handlers
             if (_animTasks.Length < _recordCount)
                 Array.Resize(ref _animTasks, _recordCount);
 
-            Array.Clear(_waveByX, 0, width);
+            for (int x = 0; x < width; x++)
+                _timelineByX[x].Time = 0f;
+
+            EnsureBuffers(width);
+
+            for (int i = 0; i < _recordCount; i++)
+                _order[i] = i;
+
+            Array.Sort(_order, 0, _recordCount, new FallMoveOrderComparer(_records));
 
             var taskCount = 0;
 
-            ScheduleShift(view, width, false, _animTasks, ref taskCount);
-            ScheduleShift(view, width, true, _animTasks, ref taskCount);
+            ScheduleShiftByTimeline(view, passIsSpawn: false, ref taskCount);
+            ScheduleShiftByTimeline(view, passIsSpawn: true, ref taskCount);
 
             if (taskCount == 0) 
                 return UniTask.CompletedTask;
@@ -160,28 +172,26 @@ namespace Core.Handlers
             return UniTask.WhenAll(_animTasks);
         }
 
-        private void ScheduleShift(IGridView view, int width, bool passIsSpawn, UniTask[] animTasks, ref int taskCount)
+        private void ScheduleShiftByTimeline(IGridView view, bool passIsSpawn, ref int taskCount)
         {
-            for (int x = 0; x < width; x++)
+            for (int oi = 0; oi < _recordCount; oi++)
             {
-                ref var state = ref _waveByX[x];
+                var recordIndex = _order[oi];
+                ref readonly var fallRecord = ref _records[recordIndex];
 
-                for (int i = 0; i < _recordCount; i++)
+                if (!fallRecord.Item) continue;
+                if (fallRecord.IsSpawn != passIsSpawn) continue;
+
+                var x = fallRecord.FinalCoord.x;
+                var startTime = _timelineByX[x].Time;
+
+                if (_shiftAnimationScheduler.TrySchedule(view, fallRecord, startTime, out var endTime, out var task))
                 {
-                    ref readonly var fallRecord = ref _records[i];
-
-                    if (!fallRecord.Item) continue;
-                        
-                    if (fallRecord.FinalCoord.x != x) continue;
-                    
-                    if (fallRecord.IsSpawn != passIsSpawn) continue;
-                    
-                    if (_shiftAnimationScheduler.TrySchedule(view, fallRecord, ref state, out var task))
-                    {
-                        animTasks[taskCount++] = task;
-                    }
+                    _timelineByX[x].Time = endTime;
+                    _animTasks[taskCount++] = task;
                 }
             }
         }
+
     }
 }
