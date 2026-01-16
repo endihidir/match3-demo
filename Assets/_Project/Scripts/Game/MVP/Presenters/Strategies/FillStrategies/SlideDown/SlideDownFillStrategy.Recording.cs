@@ -71,6 +71,5 @@ namespace Core.Handlers
             _pathNext[idx] = -1;
             return idx;
         }
-
     }
 }
