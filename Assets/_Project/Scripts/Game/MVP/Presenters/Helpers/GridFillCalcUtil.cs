@@ -108,12 +108,12 @@ namespace Core.Utils
         {
             slide = default;
             
-            if (!model.TryGetNeighbourCoord(targetCoord, new Vector2Int(dirX, -1), out var sourceCoord)) return false;
+            if (!HasStationaryShadow(model, targetCoord)) return false;
 
+            if (!model.TryGetNeighbourCoord(targetCoord, new Vector2Int(dirX, -1), out var sourceCoord)) return false;
             if (!model.IsCellActive(sourceCoord)) return false;
 
             var item = model.GetGridObject(sourceCoord);
-            
             if (!item || item.IsStationary) return false;
 
             if (IsBlockerSideSource(model, sourceCoord, dirX))
@@ -121,14 +121,14 @@ namespace Core.Utils
                 slide = new SlideDownCandidate(item, sourceCoord, targetCoord);
                 return true;
             }
-            
+
             if (HasStationaryAboveInSameSegment(model, sourceCoord) && !HasEmptyBelowInSegment(model, sourceCoord))
             {
                 slide = new SlideDownCandidate(item, sourceCoord, targetCoord);
                 return true;
             }
-            
-            if (DestinationBlockedByAdjacentRoof(model, targetCoord))
+
+            if (HasAdjacentRoofWedge(model, targetCoord))
             {
                 slide = new SlideDownCandidate(item, sourceCoord, targetCoord);
                 return true;
@@ -216,7 +216,16 @@ namespace Core.Utils
             return false;
         }
         
-        private static bool DestinationBlockedByAdjacentRoof(IGridModel model, Vector2Int targetCoord)
+        public static bool HasStationaryShadow(IGridModel model, Vector2Int targetCoord)
+        {
+            if (HasStationaryAboveInSameSegment(model, targetCoord)) return true;
+            
+            if (HasAdjacentRoofWedge(model, targetCoord)) return true;
+
+            return false;
+        }
+        
+        private static bool HasAdjacentRoofWedge(IGridModel model, Vector2Int targetCoord)
         {
             if (!model.TryGetNeighbourCoord(targetCoord, new Vector2Int(0, -1), out var roof)) return false;
             if (!model.IsCellActive(roof)) return false;
