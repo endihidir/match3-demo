@@ -10,6 +10,8 @@ namespace Core.Handlers
         
         private readonly IFillStrategyResolver _strategyResolver;
         
+        private int _fillRunId;
+        
         public FillResolveState(GridStateContext context, IFillStrategyResolver strategyResolver) : base(context)
         {
             _strategyResolver = strategyResolver;
@@ -23,6 +25,12 @@ namespace Core.Handlers
 
         private async UniTask FillGridAsync()
         {
+            int runId = ++_fillRunId;
+            
+            await UniTask.Yield();
+
+            if (runId != _fillRunId) return;
+            
             var strategy = _strategyResolver.ResolveStrategy(Context.Model);
             
             if (strategy == null)
@@ -33,6 +41,8 @@ namespace Core.Handlers
             }
             
             await strategy.Execute(Context).WaitAnimationsAsync();
+            
+            if (runId != _fillRunId) return;
             
             Context.MatchResolveRequested = GridMatchRules.HasAnyRegularMatchOnBoard(Context.Model);
         }

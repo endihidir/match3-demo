@@ -78,10 +78,15 @@ namespace Core.Handlers
         private bool TryApplyAnyMove(GridStateContext context, int width, int height)
         {
             var movedAny = false;
-
-            movedAny |= ApplyVerticalFalls(context.Model, width, height);
-            movedAny |= ApplyDiagonalSlides(context.Model, width, height);
-            movedAny |= ApplySpawns(context, width, height);
+            var movedByGravity = false;
+            
+            movedByGravity |= ApplyVerticalFalls(context.Model, width, height);
+            movedByGravity |= ApplyDiagonalSlides(context.Model, width, height);
+            
+            movedAny |= movedByGravity;
+            
+            if (!movedByGravity)
+                movedAny |= ApplySpawns(context, width, height);
 
             return movedAny;
         }
@@ -102,6 +107,8 @@ namespace Core.Handlers
                     var item = model.GetGridObject(src);
                     if (!item || item.IsStationary) continue;
 
+                    AddStep(item, src, false);
+                    
                     model.SetGridObject(src, null);
                     model.SetGridObject(dst, item);
 
@@ -122,20 +129,19 @@ namespace Core.Handlers
             {
                 for (int x = 0; x < width; x++)
                 {
-                    var target = new Vector2Int(x, y);
+                    var targetCoord = new Vector2Int(x, y);
 
-                    if (!GridFillCalcUtil.IsEmptyActiveCell(model, target)) continue;
+                    if (!GridFillCalcUtil.IsEmptyActiveCell(model, targetCoord)) continue;
                     if (GridFillCalcUtil.CanFallVertically(model, x, y, out _)) continue;
-                    if (!GridFillCalcUtil.HasStationaryAboveInSameSegment(model, target)) continue;
 
                     // Alternate side preference deterministically
                     var firstDir = ((x ^ y ^ _usedTargetStampId) & 1) == 0 ? -1 : 1;
                     var secondDir = -firstDir;
 
-                    if (TryApplySlideCandidate(model, width, target, firstDir, out var movedItem) || 
-                        TryApplySlideCandidate(model, width, target, secondDir, out movedItem))
+                    if (TryApplySlideCandidate(model, width, targetCoord, firstDir, out var movedItem) || 
+                        TryApplySlideCandidate(model, width, targetCoord, secondDir, out movedItem))
                     {
-                        AddStep(movedItem, target, false);
+                        //AddStep(movedItem, target, false);
                         movedAny = true;
                     }
                 }
@@ -172,11 +178,11 @@ namespace Core.Handlers
             }
         }
 
-        private bool TryApplySlideCandidate(IGridModel model, int width, Vector2Int target, int dirX, out BaseGridObject movedItem)
+        private bool TryApplySlideCandidate(IGridModel model, int width, Vector2Int targetCoord, int dirX, out BaseGridObject movedItem)
         {
             movedItem = null;
 
-            if (!GridFillCalcUtil.TryCollectDiagonalSide(model, target, dirX, out var candidate))
+            if (!GridFillCalcUtil.TryCollectDiagonalSide(model, targetCoord, dirX, out var candidate))
                 return false;
 
             if (model.GetGridObject(candidate.From) != candidate.Item) return false;
@@ -190,9 +196,12 @@ namespace Core.Handlers
             if (_usedSourceStamp[fi] == _usedSourceStampId) return false;
             _usedSourceStamp[fi] = _usedSourceStampId;
 
+            AddStep(candidate.Item, candidate.From, false);
+
             model.SetGridObject(candidate.From, null);
             model.SetGridObject(candidate.To, candidate.Item);
-
+            
+            AddStep(candidate.Item, candidate.To, false);
             movedItem = candidate.Item;
             return true;
         }
@@ -352,7 +361,7 @@ namespace Core.Handlers
 
         private UniTask PlayAnimations(IGridView view, int width, int height)
         {
-            BuildIndex(view, width, height);
+            BuildIndex(width, height);
 
             if (_animTasks.Length < _recordCount)
                 Array.Resize(ref _animTasks, _recordCount);
@@ -364,10 +373,16 @@ namespace Core.Handlers
             ScheduleAnimations(view, width, height,false, ref taskCount);
             ScheduleAnimations(view, width, height,true, ref taskCount);
 
-            return taskCount == 0 ? UniTask.CompletedTask : UniTask.WhenAll(_animTasks.AsSpan(0, taskCount).ToArray());
+            if (taskCount == 0) 
+                return UniTask.CompletedTask;
+            
+            if (_animTasks.Length != taskCount)
+                Array.Resize(ref _animTasks, taskCount);
+
+            return UniTask.WhenAll(_animTasks);
         }
 
-        private void BuildIndex(IGridView view, int width, int height)
+        private void BuildIndex(int width, int height)
         {
             var cellCount = width * height;
 
@@ -381,8 +396,8 @@ namespace Core.Handlers
                 if (!record.Item || record.PathCount == 0) continue;
 
                 // Slide detection based on initial vs final x
-                var start = view.WorldToGrid(record.Item.transform.position);
-                record.IsSlide = start.x != record.FinalCoord.x;
+                var startCoord = _pathCoord[record.HeadNode];
+                record.IsSlide = startCoord.x != record.FinalCoord.x;
 
                 var idx = record.FinalCoord.x + record.FinalCoord.y * width;
                 _moveIndexByCell[idx] = i;

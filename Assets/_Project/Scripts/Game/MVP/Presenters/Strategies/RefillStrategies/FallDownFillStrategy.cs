@@ -151,7 +151,13 @@ namespace Core.Handlers
             ScheduleShift(view, width, false, _animTasks, ref taskCount);
             ScheduleShift(view, width, true, _animTasks, ref taskCount);
 
-            return taskCount == 0 ? UniTask.CompletedTask : UniTask.WhenAll(_animTasks.AsSpan(0, taskCount).ToArray());
+            if (taskCount == 0) 
+                return UniTask.CompletedTask;
+            
+            if (_animTasks.Length != taskCount)
+                Array.Resize(ref _animTasks, taskCount);
+
+            return UniTask.WhenAll(_animTasks);
         }
 
         private void ScheduleShift(IGridView view, int width, bool passIsSpawn, UniTask[] animTasks, ref int taskCount)
