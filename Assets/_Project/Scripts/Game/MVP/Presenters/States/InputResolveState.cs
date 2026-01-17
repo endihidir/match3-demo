@@ -2,7 +2,6 @@ using Core.Item;
 using Core.StateMachineCore;
 using Core.Utils;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
 using UnityEngine;
 
 namespace Core.Handlers
