@@ -146,9 +146,13 @@ namespace Core.Handlers
                 Context.ReleaseAndSetNull(centerObj, centerCoord);
             }
 
-            SpawnBooster(centerCoord, boosterType.Value);
+            var boosterValue = boosterType.Value;
             
-            return PlayMergeAnimationAsync(mergeObjs, centerCoord).ContinueWith(() => ReleaseMergedObjects(mergeObjs));
+            return PlayMergeAnimationAsync(mergeObjs, centerCoord).ContinueWith(() =>
+            {
+                ReleaseMergedObjects(mergeObjs);
+                SpawnBooster(centerCoord, boosterValue);
+            });
         }
 
         private bool TryConsumeForcedCenterCoord(List<Vector2Int> group, out Vector2Int forcedCoord)
@@ -259,7 +263,7 @@ namespace Core.Handlers
                     continue;
                 }
 
-                tasks[i] = obj.ItemAnimation.Move(targetWorld).ToUniTask();
+                tasks[i] = obj.ItemAnimation.Move(targetWorld, .6f).ToUniTask();
             }
 
             await UniTask.WhenAll(tasks);

@@ -38,7 +38,7 @@ namespace Core.Handlers
                         .AddTransition(inputState, boosterState, () => inputState.IsExitReady && HasPendingBoosterActions)
                         .AddTransition(inputState, matchState, () => inputState.IsExitReady && MatchResolveRequested && !HasPendingBoosterActions)
                         .AddTransition(inputState, idleState, () => inputState.IsExitReady && !MatchResolveRequested && !HasPendingBoosterActions)
-                         
+                        
                         .AddTransition(boosterState, fillState, () => boosterState.IsExitReady)
                         .AddTransition(matchState, fillState, () => matchState.IsExitReady)
                         .AddTransition(fillState, idleState, () => fillState.IsExitReady);
@@ -77,12 +77,18 @@ namespace Core.Handlers
         {
             if (sourceCoord == targetCoord) return false;
             
-            if (!Context.Model.IsInRange(sourceCoord) || !Context.Model.IsInRange(targetCoord)) return false;
+            if (!Context.Model.IsInRange(sourceCoord)) return false;
 
             var sourceObj = Context.Model.GetGridObject(sourceCoord);
             var targetObj = Context.Model.GetGridObject(targetCoord);
 
-            if (!sourceObj || !targetObj) return false;
+            if (!sourceObj) return false;
+
+            if (!targetObj || !Context.Model.IsInRange(targetCoord))
+            {
+                sourceObj.ItemAnimation.Shake();
+                return false;
+            }
 
             if (!IsInteractable(sourceObj) || !IsInteractable(targetObj) || 
                 !IsSwapCandidate(sourceObj) || !IsSwapCandidate(targetObj))
@@ -94,7 +100,7 @@ namespace Core.Handlers
             Context.Inputs.Enqueue(new InputSource(GridInputType.Swap, sourceCoord, targetCoord));
             return true;
         }
-
+        
         private static bool IsInteractable(BaseGridObject obj)
         {
             if (obj.IsEmpty) return false;
