@@ -142,6 +142,7 @@ namespace Core.Handlers
             {
                 AddBoosterAction(targetCoord, movedBoosterToB);
                 Context.ReleaseAndSetNull(targetObj, targetCoord);
+                Context.MatchResolveRequested = true;
                 return;
             }
 
@@ -149,6 +150,7 @@ namespace Core.Handlers
             {
                 AddBoosterAction(sourceCoord, movedBoosterToA);
                 Context.ReleaseAndSetNull(sourceObj, sourceCoord);
+                Context.MatchResolveRequested = true;
                 return;
             }
             

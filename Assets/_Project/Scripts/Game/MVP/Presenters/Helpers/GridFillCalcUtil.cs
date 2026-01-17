@@ -80,12 +80,6 @@ namespace Core.Utils
             {
                 var coord = new Vector2Int(x, sy);
 
-                if (!model.IsCellActive(coord))
-                {
-                    source = default;
-                    return false;
-                }
-
                 var obj = model.GetGridObject(coord);
 
                 if (!obj) continue;

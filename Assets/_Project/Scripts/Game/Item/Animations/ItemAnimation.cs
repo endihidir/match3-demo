@@ -108,11 +108,11 @@ namespace Core.Item
             return _moveTween;
         }
 
-        public Tween Move(Vector3 worldPos)
+        public Tween Move(Vector3 worldPos, float durationMultiplier = 1f)
         {
             _moveTween?.Kill();
             
-            _moveTween = transform.DOMove(worldPos, Settings.BaseMoveDuration)
+            _moveTween = transform.DOMove(worldPos, Settings.BaseMoveDuration * durationMultiplier)
                                   .SetEase(Ease.Linear)
                                   .SetUpdate(Settings.UseUnscaledTime);
 
