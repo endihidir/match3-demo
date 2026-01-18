@@ -21,7 +21,7 @@ namespace Core.Handlers
                 var src = new Vector2Int(x, srcY);
                 var item = model.GetGridObject(src);
 
-                if (!item) continue;
+                if (!item || item.IsStationary) continue;
 
                 model.SetGridObject(coord, item);
                 model.SetGridObject(src, null);
@@ -31,7 +31,7 @@ namespace Core.Handlers
             }
         }
 
-        private void RefillColumnLogic(GridStateContext stateContext, int x, int height, float cellSize, float spawnY)
+        private void FillColumnLogic(GridStateContext stateContext, int x, int height, float cellSize, float spawnY)
         {
             var model = stateContext.Model;
             var view = stateContext.View;
@@ -44,6 +44,8 @@ namespace Core.Handlers
 
                 if (!model.IsCellActive(coord)) continue;
                 if (model.GetGridObject(coord)) continue;
+                
+                if(GridFillCalcUtil.HasStationaryAboveInSameSegment(model, coord, false)) continue;
 
                 var itemType = _itemDecider.Decide(model, coord);
                 var item = stateContext.Factory.GetRegularItem(itemType);

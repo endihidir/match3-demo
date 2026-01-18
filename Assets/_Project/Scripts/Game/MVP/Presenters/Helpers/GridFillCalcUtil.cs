@@ -171,8 +171,8 @@ namespace Core.Utils
             return count;
         }
         
-        private static bool HasStationaryAboveInSameSegment(IGridModel model, Vector2Int coord) => 
-            TryFindFirstObjectAboveInSameSegment(model, coord, out var obj) && obj.IsStationary;
+        public static bool HasStationaryAboveInSameSegment(IGridModel model, Vector2Int coord, bool stopAtInactiveCell = true) => 
+            TryFindFirstObjectAboveInSameSegment(model, coord, out var obj, stopAtInactiveCell) && obj.IsStationary;
         
         private static bool IsBlockerSideSource(IGridModel model, Vector2Int src, int dirX)
         {
@@ -210,15 +210,9 @@ namespace Core.Utils
             return false;
         }
 
-        private static bool HasStationaryShadow(IGridModel model, Vector2Int targetCoord)
-        {
-            if (HasStationaryAboveInSameSegment(model, targetCoord)) return true;
-            
-            if (HasAdjacentRoofWedge(model, targetCoord)) return true;
+        private static bool HasStationaryShadow(IGridModel model, Vector2Int targetCoord) => HasStationaryAboveInSameSegment(model, targetCoord) || 
+                                                                                             HasAdjacentRoofWedge(model, targetCoord);
 
-            return false;
-        }
-        
         private static bool HasAdjacentRoofWedge(IGridModel model, Vector2Int targetCoord)
         {
             if (!model.TryGetNeighbourCoord(targetCoord, new Vector2Int(0, -1), out var roof)) return false;
@@ -242,7 +236,7 @@ namespace Core.Utils
             return false;
         }
         
-        private static bool TryFindFirstObjectAboveInSameSegment(IGridModel model, Vector2Int from, out BaseGridObject obj)
+        private static bool TryFindFirstObjectAboveInSameSegment(IGridModel model, Vector2Int from, out BaseGridObject obj, bool stopAtInactiveCell = true)
         {
             obj = null;
 
@@ -250,7 +244,7 @@ namespace Core.Utils
             {
                 var c = new Vector2Int(from.x, y);
 
-                if (!model.IsCellActive(c)) return false;
+                if (!model.IsCellActive(c) && stopAtInactiveCell) return false;
 
                 obj = model.GetGridObject(c);
                 
