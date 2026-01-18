@@ -1,5 +1,3 @@
-using Core.Config;
-using Core.Configs;
 using Core.Pool;
 using Core.Views;
 using Cysharp.Threading.Tasks;
@@ -9,13 +7,6 @@ namespace Core.Handlers
 {
     public sealed class SlideAnimationScheduler : ISlideAnimationScheduler
     {
-        private readonly FillAnimationSettingsSO _settings;
-
-        public SlideAnimationScheduler(GameplayConfigContainer config)
-        {
-            _settings = config.FillAnimationSettings;
-        }
-        
         public bool TrySchedule(IGridView view, in SlideDownMoveRecord record, Vector2Int[] pathCoord, int[] pathNext, float startTime, out float endTime, out UniTask task)
         {
             task = UniTask.CompletedTask;
@@ -50,9 +41,14 @@ namespace Core.Handlers
                 current = next;
             }
 
-            var tween = record.Item.ItemAnimation.Slide(path.Array, length, seg.Array, startTime);
+            var animation = record.Item.ItemAnimation;
+            
+            var tween = animation.SlideAlongPath(path.Array, length, seg.Array, startTime);
+            
             task = tween.ToUniTask();
-            endTime = startTime + _settings.SlideDelay;
+            
+            endTime = startTime + animation.GetSlideTimelineDuration(seg.Array, length);
+            
             return true;
         }
     }

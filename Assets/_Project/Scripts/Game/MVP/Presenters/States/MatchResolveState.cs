@@ -263,7 +263,7 @@ namespace Core.Handlers
                     continue;
                 }
 
-                tasks[i] = obj.ItemAnimation.Move(targetWorld, .6f).ToUniTask();
+                tasks[i] = obj.ItemAnimation.MoveTo(targetWorld, .6f).ToUniTask();
             }
 
             await UniTask.WhenAll(tasks);

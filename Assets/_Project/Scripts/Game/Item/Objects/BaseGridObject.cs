@@ -25,7 +25,7 @@ namespace Core.Item
             }
         }
         
-        public bool IsShiftInProgress => ItemAnimation.IsShiftInProgress;
+        public bool IsShiftInProgress => ItemAnimation.IsFallInProgress;
         private Vector2 SpriteSizeMultiplier { get; set; }
         private bool _isEmpty;
         

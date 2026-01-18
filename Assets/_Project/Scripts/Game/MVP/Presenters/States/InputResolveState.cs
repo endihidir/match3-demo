@@ -108,8 +108,8 @@ namespace Core.Handlers
             var sourcePos = Context.View.GridToWorld(sourceCoord);
             var targetPos = Context.View.GridToWorld(targetCoord);
             
-            _ = sourceObj.ItemAnimation.Move(targetPos);
-            await targetObj.ItemAnimation.Move(sourcePos);
+            _ = sourceObj.ItemAnimation.MoveTo(targetPos);
+            await targetObj.ItemAnimation.MoveTo(sourcePos);
             
             Context.Model.Swap(sourceCoord, targetCoord);
 
