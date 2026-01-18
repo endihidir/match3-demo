@@ -9,9 +9,9 @@ namespace Core.Item
         [field: SerializeField] private ItemAnimationSettings Settings { get; set; }
         [field: SerializeField] private Transform ItemHolder { get; set; }
         
-        public bool IsShiftInProgress => _shiftTween != null && _shiftTween.IsActive() && _shiftTween.IsPlaying();
+        public bool IsFallInProgress => _shiftTween.IsActive() || _slideTween.IsActive();
         
-        private Tween _shakeTween, _moveTween, _shiftTween, _springTween;
+        private Tween _shakeTween, _moveTween, _shiftTween, _slideTween, _springTween;
 
         private Vector3 _itemHolderDefaultPos;
         
@@ -62,7 +62,7 @@ namespace Core.Item
         public void Shake() => _shakeTween?.Restart();
         private void Spring() => _springTween?.Restart();
 
-        public Tween Shift(Vector3 worldPos, float cellDistance, float delay = 0f)
+        public Tween ShiftTo(Vector3 worldPos, float cellDistance, float delay = 0f)
         {
             _shiftTween?.Kill();
 
@@ -77,10 +77,18 @@ namespace Core.Item
 
             return _shiftTween;
         }
-
-        public Tween Slide(Vector3[] points, int length, float[] cellDistances, float delay = 0f)
+        
+        public float GetShiftTimelineDuration(float cellDistance)
         {
-            _shiftTween?.Kill();
+            var totalTime = Settings.BaseShiftDelay + Settings.BaseShiftDuration + cellDistance * Settings.ShiftDistanceMultiplier;
+            var result =Mathf.Max(0.05f, totalTime - Settings.ShiftEarlyStartSeconds);
+            
+            return result;
+        }
+        
+        public Tween SlideAlongPath(Vector3[] points, int length, float[] cellDistances, float delay = 0f)
+        {
+            _slideTween?.Kill();
 
             var seq = DOTween.Sequence()
                 .SetDelay(Settings.BaseSlideDelay + delay)
@@ -90,8 +98,20 @@ namespace Core.Item
             for (int i = 0; i < length; i++)
                 seq.Append(transform.DOMove(points[i], Settings.BaseSlideDuration + (cellDistances[i] * distanceMultiplier)).SetEase(Ease.InQuad));
 
-            _shiftTween = seq.OnComplete(Spring);
-            return _shiftTween;
+            _slideTween = seq.OnComplete(Spring);
+            return _slideTween;
+        }
+        
+        public float GetSlideTimelineDuration(float[] cellDistances, int length)
+        {
+            var totalTime = Settings.BaseSlideDelay;
+            
+            for (int i = 0; i < length; i++)
+                totalTime += Settings.BaseSlideDuration + cellDistances[i] * Settings.SlideDistanceMultiplier;
+
+            var result = Mathf.Max(0.1f, totalTime - Settings.SlideEarlyStartSeconds);
+          
+            return result;
         }
 
         public Tween PingPongMove(Vector3 targetPos)
@@ -108,7 +128,7 @@ namespace Core.Item
             return _moveTween;
         }
 
-        public Tween Move(Vector3 worldPos, float durationMultiplier = 1f)
+        public Tween MoveTo(Vector3 worldPos, float durationMultiplier = 1f)
         {
             _moveTween?.Kill();
             
@@ -121,6 +141,7 @@ namespace Core.Item
         
         public void Dispose()
         {
+            _slideTween?.Kill();
             _shiftTween?.Kill();
             _moveTween?.Kill();
         }
@@ -128,7 +149,6 @@ namespace Core.Item
         private void OnDestroy()
         {
             Dispose();
-            
             _shakeTween?.Kill();
             _springTween?.Kill();
         }
