@@ -20,6 +20,8 @@ namespace Core.Handlers
 
         private int _lastTaskCount;
 
+        private int _resolveRunId;
+
         public MatchResolveState(GridStateContext context) : base(context) { }
 
         protected override void OnEnter()
@@ -30,15 +32,17 @@ namespace Core.Handlers
 
         private async UniTask ResolveMatchesAsync()
         {
+            var runId = ++_resolveRunId;
+
             if (GridMatchMaskBuilder.TryBuildMatchMask(Context.Model, out var matchMask))
             {
-                await ResolveMaskAsync(matchMask);
+                await ResolveMaskAsync(matchMask, runId);
             }
 
             RequestExit();
         }
 
-        private async UniTask ResolveMaskAsync(bool[,] matchMask)
+        private async UniTask ResolveMaskAsync(bool[,] matchMask, int runId)
         {
             var model = Context.Model;
             var width = model.Width;
@@ -115,7 +119,7 @@ namespace Core.Handlers
                 for (int i = 0; i < count; i++)
                     group.Add(_coordBuffer[i]);
 
-                _animationTasks[taskCount++] = ResolveGroupParallelAnimationAsync(model, matchMask, group, id);
+                _animationTasks[taskCount++] = ResolveGroupParallelAnimationAsync(runId, model, matchMask, group, id);
             }
 
             void CommitVisited(int count)
@@ -148,14 +152,19 @@ namespace Core.Handlers
             return UniTask.WhenAll(_animationTasks);
         }
 
-        private UniTask ResolveGroupParallelAnimationAsync(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int id)
+        private async UniTask ResolveGroupParallelAnimationAsync(int runId, IGridModel model, bool[,] matchMask, List<Vector2Int> group, int id)
         {
+            await UniTask.Yield();
+
+            if (runId != _resolveRunId)
+                return;
+
             var boosterType = GridMatchBoosterDecision.DecideBoosterTypeFromGroup(model, matchMask, group, id);
 
             if (!boosterType.HasValue)
             {
                 ReleaseGroup(model, group, true);
-                return UniTask.CompletedTask;
+                return;
             }
 
             var anyForced = TryConsumeForcedCenterCoord(group, out var forcedCoord);
@@ -163,6 +172,12 @@ namespace Core.Handlers
             var centerCoord = anyForced ? forcedCoord : GridMatchBoosterDecision.SelectMergeCenter(group);
 
             var mergeObjs = GridMatchCalc.GetMergedGroupObject(group, model, centerCoord);
+
+            var boosterValue = boosterType.Value;
+
+            await PlayMergeAnimationAsync(mergeObjs, centerCoord);
+
+            if (runId != _resolveRunId) return;
 
             GridMatchCalc.SetNullMergedObjectCoords(model, group, centerCoord);
 
@@ -173,13 +188,8 @@ namespace Core.Handlers
                 Context.ReleaseAndSetNull(centerObj, centerCoord);
             }
 
-            var boosterValue = boosterType.Value;
-
-            return PlayMergeAnimationAsync(mergeObjs, centerCoord).ContinueWith(() =>
-            {
-                ReleaseMergedObjects(mergeObjs);
-                SpawnBooster(centerCoord, boosterValue);
-            });
+            ReleaseMergedObjects(mergeObjs);
+            SpawnBooster(centerCoord, boosterValue);
         }
 
         private bool TryConsumeForcedCenterCoord(List<Vector2Int> group, out Vector2Int forcedCoord)
