@@ -79,7 +79,7 @@ namespace Core.Handlers
                 return;
             }
             
-            if (!GridMatchRules.IsCellsRegular(sourceObj, targetObj) || 
+            if (!GridMatchCalc.IsCellsRegular(sourceObj, targetObj) || 
                 !IsCellsMatched(sourceCoord, targetCoord, sourceObj.ObjectType.TypeId, targetObj.ObjectType.TypeId))
             {
                 PlaySwapAndBack(sourceObj, targetObj, sourceCoord, targetCoord).Forget();
@@ -200,8 +200,8 @@ namespace Core.Handlers
             grid[coordA.x, coordA.y] = new GridObjectType(cellA.ItemKind, typeB);
             grid[coordB.x, coordB.y] = new GridObjectType(cellB.ItemKind, typeA);
 
-            return GridMatchRules.IsCellMatched(model, grid, coordA.x, coordA.y, typeB) ||
-                   GridMatchRules.IsCellMatched(model, grid, coordB.x, coordB.y, typeA);
+            return GridMatchCalc.IsCellMatched(model, grid, coordA.x, coordA.y, typeB) ||
+                   GridMatchCalc.IsCellMatched(model, grid, coordB.x, coordB.y, typeA);
         }
     }
 }

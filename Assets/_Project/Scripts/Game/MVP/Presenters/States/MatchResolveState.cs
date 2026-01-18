@@ -13,9 +13,11 @@ namespace Core.Handlers
     public sealed class MatchResolveState : StateBase<GridStateContext>
     {
         public override bool NeedsExitPermission => true;
-        
+
         private UniTask[] _animationTasks = Array.Empty<UniTask>();
-        
+
+        private Vector2Int[] _coordBuffer = Array.Empty<Vector2Int>();
+
         private int _lastTaskCount;
 
         public MatchResolveState(GridStateContext context) : base(context) { }
@@ -43,63 +45,87 @@ namespace Core.Handlers
             var height = model.Height;
 
             var visited = new bool[width, height];
-            
+
             var capacity = width * height;
-            
+
             if (_animationTasks.Length < capacity)
                 _animationTasks = new UniTask[capacity];
-            
+
+            if (_coordBuffer.Length < capacity)
+                _coordBuffer = new Vector2Int[capacity];
+
+            var grid = model.BuildTypeDataGrid();
+
             var taskCount = 0;
-            
-            if (Context.HasForcedBoosterSpawnCoord)
+
+            var hasForced = Context.HasForcedBoosterSpawnCoord;
+            var forced = Context.ForcedBoosterSpawnCoord;
+
+            for (int pass = 0; pass < (hasForced ? 2 : 1); pass++)
             {
-                var forcedCoord = Context.ForcedBoosterSpawnCoord;
+                var onlyForced = hasForced && pass == 0;
 
-                if (model.IsInRange(forcedCoord) && matchMask[forcedCoord.x, forcedCoord.y] && !visited[forcedCoord.x, forcedCoord.y])
+                var startX = onlyForced ? forced.x : 0;
+                var startY = onlyForced ? forced.y : 0;
+                var endX = onlyForced ? forced.x + 1 : width;
+                var endY = onlyForced ? forced.y + 1 : height;
+
+                if (onlyForced)
                 {
-                    var forcedObj = model.GetGridObject(forcedCoord);
-
-                    if (forcedObj)
-                    {
-                        var forcedGroup = GridMatchGroupCollector.CollectGroupFromMask(model, matchMask, visited, forcedCoord);
-
-                        if (forcedGroup is { Count: > 2 })
-                        {
-                            var forcedId = forcedObj.TypeId;
-
-                            if (forcedId > 0)
-                            {
-                                _animationTasks[taskCount++] = ResolveGroupParallelAnimationAsync(model, matchMask, forcedGroup, forcedId);
-                            }
-                        }
-                    }
+                    Scan(startX, startY, endX, endY, 3, 999);
+                    continue;
                 }
-            }
 
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    if (!matchMask[x, y]) continue;
-                    if (visited[x, y]) continue;
-
-                    var obj = model.GetGridObject(x, y);
-                    if (!obj) continue;
-
-                    var coord = new Vector2Int(x, y);
-                    var group = GridMatchGroupCollector.CollectGroupFromMask(model, matchMask, visited, coord);
-                    if (group == null || group.Count < 3) continue;
-
-                    var id = obj.TypeId;
-                    if (id <= 0) continue;
-                    
-                    _animationTasks[taskCount++] = ResolveGroupParallelAnimationAsync(model, matchMask, group, id);
-                }
+                Scan(startX, startY, endX, endY, 4, 999);
+                Scan(startX, startY, endX, endY, 3, 3);
             }
 
             if (taskCount == 0) return;
-            
+
             await WhenAllTasks(taskCount);
+            return;
+
+            void Scan(int startX, int startY, int endX, int endY, int minCount, int maxCount)
+            {
+                for (int y = startY; y < endY; y++)
+                {
+                    for (int x = startX; x < endX; x++)
+                        TryScheduleAt(x, y, minCount, maxCount);
+                }
+            }
+
+            void TryScheduleAt(int x, int y, int minCount, int maxCount)
+            {
+                if (!matchMask[x, y]) return;
+                if (visited[x, y]) return;
+
+                var data = grid[x, y];
+                if (!GridMatchCalc.IsRegularItem(data)) return;
+
+                var id = data.TypeId;
+                if (id <= 0) return;
+
+                var count = GridMatchCalc.CollectMatchShapeFromCenter(model, grid, x, y, id, visited, _coordBuffer);
+                if (count < minCount || count > maxCount) return;
+
+                CommitVisited(count);
+
+                var group = new List<Vector2Int>(count);
+
+                for (int i = 0; i < count; i++)
+                    group.Add(_coordBuffer[i]);
+
+                _animationTasks[taskCount++] = ResolveGroupParallelAnimationAsync(model, matchMask, group, id);
+            }
+
+            void CommitVisited(int count)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    var c = _coordBuffer[i];
+                    visited[c.x, c.y] = true;
+                }
+            }
         }
 
         private UniTask WhenAllTasks(int taskCount)
@@ -111,7 +137,7 @@ namespace Core.Handlers
             }
 
             var end = _lastTaskCount;
-            
+
             if (end > _animationTasks.Length) end = _animationTasks.Length;
 
             for (int i = taskCount; i < end; i++)
@@ -121,10 +147,10 @@ namespace Core.Handlers
 
             return UniTask.WhenAll(_animationTasks);
         }
-        
+
         private UniTask ResolveGroupParallelAnimationAsync(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int id)
         {
-            var boosterType = GridBoosterDecision.DecideBoosterTypeFromGroup(model, matchMask, group, id);
+            var boosterType = GridMatchBoosterDecision.DecideBoosterTypeFromGroup(model, matchMask, group, id);
 
             if (!boosterType.HasValue)
             {
@@ -133,12 +159,13 @@ namespace Core.Handlers
             }
 
             var anyForced = TryConsumeForcedCenterCoord(group, out var forcedCoord);
-            var centerCoord = anyForced ? forcedCoord : GridBoosterDecision.SelectMergeCenter(group);
 
-            var mergeObjs = GetMergedGroupObject(group, model, centerCoord);
-            
-            SetNullMergedObjectCoords(model, group, centerCoord);
-            
+            var centerCoord = anyForced ? forcedCoord : GridMatchBoosterDecision.SelectMergeCenter(group);
+
+            var mergeObjs = GridMatchCalc.GetMergedGroupObject(group, model, centerCoord);
+
+            GridMatchCalc.SetNullMergedObjectCoords(model, group, centerCoord);
+
             var centerObj = model.GetGridObject(centerCoord);
 
             if (centerObj)
@@ -147,7 +174,7 @@ namespace Core.Handlers
             }
 
             var boosterValue = boosterType.Value;
-            
+
             return PlayMergeAnimationAsync(mergeObjs, centerCoord).ContinueWith(() =>
             {
                 ReleaseMergedObjects(mergeObjs);
@@ -174,30 +201,6 @@ namespace Core.Handlers
 
             forcedCoord = default;
             return false;
-        }
-
-        private static BaseGridObject[] GetMergedGroupObject(List<Vector2Int> group, IGridModel model, Vector2Int centerCoord)
-        {
-            var mergeObjs = new BaseGridObject[group.Count - 1];
-            var index = 0;
-
-            foreach (var coord in group)
-            {
-                if (coord == centerCoord) continue;
-                var obj = model.GetGridObject(coord);
-                if (!obj) continue;
-                mergeObjs[index++] = obj;
-            }
-
-            return mergeObjs;
-        }
-
-        private static void SetNullMergedObjectCoords(IGridModel model, List<Vector2Int> group, Vector2Int centerCoord)
-        {
-            foreach (var coord in group.Where(coord => coord != centerCoord))
-            {
-                model.SetGridObject(coord, null);
-            }
         }
 
         private void ReleaseMergedObjects(BaseGridObject[] mergeObjs)
@@ -250,7 +253,7 @@ namespace Core.Handlers
         private async UniTask PlayMergeAnimationAsync(BaseGridObject[] mergeObjs, Vector2Int centerCoord)
         {
             var targetWorld = Context.View.GridToWorld(centerCoord);
-            
+
             var tasks = new UniTask[mergeObjs.Length];
 
             for (int i = 0; i < mergeObjs.Length; i++)
