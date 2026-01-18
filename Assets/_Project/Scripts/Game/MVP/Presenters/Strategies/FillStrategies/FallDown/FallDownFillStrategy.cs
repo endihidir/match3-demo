@@ -37,7 +37,7 @@ namespace Core.Handlers
                 if (GridFillCalcUtil.TryGetSpawnCellCoord(model, x, model.Height, out var spawnCell))
                 {
                     var spawnY = view.GridToWorld(spawnCell).y + cellSize;
-                    RefillColumnLogic(context, x, height, cellSize, spawnY);
+                    FillColumnLogic(context, x, height, cellSize, spawnY);
                 }
             }
 
