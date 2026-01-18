@@ -78,28 +78,52 @@ namespace Core.Utils
             var down = CountSame(model, grid, x, y, id, 0, -1);
             var up = CountSame(model, grid, x, y, id, 0, 1);
 
-            var hasH = 1 + left + right >= 3;
-            var hasV = 1 + down + up >= 3;
-            var hasLine = hasH || hasV;
+            var hLen = 1 + left + right;
+            var vLen = 1 + down + up;
 
-            if (hasH)
+            var hasH = hLen >= 3;
+            var hasV = vLen >= 3;
+
+            var maxLineLen = hLen >= vLen ? hLen : vLen;
+            var lineMode = maxLineLen >= 4;
+
+            if (lineMode)
             {
-                AddLine(-1, 0, left);
-                AddLine(1, 0, right);
+                if (hasH)
+                {
+                    AddLine(-1, 0, left);
+                    AddLine(1, 0, right);
+                }
+
+                if (hasV)
+                {
+                    AddLine(0, -1, down);
+                    AddLine(0, 1, up);
+                }
             }
-
-            if (hasV)
+            else
             {
-                AddLine(0, -1, down);
-                AddLine(0, 1, up);
-            }
+                var anySquare = false;
 
-            if (!hasLine)
-            {
-                AddSquare(x, y);
-                AddSquare(x - 1, y);
-                AddSquare(x, y - 1);
-                AddSquare(x - 1, y - 1);
+                anySquare |= AddSquare(x, y);
+                anySquare |= AddSquare(x - 1, y);
+                anySquare |= AddSquare(x, y - 1);
+                anySquare |= AddSquare(x - 1, y - 1);
+
+                if (hasH)
+                {
+                    AddLine(-1, 0, left);
+                    AddLine(1, 0, right);
+                }
+
+                if (hasV)
+                {
+                    AddLine(0, -1, down);
+                    AddLine(0, 1, up);
+                }
+
+                if (!anySquare && !hasH && !hasV)
+                    return 0;
             }
 
             TryAdd(x, y);
@@ -119,16 +143,20 @@ namespace Core.Utils
                 }
             }
 
-            void AddSquare(int sx, int sy)
+            bool AddSquare(int sx, int sy)
             {
-                if (!Has2X2SquareAt(model, grid, sx, sy, id)) return;
+                if (!Has2X2SquareAt(model, grid, sx, sy, id)) return false;
+
+                var before = count;
 
                 TryAdd(sx, sy);
                 TryAdd(sx + 1, sy);
                 TryAdd(sx, sy + 1);
                 TryAdd(sx + 1, sy + 1);
+
+                return count != before;
             }
-            
+
             void TryAdd(int ax, int ay)
             {
                 if (!model.IsInRange(ax, ay)) return;
