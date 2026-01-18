@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Core.Utils
 {
-    public static class GridBoosterDecision
+    public static class GridMatchBoosterDecision
     {
         public static BoosterType? DecideBoosterTypeFromGroup(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int id)
         {
@@ -75,7 +75,7 @@ namespace Core.Utils
             {
                 var c = group[i];
                 
-                if (!GridMatchRules.Has2X2SquareAt(model, grid, c.x, c.y, id)) continue;
+                if (!GridMatchCalc.Has2X2SquareAt(model, grid, c.x, c.y, id)) continue;
 
                 var b = new Vector2Int(c.x + 1, c.y);
                 var d = new Vector2Int(c.x, c.y + 1);

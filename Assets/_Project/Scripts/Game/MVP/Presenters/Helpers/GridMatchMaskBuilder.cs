@@ -40,7 +40,7 @@ namespace Core.Utils
 
             while (gridModel.IsInRange(x, y))
             {
-                if (!GridMatchRules.IsRegularItem(grid[x, y]))
+                if (!GridMatchCalc.IsRegularItem(grid[x, y]))
                 {
                     x += dx;
                     y += dy;
@@ -60,7 +60,7 @@ namespace Core.Utils
                 {
                     var next = grid[nx, ny];
 
-                    if (!GridMatchRules.IsRegularItem(next) || next.TypeId != id) break;
+                    if (!GridMatchCalc.IsRegularItem(next) || next.TypeId != id) break;
 
                     runLen++;
                     nx += dx;
@@ -94,7 +94,7 @@ namespace Core.Utils
                 for (int x = 0; x < gridModel.Width - 1; x++)
                 {
                     var a = grid[x, y];
-                    if (!GridMatchRules.IsRegularItem(a)) continue;
+                    if (!GridMatchCalc.IsRegularItem(a)) continue;
 
                     var id = a.TypeId;
 
@@ -102,9 +102,9 @@ namespace Core.Utils
                     var c = grid[x, y + 1];
                     var d = grid[x + 1, y + 1];
 
-                    if (!GridMatchRules.IsRegularItem(b) || b.TypeId != id) continue;
-                    if (!GridMatchRules.IsRegularItem(c) || c.TypeId != id) continue;
-                    if (!GridMatchRules.IsRegularItem(d) || d.TypeId != id) continue;
+                    if (!GridMatchCalc.IsRegularItem(b) || b.TypeId != id) continue;
+                    if (!GridMatchCalc.IsRegularItem(c) || c.TypeId != id) continue;
+                    if (!GridMatchCalc.IsRegularItem(d) || d.TypeId != id) continue;
 
                     any = true;
 
