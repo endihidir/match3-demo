@@ -123,18 +123,18 @@ namespace Core.Item
             _pingPongTween?.Kill(true);
 
             _pingPongTween = DOTween.Sequence()
-                                .Append(transform.DOMove(targetPos, Settings.BaseMoveDuration).SetEase(Ease.Linear))
-                                .Append(transform.DOMove(defaultPos, Settings.BaseMoveDuration).SetEase(Ease.Linear))
+                                .Append(transform.DOMove(targetPos, Settings.BasePingPongDuration).SetEase(Ease.Linear))
+                                .Append(transform.DOMove(defaultPos, Settings.BasePingPongDuration).SetEase(Ease.Linear))
                                 .SetUpdate(Settings.UseUnscaledTime);
             
             return _pingPongTween;
         }
 
-        public Tween MoveTo(Vector3 worldPos, float durationMultiplier = 1f)
+        public Tween MoveTo(Vector3 worldPos)
         {
             _moveTween?.Kill(true);
             
-            _moveTween = transform.DOMove(worldPos, Settings.BaseMoveDuration * durationMultiplier)
+            _moveTween = transform.DOMove(worldPos, Settings.BaseMoveDuration)
                                   .SetEase(Ease.Linear)
                                   .SetUpdate(Settings.UseUnscaledTime);
 

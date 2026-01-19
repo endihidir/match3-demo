@@ -9,7 +9,7 @@ namespace Core.Services
 {
     public interface IInputService
     {
-        event Action<Vector2, Vector2Int> OnSwipe;
+        event Action<Vector2, Vector2Int> OnInputGet;
         void Enable();
         void Disable();
     }
@@ -17,7 +17,7 @@ namespace Core.Services
     public class InputService : IInputService, ITickable, IDisposable
     {
         private readonly InputActions _actions = new();
-        public event Action<Vector2, Vector2Int> OnSwipe;
+        public event Action<Vector2, Vector2Int> OnInputGet;
 
         private Vector2 _startPos;
         private Vector2 _lastPos;
@@ -35,7 +35,6 @@ namespace Core.Services
             _actions.Board.Press.started += OnPressStarted;
             _actions.Board.Press.canceled += OnPressCanceled;
             _actions.Board.Position.performed += OnPositionPerformed;
-            EditorLogger.Log("Input Service Enabled");
         }
 
         private void OnPositionPerformed(InputAction.CallbackContext ctx)
@@ -59,7 +58,7 @@ namespace Core.Services
 
             var dir = GetSwipeDirection(_startPos, endPos, threshold);
 
-            OnSwipe?.Invoke(_startPos, dir);
+            OnInputGet?.Invoke(_startPos, dir);
         }
 
         private static Vector2Int GetSwipeDirection(Vector2 start, Vector2 end, float threshold)
@@ -84,7 +83,6 @@ namespace Core.Services
             _actions.Board.Press.canceled -= OnPressCanceled;
             _actions.Board.Position.performed -= OnPositionPerformed;
             _actions.Disable();
-            EditorLogger.Log("Input Service Disabled");
         }
 
         public void Dispose()

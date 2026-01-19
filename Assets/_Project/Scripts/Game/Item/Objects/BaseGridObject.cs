@@ -9,7 +9,6 @@ namespace Core.Item
     {
         [field: SerializeField] public ItemAnimation ItemAnimation { get; private set; }
         [field: SerializeField] public SpriteRenderer SpriteRenderer { get; private set; }
-        [field: SerializeField] public BoxCollider2D BoxCollider2D { get; private set; }
         [field: SerializeField, ReadOnly] public bool IsStationary { get; private set; }
         [field: SerializeField, ReadOnly] public Vector2Int Coord { get; private set; }
         public GridObjectType ObjectType { get; private set; }
@@ -53,12 +52,7 @@ namespace Core.Item
         }
         
         public void SetCoordinate(Vector2Int coord) => Coord = coord;
-        public void SetSpriteSize(float cellSize)
-        {
-            SpriteRenderer.size = cellSize * SpriteSizeMultiplier;
-            BoxCollider2D.size = cellSize * SpriteSizeMultiplier;
-        }
-
+        public void SetSpriteSize(float cellSize) => SpriteRenderer.size = cellSize * SpriteSizeMultiplier;
         public void SetPosition(Vector3 position) => transform.position = position;
         public void SetParent(Transform parent) => transform.SetParent(parent);
         protected override void OnActivate() => ItemAnimation.InitAnimations();

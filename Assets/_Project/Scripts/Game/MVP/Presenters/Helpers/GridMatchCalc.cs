@@ -217,7 +217,7 @@ namespace Core.Utils
             }
         }
 
-        public static int CountSame(IGridModel gridModel, GridObjectType[,] grid, int x, int y, int id, int dx, int dy)
+        private static int CountSame(IGridModel gridModel, GridObjectType[,] grid, int x, int y, int id, int dx, int dy)
         {
             var count = 0;
 
