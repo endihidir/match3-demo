@@ -3,6 +3,7 @@ using Core.Item;
 using Core.Item.Factories;
 using Core.Models;
 using Core.StateMachineCore;
+using Core.Utils;
 using Core.Views;
 using UnityEngine;
 using VContainer.Unity;
@@ -57,10 +58,16 @@ namespace Core.Handlers
 
         private bool TryEnqueueTap(Vector2Int sourceCoord)
         {
+            if (!Context.Model.IsInRange(sourceCoord)) return false;
+
             var objA = Context.Model.GetGridObject(sourceCoord);
             if (!objA) return false;
 
-            if (!IsInteractable(objA)) return false;
+            if (!IsInteractable(objA))
+            {
+                objA.ItemAnimation.Shake();
+                return false;
+            }
 
             var inputSource = new InputSource(GridInputType.Tap, sourceCoord);
             Context.Inputs.Enqueue(inputSource);
@@ -70,15 +77,22 @@ namespace Core.Handlers
         private bool TryEnqueueSwap(Vector2Int sourceCoord, Vector2Int targetCoord)
         {
             if (sourceCoord == targetCoord) return false;
+            
+            if (!Context.Model.IsInRange(sourceCoord)) return false;
 
             var sourceObj = Context.Model.GetGridObject(sourceCoord);
             var targetObj = Context.Model.GetGridObject(targetCoord);
 
             if (!sourceObj) return false;
 
-            if (!IsInteractable(sourceObj) || !IsInteractable(targetObj)) return false;
+            if (!targetObj || !Context.Model.IsInRange(targetCoord))
+            {
+                sourceObj.ItemAnimation.Shake();
+                return false;
+            }
 
-            if (!targetObj || !Context.Model.IsInRange(targetCoord) || !IsSwapCandidate(sourceObj) || !IsSwapCandidate(targetObj))
+            if (!IsInteractable(sourceObj) || !IsInteractable(targetObj) || 
+                !IsSwapCandidate(sourceObj) || !IsSwapCandidate(targetObj))
             {
                 sourceObj.ItemAnimation.Shake();
                 return false;
