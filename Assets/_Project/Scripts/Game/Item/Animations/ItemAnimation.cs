@@ -65,6 +65,8 @@ namespace Core.Item
 
         public Tween ShiftTo(Vector3 worldPos, float cellDistance, float delay = 0f)
         {
+            KillInputTweens();
+            
             _shiftTween?.Kill();
 
             var distanceMultiplier = Settings.ShiftDistanceMultiplier;
@@ -88,6 +90,8 @@ namespace Core.Item
         
         public Tween SlideAlongPath(Vector3[] points, int length, float[] cellDistances, float delay = 0f)
         {
+            KillInputTweens();
+            
             _slideTween?.Kill();
 
             var seq = DOTween.Sequence()
@@ -116,8 +120,6 @@ namespace Core.Item
 
         public Tween PingPongMove(Vector3 defaultPos, Vector3 targetPos)
         {
-            if(IsFallInProgress) return _pingPongTween;
-            
             _pingPongTween?.Kill(true);
 
             _pingPongTween = DOTween.Sequence()
@@ -130,8 +132,6 @@ namespace Core.Item
 
         public Tween MoveTo(Vector3 worldPos, float durationMultiplier = 1f)
         {
-            if(IsFallInProgress) return _moveTween;
-            
             _moveTween?.Kill(true);
             
             _moveTween = transform.DOMove(worldPos, Settings.BaseMoveDuration * durationMultiplier)
@@ -139,6 +139,12 @@ namespace Core.Item
                                   .SetUpdate(Settings.UseUnscaledTime);
 
             return _moveTween;
+        }
+
+        private void KillInputTweens()
+        {
+            _moveTween?.Kill(true);
+            _pingPongTween?.Kill(true);
         }
         
         public void Dispose()
