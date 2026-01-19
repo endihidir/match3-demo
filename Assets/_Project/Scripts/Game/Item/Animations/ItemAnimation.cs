@@ -9,9 +9,10 @@ namespace Core.Item
         [field: SerializeField] private ItemAnimationSettings Settings { get; set; }
         [field: SerializeField] private Transform ItemHolder { get; set; }
         
-        public bool IsFallInProgress => _shiftTween.IsActive() || _slideTween.IsActive();
-        
-        private Tween _shakeTween, _moveTween, _shiftTween, _slideTween, _springTween;
+        public bool IsFallInProgress => _shiftTween.IsActive() && _shiftTween.IsPlaying() || 
+                                        _slideTween.IsActive() && _slideTween.IsPlaying();
+
+        private Tween _shakeTween, _moveTween, _pingPongTween, _shiftTween, _slideTween, _springTween;
 
         private Vector3 _itemHolderDefaultPos;
         
@@ -114,23 +115,25 @@ namespace Core.Item
             return result;
         }
 
-        public Tween PingPongMove(Vector3 targetPos)
+        public Tween PingPongMove(Vector3 sourcePos, Vector3 targetPos)
         {
-            _moveTween?.Kill();
-                
-            var defaultPos = transform.position;
+            if(IsFallInProgress) return _pingPongTween;
+            
+            _pingPongTween?.Kill(true);
 
-            _moveTween = DOTween.Sequence()
+            _pingPongTween = DOTween.Sequence()
                                 .Append(transform.DOMove(targetPos, Settings.BaseMoveDuration).SetEase(Ease.Linear))
-                                .Append(transform.DOMove(defaultPos, Settings.BaseMoveDuration).SetEase(Ease.Linear))
+                                .Append(transform.DOMove(sourcePos, Settings.BaseMoveDuration).SetEase(Ease.Linear))
                                 .SetUpdate(Settings.UseUnscaledTime);
             
-            return _moveTween;
+            return _pingPongTween;
         }
 
         public Tween MoveTo(Vector3 worldPos, float durationMultiplier = 1f)
         {
-            _moveTween?.Kill();
+            if(IsFallInProgress) return _moveTween;
+            
+            _moveTween?.Kill(true);
             
             _moveTween = transform.DOMove(worldPos, Settings.BaseMoveDuration * durationMultiplier)
                                   .SetEase(Ease.Linear)
@@ -144,13 +147,14 @@ namespace Core.Item
             _slideTween?.Kill();
             _shiftTween?.Kill();
             _moveTween?.Kill();
+            _pingPongTween?.Kill();
         }
 
         private void OnDestroy()
         {
-            Dispose();
             _shakeTween?.Kill();
             _springTween?.Kill();
+            Dispose();
         }
     }
 }

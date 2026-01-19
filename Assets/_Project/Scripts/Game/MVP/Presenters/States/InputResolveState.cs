@@ -94,8 +94,8 @@ namespace Core.Handlers
             var sourcePos = Context.View.GridToWorld(sourceCoord);
             var targetPos = Context.View.GridToWorld(targetCoord);
             
-            _ = sourceObj.ItemAnimation.PingPongMove(targetPos);
-            await targetObj.ItemAnimation.PingPongMove(sourcePos);
+            _ = sourceObj.ItemAnimation.PingPongMove(sourcePos, targetPos);
+            await targetObj.ItemAnimation.PingPongMove(targetPos, sourcePos);
            
             RequestExit();
         }
@@ -149,8 +149,6 @@ namespace Core.Handlers
             {
                 AddBoosterAction(sourceCoord, movedBoosterToA);
                 Context.ReleaseAndSetNull(sourceObj, sourceCoord);
-                Context.MatchResolveRequested = true;
-                return;
             }
             
             Context.MatchResolveRequested = true;
