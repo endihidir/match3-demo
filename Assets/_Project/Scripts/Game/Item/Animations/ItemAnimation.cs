@@ -85,7 +85,7 @@ namespace Core.Item
         {
             var totalTime = Settings.BaseShiftDelay + Settings.BaseShiftDuration + cellDistance * Settings.ShiftDistanceMultiplier;
             var result = Mathf.Max(0.05f, totalTime - Settings.ShiftEarlyStartSeconds);
-            return result;
+            return .05f;
         }
         
         public Tween SlideAlongPath(Vector3[] points, int length, float[] cellDistances, float delay = 0f)
@@ -113,9 +113,9 @@ namespace Core.Item
             for (int i = 0; i < length; i++)
                 totalTime += Settings.BaseSlideDuration + cellDistances[i] * Settings.SlideDistanceMultiplier;
 
-            var result = Mathf.Max(0.1f, totalTime - Settings.SlideEarlyStartSeconds);
+            var result = Mathf.Max(0.05f, totalTime - Settings.SlideEarlyStartSeconds);
           
-            return result;
+            return .05f;
         }
 
         public Tween PingPongMove(Vector3 defaultPos, Vector3 targetPos)
@@ -130,12 +130,12 @@ namespace Core.Item
             return _pingPongTween;
         }
 
-        public Tween MoveTo(Vector3 worldPos)
+        public Tween MoveTo(Vector3 worldPos, float durationMultiplier = 1f, Ease ease = Ease.Linear)
         {
             _moveTween?.Kill(true);
             
-            _moveTween = transform.DOMove(worldPos, Settings.BaseMoveDuration)
-                                  .SetEase(Ease.Linear)
+            _moveTween = transform.DOMove(worldPos, Settings.BaseMoveDuration * durationMultiplier)
+                                  .SetEase(ease)
                                   .SetUpdate(Settings.UseUnscaledTime);
 
             return _moveTween;

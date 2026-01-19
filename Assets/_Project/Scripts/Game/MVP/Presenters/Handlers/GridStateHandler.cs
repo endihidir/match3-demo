@@ -27,13 +27,16 @@ namespace Core.Handlers
             var boosterState = new BoosterResolveState(Context);
             var matchState = new MatchResolveState(Context);
             var fillState = new FillResolveState(Context, fillStrategyResolver);
+            var shuffleState = new ShuffleState(Context);
 
-            var states = new StateBase<GridStateContext>[] { idleState, inputState, boosterState, matchState, fillState };
+            var states = new StateBase<GridStateContext>[] { idleState, inputState, boosterState, matchState, fillState, shuffleState };
             
             StateMachine.Register(states);
 
             StateMachine.AddTransition(idleState, inputState, () => HasAnyInput)
                         .AddTransition(idleState, matchState, () => MatchResolveRequested)
+                        .AddTransition(idleState, shuffleState, () => !MatchResolveRequested && !shuffleState.HasAnyMove())
+                        .AddTransition(shuffleState, idleState, () => shuffleState.IsExitReady)
                          
                         .AddTransition(inputState, boosterState, () => inputState.IsExitReady && HasPendingBoosterActions)
                         .AddTransition(inputState, matchState, () => inputState.IsExitReady && MatchResolveRequested && !HasPendingBoosterActions)
@@ -48,6 +51,8 @@ namespace Core.Handlers
 
         public bool TryEnqueueInput(Vector2Int sourceCoord, Vector2Int direction)
         {
+            if (Context.IsShuffleInProgress) return false;
+            
             if (direction == Vector2Int.zero)
                 return TryEnqueueTap(sourceCoord);
 
