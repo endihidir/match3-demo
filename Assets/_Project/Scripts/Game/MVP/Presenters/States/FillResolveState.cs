@@ -25,7 +25,7 @@ namespace Core.Handlers
 
         private async UniTask FillGridAsync()
         {
-            int runId = ++_fillRunId;
+            var runId = ++_fillRunId;
             
             await UniTask.Yield();
 

@@ -15,6 +15,7 @@ namespace Core.Config
         [field: SerializeField] public float SlideDistanceMultiplier { get; private set; } = 0.05f;
         [field: SerializeField] public float SlideEarlyStartSeconds { get; private set; } = 0.1f;
         [field: SerializeField, Header("MOVE SETTINGS")] public float BaseMoveDuration { get; private set; } = 0.15f;
+        [field: SerializeField] public float BasePingPongDuration { get; private set; } = 0.15f;
         [field: SerializeField, Header("SHAKE SETTINGS")] public float ShakeDuration { get; private set; } = 0.25f;
         [field: SerializeField] public float ShakeRotAngle { get; private set; } = 5f;
         [field: SerializeField, Header("SPRING SETTINGS")] public float SpringDuration { get; private set; } = .1f;

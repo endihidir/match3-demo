@@ -21,7 +21,8 @@ MonoBehaviour:
   <BaseSlideDelay>k__BackingField: 0.03
   <SlideDistanceMultiplier>k__BackingField: 0.05
   <SlideEarlyStartSeconds>k__BackingField: 1
-  <BaseMoveDuration>k__BackingField: 0.15
+  <BaseMoveDuration>k__BackingField: 0.075
+  <BasePingPongDuration>k__BackingField: 0.125
   <ShakeDuration>k__BackingField: 0.25
   <ShakeRotAngle>k__BackingField: 5
   <SpringDuration>k__BackingField: 0.1
