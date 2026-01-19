@@ -3,7 +3,6 @@ using Core.Item;
 using Core.Item.Factories;
 using Core.Models;
 using Core.StateMachineCore;
-using Core.Utils;
 using Core.Views;
 using UnityEngine;
 using VContainer.Unity;
@@ -18,7 +17,6 @@ namespace Core.Handlers
         private bool HasAnyInput => Context.Inputs.Count > 0;
         private bool HasPendingBoosterActions => Context.HasPendingBoosterActions;
         private bool MatchResolveRequested => Context.MatchResolveRequested;
-        private bool IsAllItemsPlacedSuccessfully => Context.IsAllItemsPlacedSuccessfully();
 
         public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory, GameplayConfigContainer configContainer, IFillStrategyResolver fillStrategyResolver)
         {
@@ -35,7 +33,7 @@ namespace Core.Handlers
             StateMachine.Register(states);
 
             StateMachine.AddTransition(idleState, inputState, () => HasAnyInput)
-                        .AddTransition(idleState, matchState, () => MatchResolveRequested && IsAllItemsPlacedSuccessfully)
+                        .AddTransition(idleState, matchState, () => MatchResolveRequested)
                          
                         .AddTransition(inputState, boosterState, () => inputState.IsExitReady && HasPendingBoosterActions)
                         .AddTransition(inputState, matchState, () => inputState.IsExitReady && MatchResolveRequested && !HasPendingBoosterActions)
