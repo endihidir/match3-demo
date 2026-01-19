@@ -69,9 +69,15 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 4015578566053369887, guid: 3f9c05147c79b82489141297fcbe3189,
         type: 3}
-      insertIndex: -1
+      insertIndex: 2
       addedObject: {fileID: 5417191489845019921}
   m_SourcePrefab: {fileID: 100100000, guid: 3f9c05147c79b82489141297fcbe3189, type: 3}
+--- !u!61 &449683171077478029 stripped
+BoxCollider2D:
+  m_CorrespondingSourceObject: {fileID: 3952866480409687922, guid: 3f9c05147c79b82489141297fcbe3189,
+    type: 3}
+  m_PrefabInstance: {fileID: 3523784583840883199}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &530523186251299296 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4015578566053369887, guid: 3f9c05147c79b82489141297fcbe3189,
@@ -90,15 +96,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38aec17e596d455a85ab37fd96bdcd88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <SpriteRenderer>k__BackingField: {fileID: 8726645706113781878}
   <ItemAnimation>k__BackingField: {fileID: 7784691834131881766}
-  <GridObjectTypeData>k__BackingField:
-    <ItemKind>k__BackingField: 0
-    <Type>k__BackingField: 
-    <TypeId>k__BackingField: 0
-  <Coordinate>k__BackingField: {x: 0, y: 0}
-  <CellSize>k__BackingField: {x: 0, y: 0}
-  <IsStatic>k__BackingField: 0
+  <SpriteRenderer>k__BackingField: {fileID: 8726645706113781878}
+  <BoxCollider2D>k__BackingField: {fileID: 449683171077478029}
+  <IsStationary>k__BackingField: 0
+  <Coord>k__BackingField: {x: 0, y: 0}
+  <ItemType>k__BackingField: 0
 --- !u!114 &7784691834131881766 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: -2527020138448421159, guid: 3f9c05147c79b82489141297fcbe3189,

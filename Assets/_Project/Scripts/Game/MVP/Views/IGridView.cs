@@ -6,13 +6,14 @@ namespace Core.Views
     public interface IGridView
     {
         event Action OnViewInitialized;
-        public bool IsInitialized { get; }
+        Camera Cam { get; }
+        bool IsInitialized { get; }
         Transform GridObjectsParent { get; }
         void Initialize(int width, int height, bool[,] isCellActive);
         Vector2Int ScreenToGridCoordinate(Vector2 mousePosition);
         Vector3 GridToWorld(Vector2Int itemCoordinate);
         Vector2Int WorldToGrid(Vector3 worldPosition);
-        Vector2Int InputDirectionToGridDirection(Vector2Int inputDirection);
-        public float GetCellSize();
+        Vector2Int InputToGridDirection(Vector2Int inputDirection);
+        float GetCellSize();
     }
 }

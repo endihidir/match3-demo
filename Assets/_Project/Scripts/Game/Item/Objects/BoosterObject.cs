@@ -30,6 +30,7 @@ namespace Core.Item
                 BoosterAction = boosterConfigData.BoosterAction;
             }
         }
+        
         public bool TryBuildAction(Vector2Int origin, out BoosterActionContext boosterActionContext)
         {
             if (BoosterAction == null)
