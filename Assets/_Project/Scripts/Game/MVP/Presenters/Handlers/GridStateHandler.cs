@@ -104,7 +104,7 @@ namespace Core.Handlers
         private static bool IsInteractable(BaseGridObject obj)
         {
             if (obj.IsEmpty) return false;
-            return !obj.IsShiftInProgress;
+            return !obj.IsFallInProgress;
         }
 
         private static bool IsSwapCandidate(BaseGridObject obj) => !obj.IsStationary;
