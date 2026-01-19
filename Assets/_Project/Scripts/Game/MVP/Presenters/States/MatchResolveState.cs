@@ -17,10 +17,8 @@ namespace Core.Handlers
         private UniTask[] _animationTasks = Array.Empty<UniTask>();
 
         private Vector2Int[] _coordBuffer = Array.Empty<Vector2Int>();
-
+        
         private int _lastTaskCount;
-
-        private int _resolveRunId;
 
         public MatchResolveState(GridStateContext context) : base(context) { }
 
@@ -32,17 +30,15 @@ namespace Core.Handlers
 
         private async UniTask ResolveMatchesAsync()
         {
-            var runId = ++_resolveRunId;
-
             if (GridMatchMaskBuilder.TryBuildMatchMask(Context.Model, out var matchMask))
             {
-                await ResolveMaskAsync(matchMask, runId);
+                await ResolveMaskAsync(matchMask);
             }
 
             RequestExit();
         }
 
-        private async UniTask ResolveMaskAsync(bool[,] matchMask, int runId)
+        private async UniTask ResolveMaskAsync(bool[,] matchMask)
         {
             var model = Context.Model;
             var width = model.Width;
@@ -87,6 +83,7 @@ namespace Core.Handlers
             if (taskCount == 0) return;
 
             await WhenAllTasks(taskCount);
+            
             return;
 
             void Scan(int startX, int startY, int endX, int endY, int minCount, int maxCount)
@@ -119,7 +116,7 @@ namespace Core.Handlers
                 for (int i = 0; i < count; i++)
                     group.Add(_coordBuffer[i]);
 
-                _animationTasks[taskCount++] = ResolveGroupParallelAnimationAsync(runId, model, matchMask, group, id);
+                _animationTasks[taskCount++] = ResolveGroupParallelAnimationAsync(model, matchMask, group, id);
             }
 
             void CommitVisited(int count)
@@ -134,11 +131,7 @@ namespace Core.Handlers
 
         private UniTask WhenAllTasks(int taskCount)
         {
-            if (taskCount == 0)
-            {
-                _lastTaskCount = 0;
-                return UniTask.CompletedTask;
-            }
+            if (taskCount == 0) return UniTask.CompletedTask;
 
             var end = _lastTaskCount;
 
@@ -152,19 +145,14 @@ namespace Core.Handlers
             return UniTask.WhenAll(_animationTasks);
         }
 
-        private async UniTask ResolveGroupParallelAnimationAsync(int runId, IGridModel model, bool[,] matchMask, List<Vector2Int> group, int id)
+        private UniTask ResolveGroupParallelAnimationAsync(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int id)
         {
-            await UniTask.Yield();
-
-            if (runId != _resolveRunId)
-                return;
-
             var boosterType = GridMatchBoosterDecision.DecideBoosterTypeFromGroup(model, matchMask, group, id);
 
             if (!boosterType.HasValue)
             {
                 ReleaseGroup(model, group, true);
-                return;
+                return UniTask.CompletedTask;
             }
 
             var anyForced = TryConsumeForcedCenterCoord(group, out var forcedCoord);
@@ -175,20 +163,22 @@ namespace Core.Handlers
 
             var boosterValue = boosterType.Value;
 
-            await PlayMergeAnimationAsync(mergeObjs, centerCoord);
-
-            if (runId != _resolveRunId) return;
-
             GridMatchCalc.SetNullMergedObjectCoords(model, group, centerCoord);
+            
+            return PlayMergeAnimationAsync(mergeObjs, centerCoord).ContinueWith(() => OnMergeComplete(model, mergeObjs, centerCoord, boosterValue));
+        }
 
+        private void OnMergeComplete(IGridModel model, BaseGridObject[] mergeObjs, Vector2Int centerCoord, BoosterType boosterValue)
+        {
+            ReleaseMergedObjects(mergeObjs);
+                
             var centerObj = model.GetGridObject(centerCoord);
 
             if (centerObj)
             {
                 Context.ReleaseAndSetNull(centerObj, centerCoord);
             }
-
-            ReleaseMergedObjects(mergeObjs);
+                
             SpawnBooster(centerCoord, boosterValue);
         }
 
