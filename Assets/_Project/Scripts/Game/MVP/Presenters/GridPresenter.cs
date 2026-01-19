@@ -1,5 +1,6 @@
 using System;
 using Core.Handlers;
+using Core.Item;
 using Core.Models;
 using Core.Services;
 using Core.Utils;
@@ -27,16 +28,33 @@ namespace Core.Presenters
         public void Initialize()
         {
             _gridView.OnViewInitialized += PlaceGridItems;
-            _inputService.OnSwipe += OnSwipeGet;
+            _inputService.OnSwipe += OnInputGet;
         }
 
-        private void OnSwipeGet(Vector2 screenPos, Vector2Int direction)
+        private void OnInputGet(Vector2 sourcePos, Vector2Int inputDir)
         {
-            var sourceCoord = _gridView.ScreenToGridCoordinate(screenPos);
+            var gridDir = _gridView.InputToGridDirection(inputDir);
 
-            var gridDirection = _gridView.InputDirectionToGridDirection(direction);
+            if (!TryPickInteractableCoord(sourcePos, out var sourceCoord)) return;
 
-            _gridStateHandler.TryEnqueueInput(sourceCoord, gridDirection);
+            _gridStateHandler.TryEnqueueInput(sourceCoord, gridDir);
+        }
+
+        private bool TryPickInteractableCoord(Vector2 screenPos, out Vector2Int coord)
+        {
+            coord = default;
+
+            var worldPos = _gridView.Cam.ScreenToWorldPoint(screenPos);
+
+            var hit = Physics2D.Raycast(worldPos, Vector2.zero, 0f, LayerMask.GetMask("GridItem"));
+
+            if (!hit || !hit.transform.TryGetComponent(out BaseGridObject obj)) return false;
+
+            if (obj.IsFallInProgress) return false;
+            
+            coord = obj.Coord;
+            
+            return true;
         }
 
         private void PlaceGridItems()
@@ -56,7 +74,7 @@ namespace Core.Presenters
 
         public void Dispose()
         {
-            _inputService.OnSwipe -= OnSwipeGet;
+            _inputService.OnSwipe -= OnInputGet;
             _gridView.OnViewInitialized -= PlaceGridItems;
         }
     }

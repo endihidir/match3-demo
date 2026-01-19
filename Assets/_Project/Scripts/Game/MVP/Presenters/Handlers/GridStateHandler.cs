@@ -3,6 +3,7 @@ using Core.Item;
 using Core.Item.Factories;
 using Core.Models;
 using Core.StateMachineCore;
+using Core.Utils;
 using Core.Views;
 using UnityEngine;
 using VContainer.Unity;
@@ -62,11 +63,7 @@ namespace Core.Handlers
             var objA = Context.Model.GetGridObject(sourceCoord);
             if (!objA) return false;
 
-            if (!IsInteractable(objA))
-            {
-                objA.ItemAnimation.Shake();
-                return false;
-            }
+            if (!IsInteractable(objA)) return false;
 
             var inputSource = new InputSource(GridInputType.Tap, sourceCoord);
             Context.Inputs.Enqueue(inputSource);

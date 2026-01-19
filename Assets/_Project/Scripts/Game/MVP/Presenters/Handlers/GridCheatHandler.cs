@@ -114,7 +114,7 @@ namespace Core.Handlers
         private Vector2Int GetMouseGridCoord(GridStateContext context)
         {
             var screen = context.View.ScreenToGridCoordinate(Input.mousePosition);
-            return context.View.InputDirectionToGridDirection(screen);
+            return context.View.InputToGridDirection(screen);
         }
 
         private void ClearCell(GridStateContext context, Vector2Int coord)
