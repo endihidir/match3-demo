@@ -9,8 +9,8 @@ namespace Core.Item
         [field: SerializeField] private ItemAnimationSettings Settings { get; set; }
         [field: SerializeField] private Transform ItemHolder { get; set; }
         
-        public bool IsFallInProgress => _shiftTween.IsActive() && _shiftTween.IsPlaying() || 
-                                        _slideTween.IsActive() && _slideTween.IsPlaying();
+        public bool IsFallInProgress => (_shiftTween != null && _shiftTween.IsActive() && !_shiftTween.IsComplete()) ||
+                                        (_slideTween != null && _slideTween.IsActive() && !_slideTween.IsComplete());
 
         private Tween _shakeTween, _moveTween, _pingPongTween, _shiftTween, _slideTween, _springTween;
 
@@ -67,7 +67,7 @@ namespace Core.Item
         {
             KillInputTweens();
             
-            _shiftTween?.Kill();
+            _shiftTween?.Kill(true);
 
             var distanceMultiplier = Settings.ShiftDistanceMultiplier;
             var duration = Settings.BaseShiftDuration + (cellDistance * distanceMultiplier);
@@ -92,7 +92,7 @@ namespace Core.Item
         {
             KillInputTweens();
             
-            _slideTween?.Kill();
+            _slideTween?.Kill(true);
 
             var seq = DOTween.Sequence()
                 .SetDelay(Settings.BaseSlideDelay + delay)
