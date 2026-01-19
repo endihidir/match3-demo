@@ -82,8 +82,7 @@ namespace Core.Item
         public float GetShiftTimelineDuration(float cellDistance)
         {
             var totalTime = Settings.BaseShiftDelay + Settings.BaseShiftDuration + cellDistance * Settings.ShiftDistanceMultiplier;
-            var result =Mathf.Max(0.05f, totalTime - Settings.ShiftEarlyStartSeconds);
-            
+            var result = Mathf.Max(0.05f, totalTime - Settings.ShiftEarlyStartSeconds);
             return result;
         }
         
@@ -115,7 +114,7 @@ namespace Core.Item
             return result;
         }
 
-        public Tween PingPongMove(Vector3 sourcePos, Vector3 targetPos)
+        public Tween PingPongMove(Vector3 defaultPos, Vector3 targetPos)
         {
             if(IsFallInProgress) return _pingPongTween;
             
@@ -123,7 +122,7 @@ namespace Core.Item
 
             _pingPongTween = DOTween.Sequence()
                                 .Append(transform.DOMove(targetPos, Settings.BaseMoveDuration).SetEase(Ease.Linear))
-                                .Append(transform.DOMove(sourcePos, Settings.BaseMoveDuration).SetEase(Ease.Linear))
+                                .Append(transform.DOMove(defaultPos, Settings.BaseMoveDuration).SetEase(Ease.Linear))
                                 .SetUpdate(Settings.UseUnscaledTime);
             
             return _pingPongTween;
