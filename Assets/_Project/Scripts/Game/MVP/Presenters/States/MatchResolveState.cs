@@ -165,20 +165,22 @@ namespace Core.Handlers
 
             GridMatchCalc.SetNullMergedObjectCoords(model, group, centerCoord);
             
-            return PlayMergeAnimationAsync(mergeObjs, centerCoord).ContinueWith(() => OnMergeComplete(model, mergeObjs, centerCoord, boosterValue));
+            var centerObj = model.GetGridObject(centerCoord);
+            
+            model.SetGridObject(centerCoord, null);
+            
+            return PlayMergeAnimationAsync(mergeObjs, centerCoord).ContinueWith(() => OnMergeComplete(mergeObjs, centerObj, centerCoord, boosterValue));
         }
 
-        private void OnMergeComplete(IGridModel model, BaseGridObject[] mergeObjs, Vector2Int centerCoord, BoosterType boosterValue)
+        private void OnMergeComplete(BaseGridObject[] mergeObjs, BaseGridObject centerObj, Vector2Int centerCoord, BoosterType boosterValue)
         {
             ReleaseMergedObjects(mergeObjs);
-                
-            var centerObj = model.GetGridObject(centerCoord);
 
             if (centerObj)
             {
-                Context.ReleaseAndSetNull(centerObj, centerCoord);
+                Context.Factory.ReleaseItem(centerObj);
             }
-                
+            
             SpawnBooster(centerCoord, boosterValue);
         }
 
@@ -266,7 +268,7 @@ namespace Core.Handlers
                     continue;
                 }
 
-                tasks[i] = obj.ItemAnimation.MoveTo(targetWorld, .6f).ToUniTask();
+                tasks[i] = obj.ItemAnimation.MoveTo(targetWorld).ToUniTask();
             }
 
             await UniTask.WhenAll(tasks);
