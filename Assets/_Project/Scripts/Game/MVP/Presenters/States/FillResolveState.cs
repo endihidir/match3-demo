@@ -9,7 +9,7 @@ namespace Core.Handlers
         public override bool NeedsExitPermission => true;
         
         private readonly IFillStrategyResolver _strategyResolver;
-        public bool IsFillInProgress { get; private set; }
+        public bool IsInProgress { get; private set; }
         
         private int _fillRunId;
         
@@ -28,7 +28,7 @@ namespace Core.Handlers
         {
             var runId = ++_fillRunId;
             
-            IsFillInProgress = true;
+            IsInProgress = true;
 
             try
             {
@@ -53,7 +53,7 @@ namespace Core.Handlers
             finally
             {
                 if (runId == _fillRunId)
-                    IsFillInProgress = false;
+                    IsInProgress = false;
             }
         }
     }
