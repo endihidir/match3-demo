@@ -18,11 +18,13 @@ namespace Core.Handlers
         
         public bool HasForcedBoosterSpawnCoord { get; set; }
         public Vector2Int ForcedBoosterSpawnCoord { get; set; }
+        
         public List<BoosterActionContext> PendingBoosterActions { get; } = new();
+        public bool HasPendingBoosterActions => PendingBoosterActions.Count > 0;
         
         public bool MatchResolveRequested { get; set; }
-        public bool HasPendingBoosterActions => PendingBoosterActions.Count > 0;
         public bool IsShuffleInProgress { get; set; }
+        
         private int GroupIdCounter { get; set; }
 
         public GridStateContext(IGridModel model, IGridView view, IGridItemFactory factory, ItemConfigContainerSO configs)
