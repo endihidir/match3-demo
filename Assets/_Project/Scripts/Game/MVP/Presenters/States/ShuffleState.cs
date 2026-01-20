@@ -45,18 +45,16 @@ namespace Core.Handlers
             try
             {
                 var model = Context.Model;
-                var grid = model.BuildTypeDataGrid();
-
-                if (HasAnyMove(model, grid)) return;
 
                 var count = CollectShuffleCandidates();
+                
                 _candidateCount = count;
 
                 if (count < 2) return;
 
                 ShuffleOnce(count);
                 
-                grid = model.BuildTypeDataGrid();
+                var grid = model.BuildTypeDataGrid();
 
                 BreakExistingMatches(model, grid);
 
@@ -70,6 +68,7 @@ namespace Core.Handlers
                 for (int i = 0; i < count; i++)
                 {
                     var obj = _objs[i];
+                    
                     if (!obj)
                     {
                         _animTasks[i] = UniTask.CompletedTask;
