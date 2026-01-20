@@ -65,9 +65,9 @@ namespace Core.Item
 
         public Tween ShiftTo(Vector3 worldPos, float cellDistance, float delay = 0f)
         {
-            KillInputTweens();
+            KillMovementTweens();
             
-            _shiftTween?.Kill(true);
+            _shiftTween?.Kill();
 
             var distanceMultiplier = Settings.ShiftDistanceMultiplier;
             var duration = Settings.BaseShiftDuration + (cellDistance * distanceMultiplier);
@@ -85,14 +85,14 @@ namespace Core.Item
         {
             var totalTime = Settings.BaseShiftDelay + Settings.BaseShiftDuration + cellDistance * Settings.ShiftDistanceMultiplier;
             var result = Mathf.Max(0.05f, totalTime - Settings.ShiftEarlyStartSeconds);
-            return .05f;
+            return result;
         }
         
         public Tween SlideAlongPath(Vector3[] points, int length, float[] cellDistances, float delay = 0f)
         {
-            KillInputTweens();
+            KillMovementTweens();
             
-            _slideTween?.Kill(true);
+            _slideTween?.Kill();
 
             var seq = DOTween.Sequence()
                 .SetDelay(Settings.BaseSlideDelay + delay)
@@ -115,7 +115,7 @@ namespace Core.Item
 
             var result = Mathf.Max(0.05f, totalTime - Settings.SlideEarlyStartSeconds);
           
-            return .05f;
+            return result;
         }
 
         public Tween PingPongMove(Vector3 defaultPos, Vector3 targetPos)
@@ -141,25 +141,29 @@ namespace Core.Item
             return _moveTween;
         }
 
-        private void KillInputTweens()
-        {
-            _moveTween?.Kill(true);
-            _pingPongTween?.Kill(true);
-        }
-        
-        public void Dispose()
-        {
-            _slideTween?.Kill();
-            _shiftTween?.Kill();
-            _moveTween?.Kill();
-            _pingPongTween?.Kill();
-        }
-
         private void OnDestroy()
         {
             _shakeTween?.Kill();
             _springTween?.Kill();
             Dispose();
+        }
+        
+        public void Dispose()
+        {
+            KillPlacementTweens();
+            KillMovementTweens();
+        }
+
+        private void KillPlacementTweens()
+        {
+            _slideTween?.Kill(true);
+            _shiftTween?.Kill(true);
+        }
+        
+        private void KillMovementTweens()
+        {
+            _moveTween?.Kill(true);
+            _pingPongTween?.Kill(true);
         }
     }
 }
