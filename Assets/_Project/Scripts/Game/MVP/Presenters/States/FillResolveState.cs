@@ -9,6 +9,7 @@ namespace Core.Handlers
         public override bool NeedsExitPermission => true;
         
         private readonly IFillStrategyResolver _strategyResolver;
+        public bool IsFillInProgress { get; private set; }
         
         private int _fillRunId;
         
@@ -27,24 +28,33 @@ namespace Core.Handlers
         {
             var runId = ++_fillRunId;
             
-            await UniTask.Yield();
+            IsFillInProgress = true;
 
-            if (runId != _fillRunId) return;
+            try
+            {
+                await UniTask.Yield();
+
+                if (runId != _fillRunId) return;
             
-            var strategy = _strategyResolver.ResolveStrategy(Context.Model);
+                var strategy = _strategyResolver.ResolveStrategy(Context.Model);
             
-            if (strategy == null)
-            {   
-                EditorLogger.LogError("Fill strategy not found!");
-                await UniTask.CompletedTask;
-                return;
+                if (strategy == null)
+                {   
+                    EditorLogger.LogError("Fill strategy not found!");
+                    return;
+                }
+            
+                await strategy.Execute(Context).WaitAnimationsAsync();
+            
+                if (runId != _fillRunId) return;
+                
+                Context.MatchResolveRequested = GridMatchCalcUtil.HasAnyRegularMatchOnBoard(Context.Model);
             }
-            
-            await strategy.Execute(Context).WaitAnimationsAsync();
-            
-            if (runId != _fillRunId) return;
-            
-            Context.MatchResolveRequested = GridMatchCalcUtil.HasAnyRegularMatchOnBoard(Context.Model);
+            finally
+            {
+                if (runId == _fillRunId)
+                    IsFillInProgress = false;
+            }
         }
     }
 }
