@@ -26,8 +26,8 @@ namespace Core.Handlers
             var inputState = new InputResolveState(Context);
             var boosterState = new BoosterResolveState(Context);
             var matchState = new MatchResolveState(Context);
-            var fillState = new FillResolveState(Context, fillStrategyResolver);
             var shuffleState = new ShuffleState(Context);
+            var fillState = new FillResolveState(Context, fillStrategyResolver);
 
             var states = new StateBase<GridStateContext>[] { idleState, inputState, boosterState, matchState, fillState, shuffleState };
             
