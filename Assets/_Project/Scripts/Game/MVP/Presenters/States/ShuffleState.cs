@@ -1,5 +1,6 @@
 using System;
 using Core.Item;
+using Core.Models;
 using Core.StateMachineCore;
 using Core.Utils;
 using Cysharp.Threading.Tasks;
@@ -15,6 +16,9 @@ namespace Core.Handlers
         private UniTask[] _animTasks = Array.Empty<UniTask>();
         private Vector2Int[] _coords = Array.Empty<Vector2Int>();
         private BaseGridObject[] _objs = Array.Empty<BaseGridObject>();
+        private int[] _typeCounts = Array.Empty<int>();
+
+        private int _candidateCount;
 
         private const int MaxMatchBreakOps = 64;
 
@@ -22,7 +26,10 @@ namespace Core.Handlers
 
         protected override void OnEnter()
         {
-            if (HasAnyMove())
+            var model = Context.Model;
+            var grid = model.BuildTypeDataGrid();
+
+            if (HasAnyMove(model, grid))
             {
                 RequestExit();
                 return;
@@ -37,28 +44,26 @@ namespace Core.Handlers
 
             try
             {
-                if (HasAnyMove())
-                {
-                    RequestExit();
-                    return;
-                }
+                var model = Context.Model;
+                var grid = model.BuildTypeDataGrid();
+
+                if (HasAnyMove(model, grid)) return;
 
                 var count = CollectShuffleCandidates();
+                _candidateCount = count;
 
-                if (count < 2)
-                {
-                    RequestExit();
-                    return;
-                }
+                if (count < 2) return;
 
                 ShuffleOnce(count);
+                
+                grid = model.BuildTypeDataGrid();
 
-                BreakExistingMatches();
+                BreakExistingMatches(model, grid);
 
-                if (!HasAnyMove())
-                    ForceCreateAnyMove_NoTypeChange();
+                if (!HasAnyMove(model, grid))
+                    ForceCreateAnyMove_NoTypeChange(model, grid);
 
-                BreakExistingMatches();
+                BreakExistingMatches(model, grid);
 
                 EnsureTaskCapacity(count);
 
@@ -83,9 +88,9 @@ namespace Core.Handlers
             finally
             {
                 Context.IsShuffleInProgress = false;
+                RequestExit();
             }
 
-            RequestExit();
         }
 
         private int CollectShuffleCandidates()
@@ -106,7 +111,7 @@ namespace Core.Handlers
                 for (int x = 0; x < model.Width; x++)
                 {
                     var obj = model.GetGridObject(x, y);
-                    if (!IsShuffleCandidate(obj)) continue;
+                    if (!GridShuffleCalcUtil.IsSwapCandidate(obj)) continue;
 
                     _coords[count] = new Vector2Int(x, y);
                     _objs[count] = obj;
@@ -135,184 +140,159 @@ namespace Core.Handlers
         {
             var model = Context.Model;
             var grid = model.BuildTypeDataGrid();
+            return HasAnyMove(model, grid);
+        }
+
+        private bool HasAnyMove(IGridModel model, GridObjectType[,] grid)
+        {
+            if (!GridShuffleCalcUtil.HasAnyPotentialMatchGeometry(model)) return true;
+            
+            if (!CanEverFormAnyMatch(model)) return true;
+            
+            if (!GridShuffleCalcUtil.HasAnySwappableAdjacency(model)) return true;
 
             for (int y = 0; y < model.Height; y++)
             {
                 for (int x = 0; x < model.Width; x++)
                 {
                     var a = model.GetGridObject(x, y);
-                    if (!IsSwapCandidate(a)) continue;
+                    if (!GridShuffleCalcUtil.IsSwapCandidate(a)) continue;
 
-                    if (TrySwapCreatesMatch(grid, x, y, x + 1, y)) return true;
-                    if (TrySwapCreatesMatch(grid, x, y, x, y + 1)) return true;
+                    if (GridShuffleCalcUtil.TrySwapCreatesMatch(model, grid, x, y, x + 1, y)) return true;
+                    if (GridShuffleCalcUtil.TrySwapCreatesMatch(model, grid, x, y, x, y + 1)) return true;
                 }
             }
 
             return false;
         }
 
-        private bool TrySwapCreatesMatch(GridObjectType[,] grid, int ax, int ay, int bx, int by)
+        private bool CanEverFormAnyMatch(IGridModel model)
         {
-            var model = Context.Model;
-
-            if (!model.IsInRange(bx, by)) return false;
-
-            var objA = model.GetGridObject(ax, ay);
-            var objB = model.GetGridObject(bx, by);
-
-            if (!IsSwapCandidate(objA) || !IsSwapCandidate(objB)) return false;
-
-            if (!GridMatchCalc.IsCellsRegular(objA, objB)) return false;
-
-            var cellA = grid[ax, ay];
-            var cellB = grid[bx, by];
-
-            grid[ax, ay] = new GridObjectType(cellA.ItemKind, cellB.TypeId);
-            grid[bx, by] = new GridObjectType(cellB.ItemKind, cellA.TypeId);
-
-            var matched = GridMatchCalc.IsCellMatched(model, grid, ax, ay, cellB.TypeId) ||
-                          GridMatchCalc.IsCellMatched(model, grid, bx, by, cellA.TypeId);
-
-            grid[ax, ay] = cellA;
-            grid[bx, by] = cellB;
-
-            return matched;
-        }
-
-        private void BreakExistingMatches()
-        {
-            var model = Context.Model;
-            var grid = model.BuildTypeDataGrid();
-
-            for (int op = 0; op < MaxMatchBreakOps; op++)
-            {
-                if (!TryFindAnyMatchedCell(grid, out var matchCoord))
-                    return;
-
-                if (!TryBreakMatchAt(grid, matchCoord))
-                    return;
-            }
-        }
-
-        private bool TryFindAnyMatchedCell(GridObjectType[,] grid, out Vector2Int coord)
-        {
-            var model = Context.Model;
+            var maxTypeId = -1;
 
             for (int y = 0; y < model.Height; y++)
             {
                 for (int x = 0; x < model.Width; x++)
                 {
                     var obj = model.GetGridObject(x, y);
-                    if (!IsShuffleCandidate(obj)) continue;
-
-                    var typeId = obj.TypeId;
-
-                    if (GridMatchCalc.IsCellMatched(model, grid, x, y, typeId))
-                    {
-                        coord = new Vector2Int(x, y);
-                        return true;
-                    }
+                    if (!GridShuffleCalcUtil.IsSwapCandidate(obj)) continue;
+                    if (obj.TypeId > maxTypeId)
+                        maxTypeId = obj.TypeId;
                 }
             }
 
-            coord = default;
+            if (maxTypeId < 0)
+                return false;
+
+            var required = maxTypeId + 1;
+            if (_typeCounts.Length < required)
+                _typeCounts = new int[required];
+            else
+                Array.Clear(_typeCounts, 0, required);
+
+            for (int y = 0; y < model.Height; y++)
+            {
+                for (int x = 0; x < model.Width; x++)
+                {
+                    var obj = model.GetGridObject(x, y);
+                    if (!GridShuffleCalcUtil.IsSwapCandidate(obj)) continue;
+
+                    var typeId = obj.TypeId;
+                    if ((uint)typeId >= (uint)required) continue;
+
+                    _typeCounts[typeId]++;
+                }
+            }
+
+            for (int i = 0; i < required; i++)
+            {
+                if (_typeCounts[i] >= 3)
+                    return true;
+            }
+
             return false;
         }
 
-        private bool TryBreakMatchAt(GridObjectType[,] grid, Vector2Int matchCoord)
+        private void BreakExistingMatches(IGridModel model, GridObjectType[,] grid)
         {
-            var model = Context.Model;
+            for (int op = 0; op < MaxMatchBreakOps; op++)
+            {
+                if (!GridShuffleCalcUtil.TryFindAnyMatchedCell(model, grid, out var matchCoord))
+                    return;
 
+                if (!TryBreakMatchAt(model, grid, matchCoord))
+                    return;
+            }
+        }
+
+        private bool TryBreakMatchAt(IGridModel model, GridObjectType[,] grid, Vector2Int matchCoord)
+        {
             var ax = matchCoord.x;
             var ay = matchCoord.y;
 
             var objA = model.GetGridObject(ax, ay);
-            if (!IsShuffleCandidate(objA))
+            if (!GridShuffleCalcUtil.IsSwapCandidate(objA))
                 return false;
 
             var cellA = grid[ax, ay];
 
-            for (int i = 0; i < _coords.Length; i++)
+            for (int i = 0; i < _candidateCount; i++)
             {
                 var bCoord = _coords[i];
 
-                if (bCoord == matchCoord)
-                    continue;
+                if (bCoord == matchCoord) continue;
 
-                if (!model.IsInRange(bCoord)) 
-                    continue;
+                if (!model.IsInRange(bCoord)) continue;
 
-                if (!model.IsCellActive(bCoord))
-                    continue;
+                if (!model.IsCellActive(bCoord)) continue;
 
                 var bx = bCoord.x;
                 var by = bCoord.y;
 
                 var objB = model.GetGridObject(bx, by);
-                if (!IsShuffleCandidate(objB))
-                    continue;
+                
+                if (!GridShuffleCalcUtil.IsSwapCandidate(objB)) continue;
 
                 var cellB = grid[bx, by];
 
-                if (cellA.TypeId == cellB.TypeId)
-                    continue;
+                if (cellA.TypeId == cellB.TypeId) continue;
 
-                if (!GridMatchCalc.IsCellsRegular(objA, objB))
-                    continue;
+                if (!GridMatchCalcUtil.IsCellsRegular(objA, objB)) continue;
 
-                if (WouldCreateMatchAfterSwap(grid, ax, ay, bx, by))
-                    continue;
+                if (GridMatchCalcUtil.WouldSwapCreateMatch(model, grid, new Vector2Int(ax, ay), new Vector2Int(bx, by), objA.TypeId, objB.TypeId)) continue;
 
                 model.Swap(matchCoord, bCoord);
-                SwapGridCells(grid, ax, ay, bx, by);
+                GridShuffleCalcUtil.SwapGridCells(grid, ax, ay, bx, by);
                 return true;
             }
 
             return false;
         }
 
-        private bool WouldCreateMatchAfterSwap(GridObjectType[,] grid, int ax, int ay, int bx, int by)
+        private void ForceCreateAnyMove_NoTypeChange(IGridModel model, GridObjectType[,] grid)
         {
-            var model = Context.Model;
-
-            var cellA = grid[ax, ay];
-            var cellB = grid[bx, by];
-
-            grid[ax, ay] = new GridObjectType(cellA.ItemKind, cellB.TypeId);
-            grid[bx, by] = new GridObjectType(cellB.ItemKind, cellA.TypeId);
-
-            var creates = GridMatchCalc.IsCellMatched(model, grid, ax, ay, cellB.TypeId) ||
-                          GridMatchCalc.IsCellMatched(model, grid, bx, by, cellA.TypeId);
-
-            grid[ax, ay] = cellA;
-            grid[bx, by] = cellB;
-
-            return creates;
-        }
-
-        private void SwapGridCells(GridObjectType[,] grid, int ax, int ay, int bx, int by) => (grid[ax, ay], grid[bx, by]) = (grid[bx, by], grid[ax, ay]);
-
-        private void ForceCreateAnyMove_NoTypeChange()
-        {
-            var model = Context.Model;
-
-            for (int i = 0; i < _objs.Length; i++)
+            for (int i = 0; i < _candidateCount; i++)
             {
                 var a = _objs[i];
-                if (!IsShuffleCandidate(a)) continue;
+                if (!GridShuffleCalcUtil.IsSwapCandidate(a)) continue;
 
                 var typeId = a.TypeId;
 
                 BaseGridObject b = null;
                 BaseGridObject c = null;
 
-                for (int j = i + 1; j < _objs.Length; j++)
+                for (int j = i + 1; j < _candidateCount; j++)
                 {
                     var o = _objs[j];
-                    if (!IsShuffleCandidate(o)) continue;
+                    if (!GridShuffleCalcUtil.IsSwapCandidate(o)) continue;
                     if (o.TypeId != typeId) continue;
 
-                    if (b == null) { b = o; continue; }
+                    if (!b)
+                    {
+                        b = o; 
+                        continue;
+                    }
+                    
                     c = o;
                     break;
                 }
@@ -328,44 +308,21 @@ namespace Core.Handlers
                         var p2 = new Vector2Int(x + 1, y + 2);
                         var pGap = new Vector2Int(x, y + 2);
 
-                        if (!IsCellUsableForMove(p0) || !IsCellUsableForMove(p1) || !IsCellUsableForMove(p2) || !IsCellUsableForMove(pGap))
+                        if (!GridShuffleCalcUtil.IsCellUsableForMove(model, p0) || !GridShuffleCalcUtil.IsCellUsableForMove(model, p1) || 
+                            !GridShuffleCalcUtil.IsCellUsableForMove(model, p2) || !GridShuffleCalcUtil.IsCellUsableForMove(model, pGap))
                             continue;
 
                         var gapObj = model.GetGridObject(pGap);
-                        if (gapObj && gapObj.TypeId == typeId)
-                            continue;
+                        
+                        if (gapObj && gapObj.TypeId == typeId) continue;
 
-                        PlaceObjectAt(a, p0);
-                        PlaceObjectAt(b, p1);
-                        PlaceObjectAt(c, p2);
-
+                        GridShuffleCalcUtil.PlaceObjectAt(model, grid, a, p0);
+                        GridShuffleCalcUtil.PlaceObjectAt(model, grid, b, p1);
+                        GridShuffleCalcUtil.PlaceObjectAt(model, grid, c, p2);
                         return;
                     }
                 }
             }
-        }
-
-        private bool IsCellUsableForMove(Vector2Int coord)
-        {
-            var model = Context.Model;
-
-            if (!model.IsInRange(coord)) return false;
-            if (!model.IsCellActive(coord)) return false;
-
-            var obj = model.GetGridObject(coord);
-            return IsShuffleCandidate(obj);
-        }
-
-        private void PlaceObjectAt(BaseGridObject obj, Vector2Int targetCoord)
-        {
-            if (!obj) return;
-
-            var model = Context.Model;
-
-            if (obj.Coord == targetCoord)
-                return;
-
-            model.Swap(obj.Coord, targetCoord);
         }
 
         private void EnsureTaskCapacity(int count)
@@ -373,16 +330,5 @@ namespace Core.Handlers
             if (_animTasks.Length != count)
                 Array.Resize(ref _animTasks, count);
         }
-
-        private static bool IsShuffleCandidate(BaseGridObject obj)
-        {
-            if (!obj) return false;
-            if (obj.IsEmpty) return false;
-            if (obj.IsStationary) return false;
-            if (obj is BoosterObject) return false;
-            return true;
-        }
-
-        private static bool IsSwapCandidate(BaseGridObject obj) => IsShuffleCandidate(obj);
     }
 }

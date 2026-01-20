@@ -14,20 +14,20 @@ namespace Core.Item
         public GridObjectType ObjectType { get; private set; }
         public GridItemKind ItemKind => ObjectType.ItemKind;
         public int TypeId => ObjectType.TypeId;
-        public bool IsEmpty
+        public bool IsHidden
         {
-            get => _isEmpty;
+            get => _isHidden;
             private set
             {
-                _isEmpty = value;
-                SpriteRenderer.enabled = !_isEmpty;
-                if (_isEmpty) IsStationary = false;
+                _isHidden = value;
+                SpriteRenderer.enabled = !_isHidden;
+                if (_isHidden) IsStationary = false;
             }
         }
         
         public bool IsFallInProgress => ItemAnimation.IsFallInProgress;
         private Vector2 SpriteSizeMultiplier { get; set; }
-        private bool _isEmpty;
+        private bool _isHidden;
         
         public BaseGridObject Initialize(GridObjectType objectType)
         {
@@ -41,7 +41,7 @@ namespace Core.Item
         protected void UpdateIdentity()
         {
             name = ToString();
-            IsEmpty = TypeId == 0;
+            IsHidden = TypeId == 0;
         }
         
         public virtual void ApplyData(BaseItemDataSO baseItemDataSo)

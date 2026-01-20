@@ -44,7 +44,7 @@ namespace Core.Handlers
             
             if (runId != _fillRunId) return;
             
-            Context.MatchResolveRequested = GridMatchCalc.HasAnyRegularMatchOnBoard(Context.Model);
+            Context.MatchResolveRequested = GridMatchCalcUtil.HasAnyRegularMatchOnBoard(Context.Model);
         }
     }
 }

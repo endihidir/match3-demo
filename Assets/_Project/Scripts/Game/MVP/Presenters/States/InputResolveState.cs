@@ -79,8 +79,8 @@ namespace Core.Handlers
                 return;
             }
             
-            if (!GridMatchCalc.IsCellsRegular(sourceObj, targetObj) || 
-                !IsCellsMatched(sourceCoord, targetCoord, sourceObj.ObjectType.TypeId, targetObj.ObjectType.TypeId))
+            if (!GridMatchCalcUtil.IsCellsRegular(sourceObj, targetObj) || 
+                !GridMatchCalcUtil.WouldSwapCreateMatch(Context.Model, Context.Model.BuildTypeDataGrid(), sourceCoord, targetCoord, sourceObj.TypeId, targetObj.TypeId))
             {
                 PlaySwapAndBack(sourceObj, targetObj, sourceCoord, targetCoord).Forget();
                 return;
@@ -184,22 +184,6 @@ namespace Core.Handlers
             {
                 EditorLogger.LogError($"{sourceBoosterType} - {targetBoosterType} merge rule does not exist!");
             }
-        }
-        
-        private bool IsCellsMatched(Vector2Int coordA, Vector2Int coordB, int typeA, int typeB)
-        {
-            var model = Context.Model;
-
-            var grid = model.BuildTypeDataGrid();
-
-            var cellA = grid[coordA.x, coordA.y];
-            var cellB = grid[coordB.x, coordB.y];
-
-            grid[coordA.x, coordA.y] = new GridObjectType(cellA.ItemKind, typeB);
-            grid[coordB.x, coordB.y] = new GridObjectType(cellB.ItemKind, typeA);
-
-            return GridMatchCalc.IsCellMatched(model, grid, coordA.x, coordA.y, typeB) ||
-                   GridMatchCalc.IsCellMatched(model, grid, coordB.x, coordB.y, typeA);
         }
     }
 }

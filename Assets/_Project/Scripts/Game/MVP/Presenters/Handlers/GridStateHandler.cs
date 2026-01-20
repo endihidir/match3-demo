@@ -108,7 +108,7 @@ namespace Core.Handlers
         
         private static bool IsInteractable(BaseGridObject obj)
         {
-            if (obj.IsEmpty) return false;
+            if (obj.IsHidden) return false;
             return !obj.IsFallInProgress;
         }
 

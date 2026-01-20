@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Core.Utils
 {
-    public static class GridMatchCalc
+    public static class GridMatchCalcUtil
     { 
         public static bool HasAnyRegularMatchOnBoard(IGridModel model)
         {
@@ -23,6 +23,23 @@ namespace Core.Utils
             }
 
             return false;
+        }
+        
+        public static bool WouldSwapCreateMatch(IGridModel model, GridObjectType[,] grid, Vector2Int coordA, Vector2Int coordB, int typeA, int typeB)
+        {
+            var cellA = grid[coordA.x, coordA.y];
+            var cellB = grid[coordB.x, coordB.y];
+
+            grid[coordA.x, coordA.y] = new GridObjectType(cellA.ItemKind, typeB);
+            grid[coordB.x, coordB.y] = new GridObjectType(cellB.ItemKind, typeA);
+
+            var creates = IsCellMatched(model, grid, coordA.x, coordA.y, typeB) ||
+                          IsCellMatched(model, grid, coordB.x, coordB.y, typeA);
+
+            grid[coordA.x, coordA.y] = cellA;
+            grid[coordB.x, coordB.y] = cellB;
+
+            return creates;
         }
         
         public static bool IsCellMatched(IGridModel model, GridObjectType[,] grid, int x, int y, int id)
@@ -46,7 +63,7 @@ namespace Core.Utils
 
             return false;
         }
-
+        
         public static bool Has2X2SquareAt(IGridModel model, GridObjectType[,] grid, int x, int y, int id)
         {
             if (x < 0 || y < 0) return false;
