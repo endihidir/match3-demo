@@ -61,11 +61,12 @@ namespace Core.Handlers
 
         private void HandleSwap(in InputSource move)
         {
+            var model = Context.Model;
             var sourceCoord = move.SourceCoord;
             var targetCoord = move.TargetCoord;
 
-            var sourceObj = Context.Model.GetGridObject(sourceCoord);
-            var targetObj = Context.Model.GetGridObject(targetCoord);
+            var sourceObj = model.GetGridObject(sourceCoord);
+            var targetObj = model.GetGridObject(targetCoord);
          
             if (!sourceObj || !targetObj)
             {
@@ -78,9 +79,11 @@ namespace Core.Handlers
                 PlaySwapAndCommit(sourceObj, targetObj, false).Forget();
                 return;
             }
+
+            var typeData = model.BuildTypeDataGrid();
             
             if (!GridMatchCalcUtil.IsCellsRegular(sourceObj, targetObj) || 
-                !GridMatchCalcUtil.WouldSwapCreateMatch(Context.Model, Context.Model.BuildTypeDataGrid(), sourceCoord, targetCoord, sourceObj.TypeId, targetObj.TypeId))
+                !GridMatchCalcUtil.WouldSwapCreateMatch(model, typeData, sourceCoord, targetCoord, sourceObj.TypeId, targetObj.TypeId))
             {
                 PlaySwapAndBack(sourceObj, targetObj, sourceCoord, targetCoord).Forget();
                 return;
