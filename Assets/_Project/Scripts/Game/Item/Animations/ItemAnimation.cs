@@ -143,11 +143,16 @@ namespace Core.Item
 
         private void OnDestroy()
         {
-            _shakeTween?.Kill();
-            _springTween?.Kill();
+            KillCachedTweens();
             Dispose();
         }
-        
+
+        private void KillCachedTweens()
+        {
+            _shakeTween?.Kill();
+            _springTween?.Kill();
+        }
+
         public void Dispose()
         {
             KillPlacementTweens();

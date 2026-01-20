@@ -75,7 +75,7 @@ namespace Core.Utils
             {
                 var c = group[i];
                 
-                if (!GridMatchCalc.Has2X2SquareAt(model, grid, c.x, c.y, id)) continue;
+                if (!GridMatchCalcUtil.Has2X2SquareAt(model, grid, c.x, c.y, id)) continue;
 
                 var b = new Vector2Int(c.x + 1, c.y);
                 var d = new Vector2Int(c.x, c.y + 1);

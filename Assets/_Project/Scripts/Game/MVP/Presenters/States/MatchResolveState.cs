@@ -101,12 +101,12 @@ namespace Core.Handlers
                 if (visited[x, y]) return;
 
                 var data = grid[x, y];
-                if (!GridMatchCalc.IsRegularItem(data)) return;
+                if (!GridMatchCalcUtil.IsRegularItem(data)) return;
 
                 var id = data.TypeId;
                 if (id <= 0) return;
 
-                var count = GridMatchCalc.CollectMatchShapeFromCenter(model, grid, x, y, id, visited, _coordBuffer);
+                var count = GridMatchCalcUtil.CollectMatchShapeFromCenter(model, grid, x, y, id, visited, _coordBuffer);
                 if (count < minCount || count > maxCount) return;
 
                 CommitVisited(count);
@@ -159,11 +159,11 @@ namespace Core.Handlers
 
             var centerCoord = anyForced ? forcedCoord : GridMatchBoosterDecision.SelectMergeCenter(group);
 
-            var mergeObjs = GridMatchCalc.GetMergedGroupObject(group, model, centerCoord);
+            var mergeObjs = GridMatchCalcUtil.GetMergedGroupObject(group, model, centerCoord);
 
             var boosterValue = boosterType.Value;
 
-            GridMatchCalc.SetNullMergedObjectCoords(model, group, centerCoord);
+            GridMatchCalcUtil.SetNullMergedObjectCoords(model, group, centerCoord);
             
             var centerObj = model.GetGridObject(centerCoord);
             
