@@ -35,7 +35,7 @@ namespace Core.Handlers
 
             StateMachine.AddTransition(idleState, inputState, () => HasAnyInput)
                         .AddTransition(idleState, matchState, () => MatchResolveRequested)
-                        .AddTransition(idleState, shuffleState, () => !MatchResolveRequested && !shuffleState.HasAnyMove())
+                        .AddTransition(idleState, shuffleState, () => !MatchResolveRequested && !fillState.IsFillInProgress && !shuffleState.HasAnyMove())
                         .AddTransition(shuffleState, idleState, () => shuffleState.IsExitReady)
                          
                         .AddTransition(inputState, boosterState, () => inputState.IsExitReady && HasPendingBoosterActions)
