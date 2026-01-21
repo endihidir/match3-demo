@@ -12,16 +12,15 @@ namespace Core.Handlers
     public sealed class ShuffleState : StateBase<GridStateContext>
     {
         public override bool NeedsExitPermission => true;
+        public bool IsShuffleInProgress { get; private set; }
 
         private UniTask[] _animTasks = Array.Empty<UniTask>();
         private Vector2Int[] _coords = Array.Empty<Vector2Int>();
         private BaseGridObject[] _objs = Array.Empty<BaseGridObject>();
         private int[] _typeCounts = Array.Empty<int>();
-
         private int _candidateCount;
-
         private const int MaxMatchBreakOps = 64;
-
+        
         public ShuffleState(GridStateContext context) : base(context) { }
 
         protected override void OnEnter()
@@ -40,7 +39,7 @@ namespace Core.Handlers
 
         private async UniTask ShuffleAsync()
         {
-            Context.IsShuffleInProgress = true;
+            IsShuffleInProgress = true;
 
             try
             {
@@ -86,7 +85,7 @@ namespace Core.Handlers
             }
             finally
             {
-                Context.IsShuffleInProgress = false;
+                IsShuffleInProgress = false;
                 RequestExit();
             }
 
