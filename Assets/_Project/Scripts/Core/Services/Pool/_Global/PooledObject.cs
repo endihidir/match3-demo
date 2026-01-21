@@ -10,14 +10,14 @@ namespace Core.Pool
 
         public void Activate(float duration = 0f, float delay = 0f, Action onComplete = null)
         {
-            gameObject?.SetActive(true);
+            gameObject.SetActive(true);
             OnActivate();
             onComplete?.Invoke();
         }
 
         public void Deactivate(float duration = 0f, float delay = 0f, Action onComplete = null)
         {
-            gameObject?.SetActive(false);
+            gameObject.SetActive(false);
             OnDeactivate();
             onComplete?.Invoke();
         }
