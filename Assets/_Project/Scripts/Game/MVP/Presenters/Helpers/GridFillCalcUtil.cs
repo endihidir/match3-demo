@@ -215,22 +215,22 @@ namespace Core.Utils
 
         private static bool HasAdjacentRoofWedge(IGridModel model, Vector2Int targetCoord)
         {
-            if (!model.TryGetNeighbourCoord(targetCoord, new Vector2Int(0, -1), out var roof)) return false;
-            if (!model.IsCellActive(roof)) return false;
+            if (!model.TryGetNeighbourCoord(targetCoord, new Vector2Int(0, -1), out var roofCoord)) return false;
+            if (!model.IsCellActive(roofCoord)) return false;
 
-            var roofObj = model.GetGridObject(roof);
+            var roofObj = model.GetGridObject(roofCoord);
             if (!roofObj || !roofObj.IsStationary) return false;
 
-            if (model.TryGetNeighbourCoord(roof, new Vector2Int(-1, 0), out var lu) && model.IsCellActive(lu))
+            if (model.TryGetNeighbourCoord(roofCoord, new Vector2Int(-1, 0), out var lu) && model.IsCellActive(lu))
             {
                 var leftObject = model.GetGridObject(lu);
-                if (leftObject && leftObject.IsStationary) return true;
+                if (leftObject) return true;
             }
 
-            if (model.TryGetNeighbourCoord(roof, new Vector2Int(1, 0), out var ru) && model.IsCellActive(ru))
+            if (model.TryGetNeighbourCoord(roofCoord, new Vector2Int(1, 0), out var ru) && model.IsCellActive(ru))
             {
                 var rightObject = model.GetGridObject(ru);
-                if (rightObject && rightObject.IsStationary) return true;
+                if (rightObject) return true;
             }
 
             return false;
