@@ -112,12 +112,14 @@ namespace Core.Handlers
             var targetPos = Context.View.GridToWorld(targetCoord);
             
             sourceObj.SetFrontOf(targetObj);
-
-            if (forceBoosterSpawnCoord) 
+            
+            if(forceBoosterSpawnCoord || targetObj.ItemKind == GridItemKind.Regular)
+            {
                 _ = targetObj.ItemAnimation.MoveTo(sourcePos);
-            
+            }
+
             await sourceObj.ItemAnimation.MoveTo(targetPos);
-            
+
             Context.Model.Swap(sourceCoord, targetCoord);
 
             if (forceBoosterSpawnCoord)
