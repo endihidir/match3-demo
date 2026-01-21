@@ -10,6 +10,8 @@ namespace Core.StateMachineCore
 
         IStateMachine Register<T>(T state) where T : class, IState;
         IStateMachine Register<T>(T[] states) where T : class, IState;
+
+        bool TryGet<T>(out T state) where T : class, IState;
         bool TryGet<T>(string id, out T state) where T : class, IState;
 
         IStateMachine SetInitialState(string stateID);
@@ -18,7 +20,7 @@ namespace Core.StateMachineCore
         IStateMachine SetInitialState<T>(T state) where T : class, IState;
         
         IStateMachine ForceState(IState state);
-        IStateMachine ForceState<T>() where T : IState;
+        IStateMachine ForceState<T>() where T : class, IState;
 
         IStateMachine AddTransition(string from, string to, Func<bool> condition);
         IStateMachine AddTransition(IState from, IState to, Func<bool> condition);

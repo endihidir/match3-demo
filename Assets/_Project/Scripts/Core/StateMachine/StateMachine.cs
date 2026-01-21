@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Core.Utils;
 
 namespace Core.StateMachineCore
@@ -32,6 +33,7 @@ namespace Core.StateMachineCore
             return this;
         }
 
+        public bool TryGet<T>(out T state) where T : class, IState => TryGet(typeof(T).Name, out state);
         public bool TryGet(string id, out IState state) => _states.TryGetValue(id, out state);
 
         public bool TryGet<T>(string id, out T state) where T : class, IState
@@ -61,10 +63,7 @@ namespace Core.StateMachineCore
         public IStateMachine SetInitialState(IState state)
         {
             if (state == null) return this;
-
-            foreach (var kv in _states)
-                if (kv.Value.IsActive) kv.Value.Exit();
-
+            foreach (var kv in _states.Where(kv => kv.Value.IsActive)) kv.Value.Exit();
             state.Enter();
             CurrentState = state;
             CurrentStateID = state.StateID;
@@ -212,10 +211,9 @@ namespace Core.StateMachineCore
             return this;
         }
         
-        public IStateMachine ForceState<T>() where T : IState
+        public IStateMachine ForceState<T>() where T : class, IState
         {
-            var key = typeof(T).Name;
-            if (!_states.TryGetValue(key, out var state)) return this;
+            if (!TryGet(out T state)) return this;
             CurrentState?.Exit();
             CurrentState = state;
             CurrentState?.Enter();

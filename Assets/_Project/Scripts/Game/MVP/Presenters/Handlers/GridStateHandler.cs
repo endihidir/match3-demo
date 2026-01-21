@@ -51,7 +51,7 @@ namespace Core.Handlers
 
         public bool TryEnqueueInput(Vector2Int sourceCoord, Vector2Int direction)
         {
-            if (Context.IsShuffleInProgress) return false;
+            if (StateMachine.TryGet<ShuffleState>(out var shuffleState) && shuffleState.IsShuffleInProgress) return false;
             
             if (direction == Vector2Int.zero)
                 return TryEnqueueTap(sourceCoord);
