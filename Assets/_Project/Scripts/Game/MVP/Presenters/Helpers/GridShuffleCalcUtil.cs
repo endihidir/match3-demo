@@ -140,7 +140,7 @@ namespace Core.Utils
         public static bool IsSwapCandidate(BaseGridObject obj)
         {
             if (!obj) return false;
-            if (obj.IsHidden) return false;
+            if (obj.IsNone) return false;
             if (obj.IsStationary) return false;
             return obj.ItemKind != GridItemKind.Booster;
         }

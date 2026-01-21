@@ -10,7 +10,7 @@ namespace Core.Utils
     { 
         public static bool HasAnyRegularMatchOnBoard(IGridModel model)
         {
-            var grid = model.BuildTypeDataGrid();
+            var grid = model.BuildGridTypeData();
             
             for (int y = 0; y < model.Height; y++)
             {
@@ -258,6 +258,21 @@ namespace Core.Utils
             }
 
             return count;
+        }
+        
+        public static bool IsAnyGroupObjectFall(IGridModel model, List<Vector2Int> group)
+        {
+            for (var i = 0; i < group.Count; i++)
+            {
+                var coord = group[i];
+                var obj = model.GetGridObject(coord);
+                if (obj && obj.IsActive && obj.IsFallInProgress)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
         
         public static BaseGridObject[] GetMergedGroupObject(List<Vector2Int> group, IGridModel model, Vector2Int centerCoord)

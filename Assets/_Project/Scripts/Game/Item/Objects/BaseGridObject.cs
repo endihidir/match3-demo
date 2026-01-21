@@ -14,20 +14,20 @@ namespace Core.Item
         public GridObjectType ObjectType { get; private set; }
         public GridItemKind ItemKind => ObjectType.ItemKind;
         public int TypeId => ObjectType.TypeId;
-        public bool IsHidden
+        public bool IsNone
         {
-            get => _isHidden;
+            get => _isNone;
             private set
             {
-                _isHidden = value;
-                SpriteRenderer.enabled = !_isHidden;
-                if (_isHidden) IsStationary = false;
+                _isNone = value;
+                SpriteRenderer.enabled = !_isNone;
+                if (_isNone) IsStationary = false;
             }
         }
         
         public bool IsFallInProgress => ItemAnimation.IsFallInProgress;
         private Vector2 SpriteSizeMultiplier { get; set; }
-        private bool _isHidden;
+        private bool _isNone;
         
         public BaseGridObject Initialize(GridObjectType objectType)
         {
@@ -41,7 +41,7 @@ namespace Core.Item
         protected void UpdateIdentity()
         {
             name = ToString();
-            IsHidden = TypeId == 0;
+            IsNone = TypeId == 0;
         }
         
         public virtual void ApplyData(BaseItemDataSO baseItemDataSo)
@@ -50,7 +50,8 @@ namespace Core.Item
             SpriteSizeMultiplier = baseItemDataSo.spriteSizeMultiplier;
             IsStationary = baseItemDataSo.isStationary;
         }
-        
+
+        public void SetFrontOf(BaseGridObject targetObj) => SpriteRenderer.sortingOrder = targetObj.SpriteRenderer.sortingOrder + 1;
         public void SetCoordinate(Vector2Int coord) => Coord = coord;
         public void SetSpriteSize(float cellSize) => SpriteRenderer.size = cellSize * SpriteSizeMultiplier;
         public void SetPosition(Vector3 position) => transform.position = position;

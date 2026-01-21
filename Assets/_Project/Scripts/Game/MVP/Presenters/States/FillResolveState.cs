@@ -11,7 +11,7 @@ namespace Core.Handlers
         private readonly IFillStrategyResolver _strategyResolver;
         public bool IsInProgress { get; private set; }
         
-        private int _fillRunId;
+        private int _runId;
         
         public FillResolveState(GridStateContext context, IFillStrategyResolver strategyResolver) : base(context)
         {
@@ -26,7 +26,7 @@ namespace Core.Handlers
 
         private async UniTask FillGridAsync()
         {
-            var runId = ++_fillRunId;
+            var runId = ++_runId;
             
             IsInProgress = true;
 
@@ -34,7 +34,7 @@ namespace Core.Handlers
             {
                 await UniTask.Yield();
 
-                if (runId != _fillRunId) return;
+                if (runId != _runId) return;
             
                 var strategy = _strategyResolver.ResolveStrategy(Context.Model);
             
@@ -46,13 +46,13 @@ namespace Core.Handlers
             
                 await strategy.Execute(Context).WaitAnimationsAsync();
             
-                if (runId != _fillRunId) return;
+                if (runId != _runId) return;
                 
                 Context.MatchResolveRequested = GridMatchCalcUtil.HasAnyRegularMatchOnBoard(Context.Model);
             }
             finally
             {
-                if (runId == _fillRunId)
+                if (runId == _runId)
                     IsInProgress = false;
             }
         }
