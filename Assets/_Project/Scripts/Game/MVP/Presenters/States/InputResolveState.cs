@@ -80,7 +80,7 @@ namespace Core.Handlers
                 return;
             }
 
-            var typeData = model.BuildTypeDataGrid();
+            var typeData = model.BuildGridTypeData();
             
             if (!GridMatchCalcUtil.IsCellsRegular(sourceObj, targetObj) || 
                 !GridMatchCalcUtil.WouldSwapCreateMatch(model, typeData, sourceCoord, targetCoord, sourceObj.TypeId, targetObj.TypeId))
@@ -111,8 +111,12 @@ namespace Core.Handlers
             var sourcePos = Context.View.GridToWorld(sourceCoord);
             var targetPos = Context.View.GridToWorld(targetCoord);
             
-            _ = sourceObj.ItemAnimation.MoveTo(targetPos);
-            await targetObj.ItemAnimation.MoveTo(sourcePos);
+            sourceObj.SetFrontOf(targetObj);
+
+            if (forceBoosterSpawnCoord) 
+                _ = targetObj.ItemAnimation.MoveTo(sourcePos);
+            
+            await sourceObj.ItemAnimation.MoveTo(targetPos);
             
             Context.Model.Swap(sourceCoord, targetCoord);
 

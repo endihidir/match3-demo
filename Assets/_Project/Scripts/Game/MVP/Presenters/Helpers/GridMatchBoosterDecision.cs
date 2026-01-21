@@ -69,7 +69,7 @@ namespace Core.Utils
         private static bool Has2X2SquareInGroup(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int id)
         {
             var set = new HashSet<Vector2Int>(group);
-            var grid = model.BuildTypeDataGrid();
+            var grid = model.BuildGridTypeData();
 
             for (int i = 0; i < group.Count; i++)
             {

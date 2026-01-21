@@ -5,9 +5,9 @@ namespace Core.Models
 {
     public class GridModel : BaseGridModel<BaseGridObject>, IGridModel
     {
-        protected override void OnInitialize()
-        {
-        }
+        private GridObjectType[,] _typeGrid;
+
+        protected override void OnInitialize() { }
 
         public void Swap(Vector2Int sourceCoord, Vector2Int targetCoord)
         {
@@ -20,20 +20,21 @@ namespace Core.Models
             SetInternal(targetCoord, objA);
         }
         
-        public GridObjectType[,] BuildTypeDataGrid()
+        public GridObjectType[,] BuildGridTypeData()
         {
-            var grid = new GridObjectType[Width, Height];
+            if (_typeGrid == null || _typeGrid.GetLength(0) != Width || _typeGrid.GetLength(1) != Height)
+                _typeGrid = new GridObjectType[Width, Height];
 
             for (int y = 0; y < Height; y++)
             {
                 for (int x = 0; x < Width; x++)
                 {
                     var obj = GetGridObject(new Vector2Int(x, y));
-                    grid[x, y] = obj ? obj.ObjectType : default;
+                    _typeGrid[x, y] = obj ? obj.ObjectType : default;
                 }
             }
 
-            return grid;
+            return _typeGrid;
         }
 
         protected override void SetInternal(Vector2Int coord, BaseGridObject value, bool raiseEvent = true)

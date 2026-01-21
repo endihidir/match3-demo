@@ -7,7 +7,7 @@ namespace Core.Utils
     {
         public static bool TryBuildMatchMask(IGridModel gridModel, out bool[,] mask)
         {
-            var grid = gridModel.BuildTypeDataGrid();
+            var grid = gridModel.BuildGridTypeData();
             var remove = new bool[gridModel.Width, gridModel.Height];
             var any = false;
 

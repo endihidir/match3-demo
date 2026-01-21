@@ -12,7 +12,7 @@ namespace Core.Handlers
     public sealed class ShuffleState : StateBase<GridStateContext>
     {
         public override bool NeedsExitPermission => true;
-        public bool IsShuffleInProgress { get; private set; }
+        public bool IsInProgress { get; private set; }
 
         private UniTask[] _animTasks = Array.Empty<UniTask>();
         private Vector2Int[] _coords = Array.Empty<Vector2Int>();
@@ -26,7 +26,7 @@ namespace Core.Handlers
         protected override void OnEnter()
         {
             var model = Context.Model;
-            var grid = model.BuildTypeDataGrid();
+            var grid = model.BuildGridTypeData();
 
             if (HasAnyMove(model, grid))
             {
@@ -39,7 +39,7 @@ namespace Core.Handlers
 
         private async UniTask ShuffleAsync()
         {
-            IsShuffleInProgress = true;
+            IsInProgress = true;
 
             try
             {
@@ -53,7 +53,7 @@ namespace Core.Handlers
 
                 ShuffleOnce(count);
                 
-                var grid = model.BuildTypeDataGrid();
+                var grid = model.BuildGridTypeData();
 
                 BreakExistingMatches(model, grid);
 
@@ -85,7 +85,7 @@ namespace Core.Handlers
             }
             finally
             {
-                IsShuffleInProgress = false;
+                IsInProgress = false;
                 RequestExit();
             }
 
@@ -137,7 +137,7 @@ namespace Core.Handlers
         public bool HasAnyMove()
         {
             var model = Context.Model;
-            var grid = model.BuildTypeDataGrid();
+            var grid = model.BuildGridTypeData();
             return HasAnyMove(model, grid);
         }
 

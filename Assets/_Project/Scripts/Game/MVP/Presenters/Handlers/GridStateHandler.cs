@@ -51,7 +51,7 @@ namespace Core.Handlers
 
         public bool TryEnqueueInput(Vector2Int sourceCoord, Vector2Int direction)
         {
-            if (StateMachine.TryGet<ShuffleState>(out var shuffleState) && shuffleState.IsShuffleInProgress) return false;
+            if (StateMachine.TryGet<ShuffleState>(out var shuffleState) && shuffleState.IsInProgress) return false;
             
             if (direction == Vector2Int.zero)
                 return TryEnqueueTap(sourceCoord);
@@ -108,7 +108,7 @@ namespace Core.Handlers
         
         private static bool IsInteractable(BaseGridObject obj)
         {
-            if (obj.IsHidden) return false;
+            if (obj.IsNone) return false;
             return !obj.IsFallInProgress;
         }
 
