@@ -32,7 +32,8 @@ namespace Core.Utils
 
             for (int r = 1; r <= maxRadius; r++)
             {
-                VisitRingExceptSelf(model, boosterActionContext.OriginCoord, r, obj => MarkVisitedObject(obj, boosterActionContext.GroupId, markData, damageAmount, enqueue));
+                VisitRingExceptSelf(model, boosterActionContext.OriginCoord, r, 
+                    obj => MarkVisitedObject(obj, boosterActionContext.GroupId, markData, damageAmount, enqueue));
             }
         }
 
@@ -153,6 +154,5 @@ namespace Core.Utils
                 }
             }
         }
-
     }
 }

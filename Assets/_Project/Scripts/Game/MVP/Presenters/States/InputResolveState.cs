@@ -35,7 +35,7 @@ namespace Core.Handlers
             }
         }
 
-        private void HandleTap(in InputSource move)
+        private void HandleTap(in GridInputSource move)
         {
             var sourceCoord = move.SourceCoord;
             
@@ -59,7 +59,7 @@ namespace Core.Handlers
             RequestExit();
         }
 
-        private void HandleSwap(in InputSource move)
+        private void HandleSwap(in GridInputSource move)
         {
             var model = Context.Model;
             var sourceCoord = move.SourceCoord;
@@ -113,7 +113,7 @@ namespace Core.Handlers
             
             sourceObj.SetFrontOf(targetObj);
             
-            if(forceBoosterSpawnCoord || targetObj.ItemKind == GridItemKind.Regular)
+            if(sourceObj.ItemKind == GridItemKind.Regular || targetObj.ItemKind == GridItemKind.Regular)
             {
                 _ = targetObj.ItemAnimation.MoveTo(sourcePos);
             }

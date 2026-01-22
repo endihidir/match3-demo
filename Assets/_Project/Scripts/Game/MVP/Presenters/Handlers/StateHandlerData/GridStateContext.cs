@@ -14,7 +14,7 @@ namespace Core.Handlers
         public IGridView View { get; }
         public IGridItemFactory Factory { get; }
         public ItemConfigContainerSO Configs { get; }
-        public Queue<InputSource> Inputs { get; } = new();
+        public Queue<GridInputSource> Inputs { get; } = new();
         
         public bool HasForcedBoosterSpawnCoord { get; set; }
         public Vector2Int ForcedBoosterSpawnCoord { get; set; }
