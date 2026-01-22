@@ -4,6 +4,6 @@ namespace Core.Handlers
 {
     public interface IGridPopulateHandler
     {
-        void PopulateGrid(GridObjectType[,] gridObjectTypes, out BaseGridObject[,] itemObjects);
+        void PopulateGrid(GridObjectType[,] gridObjectTypes, int width, int height, out BaseGridObject[,] itemObjects);
     }
 }
