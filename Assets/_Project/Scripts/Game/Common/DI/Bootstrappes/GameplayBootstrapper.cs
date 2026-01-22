@@ -14,21 +14,21 @@ namespace Core.Bootstrapper
 {
     public class GameplayBootstrapper : IInitializable, IDisposable
     {
-        [Inject] private readonly ISceneLoadState _loadState;
+        [Inject] private readonly ISceneLoadState _sceneLoadState;
         [Inject] private readonly ILevelDefinitionProvider _levelDefinitionProvider;
-        [Inject] private readonly ILevelGridInstaller _levelGridInstaller;
+        [Inject] private readonly IGridPopulateHandler _gridPopulateHandler;
         [Inject] private readonly IGridModel _gridModel;
         [Inject] private readonly IGridView _gridView;
         [Inject] private readonly IInputService _inputService;
         
         public void Initialize()
         {
-            _loadState.OnLoadComplete += OnSceneReady;
+            _sceneLoadState.OnLoadComplete += OnSceneLoadComplete;
         }
 
-        private void OnSceneReady()
+        private void OnSceneLoadComplete()
         {
-            if(_loadState.CurrentSceneGroupType != SceneGroupType.GameScene) return;
+            if(_sceneLoadState.CurrentSceneGroupType != SceneGroupType.GameScene) return;
             
             DOTween.SetTweensCapacity(2000, 500);
             
@@ -46,7 +46,7 @@ namespace Core.Bootstrapper
         private void GridSetup()
         {
             var gridObjectTypes = _levelDefinitionProvider.GetGridObjectTypes();
-            _levelGridInstaller.PopulateGrid(gridObjectTypes, out var gridItemObjects);
+            _gridPopulateHandler.PopulateGrid(gridObjectTypes, out var gridItemObjects);
             var width = gridItemObjects.GetLength(0);
             var height = gridItemObjects.GetLength(1);
             _gridModel.Initialize(gridItemObjects, width, height, out var activeCells);
@@ -61,7 +61,7 @@ namespace Core.Bootstrapper
         private void EnableInput() => _inputService.Enable();
         public void Dispose()
         {
-            _loadState.OnLoadComplete -= OnSceneReady;
+            _sceneLoadState.OnLoadComplete -= OnSceneLoadComplete;
         }
     }
 }

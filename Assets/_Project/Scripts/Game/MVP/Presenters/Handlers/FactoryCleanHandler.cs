@@ -7,12 +7,12 @@ using VContainer.Unity;
 
 namespace Core.Handlers
 {
-    public class GameplayFactoryCleaner : IInitializable, IDisposable
+    public class FactoryCleanHandler : IInitializable, IDisposable
     {
         private readonly ISceneLoadState _sceneLoadState;
         private readonly IEnumerable<IFactoryCleaner> _factoryCleaners;
         
-        public GameplayFactoryCleaner(ISceneLoadState sceneLoadState, IEnumerable<IFactoryCleaner> factoryCleaners)
+        public FactoryCleanHandler(ISceneLoadState sceneLoadState, IEnumerable<IFactoryCleaner> factoryCleaners)
         {
             _sceneLoadState = sceneLoadState;
             _factoryCleaners = factoryCleaners;

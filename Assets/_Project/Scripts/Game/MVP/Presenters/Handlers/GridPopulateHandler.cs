@@ -4,11 +4,10 @@ using Core.Utils;
 
 namespace Core.Handlers
 {
-    public class LevelGridInstaller : ILevelGridInstaller
+    public class GridPopulateHandler : IGridPopulateHandler
     {
         private readonly IGridItemFactory _gridItemFactory;
-        
-        public LevelGridInstaller(IGridItemFactory gridItemFactory) => _gridItemFactory = gridItemFactory;
+        public GridPopulateHandler(IGridItemFactory gridItemFactory) => _gridItemFactory = gridItemFactory;
 
         public void PopulateGrid(GridObjectType[,] gridObjectTypes, out BaseGridObject[,] itemObjects)
         {
@@ -19,13 +18,12 @@ namespace Core.Handlers
 
             for (int i = 0; i < width * height; i++)
             {
-                var coordinate = GridIndexUtil.ToCoord(i, width);
-                var x = coordinate.x;
-                var y = coordinate.y;
+                var coord = GridIndexUtil.ToCoord(i, width);
+                var x = coord.x;
+                var y = coord.y;
                 var typeData = gridObjectTypes[x, y];
                 
                 if (typeData is { TypeId: -1 }) continue;
-                
                 itemObjects[x, y] = GetItem(typeData);
             }
         }
