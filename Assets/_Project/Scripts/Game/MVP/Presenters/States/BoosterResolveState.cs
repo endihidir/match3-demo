@@ -59,6 +59,18 @@ namespace Core.Handlers
                 }
             }
             
+            if (GridMatchMaskBuilder.TryBuildMatchMask(model, out var matchMask))
+            {
+                for (int x = 0; x < model.Width; x++)
+                {
+                    for (int y = 0; y < model.Height; y++)
+                    {
+                        if (!matchMask[x, y]) continue;
+                        markData[x, y].UnMarkRemove();
+                    }
+                }
+            }
+            
             return;
             
             void EnqueueIfNew(BoosterActionContext boosterActionContext)

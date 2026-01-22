@@ -42,7 +42,8 @@ namespace Core.Handlers
                         .AddTransition(inputState, matchState, () => inputState.IsExitReady && MatchResolveRequested && !HasPendingBoosterActions)
                         .AddTransition(inputState, idleState, () => inputState.IsExitReady && !MatchResolveRequested && !HasPendingBoosterActions)
                         
-                        .AddTransition(boosterState, fillState, () => boosterState.IsExitReady)
+                        .AddTransition(boosterState, matchState, () => boosterState.IsExitReady && MatchResolveRequested)
+                        .AddTransition(boosterState, fillState, () => boosterState.IsExitReady && !MatchResolveRequested)
                         .AddTransition(matchState, fillState, () => matchState.IsExitReady)
                         .AddTransition(fillState, idleState, () => fillState.IsExitReady);
 
@@ -73,7 +74,7 @@ namespace Core.Handlers
                 return false;
             }
 
-            var inputSource = new InputSource(GridInputType.Tap, sourceCoord);
+            var inputSource = new GridInputSource(GridInputType.Tap, sourceCoord);
             Context.Inputs.Enqueue(inputSource);
             return true;
         }
@@ -102,7 +103,7 @@ namespace Core.Handlers
                 return false;
             }
 
-            Context.Inputs.Enqueue(new InputSource(GridInputType.Swap, sourceCoord, targetCoord));
+            Context.Inputs.Enqueue(new GridInputSource(GridInputType.Swap, sourceCoord, targetCoord));
             return true;
         }
         
