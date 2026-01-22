@@ -9,11 +9,8 @@ namespace Core.Handlers
         private readonly IGridItemFactory _gridItemFactory;
         public GridPopulateHandler(IGridItemFactory gridItemFactory) => _gridItemFactory = gridItemFactory;
 
-        public void PopulateGrid(GridObjectType[,] gridObjectTypes, out BaseGridObject[,] itemObjects)
+        public void PopulateGrid(GridObjectType[,] gridObjectTypes, int width, int height, out BaseGridObject[,] itemObjects)
         {
-            var width = gridObjectTypes.GetLength(0);
-            var height = gridObjectTypes.GetLength(1);
-            
             itemObjects = new BaseGridObject[width, height];
 
             for (int i = 0; i < width * height; i++)

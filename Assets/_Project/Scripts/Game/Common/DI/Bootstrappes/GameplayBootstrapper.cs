@@ -46,9 +46,9 @@ namespace Core.Bootstrapper
         private void GridSetup()
         {
             var gridObjectTypes = _levelDefinitionProvider.GetGridObjectTypes();
-            _gridPopulateHandler.PopulateGrid(gridObjectTypes, out var gridItemObjects);
-            var width = gridItemObjects.GetLength(0);
-            var height = gridItemObjects.GetLength(1);
+            var width = gridObjectTypes.GetLength(0);
+            var height = gridObjectTypes.GetLength(1);
+            _gridPopulateHandler.PopulateGrid(gridObjectTypes, width, height, out var gridItemObjects);
             _gridModel.Initialize(gridItemObjects, width, height, out var activeCells);
             _gridView.Initialize(width, height, activeCells);
         }
