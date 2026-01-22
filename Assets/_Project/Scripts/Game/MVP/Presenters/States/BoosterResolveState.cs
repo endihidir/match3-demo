@@ -4,6 +4,7 @@ using Core.Item;
 using Core.Models;
 using Core.StateMachineCore;
 using Core.Utils;
+using Core.Views;
 using UnityEngine;
 
 namespace Core.Handlers
@@ -22,8 +23,9 @@ namespace Core.Handlers
         private void ApplyPendingActions()
         {
             var model = Context.Model;
+            var view = Context.View;
             MarkPendingActions(model, out var markData);
-            ApplyMarkedActions(model, markData);
+            ApplyMarkedActions(model, view, markData);
         }
 
         private void MarkPendingActions(IGridModel model, out CellImpactMarkData[,] markData)
@@ -79,6 +81,7 @@ namespace Core.Handlers
                 
                 if (!seen.Add(key)) return;
                 
+                // It is using for triggered boosters!
                 if (boosterActionContext.GroupId == 0)
                     boosterActionContext.SetGroupId(Context.NextBoosterGroupId());
                 
@@ -86,7 +89,7 @@ namespace Core.Handlers
             }
         }
         
-        private void ApplyMarkedActions(IGridModel model, CellImpactMarkData[,] markData)
+        private void ApplyMarkedActions(IGridModel model, IGridView view, CellImpactMarkData[,] markData)
         { 
             for (int x = 0; x < model.Width; x++)
             {
