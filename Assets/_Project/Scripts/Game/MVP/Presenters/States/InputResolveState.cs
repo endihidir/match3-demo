@@ -122,14 +122,14 @@ namespace Core.Handlers
 
             Context.Model.Swap(sourceCoord, targetCoord);
             
-            SetInputBoosterFlagsAfterSwap(sourceObj, targetObj, sourceCoord, targetCoord);
+            SetInputFlags(sourceObj, targetObj, sourceCoord, targetCoord);
 
             CreateBoosterActions(sourceObj, targetObj);
 
             RequestExit();
         }
         
-        private void SetInputBoosterFlagsAfterSwap(BaseGridObject sourceObj, BaseGridObject targetObj, Vector2Int sourceCoord, Vector2Int targetCoord)
+        private void SetInputFlags(BaseGridObject sourceObj, BaseGridObject targetObj, Vector2Int sourceCoord, Vector2Int targetCoord)
         {
             var sourceIsBooster = sourceObj.ItemKind == GridItemKind.Booster;
             var targetIsBooster = targetObj.ItemKind == GridItemKind.Booster;
