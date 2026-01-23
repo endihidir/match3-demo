@@ -58,17 +58,17 @@ namespace Core.Handlers
 
             var taskCount = 0;
 
-            var hasForced = Context.HasForcedBoosterSpawnCoord;
-            var forced = Context.ForcedBoosterSpawnCoord;
+            var hasForced = Context.HasMergeCenterCoordRequested;
+            var forcedCoord = Context.MergeCenterCoord;
 
             for (int pass = 0; pass < (hasForced ? 2 : 1); pass++)
             {
                 var onlyForced = hasForced && pass == 0;
 
-                var startX = onlyForced ? forced.x : 0;
-                var startY = onlyForced ? forced.y : 0;
-                var endX = onlyForced ? forced.x + 1 : width;
-                var endY = onlyForced ? forced.y + 1 : height;
+                var startX = onlyForced ? forcedCoord.x : 0;
+                var startY = onlyForced ? forcedCoord.y : 0;
+                var endX = onlyForced ? forcedCoord.x + 1 : width;
+                var endY = onlyForced ? forcedCoord.y + 1 : height;
 
                 if (onlyForced)
                 {
@@ -188,18 +188,18 @@ namespace Core.Handlers
 
         private bool TryConsumeForcedCenterCoord(List<Vector2Int> group, out Vector2Int forcedCoord)
         {
-            if (!Context.HasForcedBoosterSpawnCoord)
+            if (!Context.HasMergeCenterCoordRequested)
             {
                 forcedCoord = default;
                 return false;
             }
 
-            var forced = Context.ForcedBoosterSpawnCoord;
+            var coord = Context.MergeCenterCoord;
 
-            if (group.Any(t => t == forced))
+            if (group.Any(t => t == coord))
             {
-                Context.HasForcedBoosterSpawnCoord = false;
-                forcedCoord = forced;
+                Context.HasMergeCenterCoordRequested = false;
+                forcedCoord = coord;
                 return true;
             }
 
