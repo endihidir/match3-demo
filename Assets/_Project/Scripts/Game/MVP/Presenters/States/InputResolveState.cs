@@ -73,10 +73,10 @@ namespace Core.Handlers
                 RequestExit();
                 return;
             }
-           
-            if (sourceObj is BoosterObject || targetObj is BoosterObject)
+
+            if (sourceObj.ItemKind == GridItemKind.Booster || targetObj.ItemKind == GridItemKind.Booster)
             {
-                PlaySwapAndCommit(sourceObj, targetObj, false).Forget();
+                PlaySwapAndCommit(sourceObj, targetObj).Forget();
                 return;
             }
 
@@ -89,7 +89,7 @@ namespace Core.Handlers
                 return;
             }
             
-            PlaySwapAndCommit(sourceObj, targetObj, true).Forget();
+            PlaySwapAndCommit(sourceObj, targetObj).Forget();
         }
 
         private async UniTask PlaySwapAndBack(BaseGridObject sourceObj, BaseGridObject targetObj, Vector2Int sourceCoord, Vector2Int targetCoord)
@@ -103,7 +103,7 @@ namespace Core.Handlers
             RequestExit();
         }
 
-        private async UniTask PlaySwapAndCommit(BaseGridObject sourceObj, BaseGridObject targetObj, bool forceBoosterSpawnCoord)
+        private async UniTask PlaySwapAndCommit(BaseGridObject sourceObj, BaseGridObject targetObj)
         {
             var sourceCoord = sourceObj.Coord;
             var targetCoord = targetObj.Coord;
@@ -121,16 +121,36 @@ namespace Core.Handlers
             await sourceObj.ItemAnimation.MoveTo(targetPos);
 
             Context.Model.Swap(sourceCoord, targetCoord);
-
-            if (forceBoosterSpawnCoord)
-            {
-                Context.HasForcedBoosterSpawnCoord = true;
-                Context.ForcedBoosterSpawnCoord = targetCoord;
-            }
+            
+            SetInputBoosterFlagsAfterSwap(sourceObj, targetObj, sourceCoord, targetCoord);
 
             AfterSwapCommitted(sourceObj, targetObj);
 
             RequestExit();
+        }
+        
+        private void SetInputBoosterFlagsAfterSwap(BaseGridObject sourceObj, BaseGridObject targetObj, Vector2Int sourceCoord, Vector2Int targetCoord)
+        {
+            var sourceIsBooster = sourceObj.ItemKind == GridItemKind.Booster;
+            var targetIsBooster = targetObj.ItemKind == GridItemKind.Booster;
+
+            if (sourceIsBooster && targetIsBooster) return;
+
+            Context.HasForcedBoosterSpawnCoord = true;
+            Context.ForcedBoosterSpawnCoord = targetCoord;
+
+            if (sourceIsBooster)
+            {
+                Context.HasInputTriggeredBooster = true;
+                Context.InputTriggeredBoosterCoord = sourceCoord;
+                return;
+            }
+
+            if (targetIsBooster)
+            {
+                Context.HasInputTriggeredBooster = true;
+                Context.InputTriggeredBoosterCoord = targetCoord;
+            }
         }
 
         private void AfterSwapCommitted(BaseGridObject sourceObj, BaseGridObject targetObj)

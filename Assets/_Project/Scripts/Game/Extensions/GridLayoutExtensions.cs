@@ -112,15 +112,20 @@ namespace Core.Extensions
             }
         }
 
-        public static float GetTopY(this in GridLayout layout, Camera cam) => GetOriginPos(layout, cam, Vector3.up).y;
-        public static float GetLeftX(this in GridLayout layout, Camera cam) => GetOriginPos(layout, cam, Vector3.zero).x;
-        public static float GetRightX(this in GridLayout layout, Camera cam) => GetOriginPos(layout, cam, Vector3.right).x;
-        public static float GetBottomY(this in GridLayout layout, Camera cam) => GetOriginPos(layout, cam, Vector3.zero).y;
+        public static float GetTopYRaw(this in GridLayout layout, Camera cam) => GetViewportWorldRaw(cam, Vector3.up).y;
+        public static float GetBottomYRaw(this in GridLayout layout, Camera cam) => GetViewportWorldRaw(cam, Vector3.zero).y;
+        public static float GetLeftXRaw(this in GridLayout layout, Camera cam) => GetViewportWorldRaw(cam, Vector3.zero).x;
+        public static float GetRightXRaw(this in GridLayout layout, Camera cam) => GetViewportWorldRaw(cam, Vector3.right).x;
 
-        private static Vector3 GetOriginPos(in GridLayout layout, Camera cam, Vector3 origin)
-        {
-            return cam.ViewportToWorldPoint(new Vector3(origin.x, origin.y, cam.nearClipPlane)) + 
-                   new Vector3(layout.originOffset.x, -layout.originOffset.y, 0f);
-        }
+        public static float GetTopY(this in GridLayout layout, Camera cam) => ApplyOriginOffset(layout, GetViewportWorldRaw(cam, Vector3.up)).y;
+        public static float GetBottomY(this in GridLayout layout, Camera cam) => ApplyOriginOffset(layout, GetViewportWorldRaw(cam, Vector3.zero)).y;
+        public static float GetLeftX(this in GridLayout layout, Camera cam) => ApplyOriginOffset(layout, GetViewportWorldRaw(cam, Vector3.zero)).x;
+        public static float GetRightX(this in GridLayout layout, Camera cam) => ApplyOriginOffset(layout, GetViewportWorldRaw(cam, Vector3.right)).x;
+
+        private static Vector3 GetViewportWorldRaw(Camera cam, Vector3 origin) => 
+            cam.ViewportToWorldPoint(new Vector3(origin.x, origin.y, cam.nearClipPlane));
+
+        private static Vector3 ApplyOriginOffset(in GridLayout layout, Vector3 worldPos) => 
+            worldPos + new Vector3(layout.originOffset.x, -layout.originOffset.y, 0f);
     }
 }

@@ -38,8 +38,6 @@ namespace Core.Views
 
         private void CalculateCellSize()
         {
-            if (!Cam) return;
-            
             var layout = new GridLayout
             {
                 screenSidePaddingRatio = LayoutSettings.ScreenSidePaddingRatio,
@@ -56,19 +54,17 @@ namespace Core.Views
         private void CalculateOrigin()
         {
             var yOffset = GridRoot.position.y + (_gridSize.y * Layout.cellSize * 0.5f);
-            var topY = Layout.GetTopY(Cam);
+            var topY = Layout.GetTopYRaw(Cam);
             var originOffsetY = topY - yOffset;
             var layout = Layout;
             layout.originOffset = new Vector3(0f, originOffsetY, 0f);
             Layout = layout;
         }
-        
+
         public Vector2Int ScreenToGridCoordinate(Vector2 mousePosition)
         {
             var worldPosition = Cam.ScreenToWorldPoint(mousePosition);
-            
             var pos = WorldToGrid(worldPosition);
-            
             return pos;
         }
 
@@ -91,7 +87,11 @@ namespace Core.Views
 #if UNITY_EDITOR
         private void OnDrawGizmos()
         {
-            if(!IsInitialized || !DrawGridGizmos) return;
+            if(!IsInitialized) return;
+            
+            CalculateOrigin();
+
+            if (!DrawGridGizmos) return;
             
             Layout.DrawGrid(_gridSize, GizmosColor, Cam, IsCellActive);
         }

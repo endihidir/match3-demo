@@ -189,6 +189,47 @@ namespace Core.Utils
             }
         }
         
+        public static bool TryBuildBoosterGroupMaskAt(IGridModel model, Vector2Int inputCoord, bool[,] matchMask, out bool[,] boosterMask)
+        {
+            var width = model.Width;
+            var height = model.Height;
+
+            boosterMask = new bool[width, height];
+
+            if (!model.IsInRange(inputCoord.x, inputCoord.y)) return false;
+            if (matchMask == null) return false;
+            if (!matchMask[inputCoord.x, inputCoord.y]) return false;
+
+            var grid = model.BuildGridTypeData();
+            var data = grid[inputCoord.x, inputCoord.y];
+
+            if (!IsRegularItem(data)) return false;
+
+            var id = data.TypeId;
+            if (id <= 0) return false;
+
+            var visited = new bool[width, height];
+            var buffer = new Vector2Int[width * height];
+
+            var count = CollectMatchShapeFromCenter(model, grid, inputCoord.x, inputCoord.y, id, visited, buffer);
+            if (count <= 0) return false;
+
+            var group = new List<Vector2Int>(count);
+            for (int i = 0; i < count; i++)
+                group.Add(buffer[i]);
+
+            var boosterType = GridMatchBoosterDecision.DecideBoosterTypeFromGroup(model, matchMask, group, id);
+            if (!boosterType.HasValue) return false;
+
+            for (int i = 0; i < count; i++)
+            {
+                var c = buffer[i];
+                boosterMask[c.x, c.y] = true;
+            }
+
+            return true;
+        }
+        
         public static List<Vector2Int> CollectGroupFromMask(IGridModel model, bool[,] matchMask, bool[,] visited, Vector2Int start)
         {
             var result = new List<Vector2Int>();
