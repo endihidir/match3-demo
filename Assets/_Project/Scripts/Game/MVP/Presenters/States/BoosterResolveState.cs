@@ -60,19 +60,27 @@ namespace Core.Handlers
                         break;
                 }
             }
+
+            if (!Context.HasInputTriggeredBooster) return;
             
-            if (GridMatchMaskBuilder.TryBuildMatchMask(model, out var matchMask))
+            Context.HasInputTriggeredBooster = false;
+                
+            var targetCoord = Context.InputTriggeredBoosterCoord;
+
+            if (!GridMatchMaskBuilder.TryBuildMatchMask(model, out var matchMask)) return;
+                
+            if (!GridMatchCalcUtil.TryBuildBoosterGroupMaskAt(model, targetCoord, matchMask, out var boosterMask)) return;
+                    
+            for (int x = 0; x < model.Width; x++)
             {
-                for (int x = 0; x < model.Width; x++)
+                for (int y = 0; y < model.Height; y++)
                 {
-                    for (int y = 0; y < model.Height; y++)
-                    {
-                        if (!matchMask[x, y]) continue;
-                        markData[x, y].UnMarkRemove();
-                    }
+                    if (!boosterMask[x, y]) continue;
+                                
+                    markData[x, y].UnMarkRemove();
                 }
             }
-            
+
             return;
             
             void EnqueueIfNew(BoosterActionContext boosterActionContext)
