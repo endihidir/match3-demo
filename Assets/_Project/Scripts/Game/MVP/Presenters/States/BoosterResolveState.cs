@@ -61,11 +61,11 @@ namespace Core.Handlers
                 }
             }
 
-            if (!Context.HasInputTriggeredBooster) return;
+            if (!Context.HasUnmarkRemoveRequested) return;
             
-            Context.HasInputTriggeredBooster = false;
+            Context.HasUnmarkRemoveRequested = false;
                 
-            var targetCoord = Context.InputTriggeredBoosterCoord;
+            var targetCoord = Context.UnmarkRemoveCoord;
 
             if (!GridMatchMaskBuilder.TryBuildMatchMask(model, out var matchMask)) return;
                 

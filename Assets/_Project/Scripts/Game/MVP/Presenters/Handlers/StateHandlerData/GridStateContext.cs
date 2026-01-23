@@ -16,11 +16,11 @@ namespace Core.Handlers
         public ItemConfigContainerSO Configs { get; }
         public Queue<GridInputSource> Inputs { get; } = new();
         
-        public bool HasForcedBoosterSpawnCoord { get; set; }
-        public Vector2Int ForcedBoosterSpawnCoord { get; set; }
+        public bool HasMergeCenterCoordRequested { get; set; }
+        public Vector2Int MergeCenterCoord { get; set; }
         
-        public bool HasInputTriggeredBooster { get; set; }
-        public Vector2Int InputTriggeredBoosterCoord { get; set; }
+        public bool HasUnmarkRemoveRequested { get; set; }
+        public Vector2Int UnmarkRemoveCoord { get; set; }
         
         public List<BoosterActionContext> PendingBoosterActions { get; } = new();
         public bool HasPendingBoosterActions => PendingBoosterActions.Count > 0;

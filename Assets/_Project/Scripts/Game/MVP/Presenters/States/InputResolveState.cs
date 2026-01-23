@@ -136,20 +136,20 @@ namespace Core.Handlers
 
             if (sourceIsBooster && targetIsBooster) return;
 
-            Context.HasForcedBoosterSpawnCoord = true;
-            Context.ForcedBoosterSpawnCoord = targetCoord;
+            Context.HasMergeCenterCoordRequested = true;
+            Context.MergeCenterCoord = targetCoord;
 
             if (sourceIsBooster)
             {
-                Context.HasInputTriggeredBooster = true;
-                Context.InputTriggeredBoosterCoord = sourceCoord;
+                Context.HasUnmarkRemoveRequested = true;
+                Context.UnmarkRemoveCoord = sourceCoord;
                 return;
             }
 
             if (targetIsBooster)
             {
-                Context.HasInputTriggeredBooster = true;
-                Context.InputTriggeredBoosterCoord = targetCoord;
+                Context.HasUnmarkRemoveRequested = true;
+                Context.UnmarkRemoveCoord = targetCoord;
             }
         }
 
