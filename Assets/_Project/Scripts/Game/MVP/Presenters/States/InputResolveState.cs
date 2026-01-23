@@ -124,7 +124,7 @@ namespace Core.Handlers
             
             SetInputBoosterFlagsAfterSwap(sourceObj, targetObj, sourceCoord, targetCoord);
 
-            AfterSwapCommitted(sourceObj, targetObj);
+            CreateBoosterActions(sourceObj, targetObj);
 
             RequestExit();
         }
@@ -153,7 +153,7 @@ namespace Core.Handlers
             }
         }
 
-        private void AfterSwapCommitted(BaseGridObject sourceObj, BaseGridObject targetObj)
+        private void CreateBoosterActions(BaseGridObject sourceObj, BaseGridObject targetObj)
         {
             var sourceCoord = sourceObj.Coord;
             var targetCoord = targetObj.Coord;
