@@ -189,37 +189,12 @@ namespace Core.Utils
             }
         }
         
-        public static bool TryBuildMatchGroupMaskAt(IGridModel model, Vector2Int targetCoord, bool[,] matchMask, out bool[,] groupMask)
+        public static bool TryBuildMatchGroupMaskAt(IGridModel model, Vector2Int targetCoord, bool[,] matchMask, out bool[,] resultMask, bool shouldBoosterResult = false)
         {
             var width = model.Width;
             var height = model.Height;
 
-            groupMask = new bool[width, height];
-
-            if (!model.IsInRange(targetCoord.x, targetCoord.y)) return false;
-            if (matchMask == null) return false;
-            if (!matchMask[targetCoord.x, targetCoord.y]) return false;
-
-            var visited = new bool[width, height];
-
-            var group = CollectGroupFromMask(model, matchMask, visited, targetCoord);
-            if (group == null || group.Count == 0) return false;
-
-            for (int i = 0; i < group.Count; i++)
-            {
-                var c = group[i];
-                groupMask[c.x, c.y] = true;
-            }
-
-            return true;
-        }
-        
-        public static bool TryBuildBoosterGroupMaskAt(IGridModel model, Vector2Int targetCoord, bool[,] matchMask, out bool[,] boosterMask)
-        {
-            var width = model.Width;
-            var height = model.Height;
-
-            boosterMask = new bool[width, height];
+            resultMask = new bool[width, height];
 
             if (!model.IsInRange(targetCoord.x, targetCoord.y)) return false;
             if (matchMask == null) return false;
@@ -239,23 +214,27 @@ namespace Core.Utils
             var count = CollectMatchShapeFromCenter(model, grid, targetCoord.x, targetCoord.y, id, visited, buffer);
             if (count <= 0) return false;
 
-            var group = new List<Vector2Int>(count);
-            for (int i = 0; i < count; i++)
-                group.Add(buffer[i]);
+            if (shouldBoosterResult)
+            {
+                var group = new List<Vector2Int>(count);
+                for (int i = 0; i < count; i++)
+                    group.Add(buffer[i]);
 
-            var boosterType = GridMatchBoosterDecision.DecideBoosterTypeFromGroup(model, matchMask, group, id);
-            if (!boosterType.HasValue) return false;
+                var boosterType = GridMatchBoosterDecision.DecideBoosterTypeFromGroup(model, matchMask, group, id);
+                if (!boosterType.HasValue)
+                    return false;
+            }
 
             for (int i = 0; i < count; i++)
             {
                 var c = buffer[i];
-                boosterMask[c.x, c.y] = true;
+                resultMask[c.x, c.y] = true;
             }
 
             return true;
         }
-        
-        public static List<Vector2Int> CollectGroupFromMask(IGridModel model, bool[,] matchMask, bool[,] visited, Vector2Int start)
+
+        private static List<Vector2Int> CollectGroupFromMask(IGridModel model, bool[,] matchMask, bool[,] visited, Vector2Int start)
         {
             var result = new List<Vector2Int>();
             var stack = new Stack<Vector2Int>();
