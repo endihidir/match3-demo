@@ -58,35 +58,28 @@ namespace Core.Handlers
 
             var taskCount = 0;
 
-            var hasForced = Context.HasMergeCenterCoordRequested;
-            var forcedCoord = Context.MergeCenterCoord;
+            var hasForcedCenter = Context.HasMergeCenterCoordRequested;
+            var forcedCenter = Context.MergeCenterCoord;
 
-            for (int pass = 0; pass < (hasForced ? 2 : 1); pass++)
+            if (hasForcedCenter)
             {
-                var onlyForced = hasForced && pass == 0;
-
-                var startX = onlyForced ? forcedCoord.x : 0;
-                var startY = onlyForced ? forcedCoord.y : 0;
-                var endX = onlyForced ? forcedCoord.x + 1 : width;
-                var endY = onlyForced ? forcedCoord.y + 1 : height;
-
-                if (onlyForced)
-                {
-                    Scan(startX, startY, endX, endY, 3, 999);
-                    continue;
-                }
-
-                Scan(startX, startY, endX, endY, 4, 999);
-                Scan(startX, startY, endX, endY, 3, 3);
+                // 1) Forced center pass
+                ScanRect(forcedCenter.x, forcedCenter.y, forcedCenter.x + 1, forcedCenter.y + 1, 3, 999);
             }
+
+            // 2) Booster (4+ veya T/L/5 vs) pass
+            ScanRect(0, 0, width, height, 4, 999);
+
+            // 3) Regular 3 pass
+            ScanRect(0, 0, width, height, 3, 3);
 
             if (taskCount == 0) return;
 
             await WhenAllTasks(taskCount);
-            
+
             return;
 
-            void Scan(int startX, int startY, int endX, int endY, int minCount, int maxCount)
+            void ScanRect(int startX, int startY, int endX, int endY, int minCount, int maxCount)
             {
                 for (int y = startY; y < endY; y++)
                 {
@@ -112,7 +105,6 @@ namespace Core.Handlers
                 CommitVisited(count);
 
                 var group = new List<Vector2Int>(count);
-
                 for (int i = 0; i < count; i++)
                     group.Add(_coordBuffer[i]);
 
