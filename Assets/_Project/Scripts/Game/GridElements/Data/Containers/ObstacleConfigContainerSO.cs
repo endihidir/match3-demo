@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace Core.Config
 {
-    [CreateAssetMenu(fileName = "ObstacleConfig", menuName = "Match3/ItemConfigs/ObstacleConfig", order = -1)]
-    public class ObstacleConfigSO : BaseItemConfigSO
+    [CreateAssetMenu(fileName = "ObstacleConfigContainer", menuName = "Match3/ItemConfigs/ObstacleConfigContainer", order = -1)]
+    public class ObstacleConfigContainerSO : BaseItemConfigContainerSO
     {
         [field: SerializeField] 
         public EnumConfigMap<ObstacleType, ObstacleDataSO> Configs { get; private set; }

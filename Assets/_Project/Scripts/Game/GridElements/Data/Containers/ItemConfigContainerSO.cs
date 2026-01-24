@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace Core.Config
 {
-    [CreateAssetMenu(fileName = "ItemConfig", menuName = "Match3/ItemConfigs/ItemConfig", order = -1)]
-    public class ItemConfigSO : BaseItemConfigSO
+    [CreateAssetMenu(fileName = "ItemConfigContainer", menuName = "Match3/ItemConfigs/ItemConfigContainer", order = -1)]
+    public class ItemConfigContainerSO : BaseItemConfigContainerSO
     {
         [field: SerializeField] 
         public EnumConfigMap<ItemType, ItemDataSO> Configs { get; private set; }

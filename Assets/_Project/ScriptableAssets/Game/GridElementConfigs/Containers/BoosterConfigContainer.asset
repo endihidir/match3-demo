@@ -10,8 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a3523fac44e14a08a2943003d725ee4a, type: 3}
-  m_Name: BoosterConfig
+  m_Name: BoosterConfigContainer
   m_EditorClassIdentifier: 
+  <BoosterComboConfigSo>k__BackingField: {fileID: 11400000, guid: cccd3d23ec1b86a4e8534d8e235742cd,
+    type: 2}
   <Configs>k__BackingField:
     <Map>k__BackingField:
       _serializedList:
@@ -21,7 +23,3 @@ MonoBehaviour:
         Value: {fileID: 11400000, guid: f132fb61225924445883e907a35f52c7, type: 2}
       - Key: 3
         Value: {fileID: 11400000, guid: 9bbb4a9739b4dbe47a3a25c3a71481ae, type: 2}
-      - Key: 4
-        Value: {fileID: 11400000, guid: 9bbb4a9739b4dbe47a3a25c3a71481ae, type: 2}
-      - Key: 5
-        Value: {fileID: 11400000, guid: 0390efda2a49c5442b1522668ad6cd24, type: 2}

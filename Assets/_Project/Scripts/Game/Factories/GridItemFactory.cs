@@ -9,12 +9,12 @@ namespace Core.Item.Factories
     public class GridItemFactory : IGridItemFactory, IFactoryCleaner
     {
         private readonly IObjectPoolService _objectPoolService;
-        private readonly ItemConfigContainerSO _itemConfigContainer;
+        private readonly GridConfigContainerSO _gridConfigContainer;
 
         public GridItemFactory(IObjectPoolService objectPoolService, GameplayConfigContainer gameplayConfigContainer)
         {
             _objectPoolService = objectPoolService;
-            _itemConfigContainer = gameplayConfigContainer.ItemConfigContainer;
+            _gridConfigContainer = gameplayConfigContainer.GridConfigContainer;
         }
         
         public T GetItem<T>(GridObjectType typeData) where T : BaseGridObject
@@ -23,7 +23,7 @@ namespace Core.Item.Factories
             
             itemObject.ResetItem();
 
-            var configData = _itemConfigContainer.GetConfigData(typeData);
+            var configData = _gridConfigContainer.GetConfigData(typeData);
             
             itemObject.Initialize(typeData)
                       .ApplyData(configData);

@@ -13,7 +13,7 @@ namespace Core.Handlers
         public IGridModel Model { get; }
         public IGridView View { get; }
         public IGridItemFactory Factory { get; }
-        public ItemConfigContainerSO Configs { get; }
+        public GridConfigContainerSO Configs { get; }
         public Queue<GridInputSource> Inputs { get; } = new();
         
         public bool HasMergeCenterCoordRequested { get; set; }
@@ -28,7 +28,7 @@ namespace Core.Handlers
         public bool MatchResolveRequested { get; set; }
         private int GroupIdCounter { get; set; }
 
-        public GridStateContext(IGridModel model, IGridView view, IGridItemFactory factory, ItemConfigContainerSO configs)
+        public GridStateContext(IGridModel model, IGridView view, IGridItemFactory factory, GridConfigContainerSO configs)
         {
             Model = model;
             View = view;

@@ -20,7 +20,7 @@ namespace Core.Handlers
 
         public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory, GameplayConfigContainer configContainer, IFillStrategyResolver fillStrategyResolver)
         {
-            Context = new GridStateContext(model, view, factory, configContainer.ItemConfigContainer);
+            Context = new GridStateContext(model, view, factory, configContainer.GridConfigContainer);
 
             var idleState = new IdleState(Context);
             var inputState = new InputResolveState(Context);
