@@ -65,11 +65,11 @@ namespace Core.Handlers
             
             Context.HasUnmarkRemoveRequested = false;
                 
-            var targetCoord = Context.UnmarkRemoveCoord;
+            var unmarkRemoveCoord = Context.UnmarkRemoveCoord;
 
             if (!GridMatchMaskBuilder.TryBuildMatchMask(model, out var matchMask)) return;
                 
-            if (!GridMatchCalcUtil.TryBuildBoosterGroupMaskAt(model, targetCoord, matchMask, out var boosterMask)) return;
+            if (!GridMatchCalcUtil.TryBuildMatchGroupMaskAt(model, unmarkRemoveCoord, matchMask, out var boosterMask)) return;
                     
             for (int x = 0; x < model.Width; x++)
             {

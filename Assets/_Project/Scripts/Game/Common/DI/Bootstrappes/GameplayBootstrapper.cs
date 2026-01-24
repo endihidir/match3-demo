@@ -6,7 +6,6 @@ using Core.Models;
 using Core.SceneService;
 using Core.Services;
 using Core.Views;
-using DG.Tweening;
 using VContainer;
 using VContainer.Unity;
 
@@ -30,8 +29,6 @@ namespace Core.Bootstrapper
         {
             if(_sceneLoadState.CurrentSceneGroupType != SceneGroupType.GameScene) return;
             
-            DOTween.SetTweensCapacity(2000, 500);
-            
             DisableInput();
             
             HudSetup();
@@ -42,6 +39,10 @@ namespace Core.Bootstrapper
         }
 
         private void DisableInput() => _inputService.Disable();
+        private void HudSetup()
+        {
+            
+        }
 
         private void GridSetup()
         {
@@ -52,12 +53,7 @@ namespace Core.Bootstrapper
             _gridModel.Initialize(gridItemObjects, width, height, out var activeCells);
             _gridView.Initialize(width, height, activeCells);
         }
-
-        private void HudSetup()
-        {
-            
-        }
-
+        
         private void EnableInput() => _inputService.Enable();
         public void Dispose()
         {

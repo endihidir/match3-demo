@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: ObstacleConfig
   m_EditorClassIdentifier: 
   <Configs>k__BackingField:
-    _serializedList:
-    - Key: 1
-      Value: {fileID: 11400000, guid: 55abcbbba487bb64ba0fb0d3d08a5e95, type: 2}
-    - Key: 2
-      Value: {fileID: 11400000, guid: cc7ff29ae18c5f044bdcaf3bf62be1ea, type: 2}
-    - Key: 3
-      Value: {fileID: 11400000, guid: cc7ff29ae18c5f044bdcaf3bf62be1ea, type: 2}
+    <Map>k__BackingField:
+      _serializedList:
+      - Key: 1
+        Value: {fileID: 11400000, guid: 55abcbbba487bb64ba0fb0d3d08a5e95, type: 2}
+      - Key: 2
+        Value: {fileID: 11400000, guid: cc7ff29ae18c5f044bdcaf3bf62be1ea, type: 2}
+      - Key: 3
+        Value: {fileID: 11400000, guid: 55abcbbba487bb64ba0fb0d3d08a5e95, type: 2}

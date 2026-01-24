@@ -3,6 +3,7 @@ using Core.Generated;
 using Core.Level;
 using Core.SceneService;
 using Core.Pool;
+using DG.Tweening;
 using VContainer;
 using VContainer.Unity;
 
@@ -29,6 +30,8 @@ namespace Core.Bootstrapper
             await _levelDataBootState.WaitUntilInitializedAsync();
             
             _objectPoolService.Initialize();
+            
+            DOTween.SetTweensCapacity(2000, 500);
             
             await _sceneLoadService.LoadSceneGroupAsync(SceneGroupType.MenuScene);
         }
