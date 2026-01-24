@@ -13,10 +13,15 @@ MonoBehaviour:
   m_Name: BoosterConfig
   m_EditorClassIdentifier: 
   <Configs>k__BackingField:
-    _serializedList:
-    - Key: 1
-      Value: {fileID: 11400000, guid: 0390efda2a49c5442b1522668ad6cd24, type: 2}
-    - Key: 2
-      Value: {fileID: 11400000, guid: f132fb61225924445883e907a35f52c7, type: 2}
-    - Key: 3
-      Value: {fileID: 11400000, guid: 9bbb4a9739b4dbe47a3a25c3a71481ae, type: 2}
+    <Map>k__BackingField:
+      _serializedList:
+      - Key: 1
+        Value: {fileID: 11400000, guid: 0390efda2a49c5442b1522668ad6cd24, type: 2}
+      - Key: 2
+        Value: {fileID: 11400000, guid: f132fb61225924445883e907a35f52c7, type: 2}
+      - Key: 3
+        Value: {fileID: 11400000, guid: 9bbb4a9739b4dbe47a3a25c3a71481ae, type: 2}
+      - Key: 4
+        Value: {fileID: 11400000, guid: 9bbb4a9739b4dbe47a3a25c3a71481ae, type: 2}
+      - Key: 5
+        Value: {fileID: 11400000, guid: 0390efda2a49c5442b1522668ad6cd24, type: 2}

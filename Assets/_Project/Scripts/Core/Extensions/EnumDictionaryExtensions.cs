@@ -9,7 +9,6 @@ namespace Core.Extensions
 {
     public static class EnumDictionaryExtensions
     {
-#if UNITY_EDITOR
         public static void EnsureAllEnumKeysExist<TKey, TValue>(this SerializedDictionary<TKey, TValue> dictionary, bool exceptFirst = true) where TKey : Enum
         {
             if (dictionary == null)
@@ -26,12 +25,15 @@ namespace Core.Extensions
                     $"{validEnumValues.Length} key(s) that no longer exist in the {typeof(TKey).Name} enum.\n\n" +
                     "Do you want to remove these obsolete entries?";
 
+#if UNITY_EDITOR
                 var ok = EditorUtility.DisplayDialog(
                     "Enum Dictionary Cleanup",
                     message,
                     "Yes, Remove",
                     "No");
-
+#else
+                var ok = false;
+#endif
                 if (!ok) return;
                 
             }
@@ -47,6 +49,5 @@ namespace Core.Extensions
                     dictionary[key] = Activator.CreateInstance<TValue>();
             }
         }
-#endif
     }
 }

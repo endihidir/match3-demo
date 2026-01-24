@@ -189,19 +189,44 @@ namespace Core.Utils
             }
         }
         
-        public static bool TryBuildBoosterGroupMaskAt(IGridModel model, Vector2Int inputCoord, bool[,] matchMask, out bool[,] boosterMask)
+        public static bool TryBuildMatchGroupMaskAt(IGridModel model, Vector2Int targetCoord, bool[,] matchMask, out bool[,] groupMask)
+        {
+            var width = model.Width;
+            var height = model.Height;
+
+            groupMask = new bool[width, height];
+
+            if (!model.IsInRange(targetCoord.x, targetCoord.y)) return false;
+            if (matchMask == null) return false;
+            if (!matchMask[targetCoord.x, targetCoord.y]) return false;
+
+            var visited = new bool[width, height];
+
+            var group = CollectGroupFromMask(model, matchMask, visited, targetCoord);
+            if (group == null || group.Count == 0) return false;
+
+            for (int i = 0; i < group.Count; i++)
+            {
+                var c = group[i];
+                groupMask[c.x, c.y] = true;
+            }
+
+            return true;
+        }
+        
+        public static bool TryBuildBoosterGroupMaskAt(IGridModel model, Vector2Int targetCoord, bool[,] matchMask, out bool[,] boosterMask)
         {
             var width = model.Width;
             var height = model.Height;
 
             boosterMask = new bool[width, height];
 
-            if (!model.IsInRange(inputCoord.x, inputCoord.y)) return false;
+            if (!model.IsInRange(targetCoord.x, targetCoord.y)) return false;
             if (matchMask == null) return false;
-            if (!matchMask[inputCoord.x, inputCoord.y]) return false;
+            if (!matchMask[targetCoord.x, targetCoord.y]) return false;
 
             var grid = model.BuildGridTypeData();
-            var data = grid[inputCoord.x, inputCoord.y];
+            var data = grid[targetCoord.x, targetCoord.y];
 
             if (!IsRegularItem(data)) return false;
 
@@ -211,7 +236,7 @@ namespace Core.Utils
             var visited = new bool[width, height];
             var buffer = new Vector2Int[width * height];
 
-            var count = CollectMatchShapeFromCenter(model, grid, inputCoord.x, inputCoord.y, id, visited, buffer);
+            var count = CollectMatchShapeFromCenter(model, grid, targetCoord.x, targetCoord.y, id, visited, buffer);
             if (count <= 0) return false;
 
             var group = new List<Vector2Int>(count);

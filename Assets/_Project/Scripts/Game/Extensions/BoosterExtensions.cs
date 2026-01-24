@@ -2,7 +2,7 @@ using Core.Item;
 
 namespace Core.Extensions
 {
-    public static class BoosterFamilyExtension
+    public static class BoosterExtensions
     {
         public static BoosterFamily ToFamily(this BoosterType type)
         {
