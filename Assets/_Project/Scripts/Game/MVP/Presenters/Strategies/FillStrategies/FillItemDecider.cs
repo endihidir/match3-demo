@@ -29,7 +29,7 @@ namespace Core.Handlers
         
         public FillItemDecider(GameplayConfigContainer gameplayConfigContainer)
         {
-            _decisionSettings = gameplayConfigContainer.FillItemDecisionSettings;
+            _decisionSettings = gameplayConfigContainer.GridConfigContainer.FillItemDecisionSettings;
             _rng = null;
         }
         

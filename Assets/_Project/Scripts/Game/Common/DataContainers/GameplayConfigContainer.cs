@@ -6,10 +6,8 @@ namespace Core.Configs
 {
     //[CreateAssetMenu(fileName = "GameplayConfigContainer", menuName = "Match3/Core/GameplayConfigContainer", order = 0)]
     public class GameplayConfigContainer : ScriptableObject
-    {
-        [field: SerializeField, Required] public GameplayBootstrapperConfig GameplayBootstrapperConfig { get; private set; }
-        [field: SerializeField, Required] public ItemConfigContainerSO ItemConfigContainer { get; private set; }
-        [field: SerializeField] public FillItemDecisionSettingsSO FillItemDecisionSettings { get; private set; }
+    { 
+        [field: SerializeField, Required] public GridConfigContainerSO GridConfigContainer { get; private set; }
         public void Initialize()
         {
             

@@ -1,7 +1,6 @@
 using System;
 using AYellowpaper.SerializedCollections;
 using Core.Extensions;
-using NaughtyAttributes;
 using UnityEngine;
 
 namespace Core.Config
@@ -24,11 +23,5 @@ namespace Core.Config
             return false;
         }
         public void EnsureAllKeysExist() => Map.EnsureAllEnumKeysExist();
-
-        [Button]
-        public void Test()
-        {
-            
-        }
     }
 }

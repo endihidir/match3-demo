@@ -1,3 +1,4 @@
+using Core.Config;
 using Core.Item;
 using Core.StateMachineCore;
 using Core.Utils;
@@ -194,7 +195,7 @@ namespace Core.Handlers
 
         private void AddComboAction(Vector2Int origin, BoosterType sourceBoosterType, BoosterType targetBoosterType)
         {
-            var boosterComboConfig = Context.Configs.BoosterComboConfigSo;
+            var boosterComboConfig = Context.Configs.GetConfig<BoosterConfigContainerSO>().BoosterComboConfigSo;
 
             if (boosterComboConfig && boosterComboConfig.TryGetRule(sourceBoosterType, targetBoosterType, out var rule) && rule.Actions != null)
             {
