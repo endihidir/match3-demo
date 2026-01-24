@@ -67,7 +67,7 @@ namespace Core.Handlers
                 ScanRect(forcedCenter.x, forcedCenter.y, forcedCenter.x + 1, forcedCenter.y + 1, 3, 999);
             }
 
-            // 2) Booster (4+ veya T/L/5 vs) pass
+            // 2) Booster (4+ or T/L/5 vs) pass
             ScanRect(0, 0, width, height, 4, 999);
 
             // 3) Regular 3 pass
