@@ -56,6 +56,6 @@ namespace Core.Item.Factories
         public void ReleaseItem(Transform item) => _objectPoolService.ReturnObject(item);
         public void ReleaseAllItemsOfType<T>() where T : BaseGridObject => _objectPoolService.ReturnAllObjectsOfType<T>();
         public void CleanupFactory() => _objectPoolService.ReturnAllObjectsOfType<BaseGridObject>();
-        public void RemoveItemPool() => _objectPoolService.RemovePool<BaseGridObject>();
+        public void RemoveItemPool() => _objectPoolService.RemovePoolOfType<BaseGridObject>();
     }
 }

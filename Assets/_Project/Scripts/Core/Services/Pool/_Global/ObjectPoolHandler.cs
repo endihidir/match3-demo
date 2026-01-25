@@ -9,36 +9,21 @@ namespace Core.Pool
     public sealed class ObjectPoolHandler
     {
         private GameObject _prefab;
-        
         private Transform _pooledObjectRoot;
-        
         private int _poolCount;
-
         private bool _isUnique;
-        
-        private int _poolKey;
-        
         private GameObject _poolParent;
-        public Queue<IPooledObject> Pool { get; } = new();
+        private Queue<IPooledObject> Pool { get; } = new();
         public bool IsLazy { get; private set; }
 
-        public ObjectPoolHandler Initialize(GameObject prefab, Transform rootParent, int poolCount, bool isLazy = true, bool isUnique = false)
+        public ObjectPoolHandler(GameObject prefab, Transform rootParent, int poolCount, bool isLazy = true, bool isUnique = false)
         {
             _prefab = prefab;
-             
-            _poolKey = _prefab.GetInstanceID();
-            
             _pooledObjectRoot = rootParent;
-            
             _poolCount = poolCount;
-            
             IsLazy = isLazy;
-
             _isUnique = isUnique;
-            
             CreatePoolParent();
-
-            return this;
         }
 
         public ObjectPoolHandler CreatePool()
@@ -86,10 +71,7 @@ namespace Core.Pool
                 }
             }
             
-            if (pooledObject == null)
-            {
-                pooledObject = GetNewPooledObject();
-            }
+            pooledObject ??= GetNewPooledObject();
             
             if (activate) 
                 pooledObject?.Activate();
@@ -122,42 +104,6 @@ namespace Core.Pool
             ReturnToPool(pooledObject);
         }
 
-        private void ClearPool()
-        {
-            foreach (var pooledObject in Pool)
-            {
-                if (pooledObject is Component pooledObj)
-                {
-                    if (!pooledObj) continue;
-                    
-                    Object.Destroy(pooledObj.gameObject);
-                }
-            }
-
-            Pool?.Clear();
-
-            if (!_poolParent) return;
-                
-            Object.Destroy(_poolParent);
-        }
-
-        public void ClearAll<T>() where T : IPooledObject
-        {
-            ClearPool();
-
-            foreach (var pooledObject in PoolSearchUtils.FindPooledObjectsOfType<T>())
-            {
-                if (pooledObject is Component pooledObj)
-                {
-                    Object.Destroy(pooledObj.gameObject);
-                }
-                else
-                {
-                    EditorLogger.LogError($"{pooledObject.GetType().Name} is not Component!");
-                }
-            }
-        }
-
         private IPooledObject GetNewPooledObject()
         {
             CreateNewObject(false);
@@ -167,20 +113,20 @@ namespace Core.Pool
 
         private void CreateNewObject(bool onInitialize)
         {
-            var pooledObject = Object.Instantiate(_prefab, _poolParent.transform);
+            var objClone = Object.Instantiate(_prefab, _poolParent.transform);
 
-            pooledObject.name = _prefab.name;
+            objClone.name = _prefab.name;
             
-            var obj = pooledObject.GetOrAddComponent<PooledObject>();
+            var pooledObject = objClone.GetOrAddComponent<PooledObject>();
 
-            obj.PoolKey = _poolKey;
+            pooledObject.PoolKey = _prefab.GetInstanceID();
             
             if (onInitialize)
             {
-                obj.Deactivate();
+                pooledObject.Deactivate();
             }
 
-            Pool.Enqueue(obj);
+            Pool.Enqueue(pooledObject);
         }
 
         private void ReturnToPool(IPooledObject pooledObject)
@@ -215,14 +161,26 @@ namespace Core.Pool
             _poolParent = new GameObject("Pool_" + _prefab.name);
             _poolParent.transform.SetParent(_pooledObjectRoot);
         }
-
-        public void Dispose()
+        
+        public void ClearPool()
         {
-            ClearPool();
+            foreach (var pooledObject in Pool)
+            {
+                if (pooledObject is not Component pooledObj) continue;
+                if (!pooledObj) continue;
+                Object.Destroy(pooledObj.gameObject);
+            }
+
+            Pool?.Clear();
+            
+            if (!_poolParent) return;
+            Object.Destroy(_poolParent);
+            
             _prefab = null;
             _pooledObjectRoot = null;
-            _poolParent = null;
             _poolCount = 0;
         }
+
+        public void Dispose() => ClearPool();
     }
 }
