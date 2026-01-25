@@ -37,7 +37,7 @@ namespace Core.Pool
             return this;
         }
 
-        public T GetObject<T>(bool activate = true) where T : Component
+        public T GetObject<T>(bool activate = true, bool showLogs = false) where T : Component
         {
             if (HasAnyPooledMissing()) ClearPool();
             
@@ -85,7 +85,8 @@ namespace Core.Pool
                     break;
                 case Component comp:
                     component = comp.GetComponent<T>();
-                    EditorLogger.LogWarning($"[{GetType().Name}] Expected component '{typeof(T).Name}' not found on pooled object '{comp.gameObject.name}'.", component);
+                    if(showLogs)
+                        EditorLogger.LogWarning($"[{GetType().Name}] Expected component '{typeof(T).Name}' not found on pooled object '{comp.gameObject.name}'.", component);
                     break;
                 default:
                     EditorLogger.LogError($"[{GetType().Name}] IPooledObject is not a Component! Object: {pooledObject}");
