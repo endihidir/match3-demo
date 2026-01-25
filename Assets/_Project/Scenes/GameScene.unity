@@ -1446,7 +1446,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1517060610}
   m_Layer: 5
-  m_Name: GoalObject
+  m_Name: GoalUIObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

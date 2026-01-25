@@ -32,13 +32,13 @@ namespace Core.Pool
             CreateAllCachedPooledObjects();
         }
         
-        public T GetObject<T>(T prefab, bool show = true, int poolCount = 1, Action onComplete = null) where T : Component
+        public T GetObject<T>(T prefab, bool show = true, int poolCount = 1) where T : Component
         {
             var key = prefab.GetInstanceID();
             
             if (_idPoolHandlers.TryGetValue(key, out var objectPoolHandler))
             {
-                var pooledObject = objectPoolHandler.GetObject<T>(show, 0f, 0f, onComplete);
+                var pooledObject = objectPoolHandler.GetObject<T>(show);
                 
                 return pooledObject;
             }
@@ -46,19 +46,19 @@ namespace Core.Pool
             {
                 objectPoolHandler = CreateNewHandler(prefab, poolCount);
                 
-                var pooledObject = objectPoolHandler.GetObject<T>(show, 0f, 0f, onComplete);
+                var pooledObject = objectPoolHandler.GetObject<T>(show);
 
                 return pooledObject;
             }
         }
 
-        public T GetObject<T>(bool show = true, float duration = 0f, float delay = 0f, Action onComplete = null) where T : Component, IPooledObject
+        public T GetObject<T>(bool show = true) where T : Component, IPooledObject
         {
             var key = typeof(T);
 
             if (_typePoolHandlers.TryGetValue(key, out var objectPoolHandler))
             {
-                var pooledObject = objectPoolHandler.GetObject<T>(show, duration, delay, onComplete);
+                var pooledObject = objectPoolHandler.GetObject<T>(show);
                 
                 return pooledObject;
             }
@@ -66,13 +66,13 @@ namespace Core.Pool
             {
                 objectPoolHandler = CreateNewHandler<T>();
                 
-                var pooledObject = objectPoolHandler.GetObject<T>(show, duration, delay, onComplete);
+                var pooledObject = objectPoolHandler.GetObject<T>(show);
 
                 return pooledObject;
             }
         }
 
-        public void ReturnObject<T>(T objectRef, float duration, float delay, Action onComplete = null) where T : Component
+        public void ReturnObject<T>(T objectRef, bool hide = true) where T : Component
         {
             if (!objectRef) { EditorLogger.LogError($"[{GetType().Name}] Return failed: null/destroyed object"); return; }
 
@@ -96,20 +96,20 @@ namespace Core.Pool
                 }
             }
             
-            objectPoolHandler.ReturnObject(pooledObject, duration, delay, onComplete);
+            objectPoolHandler.ReturnObject(pooledObject, hide);
         }
         
-        public void ReturnAllObjectsOfType<T>(float duration, float delay, Action onComplete = null) where T : Component, IPooledObject
+        public void ReturnAllObjectsOfType<T>(bool hide = true) where T : Component, IPooledObject
         {
             var pooledObjects = PoolSearchUtils.FindPooledObjectsOfType<T>();
             
             foreach (var pooledObject in pooledObjects)
             {
-                ReturnObject(pooledObject, duration, delay, onComplete);
+                ReturnObject(pooledObject, hide);
             }
         }
 
-        public void ReturnAll(float duration, float delay, Action onComplete = null)
+        public void ReturnAll(bool hide = true)
         {
             var pooledObjects = PoolSearchUtils.FindPooledObjectsOfType<IPooledObject>();
             
@@ -117,7 +117,7 @@ namespace Core.Pool
             {
                 if (pooledObject is Component component)
                 {
-                    ReturnObject(component, duration, delay, onComplete);
+                    ReturnObject(component, hide);
                 }
             }
         }

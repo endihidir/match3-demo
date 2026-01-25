@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using Core.Extensions;
 using Core.Utils;
 using UnityEngine;
@@ -53,7 +51,7 @@ namespace Core.Pool
             return this;
         }
 
-        public T GetObject<T>(bool activate = true, float duration = 0f, float delay = 0f, Action onComplete = null) where T : Component
+        public T GetObject<T>(bool activate = true) where T : Component
         {
             if (HasAnyPooledMissing()) ClearPool();
             
@@ -94,7 +92,7 @@ namespace Core.Pool
             }
             
             if (activate) 
-                pooledObject?.Activate(duration, delay, onComplete);
+                pooledObject?.Activate();
 
 
             switch (pooledObject)
@@ -114,11 +112,14 @@ namespace Core.Pool
             return component;
         }
 
-        public void ReturnObject<T>(T pooledObject, float duration, float delay, Action onComplete) where T : IPooledObject
+        public void ReturnObject<T>(T pooledObject, bool hide = true) where T : IPooledObject
         {
-            if (!pooledObject.IsActive) return;
-
-            pooledObject.Deactivate(duration, delay, ()=> ReturnToPool(pooledObject, onComplete));
+            if (pooledObject.IsActive && hide)
+            {
+                pooledObject.Deactivate();
+            }
+            
+            ReturnToPool(pooledObject);
         }
 
         private void ClearPool()
@@ -182,7 +183,7 @@ namespace Core.Pool
             Pool.Enqueue(obj);
         }
 
-        private void ReturnToPool(IPooledObject pooledObject, Action onComplete)
+        private void ReturnToPool(IPooledObject pooledObject)
         {
             if(!_poolParent) CreatePoolParent();
 
@@ -192,15 +193,11 @@ namespace Core.Pool
                 return;
             }
             
-            var pooledObjectT = pooledObj.transform;
-            
-            pooledObjectT.SetParent(_poolParent.transform);
+            pooledObj.transform.SetParent(_poolParent.transform);
 
-            pooledObjectT.localPosition = Vector3.zero;
+            pooledObj.transform.localPosition = Vector3.zero;
             
             Pool.Enqueue(pooledObject);
-
-            onComplete?.Invoke();
         }
         
         private bool HasAnyPooledMissing()
@@ -216,20 +213,15 @@ namespace Core.Pool
         private void CreatePoolParent()
         {
             _poolParent = new GameObject("Pool_" + _prefab.name);
-                
             _poolParent.transform.SetParent(_pooledObjectRoot);
         }
 
         public void Dispose()
         {
             ClearPool();
-            
             _prefab = null;
-            
             _pooledObjectRoot = null;
-            
             _poolParent = null;
-            
             _poolCount = 0;
         }
     }

@@ -56,8 +56,18 @@ namespace Core.Item
         public void SetSpriteSize(float cellSize) => SpriteRenderer.size = cellSize * SpriteSizeMultiplier;
         public void SetPosition(Vector3 position) => transform.position = position;
         public void SetParent(Transform parent) => transform.SetParent(parent);
-        protected override void OnActivate() => ItemAnimation.InitAnimations();
-        protected override void OnDeactivate() => ResetItem();
+        public override void Activate()
+        {
+            base.Activate();
+            ItemAnimation.CacheAnimations();
+        }
+
+        public override void Deactivate()
+        {
+            base.Deactivate();
+            ResetItem();
+        }
+
         public void ResetItem()
         {
             Coord = new Vector2Int(-1, -1);
