@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Core.Utils
 {
-    public static class GridImpactMarker
+    public static class BoosterImpactMarker
     {
         public static void MarkLinearArea(IGridModel model, BoosterActionContext boosterActionContext, CellImpactMarkData[,] markData, int damageAmount, int lineCount, Vector2Int[] directions, Action<BoosterActionContext> enqueue)
         {

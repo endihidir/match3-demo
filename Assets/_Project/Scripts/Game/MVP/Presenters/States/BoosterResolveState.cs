@@ -49,14 +49,14 @@ namespace Core.Handlers
                 {
                     case RocketHorizontalAction hAction:
                         var horDirs = DirectionLookup.HorizontalDirections;
-                        GridImpactMarker.MarkLinearArea(model, action, markData, hAction.DamageAmount, hAction.LineCount, horDirs, EnqueueIfNew);
+                        BoosterImpactMarker.MarkLinearArea(model, action, markData, hAction.DamageAmount, hAction.LineCount, horDirs, EnqueueIfNew);
                         break;
                     case RocketVerticalAction vAction:
                         var verDirs = DirectionLookup.VerticalDirections;
-                        GridImpactMarker.MarkLinearArea(model, action, markData, vAction.DamageAmount, vAction.LineCount, verDirs, EnqueueIfNew);
+                        BoosterImpactMarker.MarkLinearArea(model, action, markData, vAction.DamageAmount, vAction.LineCount, verDirs, EnqueueIfNew);
                         break;
                     case BombAction bAction:
-                        GridImpactMarker.MarkSquareArea(model, action, markData, bAction.DamageAmount, bAction.Radius, EnqueueIfNew);
+                        BoosterImpactMarker.MarkSquareArea(model, action, markData, bAction.DamageAmount, bAction.Radius, EnqueueIfNew);
                         break;
                 }
             }
@@ -69,13 +69,13 @@ namespace Core.Handlers
 
             if (!GridMatchMaskBuilder.TryBuildMatchMask(model, out var matchMask)) return;
                 
-            if (!GridMatchCalcUtil.TryBuildMatchGroupMaskAt(model, unmarkRemoveCoord, matchMask, out var boosterMask)) return;
+            if (!GridMatchCalcUtil.TryBuildMatchGroupMaskAt(model, unmarkRemoveCoord, matchMask, out var groupMask)) return;
                     
             for (int x = 0; x < model.Width; x++)
             {
                 for (int y = 0; y < model.Height; y++)
                 {
-                    if (!boosterMask[x, y]) continue;
+                    if (!groupMask[x, y]) continue;
                                 
                     markData[x, y].UnMarkRemove();
                 }

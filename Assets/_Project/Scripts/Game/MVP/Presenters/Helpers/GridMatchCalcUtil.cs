@@ -217,12 +217,13 @@ namespace Core.Utils
             if (shouldBoosterResult)
             {
                 var group = new List<Vector2Int>(count);
+                
                 for (int i = 0; i < count; i++)
                     group.Add(buffer[i]);
 
                 var boosterType = GridMatchBoosterDecision.DecideBoosterTypeFromGroup(model, matchMask, group, id);
-                if (!boosterType.HasValue)
-                    return false;
+                
+                if (!boosterType.HasValue) return false;
             }
 
             for (int i = 0; i < count; i++)
