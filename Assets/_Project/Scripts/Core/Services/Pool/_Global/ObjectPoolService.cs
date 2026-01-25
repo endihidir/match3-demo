@@ -34,7 +34,7 @@ namespace Core.Pool
         
         public T GetObject<T>(T prefab, bool show = true, int poolCount = 1, bool isLazy = true, bool isUnique = false) where T : Component
         {
-            var key = prefab.GetInstanceID();
+            var key = prefab.gameObject.GetInstanceID();
             
             if (_idPoolHandlers.TryGetValue(key, out var objectPoolHandler))
             {
@@ -139,7 +139,7 @@ namespace Core.Pool
         
         public void RemovePool<T>(T prefab) where T : Component
         {
-            var key = prefab.GetInstanceID();
+            var key = prefab.gameObject.GetInstanceID();
 
             if (!_idPoolHandlers.TryGetValue(key, out var objectPoolHandler))
             {

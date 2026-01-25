@@ -39,6 +39,8 @@ namespace Core.Utils
 
         private static void MarkVisitedObject(BaseGridObject obj, int actionGroupId, CellImpactMarkData[,] markData, int damageAmount, Action<BoosterActionContext> enqueue)
         {
+            if(obj.IsFallInProgress) return;
+            
             var coord = obj.Coord;
             
             ref var cell = ref markData[coord.x, coord.y];
