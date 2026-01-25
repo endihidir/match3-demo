@@ -32,13 +32,13 @@ namespace Core.Pool
             CreateAllCachedPooledObjects();
         }
         
-        public T GetObject<T>(T prefab, bool show = true, int poolCount = 1, bool isLazy = true, bool isUnique = false) where T : Component
+        public T GetObject<T>(T prefab, bool show = true, int poolCount = 1, bool isLazy = true, bool isUnique = false, bool showLogs = false) where T : Component
         {
             var key = prefab.gameObject.GetInstanceID();
             
             if (_idPoolHandlers.TryGetValue(key, out var objectPoolHandler))
             {
-                var pooledObject = objectPoolHandler.GetObject<T>(show);
+                var pooledObject = objectPoolHandler.GetObject<T>(show, showLogs);
                 
                 return pooledObject;
             }
@@ -46,19 +46,19 @@ namespace Core.Pool
             {
                 objectPoolHandler = CreateNewHandler(prefab, poolCount, isLazy, isUnique);
                 
-                var pooledObject = objectPoolHandler.GetObject<T>(show);
+                var pooledObject = objectPoolHandler.GetObject<T>(show, showLogs);
 
                 return pooledObject;
             }
         }
 
-        public T GetObject<T>(bool show = true) where T : Component, IPooledObject
+        public T GetObject<T>(bool show = true, bool showLogs = false) where T : Component, IPooledObject
         {
             var key = typeof(T);
 
             if (_typePoolHandlers.TryGetValue(key, out var objectPoolHandler))
             {
-                var pooledObject = objectPoolHandler.GetObject<T>(show);
+                var pooledObject = objectPoolHandler.GetObject<T>(show, showLogs);
                 
                 return pooledObject;
             }
@@ -66,7 +66,7 @@ namespace Core.Pool
             {
                 objectPoolHandler = CreateNewHandler<T>();
                 
-                var pooledObject = objectPoolHandler.GetObject<T>(show);
+                var pooledObject = objectPoolHandler.GetObject<T>(show, showLogs);
 
                 return pooledObject;
             }
