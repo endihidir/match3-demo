@@ -20,13 +20,13 @@ namespace Core.Item
         {
             _itemHolderDefaultPos = ItemHolder.localPosition;
         }
-        public void InitAnimations()
+        public void CacheAnimations()
         {
-            CreateShakeTween();
-            CreateSpringTween();
+            CacheShakeTween();
+            CacheSpringTween();
         }
 
-        private void CreateShakeTween()
+        private void CacheShakeTween()
         {
             var duration = Settings.ShakeDuration / 3f;
 
@@ -44,7 +44,7 @@ namespace Core.Item
                 .SetUpdate(Settings.UseUnscaledTime);
         }
 
-        private void CreateSpringTween()
+        private void CacheSpringTween()
         {
             if(_springTween != null) return;
             
