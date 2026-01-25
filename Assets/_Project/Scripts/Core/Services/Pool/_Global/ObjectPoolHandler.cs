@@ -8,21 +8,22 @@ namespace Core.Pool
 {
     public sealed class ObjectPoolHandler
     {
-        private GameObject _prefab;
-        private Transform _pooledObjectRoot;
-        private int _poolCount;
-        private bool _isUnique;
+        private readonly GameObject _prefab;
+        private readonly int _poolCount;
+        private readonly Transform _pooledObjectRoot;
+        
         private GameObject _poolParent;
-        private Queue<IPooledObject> Pool { get; } = new();
         public bool IsLazy { get; private set; }
+        public bool IsUnique { get; private set; }
+        private Queue<IPooledObject> Pool { get; } = new();
 
         public ObjectPoolHandler(GameObject prefab, Transform rootParent, int poolCount, bool isLazy = true, bool isUnique = false)
         {
             _prefab = prefab;
             _pooledObjectRoot = rootParent;
             _poolCount = poolCount;
+            IsUnique = isUnique;
             IsLazy = isLazy;
-            _isUnique = isUnique;
             CreatePoolParent();
         }
 
@@ -46,7 +47,7 @@ namespace Core.Pool
             
             T component = null;
             
-            if (_isUnique)
+            if (IsUnique)
             {
                 if (Pool.TryPeek(out var peeked))
                 {
@@ -114,17 +115,12 @@ namespace Core.Pool
         private void CreateNewObject(bool onInitialize)
         {
             var objClone = Object.Instantiate(_prefab, _poolParent.transform);
-
-            objClone.name = _prefab.name;
             
             var pooledObject = objClone.GetOrAddComponent<PooledObject>();
-
+            
             pooledObject.PoolKey = _prefab.GetInstanceID();
             
-            if (onInitialize)
-            {
-                pooledObject.Deactivate();
-            }
+            if (onInitialize) pooledObject.Deactivate();
 
             Pool.Enqueue(pooledObject);
         }
@@ -140,9 +136,7 @@ namespace Core.Pool
             }
             
             pooledObj.transform.SetParent(_poolParent.transform);
-
             pooledObj.transform.localPosition = Vector3.zero;
-            
             Pool.Enqueue(pooledObject);
         }
         
@@ -175,10 +169,6 @@ namespace Core.Pool
             
             if (!_poolParent) return;
             Object.Destroy(_poolParent);
-            
-            _prefab = null;
-            _pooledObjectRoot = null;
-            _poolCount = 0;
         }
 
         public void Dispose() => ClearPool();
