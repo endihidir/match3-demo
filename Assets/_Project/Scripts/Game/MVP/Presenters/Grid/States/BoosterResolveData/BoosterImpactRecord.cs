@@ -2,7 +2,7 @@ using Core.Item;
 
 namespace Core.Handlers
 {
-    public struct CellImpactMarkData
+    public struct BoosterImpactRecord
     {
         public bool Remove { get; private set; }
         public bool HasDamage => DamageSource > 0;

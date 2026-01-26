@@ -28,9 +28,9 @@ namespace Core.Handlers
             ApplyMarkedActions(model, view, markData);
         }
 
-        private void MarkPendingActions(IGridModel model, out CellImpactMarkData[,] markData)
+        private void MarkPendingActions(IGridModel model, out BoosterImpactRecord[,] markData)
         {
-            markData = new CellImpactMarkData[model.Width, model.Height]; 
+            markData = new BoosterImpactRecord[model.Width, model.Height]; 
             var queue = new Queue<BoosterActionContext>();
             var seen = new HashSet<BoosterActionKey>();
             
@@ -49,14 +49,14 @@ namespace Core.Handlers
                 {
                     case RocketHorizontalAction hAction:
                         var horDirs = DirectionLookup.HorizontalDirections;
-                        BoosterImpactMarker.MarkLinearArea(model, action, markData, hAction.DamageAmount, hAction.LineCount, horDirs, EnqueueIfNew);
+                        BoosterImpactResolver.ResolveLinearArea(model, action, markData, hAction.DamageAmount, hAction.LineCount, horDirs, EnqueueIfNew);
                         break;
                     case RocketVerticalAction vAction:
                         var verDirs = DirectionLookup.VerticalDirections;
-                        BoosterImpactMarker.MarkLinearArea(model, action, markData, vAction.DamageAmount, vAction.LineCount, verDirs, EnqueueIfNew);
+                        BoosterImpactResolver.ResolveLinearArea(model, action, markData, vAction.DamageAmount, vAction.LineCount, verDirs, EnqueueIfNew);
                         break;
                     case BombAction bAction:
-                        BoosterImpactMarker.MarkSquareArea(model, action, markData, bAction.DamageAmount, bAction.Radius, EnqueueIfNew);
+                        BoosterImpactResolver.ResolveSquareArea(model, action, markData, bAction.DamageAmount, bAction.Radius, EnqueueIfNew);
                         break;
                 }
             }
@@ -97,7 +97,7 @@ namespace Core.Handlers
             }
         }
         
-        private void ApplyMarkedActions(IGridModel model, IGridView view, CellImpactMarkData[,] markData)
+        private void ApplyMarkedActions(IGridModel model, IGridView view, BoosterImpactRecord[,] markData)
         { 
             for (int x = 0; x < model.Width; x++)
             {

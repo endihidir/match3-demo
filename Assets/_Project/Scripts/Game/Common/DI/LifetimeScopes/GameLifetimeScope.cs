@@ -5,6 +5,7 @@ using Core.Item.Factories;
 using Core.Models;
 using Core.Presenters;
 using Core.Services;
+using Core.UI;
 using Core.Views;
 using UnityEngine;
 using VContainer;
@@ -20,19 +21,22 @@ namespace Core.LifetimeScopes
         {
             builder.RegisterInstance(GameplayConfigContainer);
             builder.RegisterEntryPoint<GameplayBootstrapper>();
+            builder.RegisterEntryPoint<GameplayFactoryLifecycle>();
             builder.RegisterEntryPoint<GridPresenter>();
-            builder.RegisterEntryPoint<FactoryCleanHandler>();
+            builder.RegisterEntryPoint<HudPresenter>();
             
             builder.Register<InputService>(Lifetime.Scoped).As<IInputService, ITickable>();
-            builder.Register<LevelGoalModel>(Lifetime.Scoped).As<ILevelGoalModel>();
+            
+            builder.Register<GridItemFactory>(Lifetime.Scoped).As<IGridItemFactory, IFactoryResettable>();
             
             builder.Register<GridPopulateHandler>(Lifetime.Scoped).As<IGridPopulateHandler>();
-            builder.Register<GridItemFactory>(Lifetime.Scoped).As<IGridItemFactory, IFactoryCleaner>();
-            
             builder.Register<GridModel>(Lifetime.Scoped).As<IGridModel>();
             builder.RegisterComponentInHierarchy<GridView>().As<IGridView>();
             builder.Register<GridStateHandler>(Lifetime.Scoped).As<IGridStateHandler, ITickable, IFixedTickable, ILateTickable>();
             builder.Register<GridCheatHandler>(Lifetime.Scoped).As<IGridCheatHandler, ITickable>();
+
+            builder.Register<LevelGoalModel>(Lifetime.Scoped).As<ILevelGoalModel>();
+            builder.RegisterComponentInHierarchy<HudView>().As<IHudView>();
             
             builder.Register<FillStrategyResolver>(Lifetime.Scoped).As<IFillStrategyResolver>();
             builder.Register<FallDownFillStrategy>(Lifetime.Scoped).As<IFillStrategy>();

@@ -9,7 +9,7 @@ using VContainer.Unity;
 
 namespace Core.Presenters
 {
-    public class GridPresenter : IInitializable, IDisposable
+    public sealed class GridPresenter : IInitializable, IDisposable
     {
         private readonly IGridModel _gridModel;
         private readonly IGridView _gridView;

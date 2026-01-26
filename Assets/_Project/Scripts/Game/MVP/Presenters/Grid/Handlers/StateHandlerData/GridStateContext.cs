@@ -26,7 +26,7 @@ namespace Core.Handlers
         public bool HasPendingBoosterActions => PendingBoosterActions.Count > 0;
         
         public bool MatchResolveRequested { get; set; }
-        private int GroupIdCounter { get; set; }
+        public int GroupIdCounter { get; set; }
 
         public GridStateContext(IGridModel model, IGridView view, IGridItemFactory factory, GridConfigContainerSO configs)
         {
