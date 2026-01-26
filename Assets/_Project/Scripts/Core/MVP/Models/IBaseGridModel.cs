@@ -30,6 +30,7 @@ namespace Core.Models
         bool TryGetNeighboursNonAlloc(Vector2Int sourceCoord, Span<T> resultBuffer, out int count);
         // Cell state
         bool IsCellActive(Vector2Int coord);
+        
         bool IsInRange(Vector2Int coord);
         bool IsInRange(int x, int y) => IsInRange(new Vector2Int(x, y));
     }

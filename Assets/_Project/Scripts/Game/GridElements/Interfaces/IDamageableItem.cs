@@ -2,7 +2,8 @@ namespace Core.Item
 {
     public interface IDamageableItem
     {
-        public DamageResult TakeDamage(int damage, DamageSource source);
+        int Life { get; }
+        DamageResult TakeDamage(int damage, DamageSource source);
     }
     
     public enum DamageResult

@@ -7,15 +7,15 @@ using VContainer.Unity;
 
 namespace Core.Handlers
 {
-    public class FactoryCleanHandler : IInitializable, IDisposable
+    public class GameplayFactoryLifecycle : IInitializable, IDisposable
     {
         private readonly ISceneLoadState _sceneLoadState;
-        private readonly IEnumerable<IFactoryCleaner> _factoryCleaners;
+        private readonly IEnumerable<IFactoryResettable> _factoryResettables;
         
-        public FactoryCleanHandler(ISceneLoadState sceneLoadState, IEnumerable<IFactoryCleaner> factoryCleaners)
+        public GameplayFactoryLifecycle(ISceneLoadState sceneLoadState, IEnumerable<IFactoryResettable> factoryResettables)
         {
             _sceneLoadState = sceneLoadState;
-            _factoryCleaners = factoryCleaners;
+            _factoryResettables = factoryResettables;
         }
         
         public void Initialize()
@@ -27,9 +27,9 @@ namespace Core.Handlers
         {
             if(_sceneLoadState.CurrentSceneGroupType != SceneGroupType.GameScene) return;
             
-            foreach (var cleaner in _factoryCleaners)
+            foreach (var factoryResettable in _factoryResettables)
             {
-                cleaner.CleanupFactory();
+                factoryResettable.Reset();
             }
         }
 

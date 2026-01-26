@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Core.Item.Factories
 {
-    public class GridItemFactory : IGridItemFactory, IFactoryCleaner
+    public class GridItemFactory : IGridItemFactory, IFactoryResettable
     {
         private readonly IObjectPoolService _objectPoolService;
         private readonly GridConfigContainerSO _gridConfigContainer;
@@ -55,7 +55,7 @@ namespace Core.Item.Factories
         public void ReleaseItem(BaseGridObject grid) => _objectPoolService.ReturnObject(grid);
         public void ReleaseItem(Transform item) => _objectPoolService.ReturnObject(item);
         public void ReleaseAllItemsOfType<T>() where T : BaseGridObject => _objectPoolService.ReturnAllObjectsOfType<T>();
-        public void CleanupFactory() => _objectPoolService.ReturnAllObjectsOfType<BaseGridObject>();
-        public void RemoveItemPool() => _objectPoolService.RemovePoolOfType<BaseGridObject>();
+        public void Reset() => _objectPoolService.ReturnAllObjectsOfType<BaseGridObject>();
+        public void Remove() => _objectPoolService.RemovePoolOfType<BaseGridObject>();
     }
 }

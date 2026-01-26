@@ -6,52 +6,57 @@ using UnityEngine;
 
 namespace Core.Utils
 {
-    public static class BoosterImpactMarker
+    public static class BoosterImpactResolver
     {
-        public static void MarkLinearArea(IGridModel model, BoosterActionContext boosterActionContext, CellImpactMarkData[,] markData, int damageAmount, int lineCount, Vector2Int[] directions, Action<BoosterActionContext> enqueue)
+        public static void ResolveLinearArea(IGridModel model, BoosterActionContext boosterActionContext, BoosterImpactRecord[,] markData, int damageAmount, int lineCount, Vector2Int[] directions, Action<BoosterActionContext> enqueue)
         {
             foreach (var dir in directions)
             {
                 VisitLineExceptSelf(model, boosterActionContext.OriginCoord, dir, lineCount, 
-                    obj => MarkVisitedObject(obj, boosterActionContext.GroupId, markData, damageAmount, enqueue));
+                    obj => ResolveVisitedObject(obj, boosterActionContext.GroupId, markData, damageAmount, enqueue));
             }
         }
 
-        public static void MarkSquareArea(IGridModel model, BoosterActionContext boosterActionContext, CellImpactMarkData[,] markData, int damageAmount, int radius, Action<BoosterActionContext> enqueue)
+        public static void ResolveSquareArea(IGridModel model, BoosterActionContext boosterActionContext, BoosterImpactRecord[,] markData, int damageAmount, int radius, Action<BoosterActionContext> enqueue)
         {
             for (int r = 1; r <= radius; r++)
             {
                 VisitRingExceptSelf(model, boosterActionContext.OriginCoord, r, 
-                    obj => MarkVisitedObject(obj, boosterActionContext.GroupId, markData, damageAmount, enqueue));
+                    obj => ResolveVisitedObject(obj, boosterActionContext.GroupId, markData, damageAmount, enqueue));
             }
         }
         
-        public static void MarkAllAreaFromOrigin(IGridModel model, BoosterActionContext boosterActionContext, CellImpactMarkData[,] markData, int damageAmount, Action<BoosterActionContext> enqueue)
+        public static void ResolveAllArea(IGridModel model, BoosterActionContext boosterActionContext, BoosterImpactRecord[,] markData, int damageAmount, Action<BoosterActionContext> enqueue)
         {
             var maxRadius = Mathf.Max(model.Width, model.Height);
 
             for (int r = 1; r <= maxRadius; r++)
             {
                 VisitRingExceptSelf(model, boosterActionContext.OriginCoord, r, 
-                    obj => MarkVisitedObject(obj, boosterActionContext.GroupId, markData, damageAmount, enqueue));
+                    obj => ResolveVisitedObject(obj, boosterActionContext.GroupId, markData, damageAmount, enqueue));
             }
         }
 
-        private static void MarkVisitedObject(BaseGridObject obj, int actionGroupId, CellImpactMarkData[,] markData, int damageAmount, Action<BoosterActionContext> enqueue)
+        private static void ResolveVisitedObject(BaseGridObject obj, int actionGroupId, BoosterImpactRecord[,] markData, int damageAmount, Action<BoosterActionContext> enqueue)
         {
             var coord = obj.Coord;
             
             ref var cell = ref markData[coord.x, coord.y];
             
-            var isDamageable = obj is IDamageableItem;
+            var damageable = obj as IDamageableItem;
             var trigger = obj as IBoosterActionSource;
+            
+            var isDamageable = damageable != null;
+            var isTrigger = trigger != null;
 
             if (isDamageable)
             {
                 cell.AddDamage(actionGroupId, damageAmount, DamageSource.Booster);
             }
 
-            if (trigger != null)
+            var shouldTrigger = isTrigger && (!isDamageable || damageable.Life - damageAmount <= 0);
+            
+            if (shouldTrigger)
             {
                 if (trigger.TryBuildAction(coord, out var boosterAction))
                 {
