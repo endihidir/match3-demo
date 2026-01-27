@@ -9,10 +9,11 @@ namespace Core.Pool
         T GetObject<T>(bool show = true, bool showLogs = false) where T : Component, IPooledObject;
         
         void ReturnObject<T>(T objectRef, bool hide = true) where T : Component;
-        void ReturnAllObjectsOfType<T>(bool hide = true) where T : Component, IPooledObject;
+        void ReturnObjectsByType<T>(bool hide = true) where T : Component, IPooledObject;
         void ReturnAll(bool hide = true);
         
-        void RemovePool<T>(T prefab) where T : Component;
-        void RemovePoolOfType<T>() where T : IPooledObject;
+        void RemovePoolsByType<T>() where T : IPooledObject;
+        void RemovePoolsByPrefab<T>(T prefab) where T : Component, IPooledObject;
+        void RemoveAllPools();
     }
 }

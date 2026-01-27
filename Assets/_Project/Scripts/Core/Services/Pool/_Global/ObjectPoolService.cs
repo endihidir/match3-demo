@@ -99,7 +99,7 @@ namespace Core.Pool
             objectPoolHandler.ReturnObject(pooledObject, hide);
         }
         
-        public void ReturnAllObjectsOfType<T>(bool hide = true) where T : Component, IPooledObject
+        public void ReturnObjectsByType<T>(bool hide = true) where T : Component, IPooledObject
         {
             var pooledObjects = PoolSearchUtils.FindPooledObjectsOfType<T>();
             
@@ -108,7 +108,7 @@ namespace Core.Pool
                 ReturnObject(pooledObject, hide);
             }
         }
-
+        
         public void ReturnAll(bool hide = true)
         {
             var pooledObjects = PoolSearchUtils.FindPooledObjectsOfType<IPooledObject>();
@@ -121,35 +121,64 @@ namespace Core.Pool
                 }
             }
         }
-
-        public void RemovePoolOfType<T>() where T : IPooledObject
+        
+        public void RemovePoolsByType<T>() where T : IPooledObject
         {
-            var key = typeof(T);
+            var baseType = typeof(T);
 
-            if (!_typePoolHandlers.TryGetValue(key, out var objectPoolHandler))
+            var keysToRemove = new List<Type>();
+
+            foreach (var kvp in _typePoolHandlers)
             {
-                EditorLogger.LogError($"You can not remove pool because {key} does not exist in the list of prefabs.");
-                return;
+                if (!baseType.IsAssignableFrom(kvp.Key)) continue;
+                
+                kvp.Value.Dispose();
+                
+                keysToRemove.Add(kvp.Key);
             }
 
-            objectPoolHandler.ClearPool();
-            
-            _typePoolHandlers.Remove(key);
+            foreach (var key in keysToRemove)
+            {
+                _typePoolHandlers.Remove(key);
+            }
+        }
+
+        public void RemovePoolsByPrefab<T>(T prefab) where T : Component, IPooledObject
+        {
+            var id = prefab.gameObject.GetInstanceID();
+
+            var keysToRemove = new List<int>();
+
+            foreach (var kvp in _idPoolHandlers)
+            {
+                if (id != kvp.Key) continue;
+                
+                kvp.Value.Dispose();
+                
+                keysToRemove.Add(kvp.Key);
+            }
+
+            foreach (var key in keysToRemove)
+            {
+                _idPoolHandlers.Remove(key);
+            }
         }
         
-        public void RemovePool<T>(T prefab) where T : Component
+        public void RemoveAllPools()
         {
-            var key = prefab.gameObject.GetInstanceID();
-
-            if (!_idPoolHandlers.TryGetValue(key, out var objectPoolHandler))
+            foreach (var kvp in _typePoolHandlers)
             {
-                EditorLogger.LogError($"You can not remove pool because {key} does not exist in the list of prefabs.");
-                return;
+                kvp.Value?.Dispose();
             }
 
-            objectPoolHandler.ClearPool();
-            
-            _idPoolHandlers.Remove(key);
+            _typePoolHandlers.Clear();
+
+            foreach (var kvp in _idPoolHandlers)
+            {
+                kvp.Value?.Dispose();
+            }
+
+            _idPoolHandlers.Clear();
         }
 
         private void CacheAllPooledObjects()
@@ -230,20 +259,6 @@ namespace Core.Pool
             return objectPoolHandler;
         }
         
-        public void Dispose()
-        {
-            foreach (var keyValuePair in _typePoolHandlers)
-            {
-                keyValuePair.Value?.Dispose();
-            }
-            
-            foreach (var keyValuePair in _idPoolHandlers)
-            {
-                keyValuePair.Value?.Dispose();
-            }
-            
-            _idPoolHandlers?.Clear();
-            _typePoolHandlers?.Clear();
-        }
+        public void Dispose() => RemoveAllPools();
     }
 }

@@ -30,10 +30,9 @@ namespace Core.Item.Factories
             return itemObject;
         }
         
-        public void ReleaseItem(BaseGridObject grid) => _objectPoolService.ReturnObject(grid);
+        public void ReleaseItem(BaseGridObject item) => _objectPoolService.ReturnObject(item);
         public void ReleaseItem(Transform item) => _objectPoolService.ReturnObject(item);
-        public void ReleaseAllItemsOfType<T>() where T : BaseGridObject => _objectPoolService.ReturnAllObjectsOfType<T>();
-        public void ReleaseAll() => _objectPoolService.ReturnAllObjectsOfType<BaseGridObject>();
-        public void Remove() => _objectPoolService.RemovePoolOfType<BaseGridObject>();
+        public void ReleaseItemsByType<T>() where T : BaseGridObject => _objectPoolService.ReturnObjectsByType<T>();
+        public void RemovePoolsByType<T>() where T : BaseGridObject => _objectPoolService.RemovePoolsByType<T>();
     }
 }

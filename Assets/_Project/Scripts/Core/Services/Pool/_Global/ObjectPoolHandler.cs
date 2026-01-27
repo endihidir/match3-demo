@@ -157,7 +157,7 @@ namespace Core.Pool
             _poolParent.transform.SetParent(_pooledObjectRoot);
         }
         
-        public void ClearPool()
+        private void ClearPool()
         {
             foreach (var pooledObject in Pool)
             {

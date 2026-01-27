@@ -1,4 +1,5 @@
 using System;
+using Core.Item;
 using Core.Item.Factories;
 using Core.SceneService;
 using VContainer.Unity;
@@ -16,7 +17,7 @@ namespace Core.Handlers
         }
 
         public void Initialize() => _sceneLoadState.OnLoadStart += OnSceneUnload;
-        private void OnSceneUnload() => _gridItemFactory.ReleaseAll();
+        private void OnSceneUnload() => _gridItemFactory.ReleaseItemsByType<BaseGridObject>();
         public void Dispose() => _sceneLoadState.OnLoadStart -= OnSceneUnload;
     }
 }
