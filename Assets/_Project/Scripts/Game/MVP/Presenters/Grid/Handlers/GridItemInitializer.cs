@@ -7,7 +7,7 @@ using VContainer.Unity;
 
 namespace Core.Handlers
 {
-    public class GridItemInitializer : IInitializable, IGridItemCreator, IDisposable
+    public class GridItemInitializer : IInitializable, IGridItemPopulator, IDisposable
     {
         private readonly IGridItemFactory _gridItemFactory;
         private readonly ISceneLoadState _sceneLoadState;
@@ -17,7 +17,7 @@ namespace Core.Handlers
             _sceneLoadState = sceneLoadState;
         }
 
-        public void CreateGridItems(GridObjectType[,] gridObjectTypes, int width, int height, out BaseGridObject[,] itemObjects)
+        public void PopulateGridItems(GridObjectType[,] gridObjectTypes, int width, int height, out BaseGridObject[,] itemObjects)
         {
             itemObjects = new BaseGridObject[width, height];
 

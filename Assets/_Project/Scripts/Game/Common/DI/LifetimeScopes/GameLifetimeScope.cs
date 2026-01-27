@@ -27,7 +27,7 @@ namespace Core.LifetimeScopes
             builder.Register<InputService>(Lifetime.Scoped).As<IInputService, ITickable>();
             
             builder.Register<GridItemFactory>(Lifetime.Scoped).As<IGridItemFactory>();
-            builder.Register<GridItemInitializer>(Lifetime.Scoped).As<IInitializable, IGridItemCreator>();
+            builder.Register<GridItemInitializer>(Lifetime.Scoped).As<IInitializable, IGridItemPopulator>();
             
             builder.Register<GridModel>(Lifetime.Scoped).As<IGridModel>();
             builder.RegisterComponentInHierarchy<GridView>().As<IGridView>();
