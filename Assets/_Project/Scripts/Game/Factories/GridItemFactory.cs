@@ -16,15 +16,15 @@ namespace Core.Item.Factories
             _gridConfigContainer = gameplayConfigContainer.GridConfigContainer;
         }
         
-        public T GetItem<T>(GridObjectType typeData) where T : BaseGridObject
+        public T GetItem<T>(GridObjectType type) where T : BaseGridObject
         {
             var itemObject = _objectPoolService.GetObject<T>();
             
             itemObject.ResetItem();
 
-            var configData = _gridConfigContainer.GetConfigData(typeData);
+            var configData = _gridConfigContainer.GetConfigData(type);
             
-            itemObject.Initialize(typeData)
+            itemObject.Initialize(type)
                       .ApplyData(configData);
             
             return itemObject;

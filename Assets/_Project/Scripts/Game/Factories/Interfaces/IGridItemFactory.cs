@@ -4,7 +4,7 @@ namespace Core.Item.Factories
 {
     public interface IGridItemFactory
     {
-        T GetItem<T>(GridObjectType typeData) where T : BaseGridObject;
+        T GetItem<T>(GridObjectType type) where T : BaseGridObject;
         void ReleaseItem(BaseGridObject grid);
         void ReleaseItem(Transform item);
         void ReleaseAllItemsOfType<T>() where T : BaseGridObject;
