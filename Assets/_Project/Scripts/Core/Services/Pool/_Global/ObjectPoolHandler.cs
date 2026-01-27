@@ -11,10 +11,9 @@ namespace Core.Pool
         private readonly GameObject _prefabObj;
         private readonly int _poolCount;
         private readonly Transform _pooledObjectRoot;
-        
         private GameObject _poolParent;
-        public bool IsLazy { get; private set; }
         private Queue<IPooledObject> Pool { get; } = new();
+        public bool IsLazy { get; private set; }
 
         public ObjectPoolHandler(GameObject prefabObj, Transform rootParent, int poolCount, bool isLazy = true)
         {

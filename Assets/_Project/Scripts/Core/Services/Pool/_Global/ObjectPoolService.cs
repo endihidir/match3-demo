@@ -187,13 +187,13 @@ namespace Core.Pool
 
             foreach (var poolAssetConfig in poolData.Distinct())
             {
-                if (!poolAssetConfig.poolObject)
+                if (!poolAssetConfig.PoolObject)
                 {
                     EditorLogger.LogError("There is missing prefab in pool object list!");
                     continue;
                 }
 
-                var isPooledObject = poolAssetConfig.poolObject.TryGetComponent<IPooledObject>(out var pooledObjects);
+                var isPooledObject = poolAssetConfig.PoolObject.TryGetComponent<IPooledObject>(out var pooledObjects);
                 
                 if(!isPooledObject) continue;
                 
@@ -202,9 +202,9 @@ namespace Core.Pool
                 if (_typePoolHandlers.ContainsKey(key)) continue;
                 
                 var size = poolAssetConfig.PoolSize;
-                var isLazy = poolAssetConfig.isLazy;
+                var isLazy = poolAssetConfig.IsLazy;
                 
-                var objectPoolHandler = new ObjectPoolHandler(poolAssetConfig.poolObject, _pooledObjectsParent, size, isLazy);
+                var objectPoolHandler = new ObjectPoolHandler(poolAssetConfig.PoolObject, _pooledObjectsParent, size, isLazy);
                 
                 _typePoolHandlers.Add(key, objectPoolHandler);
             }
@@ -235,13 +235,13 @@ namespace Core.Pool
             return objectPoolHandler;
         }
 
-        private ObjectPoolHandler CreateNewHandler<T>()
+        private ObjectPoolHandler CreateNewHandler<T>() where T : Component, IPooledObject
         {
             var type = typeof(T);
         
             var poolData = _poolServiceConfig.poolDataConfigs;
         
-            var poolAssetConfig = poolData.FirstOrDefault(x => x.poolObject.GetComponent<T>() != null);
+            var poolAssetConfig = poolData.FirstOrDefault(x => x.PoolObject.GetComponent<T>());
 
             if (!poolAssetConfig)
             {
@@ -250,9 +250,9 @@ namespace Core.Pool
             }
 
             var size = poolAssetConfig.PoolSize;
-            var isLazy = poolAssetConfig.isLazy;
+            var isLazy = poolAssetConfig.IsLazy;
         
-            var objectPoolHandler = new ObjectPoolHandler(poolAssetConfig.poolObject, _pooledObjectsParent, size, isLazy).CreatePool();
+            var objectPoolHandler = new ObjectPoolHandler(poolAssetConfig.PoolObject, _pooledObjectsParent, size, isLazy).CreatePool();
             
             _typePoolHandlers.Add(type, objectPoolHandler);
             
