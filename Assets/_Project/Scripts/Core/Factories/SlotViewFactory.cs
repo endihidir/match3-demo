@@ -10,11 +10,10 @@ namespace Core.Item.Factories
 
         public SlotViewFactory(IObjectPoolService objectPoolService) => _objectPoolService = objectPoolService;
 
-        public T GetItem<T>() where T : BaseSlotView => _objectPoolService.GetObject<T>();
-        public void ReleaseItem(BaseSlotView grid) => _objectPoolService.ReturnObject(grid);
-        public void ReleaseItem(Transform item) => _objectPoolService.ReturnObject(item);
-        public void ReleaseAllItemsOfType<T>() where T : BaseSlotView => _objectPoolService.ReturnAllObjectsOfType<T>();
-        public void ReleaseAll() => _objectPoolService.ReturnAllObjectsOfType<BaseSlotView>();
-        public void Remove() => _objectPoolService.RemovePoolOfType<BaseSlotView>();
+        public T GetSlot<T>() where T : BaseSlotView => _objectPoolService.GetObject<T>();
+        public void ReleaseSlot(BaseSlotView grid) => _objectPoolService.ReturnObject(grid);
+        public void ReleaseSlot(Transform item) => _objectPoolService.ReturnObject(item);
+        public void ReleaseSlotsByType<T>() where T : BaseSlotView => _objectPoolService.ReturnObjectsByType<T>();
+        public void RemoveSlotPoolByType<T>() where T : BaseSlotView => _objectPoolService.RemovePoolsByType<T>();
     }
 }
