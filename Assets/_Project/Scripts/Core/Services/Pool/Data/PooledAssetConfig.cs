@@ -1,3 +1,4 @@
+using System.Linq;
 using Core.Pool;
 using NaughtyAttributes;
 using UnityEngine;
@@ -10,9 +11,16 @@ namespace Core.Configs
         [field: SerializeField] public bool IsLazy { get; private set; } = true;
         [field: SerializeField] public int PoolSize {get; private set;}
         
-        [field: SerializeField, Required, ValidateInput(nameof(HasPooledObject), "PoolObject must have a PooledObject component")]
+        [field: SerializeField, Required, ValidateInput(nameof(HasDerivedPooledObject), "It must have a component derived from PooledObject component")]
         public GameObject PoolObject { get; private set; }
         
-        private bool HasPooledObject(GameObject go) => go && go.TryGetComponent<PooledObject>(out _);
+        private bool HasDerivedPooledObject(GameObject go)
+        {
+            if (!go) return true;
+
+            var components = go.GetComponents<PooledObject>();
+
+            return components.Any(comp => comp.GetType() != typeof(PooledObject));
+        }
     }
 }
