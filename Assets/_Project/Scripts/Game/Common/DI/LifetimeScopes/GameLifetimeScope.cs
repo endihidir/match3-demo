@@ -21,15 +21,14 @@ namespace Core.LifetimeScopes
         {
             builder.RegisterInstance(GameplayConfigContainer);
             builder.RegisterEntryPoint<GameplayBootstrapper>();
-            builder.RegisterEntryPoint<GameplayFactoryLifecycle>();
             builder.RegisterEntryPoint<GridPresenter>();
             builder.RegisterEntryPoint<HudPresenter>();
             
             builder.Register<InputService>(Lifetime.Scoped).As<IInputService, ITickable>();
             
-            builder.Register<GridItemFactory>(Lifetime.Scoped).As<IGridItemFactory, IFactoryResettable>();
+            builder.Register<GridItemFactory>(Lifetime.Scoped).As<IGridItemFactory>();
+            builder.Register<GridItemInitializer>(Lifetime.Scoped).As<IInitializable, IGridItemCreator>();
             
-            builder.Register<GridPopulateHandler>(Lifetime.Scoped).As<IGridPopulateHandler>();
             builder.Register<GridModel>(Lifetime.Scoped).As<IGridModel>();
             builder.RegisterComponentInHierarchy<GridView>().As<IGridView>();
             builder.Register<GridStateHandler>(Lifetime.Scoped).As<IGridStateHandler, ITickable, IFixedTickable, ILateTickable>();
