@@ -35,7 +35,7 @@ namespace Core.LifetimeScopes
             builder.Register<ObjectPoolService>(Lifetime.Singleton).As<IObjectPoolService>();
             builder.Register<LevelDataService>(Lifetime.Singleton).As<IInitializable, ILevelDataBootState, ILevelSerializer, ILevelDataReader>();
             builder.Register<JsonSaveService>(Lifetime.Singleton).As<IJsonSaveService>();
-            builder.Register<SlotViewFactory>(Lifetime.Singleton).As<ISlotViewFactory, IFactoryResettable>();
+            builder.Register<SlotViewFactory>(Lifetime.Singleton).As<ISlotViewFactory>();
         }
 
         private static void RegisterProviders(IContainerBuilder builder)

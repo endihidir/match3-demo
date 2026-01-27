@@ -16,6 +16,7 @@ namespace Core.Item.Factories
         void ReleaseItem(Transform item);
         void ReleaseItem(GameObject item) => ReleaseItem(item.transform);
         void ReleaseAllItemsOfType<T>() where T : BaseGridObject;
+        void ReleaseAll();
         void Remove();
     }
 }

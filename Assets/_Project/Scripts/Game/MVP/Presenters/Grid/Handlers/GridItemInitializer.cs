@@ -1,15 +1,23 @@
+using System;
 using Core.Item;
 using Core.Item.Factories;
+using Core.SceneService;
 using Core.Utils;
+using VContainer.Unity;
 
 namespace Core.Handlers
 {
-    public class GridPopulateHandler : IGridPopulateHandler
+    public class GridItemInitializer : IInitializable, IGridItemCreator, IDisposable
     {
         private readonly IGridItemFactory _gridItemFactory;
-        public GridPopulateHandler(IGridItemFactory gridItemFactory) => _gridItemFactory = gridItemFactory;
+        private readonly ISceneLoadState _sceneLoadState;
+        public GridItemInitializer(IGridItemFactory gridItemFactory, ISceneLoadState sceneLoadState)
+        {
+            _gridItemFactory = gridItemFactory;
+            _sceneLoadState = sceneLoadState;
+        }
 
-        public void PopulateGrid(GridObjectType[,] gridObjectTypes, int width, int height, out BaseGridObject[,] itemObjects)
+        public void CreateGridItems(GridObjectType[,] gridObjectTypes, int width, int height, out BaseGridObject[,] itemObjects)
         {
             itemObjects = new BaseGridObject[width, height];
 
@@ -32,5 +40,9 @@ namespace Core.Handlers
             GridItemKind.Obstacle => _gridItemFactory.GetItem<ObstacleObject>(typeData),
             _ => null
         };
+
+        public void Initialize() => _sceneLoadState.OnLoadStart += OnSceneUnload;
+        private void OnSceneUnload() => _gridItemFactory.ReleaseAll();
+        public void Dispose() => _sceneLoadState.OnLoadStart -= OnSceneUnload;
     }
 }
