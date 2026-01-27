@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: BoosterObjectPool
   m_EditorClassIdentifier: 
   <PoolSize>k__BackingField: 24
-  poolObject: {fileID: 1137882702466619365, guid: 91770a36915fd58469edddb3b5bc3780,
+  <IsLazy>k__BackingField: 1
+  <PoolObject>k__BackingField: {fileID: 1137882702466619365, guid: 91770a36915fd58469edddb3b5bc3780,
     type: 3}
-  isLazy: 1
-  isUnique: 0
