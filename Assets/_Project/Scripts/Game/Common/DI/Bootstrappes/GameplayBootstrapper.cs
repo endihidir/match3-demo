@@ -1,6 +1,7 @@
 using System;
+using Core.Extensions;
 using Core.Generated;
-using Core.Handlers;
+using Core.Item.Factories;
 using Core.Level;
 using Core.Models;
 using Core.SceneService;
@@ -15,7 +16,7 @@ namespace Core.Bootstrapper
     {
         [Inject] private readonly ISceneLoadState _sceneLoadState;
         [Inject] private readonly ILevelDefinitionProvider _levelDefinitionProvider;
-        [Inject] private readonly IGridItemPopulator _gridItemPopulator;
+        [Inject] private readonly IGridItemFactory _gridItemFactory;
         [Inject] private readonly IGridModel _gridModel;
         [Inject] private readonly IGridView _gridView;
         [Inject] private readonly IInputService _inputService;
@@ -49,7 +50,7 @@ namespace Core.Bootstrapper
             var gridObjectTypes = _levelDefinitionProvider.GetGridObjectTypes();
             var width = gridObjectTypes.GetLength(0);
             var height = gridObjectTypes.GetLength(1);
-            _gridItemPopulator.PopulateGridItems(gridObjectTypes, width, height, out var gridItemObjects);
+            _gridItemFactory.PopulateGridItems(gridObjectTypes, width, height, out var gridItemObjects);
             _gridModel.Initialize(gridItemObjects, width, height, out var activeCells);
             _gridView.Initialize(width, height, activeCells);
         }
