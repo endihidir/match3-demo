@@ -23,11 +23,10 @@ namespace Core.LifetimeScopes
             builder.RegisterEntryPoint<GameplayBootstrapper>();
             builder.RegisterEntryPoint<GridPresenter>();
             builder.RegisterEntryPoint<HudPresenter>();
+            builder.RegisterEntryPoint<GridItemRecycler>();
             
             builder.Register<InputService>(Lifetime.Scoped).As<IInputService, ITickable>();
-            
             builder.Register<GridItemFactory>(Lifetime.Scoped).As<IGridItemFactory>();
-            builder.Register<GridItemInitializer>(Lifetime.Scoped).As<IInitializable, IGridItemPopulator>();
             
             builder.Register<GridModel>(Lifetime.Scoped).As<IGridModel>();
             builder.RegisterComponentInHierarchy<GridView>().As<IGridView>();
