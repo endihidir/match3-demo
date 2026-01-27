@@ -2,6 +2,7 @@ using UnityEngine;
 
 namespace Core.Pool
 {
+    [DisallowMultipleComponent]
     public class PooledObject : MonoBehaviour, IPooledObject
     {
         public int PoolKey { get; set; }
