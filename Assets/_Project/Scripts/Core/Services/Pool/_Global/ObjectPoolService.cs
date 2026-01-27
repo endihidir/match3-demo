@@ -32,7 +32,7 @@ namespace Core.Pool
             CreateAllCachedPooledObjects();
         }
         
-        public T GetObject<T>(T prefab, bool show = true, int poolCount = 1, bool isLazy = true, bool isUnique = false, bool showLogs = false) where T : Component
+        public T GetObject<T>(T prefab, bool show = true, int poolCount = 1, bool isLazy = true, bool showLogs = false) where T : Component
         {
             var key = prefab.gameObject.GetInstanceID();
             
@@ -44,7 +44,7 @@ namespace Core.Pool
             }
             else
             {
-                objectPoolHandler = CreateNewHandler(prefab, poolCount, isLazy, isUnique);
+                objectPoolHandler = CreateNewHandler(prefab, poolCount, isLazy);
                 
                 var pooledObject = objectPoolHandler.GetObject<T>(show, showLogs);
 
@@ -201,11 +201,10 @@ namespace Core.Pool
                 
                 if (_typePoolHandlers.ContainsKey(key)) continue;
                 
-                var size = poolAssetConfig.GetSize();
+                var size = poolAssetConfig.PoolSize;
                 var isLazy = poolAssetConfig.isLazy;
-                var isUnique = poolAssetConfig.isUnique;
                 
-                var objectPoolHandler = new ObjectPoolHandler(poolAssetConfig.poolObject, _pooledObjectsParent, size, isLazy, isUnique);
+                var objectPoolHandler = new ObjectPoolHandler(poolAssetConfig.poolObject, _pooledObjectsParent, size, isLazy);
                 
                 _typePoolHandlers.Add(key, objectPoolHandler);
             }
@@ -221,13 +220,15 @@ namespace Core.Pool
             }
         }
         
-        private ObjectPoolHandler CreateNewHandler<T>(T prefab, int poolCount, bool isLazy = true, bool isUnique = false) where T : Component
+        private ObjectPoolHandler CreateNewHandler<T>(T prefab, int poolCount, bool isLazy = true) where T : Component
         {
             prefab.GetOrAddComponent<PooledObject>();
-            
-            var objectPoolHandler = new ObjectPoolHandler(prefab.gameObject, _pooledObjectsParent, poolCount, isLazy, isUnique).CreatePool();
 
-            var key = prefab.gameObject.GetInstanceID();
+            var prefabObj = prefab.gameObject;
+            
+            var objectPoolHandler = new ObjectPoolHandler(prefabObj, _pooledObjectsParent, poolCount, isLazy).CreatePool();
+
+            var key = prefabObj.GetInstanceID();
             
             _idPoolHandlers.Add(key, objectPoolHandler);
             
@@ -248,11 +249,10 @@ namespace Core.Pool
                 return null;
             }
 
-            var size = poolAssetConfig.GetSize();
+            var size = poolAssetConfig.PoolSize;
             var isLazy = poolAssetConfig.isLazy;
-            var isUnique = poolAssetConfig.isUnique;
         
-            var objectPoolHandler = new ObjectPoolHandler(poolAssetConfig.poolObject, _pooledObjectsParent, size, isLazy, isUnique).CreatePool();
+            var objectPoolHandler = new ObjectPoolHandler(poolAssetConfig.poolObject, _pooledObjectsParent, size, isLazy).CreatePool();
             
             _typePoolHandlers.Add(type, objectPoolHandler);
             

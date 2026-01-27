@@ -8,31 +8,28 @@ namespace Core.Pool
 {
     public sealed class ObjectPoolHandler
     {
-        private readonly GameObject _prefab;
+        private readonly GameObject _prefabObj;
         private readonly int _poolCount;
         private readonly Transform _pooledObjectRoot;
         
         private GameObject _poolParent;
         public bool IsLazy { get; private set; }
-        public bool IsUnique { get; private set; }
         private Queue<IPooledObject> Pool { get; } = new();
 
-        public ObjectPoolHandler(GameObject prefab, Transform rootParent, int poolCount, bool isLazy = true, bool isUnique = false)
+        public ObjectPoolHandler(GameObject prefabObj, Transform rootParent, int poolCount, bool isLazy = true)
         {
-            _prefab = prefab;
+            _prefabObj = prefabObj;
             _pooledObjectRoot = rootParent;
             _poolCount = poolCount;
-            IsUnique = isUnique;
+            
             IsLazy = isLazy;
             CreatePoolParent();
         }
 
         public ObjectPoolHandler CreatePool()
         {
-            for (int i = 0; i < _poolCount; i++)
-            {
+            for (int i = 0; i < _poolCount; i++) 
                 CreateNewObject(true);
-            }
 
             return this;
         }
@@ -47,29 +44,12 @@ namespace Core.Pool
             
             T component = null;
             
-            if (IsUnique)
+            while (Pool.TryDequeue(out var candidate))
             {
-                if (Pool.TryPeek(out var peeked))
-                {
-                    if (peeked is Component c && !c)
-                    {
-                        ClearPool();
-                    }
-                    else
-                    {
-                        pooledObject = peeked;
-                    }
-                }
-            }
-            else
-            {
-                while (Pool.TryDequeue(out var candidate))
-                {
-                    if (candidate is Component c && !c) continue;
+                if (candidate is Component c && !c) continue;
 
-                    pooledObject = candidate;
-                    break;
-                }
+                pooledObject = candidate;
+                break;
             }
             
             pooledObject ??= GetNewPooledObject();
@@ -115,11 +95,11 @@ namespace Core.Pool
 
         private void CreateNewObject(bool onInitialize)
         {
-            var objClone = Object.Instantiate(_prefab, _poolParent.transform);
+            var objClone = Object.Instantiate(_prefabObj, _poolParent.transform);
             
             var pooledObject = objClone.GetOrAddComponent<PooledObject>();
             
-            pooledObject.PoolKey = _prefab.GetInstanceID();
+            pooledObject.PoolKey = _prefabObj.GetInstanceID();
             
             if (onInitialize) pooledObject.Deactivate();
 
@@ -153,7 +133,7 @@ namespace Core.Pool
 
         private void CreatePoolParent()
         {
-            _poolParent = new GameObject("Pool_" + _prefab.name);
+            _poolParent = new GameObject("Pool_" + _prefabObj.name);
             _poolParent.transform.SetParent(_pooledObjectRoot);
         }
         
