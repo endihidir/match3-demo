@@ -45,7 +45,7 @@ namespace Core.Handlers
             
             var tween = animation.SlideAlongPath(path.Array, length, seg.Array, startTime);
             
-            task = tween.ToUniTask();
+            task = tween?.ToUniTask() ?? UniTask.CompletedTask;
             
             endTime = startTime + animation.GetSlideTimelineDuration(seg.Array, length);
             
