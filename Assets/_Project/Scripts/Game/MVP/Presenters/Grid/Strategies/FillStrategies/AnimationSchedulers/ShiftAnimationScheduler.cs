@@ -26,7 +26,7 @@ namespace Core.Handlers
             
             task = tween?.ToUniTask() ?? UniTask.CompletedTask;
             
-            endTime = startTime + animation.GetShiftTimelineDuration(distCells);
+            endTime = startTime + animation.GetShiftTimelineDelay(distCells);
 
             return true;
         }
