@@ -84,7 +84,7 @@ namespace Core.Item
         public float GetShiftTimelineDuration(float cellDistance)
         {
             var totalTime = Settings.BaseShiftDelay + Settings.BaseShiftDuration + cellDistance * Settings.ShiftDistanceMultiplier;
-            var result = Mathf.Max(0.02f, totalTime - Settings.ShiftEarlyStartSeconds);
+            var result = Mathf.Max(Settings.MinShiftTimelineDuration, totalTime - Settings.ShiftEarlyStartSeconds);
             return result;
         }
         
@@ -113,7 +113,7 @@ namespace Core.Item
             for (int i = 0; i < length; i++)
                 totalTime += Settings.BaseSlideDuration + cellDistances[i] * Settings.SlideDistanceMultiplier;
 
-            var result = Mathf.Max(0.02f, totalTime - Settings.SlideEarlyStartSeconds);
+            var result = Mathf.Max(Settings.MinSlideTimelineDuration, totalTime - Settings.SlideEarlyStartSeconds);
           
             return result;
         }
