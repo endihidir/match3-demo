@@ -1,3 +1,6 @@
+using System.Linq;
+using AYellowpaper.SerializedCollections;
+using Core.Item;
 using NaughtyAttributes;
 using TMPro;
 using UnityEngine;
@@ -8,13 +11,15 @@ namespace Core.UI
     {
         [field: SerializeField] private Transform GoalsHolder { get; set; }
         [field: SerializeField] private TextMeshProUGUI MoveCountTxt { get; set; }
-        [field: SerializeField, ReadOnly] public GoalSlotView[] GoalSlotViews { get; private set; }
+        [field: SerializeField, ReadOnly] public SerializedDictionary<ObstacleType, GoalSlotView> SlotByType { get; private set; }
         
         public void Initialize(GoalSlotView[] goalSlotViews, int moveCount)
         {
-            GoalSlotViews = goalSlotViews;
+            var dict = goalSlotViews.ToDictionary(x => x.ObstacleType);
             
-            foreach (var goalSlotView in GoalSlotViews)
+            SlotByType = new SerializedDictionary<ObstacleType, GoalSlotView>(dict);
+            
+            foreach (var goalSlotView in goalSlotViews)
             {
                 goalSlotView.transform.SetParent(GoalsHolder, false);
             }

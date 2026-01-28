@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using Core.Item;
 using Core.Models;
 using Core.UI;
@@ -27,9 +26,7 @@ namespace Core.Presenters
         
         private void OnGoalCountUpdate(ObstacleType obstacleType, int count)
         {
-            var slotView = _hudView.GoalSlotViews.FirstOrDefault(x => x.ObstacleType == obstacleType);
-
-            if (!slotView)
+            if (!_hudView.SlotByType.TryGetValue(obstacleType, out var slotView))
             {
                 EditorLogger.LogError($"{obstacleType} slot view not found!");
                 return;
