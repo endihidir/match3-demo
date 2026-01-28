@@ -10,10 +10,11 @@ namespace Core.Handlers
 {
     public sealed class GridStateContext
     {
-        public IGridModel Model { get; }
-        public IGridView View { get; }
-        public IGridItemFactory Factory { get; }
-        public GridConfigContainerSO Configs { get; }
+        public IGridModel GridModel { get; }
+        public IGridView GridView { get; }
+        public IGridItemFactory GridItemFactory { get; }
+        public ILevelGoalModel LevelGoalModel { get; }
+        public GridConfigContainerSO GridConfigs { get; }
         public Queue<GridInputSource> Inputs { get; } = new();
         
         public bool HasMergeCenterCoordRequested { get; set; }
@@ -28,12 +29,14 @@ namespace Core.Handlers
         public bool MatchResolveRequested { get; set; }
         public int GroupIdCounter { get; set; }
 
-        public GridStateContext(IGridModel model, IGridView view, IGridItemFactory factory, GridConfigContainerSO configs)
+        public GridStateContext(IGridModel gridModel, IGridView gridView, IGridItemFactory gridItemFactory, ILevelGoalModel levelGoalModel, 
+            GridConfigContainerSO gridConfigs)
         {
-            Model = model;
-            View = view;
-            Factory = factory;
-            Configs = configs;
+            GridModel = gridModel;
+            GridView = gridView;
+            GridItemFactory = gridItemFactory;
+            LevelGoalModel = levelGoalModel;
+            GridConfigs = gridConfigs;
         }
         
         public int NextBoosterGroupId()
@@ -45,8 +48,8 @@ namespace Core.Handlers
         
         public void ReleaseAndSetNull(BaseGridObject sourceObj, Vector2Int sourceCoord)
         {
-            Factory.ReleaseItem(sourceObj);
-            Model.SetGridObject(sourceCoord, null);
+            GridItemFactory.ReleaseItem(sourceObj);
+            GridModel.SetGridObject(sourceCoord, null);
         }
     }
 }

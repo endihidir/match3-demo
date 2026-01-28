@@ -18,9 +18,10 @@ namespace Core.Handlers
         private bool HasPendingBoosterActions => Context.HasPendingBoosterActions;
         private bool MatchResolveRequested => Context.MatchResolveRequested;
 
-        public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory, GameplayConfigContainer configContainer, IFillStrategyResolver fillStrategyResolver)
+        public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory, GameplayConfigContainer configContainer, 
+             ILevelGoalModel levelGoalModel, IFillStrategyResolver fillStrategyResolver)
         {
-            Context = new GridStateContext(model, view, factory, configContainer.GridConfigContainer);
+            Context = new GridStateContext(model, view, factory, levelGoalModel, configContainer.GridConfigContainer);
 
             var idleState = new IdleState(Context);
             var inputState = new InputResolveState(Context);
@@ -63,9 +64,9 @@ namespace Core.Handlers
 
         private bool TryEnqueueTap(Vector2Int sourceCoord)
         {
-            if (!Context.Model.IsInRange(sourceCoord)) return false;
+            if (!Context.GridModel.IsInRange(sourceCoord)) return false;
 
-            var objA = Context.Model.GetGridObject(sourceCoord);
+            var objA = Context.GridModel.GetGridObject(sourceCoord);
             if (!objA) return false;
 
             if (!IsInteractable(objA))
@@ -83,14 +84,14 @@ namespace Core.Handlers
         {
             if (sourceCoord == targetCoord) return false;
             
-            if (!Context.Model.IsInRange(sourceCoord)) return false;
+            if (!Context.GridModel.IsInRange(sourceCoord)) return false;
 
-            var sourceObj = Context.Model.GetGridObject(sourceCoord);
-            var targetObj = Context.Model.GetGridObject(targetCoord);
+            var sourceObj = Context.GridModel.GetGridObject(sourceCoord);
+            var targetObj = Context.GridModel.GetGridObject(targetCoord);
 
             if (!sourceObj) return false;
 
-            if (!targetObj || !Context.Model.IsInRange(targetCoord))
+            if (!targetObj || !Context.GridModel.IsInRange(targetCoord))
             {
                 sourceObj.ItemAnimation.Shake();
                 return false;

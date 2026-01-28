@@ -36,13 +36,13 @@ namespace Core.Handlers
                 Array.Resize(ref _animTasks, _recordCount);
 
             // Reset timelines.
-            var width = context.Model.Width;
+            var width = context.GridModel.Width;
             for (int x = 0; x < width; x++)
                 _timelineByX[x].Time = 0f;
 
             var taskCount = 0;
 
-            var view = context.View;
+            var view = context.GridView;
             ScheduleByTimeline(view, width, passIsSpawn: false, ref taskCount);
             ScheduleByTimeline(view, width, passIsSpawn: true, ref taskCount);
 

@@ -13,8 +13,8 @@ namespace Core.Handlers
 
         private bool SpawnTopOpenSegment(GridStateContext context, int x, int height)
         {
-            var model = context.Model;
-            var view = context.View;
+            var model = context.GridModel;
+            var view = context.GridView;
             var cellSize = view.GetCellSize();
 
             var spawnedAny = false;
@@ -84,7 +84,7 @@ namespace Core.Handlers
                 var target = new Vector2Int(x, startY + i);
 
                 var type = _itemDecider.Decide(model, target);
-                var item = context.Factory.GetRegularItem(type);
+                var item = context.GridItemFactory.GetRegularItem(type);
 
                 item.SetParent(view.GridObjectsParent);
                 item.SetSpriteSize(cellSize);

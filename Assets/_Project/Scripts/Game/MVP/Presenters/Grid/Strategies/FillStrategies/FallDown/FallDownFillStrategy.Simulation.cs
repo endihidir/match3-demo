@@ -34,8 +34,8 @@ namespace Core.Handlers
 
         private void FillColumnLogic(GridStateContext stateContext, int x, int height, float cellSize, float spawnY)
         {
-            var model = stateContext.Model;
-            var view = stateContext.View;
+            var model = stateContext.GridModel;
+            var view = stateContext.GridView;
 
             var stack = 0;
 
@@ -49,7 +49,7 @@ namespace Core.Handlers
                 if(GridFillCalcUtil.HasStationaryAboveInSameSegment(model, coord, false)) continue;
 
                 var itemType = _itemDecider.Decide(model, coord);
-                var item = stateContext.Factory.GetRegularItem(itemType);
+                var item = stateContext.GridItemFactory.GetRegularItem(itemType);
 
                 item.SetParent(view.GridObjectsParent);
                 item.SetSpriteSize(cellSize);
