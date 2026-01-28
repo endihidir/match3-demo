@@ -140,8 +140,6 @@ namespace Core.Handlers
 
         private UniTask ResolveGroupParallelAnimationAsync(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int id)
         {
-            if (GridMatchCalcUtil.IsAnyGroupObjectFall(model, group)) return UniTask.CompletedTask;
-            
             var boosterType = GridMatchBoosterDecision.DecideBoosterTypeFromGroup(model, matchMask, group, id);
 
             if (!boosterType.HasValue)

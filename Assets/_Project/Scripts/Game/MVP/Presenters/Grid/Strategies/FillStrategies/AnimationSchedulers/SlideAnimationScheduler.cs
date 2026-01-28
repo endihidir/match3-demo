@@ -47,7 +47,7 @@ namespace Core.Handlers
             
             task = tween?.ToUniTask() ?? UniTask.CompletedTask;
             
-            endTime = startTime + animation.GetSlideTimelineDelay(seg.Array, length);
+            endTime = startTime + animation.GetSlideDelay();
             
             return true;
         }
