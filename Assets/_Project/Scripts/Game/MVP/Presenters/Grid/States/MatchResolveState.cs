@@ -263,7 +263,9 @@ namespace Core.Handlers
                     continue;
                 }
 
-                tasks[i] = obj.ItemAnimation.MoveTo(targetWorld).ToUniTask();
+                var tween = obj.ItemAnimation.MoveTo(targetWorld);
+
+                tasks[i] = tween?.ToUniTask() ?? UniTask.CompletedTask;
             }
 
             await UniTask.WhenAll(tasks);

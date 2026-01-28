@@ -40,7 +40,9 @@ namespace Core.Item
         protected abstract void OnInitialize();
         protected void UpdateIdentity()
         {
+#if UNITY_EDITOR
             name = ToString();
+#endif
             IsNone = TypeId == 0;
         }
         

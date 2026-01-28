@@ -24,7 +24,7 @@ namespace Core.Handlers
             
             var tween = animation.ShiftTo(finalWorld, distCells, startTime);
             
-            task = tween.ToUniTask();
+            task = tween?.ToUniTask() ?? UniTask.CompletedTask;
             
             endTime = startTime + animation.GetShiftTimelineDuration(distCells);
 
