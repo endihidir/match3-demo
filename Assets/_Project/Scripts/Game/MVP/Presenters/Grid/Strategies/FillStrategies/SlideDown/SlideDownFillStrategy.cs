@@ -23,7 +23,7 @@ namespace Core.Handlers
         {
             ResetWorkspace();
 
-            var model = context.Model;
+            var model = context.GridModel;
 
             EnsureBuffers(model.Width, model.Height);
 

@@ -25,7 +25,7 @@ namespace Core.Handlers
 
         protected override void OnEnter()
         {
-            var model = Context.Model;
+            var model = Context.GridModel;
             var grid = model.BuildGridTypeData();
 
             if (HasAnyMove(model, grid))
@@ -43,7 +43,7 @@ namespace Core.Handlers
 
             try
             {
-                var model = Context.Model;
+                var model = Context.GridModel;
 
                 var count = CollectShuffleCandidates();
                 
@@ -74,7 +74,7 @@ namespace Core.Handlers
                         continue;
                     }
 
-                    var targetPos = Context.View.GridToWorld(obj.Coord);
+                    var targetPos = Context.GridView.GridToWorld(obj.Coord);
                     var tween = obj.ItemAnimation.MoveTo(targetPos, 5f, Ease.InOutQuad);
 
                     _animTasks[i] = tween?.ToUniTask() ?? UniTask.CompletedTask;
@@ -93,7 +93,7 @@ namespace Core.Handlers
 
         private int CollectShuffleCandidates()
         {
-            var model = Context.Model;
+            var model = Context.GridModel;
             var capacity = model.Width * model.Height;
 
             if (_coords.Length < capacity)
@@ -128,7 +128,7 @@ namespace Core.Handlers
                 (_objs[i], _objs[j]) = (_objs[j], _objs[i]);
             }
 
-            var model = Context.Model;
+            var model = Context.GridModel;
 
             for (int i = 0; i < count; i++)
                 model.SetGridObject(_coords[i], _objs[i]);
@@ -136,7 +136,7 @@ namespace Core.Handlers
 
         public bool HasAnyMove()
         {
-            var model = Context.Model;
+            var model = Context.GridModel;
             var grid = model.BuildGridTypeData();
             return HasAnyMove(model, grid);
         }

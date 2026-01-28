@@ -185,6 +185,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85a48e338128407788a73c926ab6de28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <GoalIcon>k__BackingField: {fileID: 4301171992361423469}
+  <GoalCountTxt>k__BackingField: {fileID: 7574754415665464615}
 --- !u!1 &8238262607789857437
 GameObject:
   m_ObjectHideFlags: 0

@@ -13,14 +13,14 @@ namespace Core.Handlers
 
         private bool TryApplyAnyMove(GridStateContext context)
         {
-            var height = context.Model.Height;
-            var width = context.Model.Width;
+            var height = context.GridModel.Height;
+            var width = context.GridModel.Width;
             
             var movedAny = false;
             var movedByGravity = false;
             
-            movedByGravity |= ApplyVerticalFalls(context.Model, width, height);
-            movedByGravity |= ApplyDiagonalSlides(context.Model, width, height);
+            movedByGravity |= ApplyVerticalFalls(context.GridModel, width, height);
+            movedByGravity |= ApplyDiagonalSlides(context.GridModel, width, height);
             
             movedAny |= movedByGravity;
             

@@ -10,24 +10,49 @@ namespace Core.Models
     public class LevelGoalModel : ILevelGoalModel
     {
         private List<LevelGoal> _goals;
-        private int _moveCount;
-        private bool _wasAllGoalsComplete, _wasMoveCountFinished;
         
-        public event Action OnAllGoalsComplete;
-        public event Action OnMoveCountsFinished;
+        private int _moveCount;
         public bool IsAllGoalsComplete => _goals.TrueForAll(x => x.Count <= 0);
         public bool IsMoveCountFinished => _moveCount <= 0;
+        public event Action OnAllGoalsComplete;
+        public event Action<int> OnMoveCountUpdate;
+        public event Action<ObstacleType, int> OnGoalCountUpdate;
 
-        public LevelGoalModel(ILevelDefinitionProvider levelDefinitionProvider)
+        public void Initialize(List<LevelGoal> goals, int moveCount)
         {
-            var levelGoals = levelDefinitionProvider.GetLevelGoals();
-            _goals = new List<LevelGoal>(levelGoals.Count);
-            levelGoals.ForEach(goal => _goals.Add(goal.Clone()));
+            _goals = new List<LevelGoal>(goals.Count);
+            goals.ForEach(goal => _goals.Add(goal.Clone()));
+            _moveCount = moveCount;
+        }
 
-            _moveCount = levelDefinitionProvider.GetMoveCount();
+        public void CountGoal(ObstacleType obstacleType, int count)
+        {
+            if(IsAllGoalsComplete) return;
             
-            _wasAllGoalsComplete = false;
-            _wasMoveCountFinished = false;
+            foreach (var levelGoal in _goals)
+            {
+                if (levelGoal.ObstacleType != obstacleType) continue;
+                
+                if (levelGoal.Count == 0) continue;
+                
+                levelGoal.Count = Mathf.Max(0, levelGoal.Count - count);
+                
+                OnGoalCountUpdate?.Invoke(levelGoal.ObstacleType, levelGoal.Count);
+            }
+
+            if (IsAllGoalsComplete)
+            {
+                OnAllGoalsComplete?.Invoke();
+            }
+        }
+
+        public void DecreaseMoveCount()
+        {
+            if (IsMoveCountFinished) return;
+            
+            _moveCount = Mathf.Max(0, _moveCount - 1);
+            
+            OnMoveCountUpdate?.Invoke(_moveCount);
         }
         
         public bool TryGetGoal(ObstacleType obstacleType, out LevelGoal levelGoal)
@@ -42,37 +67,6 @@ namespace Core.Models
 
             levelGoal = null;
             return false;
-        }
-
-        public void CountGoal(ObstacleType obstacleType, int count)
-        {
-            foreach (var levelGoal in _goals)
-            {
-                if (levelGoal.ObstacleType != obstacleType) continue;
-                
-                if (levelGoal.Count == 0) continue;
-                
-                levelGoal.Count = Mathf.Max(0, levelGoal.Count - count);
-                
-                levelGoal.RaiseGoalStatus();
-            }
-
-            if (IsAllGoalsComplete && !_wasAllGoalsComplete)
-            {
-                _wasMoveCountFinished = true;
-                OnAllGoalsComplete?.Invoke();
-            }
-        }
-
-        public void DecreaseMoveCount()
-        {
-            _moveCount = Mathf.Max(0, _moveCount - 1);
-
-            if (IsMoveCountFinished && !_wasMoveCountFinished)
-            {
-                _wasMoveCountFinished = true;
-                OnMoveCountsFinished?.Invoke();
-            }
         }
     }
 }

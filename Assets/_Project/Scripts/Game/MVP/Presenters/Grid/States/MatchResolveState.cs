@@ -31,7 +31,7 @@ namespace Core.Handlers
 
         private async UniTask ResolveMatchesAsync()
         {
-            if (GridMatchMaskBuilder.TryBuildMatchMask(Context.Model, out var matchMask))
+            if (GridMatchMaskBuilder.TryBuildMatchMask(Context.GridModel, out var matchMask))
             {
                 await ResolveMaskAsync(matchMask);
             }
@@ -41,7 +41,7 @@ namespace Core.Handlers
 
         private async UniTask ResolveMaskAsync(bool[,] matchMask)
         {
-            var model = Context.Model;
+            var model = Context.GridModel;
             var width = model.Width;
             var height = model.Height;
 
@@ -144,7 +144,7 @@ namespace Core.Handlers
 
             if (!boosterType.HasValue)
             {
-                ReleaseGroup(model, group, true);
+                ReleaseGroup(model, group);
                 return UniTask.CompletedTask;
             }
 
@@ -171,7 +171,7 @@ namespace Core.Handlers
 
             if (centerObj)
             {
-                Context.Factory.ReleaseItem(centerObj);
+                Context.GridItemFactory.ReleaseItem(centerObj);
             }
             
             SpawnBooster(centerCoord, boosterValue);
@@ -204,21 +204,19 @@ namespace Core.Handlers
             {
                 if (!obj) continue;
 
-                Context.Factory.ReleaseItem(obj);
+                Context.GridItemFactory.ReleaseItem(obj);
             }
         }
 
-        private void ReleaseGroup(IGridModel model, List<Vector2Int> group, bool hasDamage = false, Vector2Int? exceptCoord = null)
+        private void ReleaseGroup(IGridModel model, List<Vector2Int> group)
         {
             foreach (var coord in group)
             {
-                if (exceptCoord.HasValue && coord == exceptCoord.Value) continue;
-
                 var obj = model.GetGridObject(coord);
 
                 if (!obj) continue;
 
-                if (hasDamage) ApplyNeighbourDamage(model, coord);
+                ApplyNeighbourDamage(model, coord);
 
                 Context.ReleaseAndSetNull(obj, coord);
             }
@@ -234,20 +232,20 @@ namespace Core.Handlers
 
                 if (!obj) continue;
 
-                if (obj is not IDamageableItem damageable) continue;
+                if (obj is not IDamageableItem damageableItem) continue;
 
-                var result = damageable.TakeDamage(1, DamageSource.Match);
+                var result = damageableItem.TakeDamage(1, DamageSource.Match);
 
                 if (result == DamageResult.Destroyed)
                 {
-                    Context.ReleaseAndSetNull(obj, neighbourCoord);
+                    Context.LevelGoalModel.CountGoal(damageableItem.ObstacleType, 1);
                 }
             }
         }
 
         private async UniTask PlayMergeAnimationAsync(BaseGridObject[] mergeObjs, Vector2Int centerCoord)
         {
-            var targetWorld = Context.View.GridToWorld(centerCoord);
+            var targetWorld = Context.GridView.GridToWorld(centerCoord);
 
             var tasks = new UniTask[mergeObjs.Length];
 
@@ -271,11 +269,11 @@ namespace Core.Handlers
 
         private void SpawnBooster(Vector2Int pos, BoosterType boosterType)
         {
-            var booster = Context.Factory.GetBoosterItem(boosterType);
-            Context.Model.SetGridObject(pos, booster);
-            booster.SetPosition(Context.View.GridToWorld(pos));
-            booster.SetSpriteSize(Context.View.GetCellSize());
-            booster.SetParent(Context.View.GridObjectsParent);
+            var booster = Context.GridItemFactory.GetBoosterItem(boosterType);
+            Context.GridModel.SetGridObject(pos, booster);
+            booster.SetPosition(Context.GridView.GridToWorld(pos));
+            booster.SetSpriteSize(Context.GridView.GetCellSize());
+            booster.SetParent(Context.GridView.GridObjectsParent);
         }
     }
 }

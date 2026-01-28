@@ -9,8 +9,6 @@ namespace Core.Level
     {
         [field: SerializeField] public int Count { get; set; }
         [field: SerializeField] public ObstacleType ObstacleType { get; set; }
-        public event Action<int> OnGoalUpdated;
-        public void RaiseGoalStatus() => OnGoalUpdated?.Invoke(Count);
         public LevelGoal Clone()
         {
             return new LevelGoal

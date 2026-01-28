@@ -8,8 +8,8 @@ namespace Core.Handlers
     {
         private UniTask PlayAnimations(GridStateContext context)
         {
-            var view = context.View;
-            var width = context.Model.Width;
+            var view = context.GridView;
+            var width = context.GridModel.Width;
 
             if (_animTasks.Length < _recordCount)
                 Array.Resize(ref _animTasks, _recordCount);

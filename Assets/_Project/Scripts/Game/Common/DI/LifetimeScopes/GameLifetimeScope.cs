@@ -21,27 +21,33 @@ namespace Core.LifetimeScopes
         {
             builder.RegisterInstance(GameplayConfigContainer);
             builder.RegisterEntryPoint<GameplayBootstrapper>();
-            builder.RegisterEntryPoint<GridPresenter>();
-            builder.RegisterEntryPoint<HudPresenter>();
-            builder.RegisterEntryPoint<GridItemRecycler>();
             
             builder.Register<InputService>(Lifetime.Scoped).As<IInputService, ITickable>();
+            
+            // HUD SERVICES
+            builder.Register<GoalSlotFactory>(Lifetime.Scoped).As<IGoalSlotFactory>();
+            
+            builder.Register<LevelGoalModel>(Lifetime.Scoped).As<ILevelGoalModel>();
+            builder.RegisterComponentInHierarchy<HudView>().As<IHudView>();
+            builder.RegisterEntryPoint<HudPresenter>();
+            
+            // GRID SERVICES
+            builder.Register<GridCheatHandler>(Lifetime.Scoped).As<IGridCheatHandler, ITickable>();
+            
+            builder.RegisterEntryPoint<GridItemRecycler>();
             builder.Register<GridItemFactory>(Lifetime.Scoped).As<IGridItemFactory>();
             
             builder.Register<GridModel>(Lifetime.Scoped).As<IGridModel>();
             builder.RegisterComponentInHierarchy<GridView>().As<IGridView>();
-            builder.Register<GridStateHandler>(Lifetime.Scoped).As<IGridStateHandler, ITickable, IFixedTickable, ILateTickable>();
-            builder.Register<GridCheatHandler>(Lifetime.Scoped).As<IGridCheatHandler, ITickable>();
-
-            builder.Register<LevelGoalModel>(Lifetime.Scoped).As<ILevelGoalModel>();
-            builder.RegisterComponentInHierarchy<HudView>().As<IHudView>();
+            builder.RegisterEntryPoint<GridPresenter>();
             
-            builder.Register<FillStrategyResolver>(Lifetime.Scoped).As<IFillStrategyResolver>();
-            builder.Register<FallDownFillStrategy>(Lifetime.Scoped).As<IFillStrategy>();
-            builder.Register<SlideDownFillStrategy>(Lifetime.Scoped).As<IFillStrategy>();
             builder.Register<ShiftAnimationScheduler>(Lifetime.Scoped).As<IShiftAnimationScheduler>();
             builder.Register<SlideAnimationScheduler>(Lifetime.Scoped).As<ISlideAnimationScheduler>();
             builder.Register<FillItemDecider>(Lifetime.Scoped).As<IFillItemDecider>();
+            builder.Register<FallDownFillStrategy>(Lifetime.Scoped).As<IFillStrategy>();
+            builder.Register<SlideDownFillStrategy>(Lifetime.Scoped).As<IFillStrategy>();
+            builder.Register<FillStrategyResolver>(Lifetime.Scoped).As<IFillStrategyResolver>();
+            builder.Register<GridStateHandler>(Lifetime.Scoped).As<IGridStateHandler, ITickable, IFixedTickable, ILateTickable>();
         }
     }
 }

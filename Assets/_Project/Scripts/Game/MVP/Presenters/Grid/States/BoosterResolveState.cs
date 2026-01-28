@@ -22,8 +22,8 @@ namespace Core.Handlers
         
         private void ApplyPendingActions()
         {
-            var model = Context.Model;
-            var view = Context.View;
+            var model = Context.GridModel;
+            var view = Context.GridView;
             MarkPendingActions(model, out var markData);
             ApplyMarkedActions(model, view, markData);
         }
@@ -111,14 +111,14 @@ namespace Core.Handlers
 
                     if (data.Remove)
                     {
-                        Context.ReleaseAndSetNull(obj, coord);
-                        
                         if (obj is IBoosterActionSource source)
                         {
                             // TODO: play booster effect!
                         }
 
                         // TODO: play destroy effect!
+                     
+                        Context.ReleaseAndSetNull(obj, coord);
                         continue;
                     }
 
@@ -132,14 +132,16 @@ namespace Core.Handlers
                         }
                         else if (damageResult == DamageResult.Destroyed)
                         {
-                            Context.ReleaseAndSetNull(obj, coord);
-                            
                             if (obj is IBoosterActionSource source)
                             {
                                 // TODO: play booster effect!
                             }
                             
                             // TODO: play destroy effect!
+                            
+                            Context.LevelGoalModel.CountGoal(damageableItem.ObstacleType, 1);
+                            
+                            Context.ReleaseAndSetNull(obj, coord);
                         }
                         continue;
                     }

@@ -20,8 +20,8 @@ namespace Core.Handlers
         {
             _recordCount = 0;
 
-            var model = context.Model;
-            var view = context.View;
+            var model = context.GridModel;
+            var view = context.GridView;
 
             var width = model.Width;
             var height = model.Height;

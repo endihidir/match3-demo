@@ -49,12 +49,12 @@ namespace Core.Handlers
         {
             if (!TryGetContext(out var context)) return;
 
-            for (int x = 0; x < context.Model.Width; x++)
+            for (int x = 0; x < context.GridModel.Width; x++)
             {
-                for (int y = 0; y < context.Model.Height; y++)
+                for (int y = 0; y < context.GridModel.Height; y++)
                 {
                     var coord = new Vector2Int(x, y);
-                    if (context.Model.GetGridObject(coord) is T)
+                    if (context.GridModel.GetGridObject(coord) is T)
                     {
                         ClearCell(context, coord);
                         ForceRefill();
@@ -70,7 +70,7 @@ namespace Core.Handlers
             var coord = GetMouseGridCoord(context);
             ClearCell(context, coord);
 
-            var obstacle = context.Factory.GetRegularItem(type);
+            var obstacle = context.GridItemFactory.GetRegularItem(type);
             PlaceItem(context, coord, obstacle);
         }
 
@@ -81,7 +81,7 @@ namespace Core.Handlers
             var coord = GetMouseGridCoord(context);
             ClearCell(context, coord);
 
-            var booster = context.Factory.GetBoosterItem(type);
+            var booster = context.GridItemFactory.GetBoosterItem(type);
             PlaceItem(context, coord, booster);
         }
 
@@ -92,7 +92,7 @@ namespace Core.Handlers
             var coord = GetMouseGridCoord(context);
             ClearCell(context, coord);
 
-            var obstacle = context.Factory.GetObstacleItem(type);
+            var obstacle = context.GridItemFactory.GetObstacleItem(type);
             PlaceItem(context, coord, obstacle);
         }
 
@@ -114,13 +114,13 @@ namespace Core.Handlers
 
         private Vector2Int GetMouseGridCoord(GridStateContext context)
         {
-            var screen = context.View.ScreenToGridCoordinate(Input.mousePosition);
-            return context.View.InputToGridDirection(screen);
+            var screen = context.GridView.ScreenToGridCoordinate(Input.mousePosition);
+            return context.GridView.InputToGridDirection(screen);
         }
 
         private void ClearCell(GridStateContext context, Vector2Int coord)
         {
-            var obj = context.Model.GetGridObject(coord);
+            var obj = context.GridModel.GetGridObject(coord);
             if (!obj) return;
 
             context.ReleaseAndSetNull(obj, coord);
@@ -128,10 +128,10 @@ namespace Core.Handlers
 
         private void PlaceItem(GridStateContext context, Vector2Int coord, BaseGridObject item)
         {
-            context.Model.SetGridObject(coord, item);
-            item.SetPosition(context.View.GridToWorld(coord));
-            item.SetSpriteSize(context.View.GetCellSize());
-            item.SetParent(context.View.GridObjectsParent);
+            context.GridModel.SetGridObject(coord, item);
+            item.SetPosition(context.GridView.GridToWorld(coord));
+            item.SetSpriteSize(context.GridView.GetCellSize());
+            item.SetParent(context.GridView.GridObjectsParent);
         }
     }
 }

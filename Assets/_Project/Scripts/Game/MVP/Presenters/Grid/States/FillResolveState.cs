@@ -36,7 +36,7 @@ namespace Core.Handlers
 
                 if (runId != _runId) return;
             
-                var strategy = _strategyResolver.ResolveStrategy(Context.Model);
+                var strategy = _strategyResolver.ResolveStrategy(Context.GridModel);
             
                 if (strategy == null)
                 {   
@@ -48,7 +48,7 @@ namespace Core.Handlers
             
                 if (runId != _runId) return;
                 
-                Context.MatchResolveRequested = GridMatchCalcUtil.HasAnyRegularMatchOnBoard(Context.Model);
+                Context.MatchResolveRequested = GridMatchCalcUtil.HasAnyRegularMatchOnBoard(Context.GridModel);
             }
             finally
             {
