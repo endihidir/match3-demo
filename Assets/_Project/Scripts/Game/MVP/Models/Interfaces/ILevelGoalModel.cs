@@ -11,7 +11,7 @@ namespace Core.Models
         event Action<int> OnMoveCountUpdate;
         event Action<ObstacleType,int> OnGoalCountUpdate;
         bool IsAllGoalsComplete { get; }
-        bool IsMoveCountFinished { get; }
+        bool IsAllMovesFinished { get; }
         void Initialize(List<LevelGoal> goals, int moveCount);
         void CountGoal(ObstacleType obstacleType, int count);
         void DecreaseMoveCount();
