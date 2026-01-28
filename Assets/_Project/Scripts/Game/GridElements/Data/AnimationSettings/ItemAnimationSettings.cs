@@ -9,13 +9,11 @@ namespace Core.Config
         [field: SerializeField, Header("SHIFT SETTINGS")] public float BaseShiftDuration { get; private set; } = 0.15f;
         [field: SerializeField] public float BaseShiftDelay { get; private set; } = 0.1f;
         [field: SerializeField] public float ShiftDistanceMultiplier { get; private set; } = 0.05f;
-        [field: SerializeField] public float ShiftEarlyStartSeconds { get; private set; } = 0.05f;
-        [field: SerializeField] public float MinShiftTimelineDelay { get; private set; } = 0.03f;
+        [field: SerializeField] public float ShiftDelay { get; private set; } = 0.03f;
         [field: SerializeField, Header("SLIDE SETTINGS")] public float BaseSlideDuration { get; private set; } = 0.15f;
         [field: SerializeField] public float BaseSlideDelay { get; private set; } = 0.1f;
         [field: SerializeField] public float SlideDistanceMultiplier { get; private set; } = 0.05f;
-        [field: SerializeField] public float SlideEarlyStartSeconds { get; private set; } = 0.1f;
-        [field: SerializeField] public float MinSlideTimelineDelay { get; private set; } = 0.1f;
+        [field: SerializeField] public float SlideDelay { get; private set; } = 0.1f;
         [field: SerializeField, Header("MOVE SETTINGS")] public float BaseMoveDuration { get; private set; } = 0.15f;
         [field: SerializeField] public float BasePingPongDuration { get; private set; } = 0.15f;
         [field: SerializeField, Header("SHAKE SETTINGS")] public float ShakeDuration { get; private set; } = 0.25f;

@@ -81,13 +81,8 @@ namespace Core.Item
             return _shiftTween;
         }
         
-        public float GetShiftTimelineDelay(float cellDistance)
-        {
-            var totalTime = Settings.BaseShiftDelay + Settings.BaseShiftDuration + cellDistance * Settings.ShiftDistanceMultiplier;
-            var result = Mathf.Max(Settings.MinShiftTimelineDelay, totalTime - Settings.ShiftEarlyStartSeconds);
-            return result;
-        }
-        
+        public float GetShiftDelay() => Settings.ShiftDelay;
+
         public Tween SlideAlongPath(Vector3[] points, int length, float[] cellDistances, float delay = 0f)
         {
             KillMovementTweens();
@@ -106,17 +101,7 @@ namespace Core.Item
             return _slideTween;
         }
         
-        public float GetSlideTimelineDelay(float[] cellDistances, int length)
-        {
-            var totalTime = Settings.BaseSlideDelay;
-            
-            for (int i = 0; i < length; i++)
-                totalTime += Settings.BaseSlideDuration + cellDistances[i] * Settings.SlideDistanceMultiplier;
-
-            var result = Mathf.Max(Settings.MinSlideTimelineDelay, totalTime - Settings.SlideEarlyStartSeconds);
-          
-            return result;
-        }
+        public float GetSlideDelay() => Settings.SlideDelay;
 
         public Tween PingPongMove(Vector3 defaultPos, Vector3 targetPos)
         {
