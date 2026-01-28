@@ -81,10 +81,10 @@ namespace Core.Item
             return _shiftTween;
         }
         
-        public float GetShiftTimelineDuration(float cellDistance)
+        public float GetShiftTimelineDelay(float cellDistance)
         {
             var totalTime = Settings.BaseShiftDelay + Settings.BaseShiftDuration + cellDistance * Settings.ShiftDistanceMultiplier;
-            var result = Mathf.Max(Settings.MinShiftTimelineDuration, totalTime - Settings.ShiftEarlyStartSeconds);
+            var result = Mathf.Max(Settings.MinShiftTimelineDelay, totalTime - Settings.ShiftEarlyStartSeconds);
             return result;
         }
         
@@ -106,14 +106,14 @@ namespace Core.Item
             return _slideTween;
         }
         
-        public float GetSlideTimelineDuration(float[] cellDistances, int length)
+        public float GetSlideTimelineDelay(float[] cellDistances, int length)
         {
             var totalTime = Settings.BaseSlideDelay;
             
             for (int i = 0; i < length; i++)
                 totalTime += Settings.BaseSlideDuration + cellDistances[i] * Settings.SlideDistanceMultiplier;
 
-            var result = Mathf.Max(Settings.MinSlideTimelineDuration, totalTime - Settings.SlideEarlyStartSeconds);
+            var result = Mathf.Max(Settings.MinSlideTimelineDelay, totalTime - Settings.SlideEarlyStartSeconds);
           
             return result;
         }

@@ -17,10 +17,12 @@ MonoBehaviour:
   <BaseShiftDelay>k__BackingField: 0.1
   <ShiftDistanceMultiplier>k__BackingField: 0.05
   <ShiftEarlyStartSeconds>k__BackingField: 1.6
+  <MinShiftTimelineDuration>k__BackingField: 0.03
   <BaseSlideDuration>k__BackingField: 0.06
   <BaseSlideDelay>k__BackingField: 0.1
   <SlideDistanceMultiplier>k__BackingField: 0.05
   <SlideEarlyStartSeconds>k__BackingField: 1.2
+  <MinSlideTimelineDuration>k__BackingField: 0.1
   <BaseMoveDuration>k__BackingField: 0.15
   <BasePingPongDuration>k__BackingField: 0.15
   <ShakeDuration>k__BackingField: 0.25
