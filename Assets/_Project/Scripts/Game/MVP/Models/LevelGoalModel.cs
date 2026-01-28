@@ -42,13 +42,12 @@ namespace Core.Models
                 _totalGoalCount -= removed;
 
                 OnGoalCountUpdate?.Invoke(levelGoal.ObstacleType, levelGoal.Count);
+                break;
+            }
 
-                if (_totalGoalCount > 0) continue;
-                
-                _totalGoalCount = 0;
-                
+            if (IsAllGoalsComplete)
+            {
                 OnAllGoalsComplete?.Invoke();
-                return;
             }
         }
 
