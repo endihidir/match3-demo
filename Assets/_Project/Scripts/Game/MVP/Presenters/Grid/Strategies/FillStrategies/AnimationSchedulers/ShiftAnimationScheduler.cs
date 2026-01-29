@@ -20,7 +20,7 @@ namespace Core.Handlers
             
             var distCells = Mathf.Abs(finalWorld.y - startWorld.y) / view.GetCellSize();
 
-            var animation = record.Item.ItemAnimation;
+            var animation = record.Item.Animation;
             
             var tween = animation.ShiftTo(finalWorld, distCells, startTime);
             

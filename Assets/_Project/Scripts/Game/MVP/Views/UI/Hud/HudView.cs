@@ -10,14 +10,13 @@ namespace Core.UI
     public class HudView : MonoBehaviour, IHudView
     {
         [field: SerializeField] private Transform GoalsHolder { get; set; }
+        [field: SerializeField] public Transform GoalFxHolder { get; set; }
         [field: SerializeField] private TextMeshProUGUI MoveCountTxt { get; set; }
         [field: SerializeField, ReadOnly] public SerializedDictionary<ObstacleType, GoalSlotView> SlotByType { get; private set; }
         
         public void Initialize(GoalSlotView[] goalSlotViews, int moveCount)
         {
-            var dict = goalSlotViews.ToDictionary(x => x.ObstacleType);
-            
-            SlotByType = new SerializedDictionary<ObstacleType, GoalSlotView>(dict);
+            SlotByType = new SerializedDictionary<ObstacleType, GoalSlotView>(goalSlotViews.ToDictionary(x => x.ObstacleType));
             
             foreach (var goalSlotView in goalSlotViews)
             {
@@ -27,9 +26,6 @@ namespace Core.UI
             SetMoveCount(moveCount);
         }
         
-        public void SetMoveCount(int moveCount)
-        {
-            MoveCountTxt.SetText(moveCount.ToString());
-        }
+        public void SetMoveCount(int moveCount) => MoveCountTxt.SetText(moveCount.ToString());
     }
 }

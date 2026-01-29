@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Core.Item
 {
-    public class ItemAnimation : MonoBehaviour
+    public class GridObjectAnimation : MonoBehaviour
     {
         [field: SerializeField] private ItemAnimationSettings Settings { get; set; }
         [field: SerializeField] private Transform ItemHolder { get; set; }

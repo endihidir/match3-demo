@@ -8,5 +8,6 @@ namespace Core.Config
     {
         [field: SerializeField] public int Life { get; private set; }
         [field: SerializeField] public DamageSource DamageSource { get; private set; }
+        [field: SerializeField] public bool IsCollectible { get; private set; }
     }
 }

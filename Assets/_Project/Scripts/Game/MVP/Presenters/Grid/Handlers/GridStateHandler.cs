@@ -71,7 +71,7 @@ namespace Core.Handlers
 
             if (!IsInteractable(objA))
             {
-                objA.ItemAnimation.Shake();
+                objA.Animation.Shake();
                 return false;
             }
 
@@ -93,18 +93,19 @@ namespace Core.Handlers
 
             if (!targetObj || !Context.GridModel.IsInRange(targetCoord))
             {
-                sourceObj.ItemAnimation.Shake();
+                sourceObj.Animation.Shake();
                 return false;
             }
 
             if (!IsInteractable(sourceObj) || !IsInteractable(targetObj) || 
                 !IsSwapCandidate(sourceObj) || !IsSwapCandidate(targetObj))
             {
-                sourceObj.ItemAnimation.Shake();
+                sourceObj.Animation.Shake();
                 return false;
             }
 
-            Context.Inputs.Enqueue(new GridInputSource(GridInputType.Swap, sourceCoord, targetCoord));
+            var inputSource = new GridInputSource(GridInputType.Swap, sourceCoord, targetCoord);
+            Context.Inputs.Enqueue(inputSource);
             return true;
         }
         

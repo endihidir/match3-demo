@@ -36,6 +36,9 @@ namespace Core.LifetimeScopes
             builder.Register<LevelDataService>(Lifetime.Singleton).As<IInitializable, ILevelDataBootState, ILevelSerializer, ILevelDataReader>();
             builder.Register<JsonSaveService>(Lifetime.Singleton).As<IJsonSaveService>();
             builder.Register<SlotViewFactory>(Lifetime.Singleton).As<ISlotViewFactory>();
+            builder.Register<FXViewFactory>(Lifetime.Singleton).As<IFXViewFactory>();
+            builder.Register<AnimatedFXViewFactory>(Lifetime.Singleton).As<IAnimatedFXViewFactory>();
+            builder.Register<ParticleFXViewFactory>(Lifetime.Singleton).As<IParticleFXViewFactory>();
         }
 
         private static void RegisterProviders(IContainerBuilder builder)

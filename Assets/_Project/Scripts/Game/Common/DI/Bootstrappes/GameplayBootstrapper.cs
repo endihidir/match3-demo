@@ -71,9 +71,9 @@ namespace Core.Bootstrapper
         private void DisableInput() => _inputService.Disable();
         
         private void OnAllGoalsComplete() => DisableInput();
-        private void OnMoveCountUpdate(int moveCount)
+        private void OnMoveCountUpdate()
         {
-            if (moveCount > 0) return;
+            if (_levelGoalModel.MoveCount > 0) return;
             
             DisableInput();
         }

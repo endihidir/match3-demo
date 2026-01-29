@@ -34,9 +34,9 @@ namespace Core.Item
             return Life <= 0 ? DamageResult.Destroyed : DamageResult.Damaged;
         }
 
-        public override void Deactivate()
+        protected override void OnDespawned()
         {
-            base.Deactivate();
+            base.OnDespawned();
             ObstacleType = (ObstacleType)TypeId;
             Life = 0;
             UpdateIdentity();

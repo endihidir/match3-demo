@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 85d1cd021bdc484e81ee8f2723d6df97, type: 3}
-  m_Name: GoalSlotView
+  m_Name: ObstacleFxViewPool
   m_EditorClassIdentifier: 
   <IsLazy>k__BackingField: 1
-  <PoolSize>k__BackingField: 2
-  <PoolObject>k__BackingField: {fileID: 6996242838893979593, guid: 5cadbd2821c7bd44f8b71856632778e4,
+  <PoolSize>k__BackingField: 5
+  <PoolObject>k__BackingField: {fileID: 6877316281403719742, guid: 430e8b260a89bbc44af216af56513654,
     type: 3}

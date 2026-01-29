@@ -14,9 +14,9 @@ namespace Core.Item
             BoosterType = (BoosterType)TypeId;
         }
 
-        public override void Deactivate()
+        protected override void OnDespawned()
         {
-            base.Deactivate();
+            base.OnDespawned();
             BoosterType = (BoosterType)TypeId;
             UpdateIdentity();
         }

@@ -156,13 +156,23 @@ namespace Core.Handlers
 
             var boosterValue = boosterType.Value;
 
-            GridMatchCalcUtil.SetNullMergedObjectCoords(model, group, centerCoord);
-            
             var centerObj = model.GetGridObject(centerCoord);
             
-            model.SetGridObject(centerCoord, null);
+            SetNullMergedObjectCoords(model, group);
             
             return PlayMergeAnimationAsync(mergeObjs, centerCoord).ContinueWith(() => OnMergeComplete(mergeObjs, centerObj, centerCoord, boosterValue));
+        }
+        
+        private void SetNullMergedObjectCoords(IGridModel model, List<Vector2Int> group)
+        {
+            foreach (var coord in group)
+            {
+                ApplyNeighbourDamage(model, coord);
+                
+                model.SetGridObject(coord, null);
+            }
+            
+            Context.RaiseGoalCountComplete();
         }
 
         private void OnMergeComplete(BaseGridObject[] mergeObjs, BaseGridObject centerObj, Vector2Int centerCoord, BoosterType boosterValue)
@@ -220,6 +230,8 @@ namespace Core.Handlers
 
                 Context.ReleaseAndSetNull(obj, coord);
             }
+            
+            Context.RaiseGoalCountComplete();
         }
 
         private void ApplyNeighbourDamage(IGridModel model, Vector2Int origin)
@@ -238,7 +250,9 @@ namespace Core.Handlers
 
                 if (result == DamageResult.Destroyed)
                 {
-                    Context.LevelGoalModel.CountGoal(damageableItem.ObstacleType, 1);
+                    Context.CountGoal(damageableItem.ObstacleType, obj.Coord, obj.SpriteRenderer.size);
+                    
+                    Context.ReleaseAndSetNull(obj, obj.Coord);
                 }
             }
         }
@@ -259,7 +273,7 @@ namespace Core.Handlers
                     continue;
                 }
 
-                var tween = obj.ItemAnimation.MoveTo(targetWorld);
+                var tween = obj.Animation.MoveTo(targetWorld);
 
                 tasks[i] = tween?.ToUniTask() ?? UniTask.CompletedTask;
             }

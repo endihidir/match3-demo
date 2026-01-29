@@ -54,7 +54,7 @@ namespace Core.Handlers
 
             if (sourceObj is not BoosterObject booster)
             {
-                sourceObj.ItemAnimation.Shake();
+                sourceObj.Animation.Shake();
                 onComplete?.Invoke();
                 return false;
             }
@@ -104,8 +104,8 @@ namespace Core.Handlers
             var sourcePos = Context.GridView.GridToWorld(sourceCoord);
             var targetPos = Context.GridView.GridToWorld(targetCoord);
             
-            _ = sourceObj.ItemAnimation.PingPongMove(sourcePos, targetPos);
-            await targetObj.ItemAnimation.PingPongMove(targetPos, sourcePos);
+            _ = sourceObj.Animation.PingPongMove(sourcePos, targetPos);
+            await targetObj.Animation.PingPongMove(targetPos, sourcePos);
            
             onComplete?.Invoke();
         }
@@ -122,10 +122,10 @@ namespace Core.Handlers
             
             if(sourceObj.ItemKind == GridItemKind.Regular || targetObj.ItemKind == GridItemKind.Regular)
             {
-                _ = targetObj.ItemAnimation.MoveTo(sourcePos);
+                _ = targetObj.Animation.MoveTo(sourcePos);
             }
 
-            await sourceObj.ItemAnimation.MoveTo(targetPos);
+            await sourceObj.Animation.MoveTo(targetPos);
 
             Context.GridModel.Swap(sourceCoord, targetCoord);
             
