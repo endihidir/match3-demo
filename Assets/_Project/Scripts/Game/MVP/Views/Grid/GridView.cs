@@ -1,6 +1,7 @@
 using System;
 using Core.Config;
 using Core.Extensions;
+using Core.Utils;
 using NaughtyAttributes;
 using UnityEngine;
 using GridLayout = Core.Grid.GridLayout;
@@ -12,6 +13,7 @@ namespace Core.Views
         [field: SerializeField, ReadOnly] public bool IsInitialized { get; private set; }
         [field: SerializeField, ReadOnly] public GridLayout Layout { get; private set; }
         [field: SerializeField] public Camera Cam { get; private set; }
+        [field: SerializeField] public Canvas Canvas { get; private set; }
         [field: SerializeField] public Transform GridRoot { get; private set; }
         [field: SerializeField] public Transform GridObjectsParent { get; private set; }
         [field: SerializeField] public MeshFilter GridMeshFilter { get; private set; }
@@ -75,7 +77,13 @@ namespace Core.Views
         }
         public Vector3 GridToWorld(Vector2Int itemCoordinate) => Layout.GridToWorld(_gridSize, itemCoordinate, Cam);
         public Vector2Int WorldToGrid(Vector3 worldPosition) => Layout.WorldToGrid(_gridSize, worldPosition, Cam);
-        
+        public Vector3 GridToScreen(Vector2Int itemCoordinate)
+        {
+            var worldPos = Layout.GridToWorld(_gridSize, itemCoordinate, Cam);
+            return Cam.WorldToScreenPoint(worldPos);
+        }
+        public Vector2 SpriteToUISize(Vector2 spriteSize) => UIWorldSpaceUtils.WorldSizeToUISize(spriteSize, Cam, Canvas);
+
         public Vector2Int InputToGridDirection(Vector2Int inputDirection)
         {
             if (inputDirection == Vector2Int.up) return Vector2Int.down;

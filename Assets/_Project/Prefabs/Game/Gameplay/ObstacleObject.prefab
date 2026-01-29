@@ -69,15 +69,9 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 4015578566053369887, guid: 3f9c05147c79b82489141297fcbe3189,
         type: 3}
-      insertIndex: 2
+      insertIndex: -1
       addedObject: {fileID: 6421757045523901885}
   m_SourcePrefab: {fileID: 100100000, guid: 3f9c05147c79b82489141297fcbe3189, type: 3}
---- !u!61 &1332820559092635134 stripped
-BoxCollider2D:
-  m_CorrespondingSourceObject: {fileID: 3952866480409687922, guid: 3f9c05147c79b82489141297fcbe3189,
-    type: 3}
-  m_PrefabInstance: {fileID: 2640312394719683212}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1377667506945882771 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4015578566053369887, guid: 3f9c05147c79b82489141297fcbe3189,
@@ -96,9 +90,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9da892c47e0047c0918aa8626f5c67a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <ItemAnimation>k__BackingField: {fileID: 8667879731180739669}
+  <Animation>k__BackingField: {fileID: 8667879731180739669}
   <SpriteRenderer>k__BackingField: {fileID: 7879609683036541701}
-  <BoxCollider2D>k__BackingField: {fileID: 1332820559092635134}
   <IsStationary>k__BackingField: 0
   <Coord>k__BackingField: {x: 0, y: 0}
   <ObstacleType>k__BackingField: 0

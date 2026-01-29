@@ -15,5 +15,5 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: f1284f1fe9eb2a545b2ef886c61ba241, type: 3}
   spriteSizeMultiplier: {x: 0.95, y: 0.95}
   isStationary: 1
-  <Life>k__BackingField: 2
-  <DamageSource>k__BackingField: 2
+  <Life>k__BackingField: 1
+  <DamageSource>k__BackingField: -1

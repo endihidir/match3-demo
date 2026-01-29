@@ -336,14 +336,6 @@ namespace Core.Utils
 
             return mergeObjs;
         }
-
-        public static void SetNullMergedObjectCoords(IGridModel model, List<Vector2Int> group, Vector2Int centerCoord)
-        {
-            foreach (var coord in group.Where(coord => coord != centerCoord))
-            {
-                model.SetGridObject(coord, null);
-            }
-        }
         
         public static bool IsCellsRegular(BaseGridObject sourceObj, BaseGridObject targetObj)
         {

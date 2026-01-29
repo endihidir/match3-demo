@@ -75,7 +75,7 @@ namespace Core.Handlers
                     }
 
                     var targetPos = Context.GridView.GridToWorld(obj.Coord);
-                    var tween = obj.ItemAnimation.MoveTo(targetPos, 5f, Ease.InOutQuad);
+                    var tween = obj.Animation.MoveTo(targetPos, 5f, Ease.InOutQuad);
 
                     _animTasks[i] = tween?.ToUniTask() ?? UniTask.CompletedTask;
                 }

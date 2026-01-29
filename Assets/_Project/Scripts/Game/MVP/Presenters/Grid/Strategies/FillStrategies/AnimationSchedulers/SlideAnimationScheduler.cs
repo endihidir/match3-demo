@@ -41,7 +41,7 @@ namespace Core.Handlers
                 current = next;
             }
 
-            var animation = record.Item.ItemAnimation;
+            var animation = record.Item.Animation;
             
             var tween = animation.SlideAlongPath(path.Array, length, seg.Array, startTime);
             

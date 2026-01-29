@@ -69,15 +69,9 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 4015578566053369887, guid: 3f9c05147c79b82489141297fcbe3189,
         type: 3}
-      insertIndex: 2
+      insertIndex: -1
       addedObject: {fileID: 4973082873272601073}
   m_SourcePrefab: {fileID: 100100000, guid: 3f9c05147c79b82489141297fcbe3189, type: 3}
---- !u!61 &1057156493188741256 stripped
-BoxCollider2D:
-  m_CorrespondingSourceObject: {fileID: 3952866480409687922, guid: 3f9c05147c79b82489141297fcbe3189,
-    type: 3}
-  m_PrefabInstance: {fileID: 4066927640208805882}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1137882702466619365 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4015578566053369887, guid: 3f9c05147c79b82489141297fcbe3189,
@@ -96,9 +90,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df9b326536704366ae3ccd096aa08930, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <ItemAnimation>k__BackingField: {fileID: 7250401459397259555}
+  <Animation>k__BackingField: {fileID: 7250401459397259555}
   <SpriteRenderer>k__BackingField: {fileID: 8182222779824864883}
-  <BoxCollider2D>k__BackingField: {fileID: 1057156493188741256}
   <IsStationary>k__BackingField: 0
   <Coord>k__BackingField: {x: 0, y: 0}
   <BoosterType>k__BackingField: 0

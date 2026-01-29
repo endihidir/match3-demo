@@ -51,5 +51,14 @@ namespace Core.Handlers
             GridItemFactory.ReleaseItem(sourceObj);
             GridModel.SetGridObject(sourceCoord, null);
         }
+
+        public void CountGoal(ObstacleType obstacleType, Vector2Int coord, Vector2 spriteSize)
+        {
+            var screenPos = GridView.GridToWorld(coord);
+            var uiSizeDelta = GridView.SpriteToUISize(spriteSize);
+            LevelGoalModel.CountGoal(obstacleType, screenPos, uiSizeDelta);
+        }
+
+        public void RaiseGoalCountComplete() => LevelGoalModel.RaiseGoalCountUpdateComplete();
     }
 }

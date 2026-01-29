@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Core.Item.Factories
 {
-    public class SlotViewFactory : ISlotViewFactory
+    public sealed class SlotViewFactory : ISlotViewFactory
     {
         private readonly IObjectPoolService _objectPoolService;
 

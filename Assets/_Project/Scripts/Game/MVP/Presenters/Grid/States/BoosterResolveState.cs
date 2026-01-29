@@ -139,14 +139,15 @@ namespace Core.Handlers
                             
                             // TODO: play destroy effect!
                             
-                            Context.LevelGoalModel.CountGoal(damageableItem.ObstacleType, 1);
-                            
+                            Context.CountGoal(damageableItem.ObstacleType, obj.Coord, obj.SpriteRenderer.size);
                             Context.ReleaseAndSetNull(obj, coord);
                         }
                         continue;
                     }
                 }
             }
+            
+            Context.RaiseGoalCountComplete();
         }
     }
 }

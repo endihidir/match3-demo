@@ -9,24 +9,24 @@ namespace Core.Models
 {
     public class LevelGoalModel : ILevelGoalModel
     {
-        private List<LevelGoal> _goals;
-        
-        private int _moveCount, _totalGoalCount;
-        public bool IsAllMovesFinished => _moveCount <= 0;
+        private IEnumerable<LevelGoal> _goals;
+        private int _totalGoalCount;
+        public int MoveCount { get; private set; }
+        public bool IsAllMovesFinished => MoveCount <= 0;
         public bool IsAllGoalsComplete => _totalGoalCount <= 0;
         public event Action OnAllGoalsComplete;
-        public event Action<int> OnMoveCountUpdate;
-        public event Action<ObstacleType, int> OnGoalCountUpdate;
+        public event Action OnMoveCountUpdate;
+        public event Action<ObstacleType, Vector3, Vector2> OnGoalCountUpdate;
+        public event Action OnGoalCountUpdateComplete;
 
         public void Initialize(List<LevelGoal> goals, int moveCount)
         {
-            _goals = new List<LevelGoal>(goals.Count);
-            goals.ForEach(goal => _goals.Add(goal.Clone()));
-            _moveCount = moveCount;
+            _goals = goals.Select(g => g.Clone());
             _totalGoalCount = _goals.Sum(x => x.Count);
+            MoveCount = moveCount;
         }
 
-        public void CountGoal(ObstacleType obstacleType, int count)
+        public void CountGoal(ObstacleType obstacleType, Vector3 objPos, Vector2 uiSizeDelta)
         {
             if (IsAllGoalsComplete) return;
 
@@ -36,12 +36,12 @@ namespace Core.Models
                 if (levelGoal.Count == 0) continue;
 
                 var before = levelGoal.Count;
-                var removed = Mathf.Min(before, count);
+                var removed = Mathf.Min(before, 1);
 
                 levelGoal.Count = before - removed;
                 _totalGoalCount -= removed;
 
-                OnGoalCountUpdate?.Invoke(levelGoal.ObstacleType, levelGoal.Count);
+                OnGoalCountUpdate?.Invoke(levelGoal.ObstacleType, objPos, uiSizeDelta);
                 break;
             }
 
@@ -54,11 +54,11 @@ namespace Core.Models
         public void DecreaseMoveCount()
         {
             if (IsAllMovesFinished) return;
-            
-            _moveCount = Mathf.Max(0, _moveCount - 1);
-            
-            OnMoveCountUpdate?.Invoke(_moveCount);
+            MoveCount = Mathf.Max(0, MoveCount - 1);
+            OnMoveCountUpdate?.Invoke();
         }
+        
+        public void RaiseGoalCountUpdateComplete() => OnGoalCountUpdateComplete?.Invoke();
         
         public bool TryGetGoal(ObstacleType obstacleType, out LevelGoal levelGoal)
         {

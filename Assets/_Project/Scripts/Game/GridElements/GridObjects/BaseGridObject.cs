@@ -7,7 +7,7 @@ namespace Core.Item
 {
     public abstract class BaseGridObject : PooledObject
     {
-        [field: SerializeField] public ItemAnimation ItemAnimation { get; private set; }
+        [field: SerializeField] public GridObjectAnimation Animation { get; private set; }
         [field: SerializeField] public SpriteRenderer SpriteRenderer { get; private set; }
         [field: SerializeField, ReadOnly] public bool IsStationary { get; private set; }
         [field: SerializeField, ReadOnly] public Vector2Int Coord { get; private set; }
@@ -25,7 +25,7 @@ namespace Core.Item
             }
         }
         
-        public bool IsFallInProgress => ItemAnimation.IsFallInProgress;
+        public bool IsFallInProgress => Animation.IsFallInProgress;
         private Vector2 SpriteSizeMultiplier { get; set; }
         private bool _isNone;
         
@@ -58,24 +58,15 @@ namespace Core.Item
         public void SetSpriteSize(float cellSize) => SpriteRenderer.size = cellSize * SpriteSizeMultiplier;
         public void SetPosition(Vector3 position) => transform.position = position;
         public void SetParent(Transform parent) => transform.SetParent(parent);
-        public override void Activate()
-        {
-            base.Activate();
-            ItemAnimation.CacheAnimations();
-        }
-
-        public override void Deactivate()
-        {
-            base.Deactivate();
-            ResetItem();
-        }
-
+        protected override void OnSpawned() => Animation.CacheAnimations();
+        protected override void OnDespawned() => ResetItem();
+        
         public void ResetItem()
         {
             Coord = new Vector2Int(-1, -1);
             ObjectType = default;
             SetPosition(Vector3.zero);
-            ItemAnimation?.Dispose();
+            Animation?.Dispose();
             SpriteRenderer.sprite = null;
             SpriteSizeMultiplier = Vector2.zero;
         }
