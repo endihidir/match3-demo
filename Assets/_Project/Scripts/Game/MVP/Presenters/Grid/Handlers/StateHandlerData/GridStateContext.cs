@@ -56,9 +56,9 @@ namespace Core.Handlers
 
         public void CountGoal(IDamageableObstacle damageableObstacle, Vector2Int coord, Vector2 spriteSize)
         {
-            var screenPos = GridView.GridToWorld(coord);
-            var uiSizeDelta = GridView.SpriteToUISize(spriteSize);
-            LevelGoalModel.CountGoal(damageableObstacle, screenPos, uiSizeDelta);
+            var worldPos = GridView.GridToWorld(coord);
+            var size = GridView.SpriteToUISize(spriteSize);
+            LevelGoalModel.CountGoal(damageableObstacle, worldPos, size);
         }
 
         public void RaiseObjectsDestroyed() => OnGridDestructionComplete?.Invoke();
