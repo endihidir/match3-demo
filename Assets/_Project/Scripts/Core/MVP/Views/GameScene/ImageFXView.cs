@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Core.UI
 {
-    public class ImageFXView : BaseAnimatedFXView
+    public abstract class ImageFXView : BaseAnimatedFXView
     {
         [field: SerializeField, Required] public Image Image { get; private set; }
         
