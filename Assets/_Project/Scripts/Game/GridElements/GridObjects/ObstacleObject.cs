@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Core.Item
 {
-    public class ObstacleObject : BaseGridObject, IDamageableItem
+    public class ObstacleObject : BaseGridObject, IDamageableObstacle
     {
         [field: SerializeField, ReadOnly] public ObstacleType ObstacleType { get; private set; }
         [field: SerializeField, ReadOnly] public int Life { get; private set; }

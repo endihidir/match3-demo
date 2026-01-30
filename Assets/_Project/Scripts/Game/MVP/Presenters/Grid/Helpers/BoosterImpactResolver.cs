@@ -43,7 +43,7 @@ namespace Core.Utils
             
             ref var cell = ref markData[coord.x, coord.y];
             
-            var damageable = obj as IDamageableItem;
+            var damageable = obj as IDamageableObstacle;
             var trigger = obj as IBoosterActionSource;
             
             var isDamageable = damageable != null;
