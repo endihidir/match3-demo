@@ -25,7 +25,7 @@ namespace Core.Models
             MoveCount = moveCount;
         }
 
-        public void CountGoal(IDamageableObstacle damageableObstacle, Vector3 objPos, Vector2 uiSizeDelta)
+        public void CountGoal(IDamageableObstacle damageableObstacle, Vector3 worldPos, Vector2 size)
         {
             if (IsAllGoalsComplete) return;
 
@@ -40,7 +40,7 @@ namespace Core.Models
                 levelGoal.Count = before - removed;
                 _totalGoalCount -= removed;
 
-                OnGoalCountUpdate?.Invoke(damageableObstacle, objPos, uiSizeDelta);
+                OnGoalCountUpdate?.Invoke(damageableObstacle, worldPos, size);
                 break;
             }
 
