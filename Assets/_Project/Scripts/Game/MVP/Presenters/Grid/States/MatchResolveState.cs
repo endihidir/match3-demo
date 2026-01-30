@@ -172,7 +172,7 @@ namespace Core.Handlers
                 model.SetGridObject(coord, null);
             }
             
-            Context.RaiseGoalCountComplete();
+            Context.RaiseObjectsDestroyed();
         }
 
         private void OnMergeComplete(BaseGridObject[] mergeObjs, BaseGridObject centerObj, Vector2Int centerCoord, BoosterType boosterValue)
@@ -231,7 +231,7 @@ namespace Core.Handlers
                 Context.ReleaseAndSetNull(obj, coord);
             }
             
-            Context.RaiseGoalCountComplete();
+            Context.RaiseObjectsDestroyed();
         }
 
         private void ApplyNeighbourDamage(IGridModel model, Vector2Int origin)
@@ -250,7 +250,7 @@ namespace Core.Handlers
 
                 if (result == DamageResult.Destroyed)
                 {
-                    Context.CountGoal(damageableItem.ObstacleType, obj.Coord, obj.SpriteRenderer.size);
+                    Context.CountGoal(damageableItem, obj.Coord, obj.SpriteRenderer.size);
                     
                     Context.ReleaseAndSetNull(obj, obj.Coord);
                 }

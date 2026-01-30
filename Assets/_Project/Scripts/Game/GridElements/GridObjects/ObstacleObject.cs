@@ -8,7 +8,8 @@ namespace Core.Item
     {
         [field: SerializeField, ReadOnly] public ObstacleType ObstacleType { get; private set; }
         [field: SerializeField, ReadOnly] public int Life { get; private set; }
-        [field: SerializeField, ReadOnly] public DamageSource AllowDamageSources { get; private set; }
+        [field: SerializeField, ReadOnly] public DamageSource AllowedDamageSources { get; private set; }
+        [field: SerializeField, ReadOnly] public bool IsCollectible { get; private set; }
 
         protected override void OnInitialize()
         {
@@ -22,13 +23,14 @@ namespace Core.Item
             if (baseItemDataSo is ObstacleDataSO obstacleConfigData)
             {
                 Life = obstacleConfigData.Life;
-                AllowDamageSources = obstacleConfigData.DamageSource;
+                IsCollectible = obstacleConfigData.IsCollectible;
+                AllowedDamageSources = obstacleConfigData.DamageSource;
             }
         }
 
         public DamageResult TakeDamage(int damage, DamageSource source)
         {
-            if ((AllowDamageSources & source) == 0 || Life <= 0) return DamageResult.Ignored;
+            if ((AllowedDamageSources & source) == 0 || Life <= 0) return DamageResult.Ignored;
             Life -= damage;
             Life = Mathf.Max(0, Life);
             return Life <= 0 ? DamageResult.Destroyed : DamageResult.Damaged;
