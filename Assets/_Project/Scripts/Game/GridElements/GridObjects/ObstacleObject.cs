@@ -10,6 +10,7 @@ namespace Core.Item
         [field: SerializeField, ReadOnly] public int Life { get; private set; }
         [field: SerializeField, ReadOnly] public DamageSource AllowedDamageSources { get; private set; }
         [field: SerializeField, ReadOnly] public bool IsCollectible { get; private set; }
+        [field: SerializeField, ReadOnly] public Sprite[] BrokenSprites { get; private set; }
 
         protected override void OnInitialize()
         {
@@ -22,9 +23,10 @@ namespace Core.Item
 
             if (baseItemDataSo is ObstacleDataSO obstacleConfigData)
             {
-                Life = obstacleConfigData.Life;
+                Life = obstacleConfigData.GetLife();
                 IsCollectible = obstacleConfigData.IsCollectible;
                 AllowedDamageSources = obstacleConfigData.DamageSource;
+                BrokenSprites = obstacleConfigData.BrokenSprites;
             }
         }
 
@@ -33,6 +35,7 @@ namespace Core.Item
             if ((AllowedDamageSources & source) == 0 || Life <= 0) return DamageResult.Ignored;
             Life -= damage;
             Life = Mathf.Max(0, Life);
+            SetBrokenSprite(Life);
             return Life <= 0 ? DamageResult.Destroyed : DamageResult.Damaged;
         }
 
@@ -42,6 +45,13 @@ namespace Core.Item
             ObstacleType = (ObstacleType)TypeId;
             Life = 0;
             UpdateIdentity();
+        }
+
+        private void SetBrokenSprite(int remainingLife)
+        {
+            if (BrokenSprites == null || BrokenSprites.Length < 1) return;
+            var index = Mathf.Max(0, remainingLife - 1);
+            SpriteRenderer.sprite = BrokenSprites[index];
         }
 
         public override string ToString() => $"Type: {ObstacleType}";
