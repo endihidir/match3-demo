@@ -13,28 +13,6 @@ using VContainer.Unity;
 
 namespace Core.SceneService
 {
-    public interface ISceneLoadState
-    {
-        event Action OnLoadStart;
-        event Action OnScenesUnload; 
-        event Action OnScenesLoad; 
-        event Action OnScenesActivate; 
-        event Func<UniTask> OnTransitionOut; 
-        event Action OnLoadComplete;
-        ProgressHandler Progress { get; }
-        SceneGroupType CurrentSceneGroupType { get; }
-        float ProgressSpeed { get; }
-        bool IsTransitionViewActivated { get; }
-    }
-    
-    public interface ISceneLoadService
-    {
-        bool IsInAnyGameScene { get; }
-        bool IsInBootScene { get; }
-        UniTask InitBootSceneAsync();
-        UniTask LoadSceneGroupAsync(SceneGroupType groupType, bool useTransitionView = false, bool reloadDupScenes = false);
-    }
-
     public class SceneLoadService : ISceneLoadService, ISceneLoadState, ITickable
     {
         private readonly SceneLoadServiceConfig _sceneLoadConfig;
@@ -47,9 +25,10 @@ namespace Core.SceneService
         public event Action OnScenesActivate;
         public event Func<UniTask> OnTransitionOut;
         public event Action OnLoadComplete;
-        public SceneGroupType CurrentSceneGroupType { get; private set; }
         public bool IsTransitionViewActivated { get; private set; }
         public ProgressHandler Progress { get; }
+        
+        private SceneGroupType CurrentSceneGroupType { get; set; }
         public float ProgressSpeed { get; }
         private string ActiveSceneName => SceneManager.GetActiveScene().name;
 
@@ -154,6 +133,8 @@ namespace Core.SceneService
             
             OnLoadComplete?.Invoke();
         }
+        
+        public bool IsCurrentSceneEqualWidth(SceneGroupType sceneGroupType) => CurrentSceneGroupType == sceneGroupType;
 
         private async UniTask UnloadSceneAsync()
         {

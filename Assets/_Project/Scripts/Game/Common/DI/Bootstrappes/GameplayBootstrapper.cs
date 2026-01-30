@@ -37,7 +37,7 @@ namespace Core.Bootstrapper
 
         private void OnSceneLoadComplete()
         {
-            if(_sceneLoadState.CurrentSceneGroupType != SceneGroupType.GameScene) return;
+            if(!_sceneLoadState.IsCurrentSceneEqualWidth(SceneGroupType.GameScene)) return;
             
             DisableInput();
             
