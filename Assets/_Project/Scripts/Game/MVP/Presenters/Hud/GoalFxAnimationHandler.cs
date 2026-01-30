@@ -27,9 +27,9 @@ namespace Core.Presenters
             
             var sprite = slotView.GetIcon();
             
-            var fx = _factory.GetAnimatedFX<GoalFxView>(_hudView.GoalFxHolder, worldPos, sprite, size,false);
+            var goalFxView = _factory.GetAnimatedFX<GoalFxView>(_hudView.GoalFxHolder, worldPos, sprite, size,false);
             
-            _pendingAnimations.Add(new PendingGoalFX(obstacleType, fx));
+            _pendingAnimations.Add(new PendingGoalFX(obstacleType, goalFxView));
         }
     
         public void PlayQueuedAnimations()
