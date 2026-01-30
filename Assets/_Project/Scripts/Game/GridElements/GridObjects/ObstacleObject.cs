@@ -49,7 +49,7 @@ namespace Core.Item
 
         private void SetBrokenSprite(int remainingLife)
         {
-            if (BrokenSprites == null || BrokenSprites.Length < 1) return;
+            if (BrokenSprites.Length < 1) return;
             var index = Mathf.Max(0, remainingLife - 1);
             SpriteRenderer.sprite = BrokenSprites[index];
         }
