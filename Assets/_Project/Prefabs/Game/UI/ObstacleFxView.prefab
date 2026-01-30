@@ -45,7 +45,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 582623437816026205}
-  - component: {fileID: 6802074934085119327}
+  - component: {fileID: 1122615608298194602}
   m_Layer: 5
   m_Name: ObstacleFxView
   m_TagString: Untagged
@@ -73,7 +73,7 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &6802074934085119327
+--- !u!114 &1122615608298194602
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -82,7 +82,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6877316281403719742}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 892c83b62cf144e881b68726130b3933, type: 3}
+  m_Script: {fileID: 11500000, guid: d61712822b3d45b28fa6e85c924ec253, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   <UseUnscaledTime>k__BackingField: 0

@@ -20,7 +20,7 @@ namespace Core.UI
             return this;
         }
         
-        public BaseAnimatedFXView PlayBounce(float duration = 0.22f, float up = 1.12f)
+        public BaseAnimatedFXView PlayBounce(float duration = 0.15f, float up = 1.2f)
         {
             _bounceTween.Kill();
             

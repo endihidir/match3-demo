@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Core.UI
 {
-    public class RendererFXView : BaseAnimatedFXView
+    public abstract class RendererFXView : BaseAnimatedFXView
     {
         [field: SerializeField, Required] public SpriteRenderer Renderer { get; private set; }
         
