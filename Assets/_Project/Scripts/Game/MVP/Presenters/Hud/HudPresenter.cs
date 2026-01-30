@@ -30,15 +30,15 @@ namespace Core.Presenters
             _gridStateHandler.Context.OnGridDestructionComplete += _fxHandler.PlayQueuedAnimations;
         }
 
-        private void OnGoalCountUpdate(IDamageableItem item, Vector3 worldPos, Vector2 size)
+        private void OnGoalCountUpdate(IDamageableObstacle obstacle, Vector3 worldPos, Vector2 size)
         {
-            if (item.IsCollectible)
+            if (obstacle.IsCollectible)
             {
-                _fxHandler.QueueAnimation(item, worldPos, size);
+                _fxHandler.QueueAnimation(obstacle, worldPos, size);
             }
             else
             {
-                _hudView.DecreaseGoalCount(item.ObstacleType);
+                _hudView.DecreaseGoalCount(obstacle.ObstacleType);
             }
         }
 

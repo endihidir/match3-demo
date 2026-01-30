@@ -19,9 +19,9 @@ namespace Core.Presenters
             _factory = factory;
         }
     
-        public void QueueAnimation(IDamageableItem item, Vector3 worldPos, Vector2 size)
+        public void QueueAnimation(IDamageableObstacle obstacle, Vector3 worldPos, Vector2 size)
         {
-            var obstacleType = item.ObstacleType;
+            var obstacleType = obstacle.ObstacleType;
             
             if (!_hudView.TryGetGoalSlotView(obstacleType, out var slotView)) return;
             

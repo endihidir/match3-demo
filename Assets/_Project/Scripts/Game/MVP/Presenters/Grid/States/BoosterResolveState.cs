@@ -122,7 +122,7 @@ namespace Core.Handlers
                         continue;
                     }
 
-                    if (data.HasDamage && obj is IDamageableItem damageableItem)
+                    if (data.HasDamage && obj is IDamageableObstacle damageableItem)
                     {
                         var damageResult = damageableItem.TakeDamage(data.DamageAmount, data.DamageSource);
 

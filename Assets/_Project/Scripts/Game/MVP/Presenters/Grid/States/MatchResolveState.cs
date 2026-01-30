@@ -244,7 +244,7 @@ namespace Core.Handlers
 
                 if (!obj) continue;
 
-                if (obj is not IDamageableItem damageableItem) continue;
+                if (obj is not IDamageableObstacle damageableItem) continue;
 
                 var result = damageableItem.TakeDamage(1, DamageSource.Match);
 

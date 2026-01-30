@@ -68,6 +68,7 @@ namespace Core.Handlers
             if (!TryGetContext(out var context)) return;
 
             var coord = GetMouseGridCoord(context);
+            if(!IsCellActive(context, coord)) return;
             ClearCell(context, coord);
 
             var obstacle = context.GridItemFactory.GetRegularItem(type);
@@ -79,6 +80,7 @@ namespace Core.Handlers
             if (!TryGetContext(out var context)) return;
 
             var coord = GetMouseGridCoord(context);
+            if(!IsCellActive(context, coord)) return;
             ClearCell(context, coord);
 
             var booster = context.GridItemFactory.GetBoosterItem(type);
@@ -90,6 +92,7 @@ namespace Core.Handlers
             if (!TryGetContext(out var context)) return;
 
             var coord = GetMouseGridCoord(context);
+            if(!IsCellActive(context, coord)) return;
             ClearCell(context, coord);
 
             var obstacle = context.GridItemFactory.GetObstacleItem(type);
@@ -101,6 +104,7 @@ namespace Core.Handlers
             if (!TryGetContext(out var context)) return;
 
             var coord = GetMouseGridCoord(context);
+            if(!IsCellActive(context, coord)) return;
             ClearCell(context, coord);
         }
 
@@ -122,9 +126,10 @@ namespace Core.Handlers
         {
             var obj = context.GridModel.GetGridObject(coord);
             if (!obj) return;
-
             context.ReleaseAndSetNull(obj, coord);
         }
+
+        private bool IsCellActive(GridStateContext context, Vector2Int coord) => context.GridModel.IsCellActive(coord);
 
         private void PlaceItem(GridStateContext context, Vector2Int coord, BaseGridObject item)
         {
