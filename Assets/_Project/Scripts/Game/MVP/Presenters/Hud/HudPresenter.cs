@@ -1,11 +1,8 @@
 using System;
-using System.Collections.Generic;
+using Core.Handlers;
 using Core.Item;
-using Core.Item.Factories;
 using Core.Models;
 using Core.UI;
-using Core.Utils;
-using DG.Tweening;
 using UnityEngine;
 using VContainer.Unity;
 
@@ -15,76 +12,47 @@ namespace Core.Presenters
     {
         private readonly ILevelGoalModel _levelGoalModel;
         private readonly IHudView _hudView;
-        private readonly IAnimatedFXViewFactory _animatedFXViewFactory;
-        private readonly List<(ImageFXView, GoalSlotView)> _fxViews = new();
+        private readonly IGoalFxAnimationHandler _fxHandler;
+        private readonly IGridStateHandler _gridStateHandler;
 
-        public HudPresenter(ILevelGoalModel levelGoalModel, IHudView hudView, IAnimatedFXViewFactory animatedFXViewFactory)
+        public HudPresenter(ILevelGoalModel levelGoalModel, IHudView hudView, IGoalFxAnimationHandler fxHandler, IGridStateHandler stateHandler)
         {
             _levelGoalModel = levelGoalModel;
             _hudView = hudView;
-            _animatedFXViewFactory = animatedFXViewFactory;
+            _fxHandler = fxHandler;
+            _gridStateHandler = stateHandler;
         }
 
         public void Initialize()
         {
             _levelGoalModel.OnMoveCountUpdate += OnMoveCountUpdate;
-            _levelGoalModel.OnGoalCountUpdate += CreateFxViews;
-            _levelGoalModel.OnGoalCountUpdateComplete += AnimateFxViews;
+            _levelGoalModel.OnGoalCountUpdate += OnGoalCountUpdate;
+            _gridStateHandler.Context.OnGridDestructionComplete += _fxHandler.PlayQueuedAnimations;
         }
 
-        private void CreateFxViews(ObstacleType obstacleType, Vector3 objPos, Vector2 uiSizeDelta)
+        private void OnGoalCountUpdate(IDamageableItem item, Vector3 worldPos, Vector2 size)
         {
-            if (!_hudView.SlotByType.TryGetValue(obstacleType, out var slotView))
+            if (item.IsCollectible)
             {
-                EditorLogger.LogError($"{obstacleType} slot view not found!");
-                return;
-            }
-
-            if (slotView.IsCollectible)
-            {
-                var animatedFX = _animatedFXViewFactory.GetAnimatedFX<ImageFXView>(_hudView.GoalFxHolder, objPos, slotView.GetIcon(), uiSizeDelta,false);
-                
-                _fxViews.Add((animatedFX, slotView));
+                _fxHandler.QueueAnimation(item, worldPos, size);
             }
             else
             {
-                slotView.DecreaseGoalCount();
+                _hudView.DecreaseGoalCount(item.ObstacleType);
             }
-        }
-        
-        private void AnimateFxViews()
-        {
-            for (var i = 0; i < _fxViews.Count; i++)
-            {
-                var (animatedFX, slotView) = _fxViews[i];
-                var delay = i * .05f;
-                
-                animatedFX.Activate();
-                
-                animatedFX.MoveTo(slotView.transform.position, .75f, delay, Ease.InBack)
-                            .SetSize(slotView.GetSize(), .75f, delay)
-                            .OnMoveComplete(() => OnAnimComplete(animatedFX, slotView));
-            }
-            
-            _fxViews.Clear();
-        }
-
-        private void OnAnimComplete(ImageFXView fxView, GoalSlotView slotView)
-        {
-            _animatedFXViewFactory.ReleaseAnimatedFX(fxView);
-            slotView.DecreaseGoalCount();
         }
 
         private void OnMoveCountUpdate()
         {
             var moveCount = _levelGoalModel.MoveCount;
+            
             _hudView.SetMoveCount(moveCount);
         }
 
         public void Dispose()
         {
-            _levelGoalModel.OnGoalCountUpdate -= CreateFxViews;
-            _levelGoalModel.OnGoalCountUpdateComplete -= AnimateFxViews;
+            _gridStateHandler.Context.OnGridDestructionComplete -= _fxHandler.PlayQueuedAnimations;
+            _levelGoalModel.OnGoalCountUpdate -= OnGoalCountUpdate;
             _levelGoalModel.OnMoveCountUpdate -= OnMoveCountUpdate;
         }
     }

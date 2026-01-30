@@ -16,9 +16,8 @@ namespace Core.Models
         public bool IsAllGoalsComplete => _totalGoalCount <= 0;
         public event Action OnAllGoalsComplete;
         public event Action OnMoveCountUpdate;
-        public event Action<ObstacleType, Vector3, Vector2> OnGoalCountUpdate;
-        public event Action OnGoalCountUpdateComplete;
-
+        public event Action<IDamageableItem, Vector3, Vector2> OnGoalCountUpdate;
+        
         public void Initialize(List<LevelGoal> goals, int moveCount)
         {
             _goals = goals.Select(g => g.Clone());
@@ -26,13 +25,13 @@ namespace Core.Models
             MoveCount = moveCount;
         }
 
-        public void CountGoal(ObstacleType obstacleType, Vector3 objPos, Vector2 uiSizeDelta)
+        public void CountGoal(IDamageableItem damageableItem, Vector3 objPos, Vector2 uiSizeDelta)
         {
             if (IsAllGoalsComplete) return;
 
             foreach (var levelGoal in _goals)
             {
-                if (levelGoal.ObstacleType != obstacleType) continue;
+                if (levelGoal.ObstacleType != damageableItem.ObstacleType) continue;
                 if (levelGoal.Count == 0) continue;
 
                 var before = levelGoal.Count;
@@ -41,7 +40,7 @@ namespace Core.Models
                 levelGoal.Count = before - removed;
                 _totalGoalCount -= removed;
 
-                OnGoalCountUpdate?.Invoke(levelGoal.ObstacleType, objPos, uiSizeDelta);
+                OnGoalCountUpdate?.Invoke(damageableItem, objPos, uiSizeDelta);
                 break;
             }
 
@@ -57,8 +56,6 @@ namespace Core.Models
             MoveCount = Mathf.Max(0, MoveCount - 1);
             OnMoveCountUpdate?.Invoke();
         }
-        
-        public void RaiseGoalCountUpdateComplete() => OnGoalCountUpdateComplete?.Invoke();
         
         public bool TryGetGoal(ObstacleType obstacleType, out LevelGoal levelGoal)
         {

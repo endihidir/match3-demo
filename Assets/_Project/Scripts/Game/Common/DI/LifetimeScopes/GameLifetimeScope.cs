@@ -29,6 +29,7 @@ namespace Core.LifetimeScopes
             
             builder.Register<LevelGoalModel>(Lifetime.Scoped).As<ILevelGoalModel>();
             builder.RegisterComponentInHierarchy<HudView>().As<IHudView>();
+            builder.Register<GoalFxAnimationHandler>(Lifetime.Scoped).As<IGoalFxAnimationHandler>();
             builder.RegisterEntryPoint<HudPresenter>();
             
             // GRID SERVICES

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Core.Config;
 using Core.Item;
@@ -28,6 +29,7 @@ namespace Core.Handlers
         
         public bool MatchResolveRequested { get; set; }
         public int GroupIdCounter { get; set; }
+        public event Action OnGridDestructionComplete;
 
         public GridStateContext(IGridModel gridModel, IGridView gridView, IGridItemFactory gridItemFactory, ILevelGoalModel levelGoalModel, 
             GridConfigContainerSO gridConfigs)
@@ -52,13 +54,13 @@ namespace Core.Handlers
             GridModel.SetGridObject(sourceCoord, null);
         }
 
-        public void CountGoal(ObstacleType obstacleType, Vector2Int coord, Vector2 spriteSize)
+        public void CountGoal(IDamageableItem damageableItem, Vector2Int coord, Vector2 spriteSize)
         {
             var screenPos = GridView.GridToWorld(coord);
             var uiSizeDelta = GridView.SpriteToUISize(spriteSize);
-            LevelGoalModel.CountGoal(obstacleType, screenPos, uiSizeDelta);
+            LevelGoalModel.CountGoal(damageableItem, screenPos, uiSizeDelta);
         }
 
-        public void RaiseGoalCountComplete() => LevelGoalModel.RaiseGoalCountUpdateComplete();
+        public void RaiseObjectsDestroyed() => OnGridDestructionComplete?.Invoke();
     }
 }

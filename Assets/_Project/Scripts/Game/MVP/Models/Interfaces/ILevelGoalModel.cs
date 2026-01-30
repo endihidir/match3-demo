@@ -10,15 +10,13 @@ namespace Core.Models
     {
         event Action OnAllGoalsComplete;
         event Action OnMoveCountUpdate;
-        event Action<ObstacleType, Vector3, Vector2> OnGoalCountUpdate;
-        event Action OnGoalCountUpdateComplete;
+        event Action<IDamageableItem, Vector3, Vector2> OnGoalCountUpdate;
         public int MoveCount { get; }
         bool IsAllGoalsComplete { get; }
         bool IsAllMovesFinished { get; }
         void Initialize(List<LevelGoal> goals, int moveCount);
-        void CountGoal(ObstacleType obstacleType, Vector3 objPos, Vector2 uiSizeDelta);
+        void CountGoal(IDamageableItem damageableItem, Vector3 objPos, Vector2 uiSizeDelta);
         void DecreaseMoveCount();
         bool TryGetGoal(ObstacleType obstacleType, out LevelGoal levelGoal);
-        void RaiseGoalCountUpdateComplete();
     }
 }

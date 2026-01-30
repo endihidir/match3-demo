@@ -2,8 +2,10 @@ namespace Core.Item
 {
     public interface IDamageableItem
     {
-        public ObstacleType ObstacleType { get; }
         int Life { get; }
+        bool IsCollectible { get; }
+        ObstacleType ObstacleType { get; }
+        DamageSource AllowedDamageSources { get; }
         DamageResult TakeDamage(int damage, DamageSource source);
     }
     

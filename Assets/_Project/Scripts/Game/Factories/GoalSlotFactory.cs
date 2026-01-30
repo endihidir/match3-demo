@@ -22,11 +22,9 @@ namespace Core.Item.Factories
 
             if (!_obstacleConfigContainer.Configs.TryGet(obstacleType, out var obstacleConfig)) return slotView;
             
-            slotView.SetCollectible(obstacleConfig.IsCollectible);
+            slotView.Initialize(obstacleType);
             
-            slotView.SetType(obstacleType);
-            
-            slotView.SetIcon(obstacleConfig.icon);
+            slotView.ApplyData(obstacleConfig);
 
             return slotView;
         }
