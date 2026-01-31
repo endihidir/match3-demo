@@ -48,7 +48,7 @@ namespace Core.LifetimeScopes
 
         private static void RegisterGlobalModels(IContainerBuilder builder)
         {
-            builder.Register<LevelProgressModel>(Lifetime.Singleton).As<ILevelProgressReader, ILevelProgressWriter>();
+            builder.Register<LevelProgressionModel>(Lifetime.Singleton).As<ILevelProgressionReader, ILevelProgressionWriter>();
         }
     }
 }

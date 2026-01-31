@@ -7,14 +7,14 @@ using VContainer.Unity;
 
 namespace Core.Services
 {
-    public interface IInputService
+    public interface IGridInputService
     {
         event Action<Vector2, Vector2Int> OnInputGet;
         void Enable();
         void Disable();
     }
 
-    public class InputService : IInputService, ITickable, IDisposable
+    public class GridInputService : IGridInputService, ITickable, IDisposable
     {
         private readonly InputActions _actions = new();
         public event Action<Vector2, Vector2Int> OnInputGet;
@@ -24,7 +24,7 @@ namespace Core.Services
 
         private bool _isPointerOverUI;
 
-        public InputService()
+        public GridInputService()
         {
             Input.multiTouchEnabled = false;
         }

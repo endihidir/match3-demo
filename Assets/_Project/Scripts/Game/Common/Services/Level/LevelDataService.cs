@@ -8,23 +8,6 @@ using VContainer.Unity;
 
 namespace Core.Level
 {
-    public interface ILevelDataBootState
-    {
-        bool IsInitialized { get; } 
-        UniTask WaitUntilInitializedAsync(); 
-    }
-
-    public interface ILevelSerializer
-    {
-        LevelDefinition SerializeToLevelDefinition(int level);
-    }
-
-    public interface ILevelDataReader
-    {
-        int LevelSize { get; }
-        LevelDefinition GetLevelDefinition(int index);
-    }
-    
     public class LevelDataService : IInitializable, ILevelDataBootState, ILevelSerializer, ILevelDataReader
     {
         private readonly LevelDataServiceConfig _levelDataServiceConfig;

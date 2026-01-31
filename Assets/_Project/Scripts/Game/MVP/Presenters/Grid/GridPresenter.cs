@@ -12,33 +12,35 @@ namespace Core.Presenters
     public sealed class GridPresenter : IInitializable, IDisposable
     {
         private readonly IGridModel _gridModel;
+        private readonly ILevelGoalModel _goalModel;
         private readonly IGridView _gridView;
-        private readonly IInputService _inputService;
-        private readonly IGridStateHandler _gridStateHandler;
+        private readonly IGridInputService _inputService;
+        private readonly IGridStateHandler _stateHandler;
 
-        public GridPresenter(IGridModel model, IGridView gridView, IInputService inputService, IGridStateHandler gridStateHandler)
+        public GridPresenter(IGridModel model, ILevelGoalModel goalModel, IGridView gridView, IGridInputService inputService, IGridStateHandler stateHandler)
         {
             _gridModel = model;
+            _goalModel = goalModel;
             _gridView = gridView;
             _inputService = inputService;
-            _gridStateHandler = gridStateHandler;
+            _stateHandler = stateHandler;
         }
 
         public void Initialize()
         {
-            _gridView.OnViewInitialized += PlaceGridItems;
+            _gridView.OnViewInitialized += OnViewInitialized;
             _inputService.OnInputGet += OnInputGet;
+            _goalModel.OnAllGoalsComplete += OnAllGoalsComplete;
+            _goalModel.OnMoveCountUpdate += OnMoveCountUpdate;
         }
-
-        private void OnInputGet(Vector2 sourcePos, Vector2Int inputDir)
+        
+        private void OnViewInitialized()
         {
-            var gridDir = _gridView.InputToGridDirection(inputDir);
+            PlaceGridItems();
             
-            var sourceCoord = _gridView.ScreenToGridCoordinate(sourcePos);
-
-            _gridStateHandler.TryEnqueueInput(sourceCoord, gridDir);
+            _inputService.Enable();
         }
-
+        
         private void PlaceGridItems()
         {
             for (int i = 0; i < _gridModel.Width * _gridModel.Height; i++)
@@ -54,10 +56,28 @@ namespace Core.Presenters
             }
         }
 
+        private void OnInputGet(Vector2 sourcePos, Vector2Int inputDir)
+        {
+            var gridDir = _gridView.InputToGridDirection(inputDir);
+            var sourceCoord = _gridView.ScreenToGridCoordinate(sourcePos);
+            _stateHandler.TryEnqueueInput(sourceCoord, gridDir);
+        }
+        
+        private void OnAllGoalsComplete() => _inputService.Disable();
+        
+        private void OnMoveCountUpdate()
+        {
+            if (_goalModel.MoveCount > 0) return;
+            
+            _inputService.Disable();
+        }
+        
         public void Dispose()
         {
             _inputService.OnInputGet -= OnInputGet;
-            _gridView.OnViewInitialized -= PlaceGridItems;
+            _gridView.OnViewInitialized -= OnViewInitialized;
+            _goalModel.OnAllGoalsComplete -= OnAllGoalsComplete;
+            _goalModel.OnMoveCountUpdate -= OnMoveCountUpdate;
         }
     }
 }
