@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using Core.Config;
+using Core.Configs;
 using Core.Item;
 using Core.Item.Factories;
 using Core.UI;
@@ -11,21 +13,23 @@ namespace Core.Presenters
     {
         private readonly IHudView _hudView;
         private readonly IAnimatedFXViewFactory _factory;
+        private readonly ObstacleConfigContainerSO  _obstacleConfigContainer;
         private readonly List<PendingGoalFX> _pendingAnimations = new();
 
-        public GoalFxAnimationHandler(IHudView hudView, IAnimatedFXViewFactory factory)
+        public GoalFxAnimationHandler(IHudView hudView, IAnimatedFXViewFactory factory, GameplayConfigContainer gameplayConfigContainer)
         {
             _hudView = hudView;
             _factory = factory;
+            _obstacleConfigContainer = gameplayConfigContainer.GridConfigContainer.GetConfig<ObstacleConfigContainerSO>();
         }
     
         public void QueueAnimation(IDamageableObstacle obstacle, Vector3 worldPos, Vector2 size)
         {
             var obstacleType = obstacle.ObstacleType;
             
-            if (!_hudView.TryGetGoalSlotView(obstacleType, out var slotView)) return;
-            
-            var sprite = slotView.GetIcon();
+            if(!_obstacleConfigContainer.Configs.TryGet(obstacleType, out var obstacleConfig)) return;
+
+            var sprite = obstacleConfig.BrokenSprites.Length > 0 ? obstacleConfig.BrokenSprites[0] : obstacleConfig.icon;
             
             var goalFxView = _factory.GetAnimatedFX<GoalFxView>(_hudView.GoalFxHolder, worldPos, sprite, size,false);
             
