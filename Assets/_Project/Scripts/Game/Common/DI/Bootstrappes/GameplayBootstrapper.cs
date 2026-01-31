@@ -32,7 +32,7 @@ namespace Core.Bootstrapper
 
         private void OnSceneLoadComplete()
         {
-            if(!_sceneLoadState.IsCurrentSceneEqualWidth(SceneGroupType.GameScene)) return;
+            if(!_sceneLoadState.IsLoadedSceneGroup(SceneGroupType.GameScene)) return;
             
             HudSetup();
             

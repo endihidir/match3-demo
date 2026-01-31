@@ -15,6 +15,6 @@ namespace Core.SceneService
         ProgressHandler Progress { get; }
         float ProgressSpeed { get; }
         bool IsTransitionViewActivated { get; }
-        bool IsCurrentSceneEqualWidth(SceneGroupType sceneGroupType);
+        bool IsLoadedSceneGroup(SceneGroupType sceneGroupType);
     }
 }
