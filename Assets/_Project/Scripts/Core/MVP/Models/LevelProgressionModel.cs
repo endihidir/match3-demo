@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Core.Models
 {
-    public sealed class LevelProgressionModel : ILevelProgressionReader, ILevelProgressionWriter
+    public sealed class LevelProgressionModel : ILevelProgressionModel
     {
         private const string SaveKey = "level_progression";
 

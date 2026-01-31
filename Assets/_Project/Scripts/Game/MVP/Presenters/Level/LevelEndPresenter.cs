@@ -11,25 +11,32 @@ namespace Core.Models
     {
         private readonly IGridModel _gridModel;
         private readonly ILevelObjectiveModel _objectiveModel;
+        private readonly ILevelProgressionModel _progressionModel;
         private readonly ILevelEndView _levelEndView;
-        private readonly IGridStateHandler _gridStateHandler;
+        private readonly IGridStateHandler _stateHandler;
 
-        public LevelEndPresenter(IGridModel model, ILevelObjectiveModel objectiveModel, ILevelEndView levelEndView, IGridStateHandler gridStateHandler)
+        public LevelEndPresenter(IGridModel model, ILevelObjectiveModel objectiveModel, ILevelProgressionModel progressionModel, ILevelEndView levelEndView, 
+            IGridStateHandler stateHandler)
         {
             _gridModel = model;
             _objectiveModel = objectiveModel;
+            _progressionModel = progressionModel;
             _levelEndView = levelEndView;
-            _gridStateHandler = gridStateHandler;
+            _stateHandler = stateHandler;
         }
 
         public void Initialize()
         {
-            _objectiveModel.OnAllGoalsComplete += OnAllGoalsComplete;
-            _gridStateHandler.Context.OnGridDestructionComplete += OnGridDestructionComplete;
+            _objectiveModel.OnGoalsComplete += OnLevelCompleted;
+            _stateHandler.Context.OnGridDestructionComplete += OnGridDestructionComplete;
         }
 
-        private void OnAllGoalsComplete() => _levelEndView.OpenSuccessMenuView();
-        
+        private void OnLevelCompleted()
+        {
+            _levelEndView.OpenSuccessMenuView();
+            _progressionModel.AdvanceLevel();
+        }
+
         private void OnGridDestructionComplete()
         {
             if(!_objectiveModel.IsAllMovesFinished) return;
@@ -44,8 +51,8 @@ namespace Core.Models
         
         public void Dispose()
         {
-            _objectiveModel.OnAllGoalsComplete -= OnAllGoalsComplete;
-            _gridStateHandler.Context.OnGridDestructionComplete -= OnGridDestructionComplete;
+            _objectiveModel.OnGoalsComplete -= OnLevelCompleted;
+            _stateHandler.Context.OnGridDestructionComplete -= OnGridDestructionComplete;
         }
     }
 }

@@ -14,7 +14,7 @@ namespace Core.Models
         public int MoveCount { get; private set; }
         public bool IsAllMovesFinished => MoveCount <= 0;
         public bool IsAllGoalsComplete => _totalGoalCount <= 0;
-        public event Action OnAllGoalsComplete;
+        public event Action OnGoalsComplete;
         public event Action OnMoveCountUpdate;
         public event Action<IDamageableObstacle, Vector3, Vector2> OnGoalProgressUpdate;
         
@@ -46,7 +46,7 @@ namespace Core.Models
 
             if (IsAllGoalsComplete)
             {
-                OnAllGoalsComplete?.Invoke();
+                OnGoalsComplete?.Invoke();
             }
         }
 

@@ -30,7 +30,7 @@ namespace Core.Presenters
         {
             _gridView.OnViewInitialized += OnViewInitialized;
             _inputService.OnInputGet += OnInputGet;
-            _objectiveModel.OnAllGoalsComplete += OnAllObjectivesComplete;
+            _objectiveModel.OnGoalsComplete += OnObjectivesComplete;
             _objectiveModel.OnMoveCountUpdate += OnMoveCountUpdate;
         }
         
@@ -63,7 +63,7 @@ namespace Core.Presenters
             _stateHandler.TryEnqueueInput(sourceCoord, gridDir);
         }
         
-        private void OnAllObjectivesComplete() => _inputService.Disable();
+        private void OnObjectivesComplete() => _inputService.Disable();
         
         private void OnMoveCountUpdate()
         {
@@ -76,7 +76,7 @@ namespace Core.Presenters
         {
             _inputService.OnInputGet -= OnInputGet;
             _gridView.OnViewInitialized -= OnViewInitialized;
-            _objectiveModel.OnAllGoalsComplete -= OnAllObjectivesComplete;
+            _objectiveModel.OnGoalsComplete -= OnObjectivesComplete;
             _objectiveModel.OnMoveCountUpdate -= OnMoveCountUpdate;
         }
     }
