@@ -134,7 +134,7 @@ namespace Core.SceneService
             OnLoadComplete?.Invoke();
         }
         
-        public bool IsCurrentSceneEqualWidth(SceneGroupType sceneGroupType) => CurrentSceneGroupType == sceneGroupType;
+        public bool IsLoadedSceneGroup(SceneGroupType sceneGroupType) => CurrentSceneGroupType == sceneGroupType;
 
         private async UniTask UnloadSceneAsync()
         {

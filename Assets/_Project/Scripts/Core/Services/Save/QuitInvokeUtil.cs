@@ -20,9 +20,7 @@ namespace Core.SaveSystem
         
         private static readonly string[] _allowedAsmPrefixes =
         {
-            "Assembly-CSharp",
-            "UnityBase",
-            "Game"
+            "Assembly-CSharp"
         };
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -57,9 +55,6 @@ namespace Core.SaveSystem
                     }
                 }
             }
-
-            try { PlayerPrefs.Save(); }
-            catch (Exception e) { Debug.LogException(e); }
         }
 
         private static void CacheIfNeeded()
