@@ -7,7 +7,7 @@ namespace Core.Models
 {
     public sealed class LevelProgressionModel : ILevelProgressionReader, ILevelProgressionWriter
     {
-        private const string SaveKey = "level_progress";
+        private const string SaveKey = "LEVEL_PROGRESSION";
 
         private readonly IJsonSaveService _saveService;
         private readonly ILevelDataReader _levelDataReader;
@@ -17,7 +17,7 @@ namespace Core.Models
         public int CurrentLevelIndex => _levelProgressionData.currentLevelIndex;
         public int DisplayLevelNumber => _levelProgressionData.displayLevelNumber;
         private bool ResetIndexOnLimit => true; //TODO: Get this form config
-        public event Action OnProgressChanged;
+        public event Action OnLevelChanged;
         public LevelProgressionModel(IJsonSaveService saveService, ILevelDataReader levelDataReader)
         {
             _saveService = saveService;
@@ -72,7 +72,7 @@ namespace Core.Models
         private void RaiseChanged()
         {
             _saveService.SaveToTextFile(SaveKey, _levelProgressionData);
-            OnProgressChanged?.Invoke();
+            OnLevelChanged?.Invoke();
         }
     }
 }

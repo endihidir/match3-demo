@@ -10,14 +10,14 @@ namespace Core.Presenters
 {
     public sealed class HudPresenter : IInitializable, IDisposable
     {
-        private readonly ILevelGoalModel _levelGoalModel;
+        private readonly ILevelObjectiveModel _levelObjectiveModel;
         private readonly IHudView _hudView;
         private readonly IGoalFxAnimationHandler _fxHandler;
         private readonly IGridStateHandler _gridStateHandler;
 
-        public HudPresenter(ILevelGoalModel levelGoalModel, IHudView hudView, IGoalFxAnimationHandler fxHandler, IGridStateHandler stateHandler)
+        public HudPresenter(ILevelObjectiveModel levelObjectiveModel, IHudView hudView, IGoalFxAnimationHandler fxHandler, IGridStateHandler stateHandler)
         {
-            _levelGoalModel = levelGoalModel;
+            _levelObjectiveModel = levelObjectiveModel;
             _hudView = hudView;
             _fxHandler = fxHandler;
             _gridStateHandler = stateHandler;
@@ -25,12 +25,12 @@ namespace Core.Presenters
 
         public void Initialize()
         {
-            _levelGoalModel.OnMoveCountUpdate += OnMoveCountUpdate;
-            _levelGoalModel.OnGoalCountUpdate += OnGoalCountUpdate;
+            _levelObjectiveModel.OnMoveCountUpdate += OnMoveCountUpdate;
+            _levelObjectiveModel.OnGoalCountUpdate += OnObjectiveCountUpdate;
             _gridStateHandler.Context.OnGridDestructionComplete += _fxHandler.PlayQueuedAnimations;
         }
 
-        private void OnGoalCountUpdate(IDamageableObstacle obstacle, Vector3 worldPos, Vector2 size)
+        private void OnObjectiveCountUpdate(IDamageableObstacle obstacle, Vector3 worldPos, Vector2 size)
         {
             if (obstacle.IsCollectible)
             {
@@ -44,7 +44,7 @@ namespace Core.Presenters
 
         private void OnMoveCountUpdate()
         {
-            var moveCount = _levelGoalModel.MoveCount;
+            var moveCount = _levelObjectiveModel.MoveCount;
             
             _hudView.SetMoveCount(moveCount);
         }
@@ -52,8 +52,8 @@ namespace Core.Presenters
         public void Dispose()
         {
             _gridStateHandler.Context.OnGridDestructionComplete -= _fxHandler.PlayQueuedAnimations;
-            _levelGoalModel.OnGoalCountUpdate -= OnGoalCountUpdate;
-            _levelGoalModel.OnMoveCountUpdate -= OnMoveCountUpdate;
+            _levelObjectiveModel.OnGoalCountUpdate -= OnObjectiveCountUpdate;
+            _levelObjectiveModel.OnMoveCountUpdate -= OnMoveCountUpdate;
         }
     }
 }

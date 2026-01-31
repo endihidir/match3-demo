@@ -12,15 +12,15 @@ namespace Core.Presenters
     public sealed class GridPresenter : IInitializable, IDisposable
     {
         private readonly IGridModel _gridModel;
-        private readonly ILevelGoalModel _goalModel;
+        private readonly ILevelObjectiveModel _objectiveModel;
         private readonly IGridView _gridView;
         private readonly IGridInputService _inputService;
         private readonly IGridStateHandler _stateHandler;
 
-        public GridPresenter(IGridModel model, ILevelGoalModel goalModel, IGridView gridView, IGridInputService inputService, IGridStateHandler stateHandler)
+        public GridPresenter(IGridModel model, ILevelObjectiveModel objectiveModel, IGridView gridView, IGridInputService inputService, IGridStateHandler stateHandler)
         {
             _gridModel = model;
-            _goalModel = goalModel;
+            _objectiveModel = objectiveModel;
             _gridView = gridView;
             _inputService = inputService;
             _stateHandler = stateHandler;
@@ -30,8 +30,8 @@ namespace Core.Presenters
         {
             _gridView.OnViewInitialized += OnViewInitialized;
             _inputService.OnInputGet += OnInputGet;
-            _goalModel.OnAllGoalsComplete += OnAllGoalsComplete;
-            _goalModel.OnMoveCountUpdate += OnMoveCountUpdate;
+            _objectiveModel.OnAllGoalsComplete += OnAllObjectivesComplete;
+            _objectiveModel.OnMoveCountUpdate += OnMoveCountUpdate;
         }
         
         private void OnViewInitialized()
@@ -63,11 +63,11 @@ namespace Core.Presenters
             _stateHandler.TryEnqueueInput(sourceCoord, gridDir);
         }
         
-        private void OnAllGoalsComplete() => _inputService.Disable();
+        private void OnAllObjectivesComplete() => _inputService.Disable();
         
         private void OnMoveCountUpdate()
         {
-            if (_goalModel.MoveCount > 0) return;
+            if (_objectiveModel.MoveCount > 0) return;
             
             _inputService.Disable();
         }
@@ -76,8 +76,8 @@ namespace Core.Presenters
         {
             _inputService.OnInputGet -= OnInputGet;
             _gridView.OnViewInitialized -= OnViewInitialized;
-            _goalModel.OnAllGoalsComplete -= OnAllGoalsComplete;
-            _goalModel.OnMoveCountUpdate -= OnMoveCountUpdate;
+            _objectiveModel.OnAllGoalsComplete -= OnAllObjectivesComplete;
+            _objectiveModel.OnMoveCountUpdate -= OnMoveCountUpdate;
         }
     }
 }

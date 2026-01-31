@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Core.Models
 {
-    public interface ILevelGoalModel
+    public interface ILevelObjectiveModel
     {
         event Action OnAllGoalsComplete;
         event Action OnMoveCountUpdate;

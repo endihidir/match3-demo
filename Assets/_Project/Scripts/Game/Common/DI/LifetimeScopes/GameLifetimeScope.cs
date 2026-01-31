@@ -27,7 +27,7 @@ namespace Core.LifetimeScopes
             // HUD SERVICES
             builder.Register<GoalSlotFactory>(Lifetime.Scoped).As<IGoalSlotFactory>();
             
-            builder.Register<LevelGoalModel>(Lifetime.Scoped).As<ILevelGoalModel>();
+            builder.Register<LevelObjectiveModel>(Lifetime.Scoped).As<ILevelObjectiveModel>();
             builder.RegisterComponentInHierarchy<HudView>().As<IHudView>();
             builder.Register<GoalFxAnimationHandler>(Lifetime.Scoped).As<IGoalFxAnimationHandler>();
             builder.RegisterEntryPoint<HudPresenter>();
