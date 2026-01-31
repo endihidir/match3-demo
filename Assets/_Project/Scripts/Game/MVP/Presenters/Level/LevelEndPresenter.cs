@@ -28,7 +28,7 @@ namespace Core.Models
             _gridStateHandler.Context.OnGridDestructionComplete += OnGridDestructionComplete;
         }
 
-        private void OnAllGoalsComplete() => _levelEndView.OpenLevelSuccessPanel();
+        private void OnAllGoalsComplete() => _levelEndView.OpenSuccessMenuView();
         
         private void OnGridDestructionComplete()
         {
@@ -38,7 +38,7 @@ namespace Core.Models
 
             if (itemTypes.Count(x => x.ItemKind == GridItemKind.Obstacle) > 0)
             {
-                _levelEndView.OpenLevelFailPanel();
+                _levelEndView.OpenFailMenuView();
             }
         }
         
