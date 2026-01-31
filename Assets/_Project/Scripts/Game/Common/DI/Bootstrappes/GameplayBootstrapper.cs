@@ -1,6 +1,5 @@
 using System;
 using Core.Extensions;
-using Core.Generated;
 using Core.Item.Factories;
 using Core.Level;
 using Core.Models;
@@ -32,10 +31,7 @@ namespace Core.Bootstrapper
 
         private void OnSceneLoadComplete()
         {
-            if(!_sceneLoadState.IsLoadedSceneGroup(SceneGroupType.GameScene)) return;
-            
             HudSetup();
-            
             GridSetup();
         }
 
