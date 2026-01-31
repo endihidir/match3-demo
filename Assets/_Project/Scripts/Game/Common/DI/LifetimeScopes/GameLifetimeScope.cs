@@ -22,7 +22,7 @@ namespace Core.LifetimeScopes
             builder.RegisterInstance(GameplayConfigContainer);
             builder.RegisterEntryPoint<GameplayBootstrapper>();
             
-            builder.Register<InputService>(Lifetime.Scoped).As<IInputService, ITickable>();
+            builder.Register<GridInputService>(Lifetime.Scoped).As<IGridInputService, ITickable>();
             
             // HUD SERVICES
             builder.Register<GoalSlotFactory>(Lifetime.Scoped).As<IGoalSlotFactory>();

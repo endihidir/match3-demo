@@ -5,7 +5,6 @@ using Core.Item.Factories;
 using Core.Level;
 using Core.Models;
 using Core.SceneService;
-using Core.Services;
 using Core.UI;
 using Core.Views;
 using VContainer;
@@ -18,8 +17,6 @@ namespace Core.Bootstrapper
         [Inject] private readonly ISceneLoadState _sceneLoadState;
         [Inject] private readonly ILevelDefinitionProvider _levelDefinitionProvider;
         
-        [Inject] private readonly IInputService _inputService;
-        
         [Inject] private readonly IGridItemFactory _gridItemFactory;
         [Inject] private readonly IGridModel _gridModel;
         [Inject] private readonly IGridView _gridView;
@@ -31,21 +28,15 @@ namespace Core.Bootstrapper
         public void Initialize()
         {
             _sceneLoadState.OnLoadComplete += OnSceneLoadComplete;
-            _levelGoalModel.OnAllGoalsComplete += OnAllGoalsComplete;
-            _levelGoalModel.OnMoveCountUpdate += OnMoveCountUpdate;
         }
 
         private void OnSceneLoadComplete()
         {
             if(!_sceneLoadState.IsCurrentSceneEqualWidth(SceneGroupType.GameScene)) return;
             
-            DisableInput();
-            
             HudSetup();
             
             GridSetup();
-            
-            EnableInput();
         }
 
         private void HudSetup()
@@ -67,21 +58,8 @@ namespace Core.Bootstrapper
             _gridView.Initialize(width, height, activeCells);
         }
         
-        private void EnableInput() => _inputService.Enable();
-        private void DisableInput() => _inputService.Disable();
-        
-        private void OnAllGoalsComplete() => DisableInput();
-        private void OnMoveCountUpdate()
-        {
-            if (_levelGoalModel.MoveCount > 0) return;
-            
-            DisableInput();
-        }
-        
         public void Dispose()
         {
-            _levelGoalModel.OnAllGoalsComplete -= OnAllGoalsComplete;
-            _levelGoalModel.OnMoveCountUpdate -= OnMoveCountUpdate;
             _sceneLoadState.OnLoadComplete -= OnSceneLoadComplete;
         }
     }
