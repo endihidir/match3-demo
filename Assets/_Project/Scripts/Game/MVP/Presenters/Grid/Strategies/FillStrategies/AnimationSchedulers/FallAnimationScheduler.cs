@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Core.Handlers
 {
-    public sealed class ShiftAnimationScheduler : IShiftAnimationScheduler
+    public sealed class FallAnimationScheduler : IFallAnimationScheduler
     {
         public bool TrySchedule(IGridView view, in FallDownMoveRecord record, float startTime, out float endTime, out UniTask task)
         {

@@ -7,7 +7,7 @@ namespace Core.Models
 {
     public sealed class LevelProgressionModel : ILevelProgressionReader, ILevelProgressionWriter
     {
-        private const string SaveKey = "LEVEL_PROGRESSION";
+        private const string SaveKey = "level_progression";
 
         private readonly IJsonSaveService _saveService;
         private readonly ILevelDataReader _levelDataReader;

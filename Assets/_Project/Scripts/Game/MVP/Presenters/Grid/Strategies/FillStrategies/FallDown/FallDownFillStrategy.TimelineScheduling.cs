@@ -51,7 +51,7 @@ namespace Core.Handlers
                 var x = fallRecord.FinalCoord.x;
                 var startTime = _timelineByX[x].Time;
 
-                if (_shiftAnimationScheduler.TrySchedule(view, fallRecord, startTime, out var endTime, out var task))
+                if (_fallAnimationScheduler.TrySchedule(view, fallRecord, startTime, out var endTime, out var task))
                 {
                     _timelineByX[x].Time = endTime;
                     _animTasks[taskCount++] = task;
