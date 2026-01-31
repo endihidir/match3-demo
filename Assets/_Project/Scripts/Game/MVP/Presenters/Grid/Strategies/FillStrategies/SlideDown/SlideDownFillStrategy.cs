@@ -7,13 +7,13 @@ namespace Core.Handlers
     public sealed partial class SlideDownFillStrategy : IFillStrategy
     {
         private readonly IFillItemDecider _itemDecider;
-        private readonly IShiftAnimationScheduler _shiftAnimationScheduler;
+        private readonly IFallAnimationScheduler _fallAnimationScheduler;
         private readonly ISlideAnimationScheduler _slideAnimationScheduler;
         
-        public SlideDownFillStrategy(IFillItemDecider itemDecider, IShiftAnimationScheduler shiftAnimationScheduler, ISlideAnimationScheduler slideAnimationScheduler)
+        public SlideDownFillStrategy(IFillItemDecider itemDecider, IFallAnimationScheduler fallAnimationScheduler, ISlideAnimationScheduler slideAnimationScheduler)
         {
             _itemDecider = itemDecider;
-            _shiftAnimationScheduler = shiftAnimationScheduler;
+            _fallAnimationScheduler = fallAnimationScheduler;
             _slideAnimationScheduler = slideAnimationScheduler;
         }
 

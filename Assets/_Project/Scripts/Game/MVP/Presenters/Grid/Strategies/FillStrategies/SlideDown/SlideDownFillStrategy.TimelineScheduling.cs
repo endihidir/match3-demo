@@ -78,7 +78,7 @@ namespace Core.Handlers
                 {
                     var fallRecord = new FallDownMoveRecord(record.Item, record.FinalCoord, record.IsSpawn);
 
-                    if (_shiftAnimationScheduler.TrySchedule(view, fallRecord, startTime, out var endTime, out var task))
+                    if (_fallAnimationScheduler.TrySchedule(view, fallRecord, startTime, out var endTime, out var task))
                     {
                         UpdateTimeline(usedCount, endTime);
                         _animTasks[taskCount++] = task;

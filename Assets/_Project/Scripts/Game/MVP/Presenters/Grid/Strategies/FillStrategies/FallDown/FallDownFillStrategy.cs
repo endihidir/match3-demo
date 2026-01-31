@@ -7,13 +7,13 @@ namespace Core.Handlers
     public sealed partial class FallDownFillStrategy : IFillStrategy
     {
         private readonly IFillItemDecider _itemDecider;
-        private readonly IShiftAnimationScheduler _shiftAnimationScheduler;
+        private readonly IFallAnimationScheduler _fallAnimationScheduler;
         public bool CanHandle(IGridModel model) => !GridFillCalcUtil.HasStationaryAndBlocking(model);
 
-        public FallDownFillStrategy(IFillItemDecider itemDecider, IShiftAnimationScheduler shiftAnimationScheduler)
+        public FallDownFillStrategy(IFillItemDecider itemDecider, IFallAnimationScheduler fallAnimationScheduler)
         {
             _itemDecider = itemDecider;
-            _shiftAnimationScheduler = shiftAnimationScheduler;
+            _fallAnimationScheduler = fallAnimationScheduler;
         }
 
         public IFillStrategy Execute(GridStateContext context)
