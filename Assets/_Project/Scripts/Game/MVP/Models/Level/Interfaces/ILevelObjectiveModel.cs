@@ -8,7 +8,7 @@ namespace Core.Models
 {
     public interface ILevelObjectiveModel
     {
-        event Action OnAllGoalsComplete;
+        event Action OnGoalsComplete;
         event Action OnMoveCountUpdate;
         event Action<IDamageableObstacle, Vector3, Vector2> OnGoalProgressUpdate;
         public int MoveCount { get; }

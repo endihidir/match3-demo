@@ -17,20 +17,20 @@ namespace Core.Level
     public class LevelDefinitionProvider : ILevelDefinitionProvider
     {
         private readonly ILevelDataReader _dataReader;
-        private readonly ILevelProgressionReader _progressionReader;
+        private readonly ILevelProgressionModel _progressionModel;
 
-        public LevelDefinitionProvider(ILevelDataReader dataReader, ILevelProgressionReader progressionReader)
+        public LevelDefinitionProvider(ILevelDataReader dataReader, ILevelProgressionModel progressionModel)
         {
             _dataReader = dataReader;
-            _progressionReader = progressionReader;
+            _progressionModel = progressionModel;
         }
 
-        public int GetMoveCount() => _dataReader.GetLevelDefinition(_progressionReader.CurrentLevelIndex).MoveCount;
-        public Vector2Int GetGridSize() => _dataReader.GetLevelDefinition(_progressionReader.CurrentLevelIndex).GridSize;
-        public List<LevelGoal> GetLevelGoals() => _dataReader.GetLevelDefinition(_progressionReader.CurrentLevelIndex).Goals;
-        public GridObjectType[,] GetGridObjectTypes() => _dataReader.GetLevelDefinition(_progressionReader.CurrentLevelIndex).GridObjectTypes;
+        public int GetMoveCount() => _dataReader.GetLevelDefinition(_progressionModel.CurrentLevelIndex).MoveCount;
+        public Vector2Int GetGridSize() => _dataReader.GetLevelDefinition(_progressionModel.CurrentLevelIndex).GridSize;
+        public List<LevelGoal> GetLevelGoals() => _dataReader.GetLevelDefinition(_progressionModel.CurrentLevelIndex).Goals;
+        public GridObjectType[,] GetGridObjectTypes() => _dataReader.GetLevelDefinition(_progressionModel.CurrentLevelIndex).GridObjectTypes;
         public int GetLevelNumber(bool useInfiniteCount = false) => useInfiniteCount 
-                                                                  ? _progressionReader.DisplayLevelNumber
-                                                                  : _dataReader.GetLevelDefinition(_progressionReader.CurrentLevelIndex).LevelNumber;
+                                                                  ? _progressionModel.DisplayLevelNumber
+                                                                  : _dataReader.GetLevelDefinition(_progressionModel.CurrentLevelIndex).LevelNumber;
     }
 }
