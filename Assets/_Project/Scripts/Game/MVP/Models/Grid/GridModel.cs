@@ -1,4 +1,5 @@
 using Core.Item;
+using Core.Utils;
 using UnityEngine;
 
 namespace Core.Models
@@ -6,6 +7,7 @@ namespace Core.Models
     public class GridModel : BaseGridModel<BaseGridObject>, IGridModel
     {
         private GridObjectType[,] _typeGrid;
+        private GridObjectType[] _typeGridArray;
 
         protected override void OnInitialize() { }
 
@@ -35,6 +37,25 @@ namespace Core.Models
             }
 
             return _typeGrid;
+        }
+        
+        public GridObjectType[] BuildGridTypeDataArray()
+        {
+            if (_typeGridArray == null || _typeGridArray.Length != Width * Height)
+                _typeGridArray = new GridObjectType[Width * Height];
+
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    var coord =  new Vector2Int(x, y);
+                    var obj = GetGridObject(coord);
+                    var index = GridIndexUtil.FromCoord(coord, Width);
+                    _typeGridArray[index] = obj ? obj.ObjectType : default;
+                }
+            }
+
+            return _typeGridArray;
         }
 
         protected override void SetInternal(Vector2Int coord, BaseGridObject value, bool raiseEvent = true)

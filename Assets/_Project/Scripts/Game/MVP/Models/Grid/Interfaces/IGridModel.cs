@@ -7,5 +7,6 @@ namespace Core.Models
     {
         void Swap(Vector2Int sourceCoord, Vector2Int targetCoord);
         GridObjectType[,] BuildGridTypeData();
+        GridObjectType[] BuildGridTypeDataArray();
     }
 }

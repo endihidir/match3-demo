@@ -26,7 +26,7 @@ namespace Core.Presenters
         public void Initialize()
         {
             _levelObjectiveModel.OnMoveCountUpdate += OnMoveCountUpdate;
-            _levelObjectiveModel.OnGoalCountUpdate += OnObjectiveCountUpdate;
+            _levelObjectiveModel.OnGoalProgressUpdate += OnObjectiveCountUpdate;
             _gridStateHandler.Context.OnGridDestructionComplete += _fxHandler.PlayQueuedAnimations;
         }
 
@@ -52,7 +52,7 @@ namespace Core.Presenters
         public void Dispose()
         {
             _gridStateHandler.Context.OnGridDestructionComplete -= _fxHandler.PlayQueuedAnimations;
-            _levelObjectiveModel.OnGoalCountUpdate -= OnObjectiveCountUpdate;
+            _levelObjectiveModel.OnGoalProgressUpdate -= OnObjectiveCountUpdate;
             _levelObjectiveModel.OnMoveCountUpdate -= OnMoveCountUpdate;
         }
     }

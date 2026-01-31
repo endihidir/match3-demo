@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Core.Models
 {
-    public class LevelObjectiveModel : ILevelObjectiveModel
+    public sealed class LevelObjectiveModel : ILevelObjectiveModel
     {
         private IEnumerable<LevelGoal> _goals;
         private int _totalGoalCount;
@@ -16,7 +16,7 @@ namespace Core.Models
         public bool IsAllGoalsComplete => _totalGoalCount <= 0;
         public event Action OnAllGoalsComplete;
         public event Action OnMoveCountUpdate;
-        public event Action<IDamageableObstacle, Vector3, Vector2> OnGoalCountUpdate;
+        public event Action<IDamageableObstacle, Vector3, Vector2> OnGoalProgressUpdate;
         
         public void Initialize(List<LevelGoal> goals, int moveCount)
         {
@@ -25,7 +25,7 @@ namespace Core.Models
             MoveCount = moveCount;
         }
 
-        public void CountGoal(IDamageableObstacle damageableObstacle, Vector3 worldPos, Vector2 size)
+        public void ProgressGoal(IDamageableObstacle damageableObstacle, Vector3 worldPos, Vector2 size)
         {
             if (IsAllGoalsComplete) return;
 
@@ -40,7 +40,7 @@ namespace Core.Models
                 levelGoal.Count = before - removed;
                 _totalGoalCount -= removed;
 
-                OnGoalCountUpdate?.Invoke(damageableObstacle, worldPos, size);
+                OnGoalProgressUpdate?.Invoke(damageableObstacle, worldPos, size);
                 break;
             }
 
@@ -50,10 +50,12 @@ namespace Core.Models
             }
         }
 
-        public void DecreaseMoveCount()
+        public void ConsumeMove()
         {
             if (IsAllMovesFinished) return;
+            
             MoveCount = Mathf.Max(0, MoveCount - 1);
+            
             OnMoveCountUpdate?.Invoke();
         }
         
