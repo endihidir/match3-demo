@@ -67,7 +67,7 @@ namespace Core.Presenters
         
         private void OnMoveCountUpdate()
         {
-            if (_objectiveModel.MoveCount > 0) return;
+            if (!_objectiveModel.IsAllMovesFinished) return;
             
             _inputService.Disable();
         }

@@ -43,6 +43,5 @@ namespace Core.UI
             if (TryGetGoalSlotView(obstacleType, out var goalSlotView)) 
                 goalSlotView.DecreaseGoalCount();
         }
-
     }
 }

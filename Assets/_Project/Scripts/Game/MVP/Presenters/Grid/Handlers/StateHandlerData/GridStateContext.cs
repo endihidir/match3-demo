@@ -54,11 +54,11 @@ namespace Core.Handlers
             GridModel.SetGridObject(sourceCoord, null);
         }
 
-        public void CountGoal(IDamageableObstacle damageableObstacle, Vector2Int coord, Vector2 spriteSize)
+        public void ProgressGoal(IDamageableObstacle damageableObstacle, Vector2Int coord, Vector2 spriteSize)
         {
             var worldPos = GridView.GridToWorld(coord);
             var size = GridView.SpriteToUISize(spriteSize);
-            LevelObjectiveModel.CountGoal(damageableObstacle, worldPos, size);
+            LevelObjectiveModel.ProgressGoal(damageableObstacle, worldPos, size);
         }
 
         public void RaiseObjectsDestroyed() => OnGridDestructionComplete?.Invoke();

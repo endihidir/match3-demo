@@ -27,13 +27,14 @@ namespace Core.LifetimeScopes
     
             // LEVEL
             builder.Register<LevelObjectiveModel>(Lifetime.Scoped).As<ILevelObjectiveModel>();
-            builder.Register<LevelFlowModel>(Lifetime.Scoped).As<ILevelFlowModel>();
+            builder.RegisterComponentInHierarchy<LevelEndView>().As<ILevelEndView>();
+            builder.RegisterEntryPoint<LevelEndPresenter>();
     
             // HUD
+            builder.RegisterEntryPoint<HudPresenter>();
             builder.Register<GoalSlotFactory>(Lifetime.Scoped).As<IGoalSlotFactory>();
             builder.RegisterComponentInHierarchy<HudView>().As<IHudView>();
             builder.Register<GoalFxAnimationHandler>(Lifetime.Scoped).As<IGoalFxAnimationHandler>();
-            builder.RegisterEntryPoint<HudPresenter>();
     
             // GRID
             builder.RegisterEntryPoint<GridItemRecycler>();

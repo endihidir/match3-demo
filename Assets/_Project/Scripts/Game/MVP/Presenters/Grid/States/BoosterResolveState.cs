@@ -139,7 +139,7 @@ namespace Core.Handlers
                             
                             // TODO: play destroy effect!
                             
-                            Context.CountGoal(damageableItem, obj.Coord, obj.SpriteRenderer.size);
+                            Context.ProgressGoal(damageableItem, obj.Coord, obj.SpriteRenderer.size);
                             Context.ReleaseAndSetNull(obj, coord);
                         }
                         continue;
