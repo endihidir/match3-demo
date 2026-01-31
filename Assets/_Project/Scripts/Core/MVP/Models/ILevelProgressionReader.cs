@@ -4,7 +4,7 @@ namespace Core.Models
 {
     public interface ILevelProgressionReader
     {
-        event Action OnProgressChanged;
+        event Action OnLevelChanged;
         int CurrentLevelIndex { get; }
         int DisplayLevelNumber { get; }
     }

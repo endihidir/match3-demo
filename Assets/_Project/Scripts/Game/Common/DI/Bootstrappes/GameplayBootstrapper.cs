@@ -21,13 +21,10 @@ namespace Core.Bootstrapper
         [Inject] private readonly IGridView _gridView;
         
         [Inject] private readonly IGoalSlotFactory _goalSlotFactory;
-        [Inject] private readonly ILevelGoalModel _levelGoalModel;
+        [Inject] private readonly ILevelObjectiveModel _levelObjectiveModel;
         [Inject] private readonly IHudView _hudView;
         
-        public void Initialize()
-        {
-            _sceneLoadState.OnLoadComplete += OnSceneLoadComplete;
-        }
+        public void Initialize() => _sceneLoadState.OnLoadComplete += OnSceneLoadComplete;
 
         private void OnSceneLoadComplete()
         {
@@ -40,7 +37,7 @@ namespace Core.Bootstrapper
             var levelGoals = _levelDefinitionProvider.GetLevelGoals();
             var levelMoveCount = _levelDefinitionProvider.GetMoveCount();
             _goalSlotFactory.PopulateSlotViews(levelGoals, out var slotViews);
-            _levelGoalModel.Initialize(levelGoals, levelMoveCount);
+            _levelObjectiveModel.Initialize(levelGoals, levelMoveCount);
             _hudView.Initialize(slotViews, levelMoveCount);
         }
 
@@ -54,9 +51,6 @@ namespace Core.Bootstrapper
             _gridView.Initialize(width, height, activeCells);
         }
         
-        public void Dispose()
-        {
-            _sceneLoadState.OnLoadComplete -= OnSceneLoadComplete;
-        }
+        public void Dispose() => _sceneLoadState.OnLoadComplete -= OnSceneLoadComplete;
     }
 }

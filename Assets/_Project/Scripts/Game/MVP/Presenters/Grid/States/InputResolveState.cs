@@ -32,7 +32,7 @@ namespace Core.Handlers
             
             if (hasInputGet)
             {
-                Context.LevelGoalModel.DecreaseMoveCount();
+                Context.LevelObjectiveModel.DecreaseMoveCount();
             }
             else
             {

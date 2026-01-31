@@ -19,9 +19,9 @@ namespace Core.Handlers
         private bool MatchResolveRequested => Context.MatchResolveRequested;
 
         public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory, GameplayConfigContainer configContainer, 
-             ILevelGoalModel levelGoalModel, IFillStrategyResolver fillStrategyResolver)
+             ILevelObjectiveModel levelObjectiveModel, IFillStrategyResolver fillStrategyResolver)
         {
-            Context = new GridStateContext(model, view, factory, levelGoalModel, configContainer.GridConfigContainer);
+            Context = new GridStateContext(model, view, factory, levelObjectiveModel, configContainer.GridConfigContainer);
 
             var idleState = new IdleState(Context);
             var inputState = new InputResolveState(Context);

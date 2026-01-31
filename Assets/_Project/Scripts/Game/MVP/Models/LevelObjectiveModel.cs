@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Core.Models
 {
-    public class LevelGoalModel : ILevelGoalModel
+    public class LevelObjectiveModel : ILevelObjectiveModel
     {
         private IEnumerable<LevelGoal> _goals;
         private int _totalGoalCount;

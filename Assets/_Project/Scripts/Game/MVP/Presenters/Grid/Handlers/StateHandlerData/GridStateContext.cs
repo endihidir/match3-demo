@@ -14,7 +14,7 @@ namespace Core.Handlers
         public IGridModel GridModel { get; }
         public IGridView GridView { get; }
         public IGridItemFactory GridItemFactory { get; }
-        public ILevelGoalModel LevelGoalModel { get; }
+        public ILevelObjectiveModel LevelObjectiveModel { get; }
         public GridConfigContainerSO GridConfigs { get; }
         public Queue<GridInputSource> Inputs { get; } = new();
         
@@ -31,13 +31,13 @@ namespace Core.Handlers
         public int GroupIdCounter { get; set; }
         public event Action OnGridDestructionComplete;
 
-        public GridStateContext(IGridModel gridModel, IGridView gridView, IGridItemFactory gridItemFactory, ILevelGoalModel levelGoalModel, 
+        public GridStateContext(IGridModel gridModel, IGridView gridView, IGridItemFactory gridItemFactory, ILevelObjectiveModel levelObjectiveModel, 
             GridConfigContainerSO gridConfigs)
         {
             GridModel = gridModel;
             GridView = gridView;
             GridItemFactory = gridItemFactory;
-            LevelGoalModel = levelGoalModel;
+            LevelObjectiveModel = levelObjectiveModel;
             GridConfigs = gridConfigs;
         }
         
@@ -58,7 +58,7 @@ namespace Core.Handlers
         {
             var worldPos = GridView.GridToWorld(coord);
             var size = GridView.SpriteToUISize(spriteSize);
-            LevelGoalModel.CountGoal(damageableObstacle, worldPos, size);
+            LevelObjectiveModel.CountGoal(damageableObstacle, worldPos, size);
         }
 
         public void RaiseObjectsDestroyed() => OnGridDestructionComplete?.Invoke();
