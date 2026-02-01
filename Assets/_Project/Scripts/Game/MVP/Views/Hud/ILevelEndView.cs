@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine.UI;
 
 namespace Core.UI
@@ -7,7 +8,7 @@ namespace Core.UI
         Button.ButtonClickedEvent OnClickNextButton { get; }
         Button.ButtonClickedEvent OnClickTryAgainButton { get; }
         void Initialize();
-        void OpenSuccessMenuView();
-        void OpenFailMenuView();
+        UniTask OpenSuccessMenuViewAsync();
+        UniTask OpenFailMenuViewAsync();
     }
 }

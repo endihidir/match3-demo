@@ -43,7 +43,7 @@ namespace Core.Models
 
         private void OnLevelCompleted()
         {
-            _levelEndView.OpenSuccessMenuView();
+            _levelEndView.OpenSuccessMenuViewAsync().Forget();
             _progressionModel.AdvanceLevel();
         }
 
@@ -55,7 +55,7 @@ namespace Core.Models
 
             if (itemTypes.Count(x => x.ItemKind == GridItemKind.Obstacle) > 0)
             {
-                _levelEndView.OpenFailMenuView();
+                _levelEndView.OpenFailMenuViewAsync().Forget();
             }
         }
         

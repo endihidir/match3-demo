@@ -31,7 +31,7 @@ namespace Core.Presenters
 
             var sprite = obstacleConfig.BrokenSprites.Length > 0 ? obstacleConfig.BrokenSprites[0] : obstacleConfig.icon;
             
-            var goalFxView = _factory.GetAnimatedFX<GoalFxView>(_hudView.GoalFxHolder, worldPos, sprite, size,false);
+            var goalFxView = _factory.GetImageFX<GoalFxView>(_hudView.GoalFxHolder, worldPos, sprite, size,false);
             
             _pendingAnimations.Add(new PendingGoalFX(obstacleType, goalFxView));
         }
@@ -53,15 +53,15 @@ namespace Core.Presenters
             if (!_hudView.TryGetGoalSlotView(data.ObstacleType, out var slotView)) return;
             
             data.FxView.Activate();
+
+            data.FxView.SizeAnimation.SetRectSize(slotView.GetIconSize(), 0.75f, delay);
             
-            data.FxView.MoveTo(slotView.transform.position, 0.75f, delay, Ease.InBack)
-                       .SetSize(slotView.GetIconSize(), 0.75f, delay)
-                       .OnMoveComplete(() => OnComplete(data));
+            data.FxView.MoveAnimation.MoveTo(slotView.transform.position, 0.75f, delay, Ease.InBack).OnComplete(()=> OnComplete(data));
         }
     
         private void OnComplete(PendingGoalFX data)
         {
-            _factory.ReleaseAnimatedFX(data.FxView);
+            _factory.ReleaseImageFX(data.FxView);
             _hudView.DecreaseGoalCount(data.ObstacleType);
         }
     }

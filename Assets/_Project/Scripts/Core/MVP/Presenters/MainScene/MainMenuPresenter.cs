@@ -12,25 +12,25 @@ namespace Core.Presenters
     {
         private readonly ILevelDefinitionProvider _levelDefinitionProvider;
         private readonly ISceneLoadService _sceneLoadService;
-        private readonly IPlayButtonView _playButtonView;
+        private readonly IMainMenuView _mainMenuView;
         
-        public MainMenuPresenter(ILevelDefinitionProvider levelDefinitionProvider, ISceneLoadService sceneLoadService, IPlayButtonView playButtonView)
+        public MainMenuPresenter(ILevelDefinitionProvider levelDefinitionProvider, ISceneLoadService sceneLoadService, IMainMenuView mainMenuView)
         {
             _levelDefinitionProvider = levelDefinitionProvider;
             _sceneLoadService = sceneLoadService;
-            _playButtonView = playButtonView;
+            _mainMenuView = mainMenuView;
         }
         
         public void Initialize()
         {
-            _playButtonView.SetLevelNumber(_levelDefinitionProvider.GetLevelNumber());
+            _mainMenuView.SetLevelNumber(_levelDefinitionProvider.GetLevelNumber());
             
             AddListeners();
         }
 
         private void AddListeners()
         {
-            _playButtonView.ClickedEvent.AddListener(OnClickPlayButton);
+            _mainMenuView.ClickedEvent.AddListener(OnClickPlayButton);
         }
 
         private void OnClickPlayButton() => LoadSceneAsync().Forget();
@@ -41,7 +41,7 @@ namespace Core.Presenters
 
         private void RemoveListeners()
         {
-            _playButtonView.ClickedEvent.RemoveListener(OnClickPlayButton);
+            _mainMenuView.ClickedEvent.RemoveListener(OnClickPlayButton);
         }
         
         public void Dispose()

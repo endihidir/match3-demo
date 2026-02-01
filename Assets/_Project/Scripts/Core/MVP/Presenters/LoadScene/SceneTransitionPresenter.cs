@@ -10,55 +10,39 @@ namespace Core.Presenters
 {
     public class SceneTransitionPresenter : IInitializable, ITickable, IDisposable
     {
-        private readonly ISceneLoadState _sceneLoadState;
+        private readonly ISceneLoadState _loadState;
         private readonly ISceneTransitionModel _transitionModel;
         private readonly ISceneTransitionView _transitionView;
         private bool _isTransitionViewEnabled = false;
-        public SceneTransitionPresenter(ISceneLoadState sceneLoadState, ISceneTransitionModel sceneTransitionTransitionModel, ISceneTransitionView transitionView)
+        public SceneTransitionPresenter(ISceneLoadState loadState, ISceneTransitionModel transitionModel, ISceneTransitionView transitionView)
         {
-            _sceneLoadState = sceneLoadState;
-            _transitionModel = sceneTransitionTransitionModel;
+            _loadState = loadState;
+            _transitionModel = transitionModel;
             _transitionView = transitionView;
         }
 
         public void Initialize()
         {
-            _sceneLoadState.OnLoadStart += OnBeforeTransition;
-            _sceneLoadState.Progress.Progressed += OnTransitionProgressed;
-            _sceneLoadState.OnTransitionOut += OnBeforeTransitionOut;
+            _loadState.OnLoadStart += OnTransitionStart;
+            _loadState.Progress.Progressed += OnTransitionProgress;
+            _loadState.OnTransitionOut += OnTransitionOut;
             
             _transitionView.SetLabelText("Loading...");
             _transitionView.DisableAsync(0f, .25f).Forget();
         }
-
-        public void Tick()
-        {
-            if(!_isTransitionViewEnabled) return;
-            
-            _transitionModel.UpdateData();
-            
-            _transitionView.SetFillAmount(_transitionModel.FillAmount);
-
-            var percentage = _transitionModel.FillAmount * 100f;
-            
-            _transitionView.SetPercentageText(percentage.ToString("0.0") + "%");
-        }
         
-        private void OnBeforeTransition()
+        private void OnTransitionStart()
         {
-            _isTransitionViewEnabled = _sceneLoadState.IsTransitionViewActivated;
-            
+            _isTransitionViewEnabled = _loadState.IsTransitionViewActivated;
             if (!_isTransitionViewEnabled) return;
 
             _transitionModel.ResetProgress();
-            
             _transitionView.SetFillAmount(_transitionModel.FillAmount);
-            
             _transitionView.EnableAsync().Forget();
         }
 
-        private void OnTransitionProgressed(float ratio) => _transitionModel.SetTargetRatio(ratio);
-        private async UniTask OnBeforeTransitionOut()
+        private void OnTransitionProgress(float ratio) => _transitionModel.SetTargetRatio(ratio);
+        private async UniTask OnTransitionOut()
         {
             if (!_isTransitionViewEnabled) return;
 
@@ -71,12 +55,23 @@ namespace Core.Presenters
             
             _isTransitionViewEnabled = false;
         }
+      
+        public void Tick()
+        {
+            if(!_isTransitionViewEnabled) return;
+            
+            _transitionModel.UpdateData();
+            _transitionView.SetFillAmount(_transitionModel.FillAmount);
+
+            var ratio = _transitionModel.FillAmount * 100f;
+            _transitionView.SetPercentageText(ratio.ToString("0.0") + "%");
+        }
         
         public void Dispose()
         {
-            _sceneLoadState.OnLoadStart -= OnBeforeTransition;
-            _sceneLoadState.Progress.Progressed -= OnTransitionProgressed;
-            _sceneLoadState.OnTransitionOut -= OnBeforeTransitionOut;
+            _loadState.OnLoadStart -= OnTransitionStart;
+            _loadState.Progress.Progressed -= OnTransitionProgress;
+            _loadState.OnTransitionOut -= OnTransitionOut;
         }
     }
 }
