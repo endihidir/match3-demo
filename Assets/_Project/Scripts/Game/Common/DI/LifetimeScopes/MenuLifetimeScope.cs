@@ -10,7 +10,7 @@ namespace Core.LifetimeScopes
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterEntryPoint<MainMenuPresenter>();
-            builder.RegisterComponentInHierarchy<PlayButtonView>().As<IPlayButtonView>();
+            builder.RegisterComponentInHierarchy<MainMenuView>().As<IMainMenuView>();
         }
     }
 }

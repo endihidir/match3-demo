@@ -96,7 +96,9 @@ MonoBehaviour:
   <Coord>k__BackingField: {x: 0, y: 0}
   <ObstacleType>k__BackingField: 0
   <Life>k__BackingField: 0
-  <AllowDamageSources>k__BackingField: 0
+  <AllowedDamageSources>k__BackingField: 0
+  <IsCollectible>k__BackingField: 0
+  <BrokenSprites>k__BackingField: []
 --- !u!212 &7879609683036541701 stripped
 SpriteRenderer:
   m_CorrespondingSourceObject: {fileID: 5331621357745402249, guid: 3f9c05147c79b82489141297fcbe3189,

@@ -46,8 +46,10 @@ GameObject:
   m_Component:
   - component: {fileID: 582623437816026205}
   - component: {fileID: 1122615608298194602}
+  - component: {fileID: 7672111661685643027}
+  - component: {fileID: 8102414354056981077}
   m_Layer: 5
-  m_Name: ObstacleFxView
+  m_Name: GoalFxView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -88,6 +90,35 @@ MonoBehaviour:
   <UseUnscaledTime>k__BackingField: 0
   <FxViewHolder>k__BackingField: {fileID: 8098826787367918283}
   <Image>k__BackingField: {fileID: 5902407023251381303}
+  <MoveAnimation>k__BackingField: {fileID: 7672111661685643027}
+  <SizeAnimation>k__BackingField: {fileID: 8102414354056981077}
+--- !u!114 &7672111661685643027
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6877316281403719742}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3de98027a1dc4ce58bd8cb64dcfe5b42, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &8102414354056981077
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6877316281403719742}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d184be5ab6d447dc8e52ddc0eac609bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <Transform>k__BackingField: {fileID: 0}
+  <RectTransform>k__BackingField: {fileID: 7277567924191133422}
+  <SpriteRenderer>k__BackingField: {fileID: 0}
 --- !u!1 &8853292706010318724
 GameObject:
   m_ObjectHideFlags: 0

@@ -146,6 +146,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7062951995387277777}
   - component: {fileID: 2626314640824585696}
+  - component: {fileID: -8554596260821298268}
   m_Layer: 5
   m_Name: GoalSlotView
   m_TagString: Untagged
@@ -185,8 +186,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85a48e338128407788a73c926ab6de28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <ObstacleType>k__BackingField: 0
   <GoalIcon>k__BackingField: {fileID: 4301171992361423469}
   <GoalCountTxt>k__BackingField: {fileID: 7574754415665464615}
+  <BounceAnimationView>k__BackingField: {fileID: -8554596260821298268}
+  <GoalCount>k__BackingField: 0
+--- !u!114 &-8554596260821298268
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6996242838893979593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecadaf3e10843758b8b2a8eca382169, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <BounceTransform>k__BackingField: {fileID: 5249607260581398094}
+  <Duration>k__BackingField: 0.15
+  <SizeUpMultiplier>k__BackingField: 1.2
 --- !u!1 &8238262607789857437
 GameObject:
   m_ObjectHideFlags: 0
@@ -253,7 +272,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 6528b59110dffbd4c93f3812a59d8a8e, type: 3}
+  m_Sprite: {fileID: 1760463079, guid: 6528b59110dffbd4c93f3812a59d8a8e, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1

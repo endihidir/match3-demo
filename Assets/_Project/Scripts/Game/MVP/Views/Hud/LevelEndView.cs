@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,8 +22,20 @@ namespace Core.UI
             FailMenuView?.SetActive(false);
         }
 
-        public void OpenSuccessMenuView() => SuccessMenuView?.SetActive(true);
-        public void OpenFailMenuView() => FailMenuView?.SetActive(true);
+        public async UniTask OpenSuccessMenuViewAsync()
+        {
+            await UniTask.WaitForSeconds(0.5f);
+            
+            SuccessMenuView?.SetActive(true);
+        }
+
+        public async UniTask OpenFailMenuViewAsync()
+        {
+            await UniTask.WaitForSeconds(0.5f);
+            
+            FailMenuView?.SetActive(true);
+        }
+
         public void Dispose()
         {
             

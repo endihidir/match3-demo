@@ -7,7 +7,5 @@ namespace Core.UI
     {
         [field: SerializeField] protected bool UseUnscaledTime { get; private set; }
         [field: SerializeField] protected Transform FxViewHolder { get; private set; }
-
-        protected abstract void OnDestroy();
     }
 }
