@@ -24,23 +24,16 @@ namespace Core.Bootstrapper
         [Inject] private readonly ILevelObjectiveModel _levelObjectiveModel;
         [Inject] private readonly IHudView _hudView;
         
+        [Inject] private readonly ILevelEndView _levelEndView;
+        
         public void Initialize() => _sceneLoadState.OnLoadComplete += OnSceneLoadComplete;
 
         private void OnSceneLoadComplete()
         {
-            HudSetup();
             GridSetup();
+            LevelEndSetup();
+            HudSetup();
         }
-
-        private void HudSetup()
-        {
-            var levelGoals = _levelDefinitionProvider.GetLevelGoals();
-            var levelMoveCount = _levelDefinitionProvider.GetMoveCount();
-            _goalSlotFactory.PopulateSlotViews(levelGoals, out var slotViews);
-            _levelObjectiveModel.Initialize(levelGoals, levelMoveCount);
-            _hudView.Initialize(slotViews, levelMoveCount);
-        }
-
         private void GridSetup()
         {
             var gridObjectTypes = _levelDefinitionProvider.GetGridObjectTypes();
@@ -51,6 +44,17 @@ namespace Core.Bootstrapper
             _gridView.Initialize(width, height, activeCells);
         }
         
+        private void LevelEndSetup() => _levelEndView.Initialize();
+        
+        private void HudSetup()
+        {
+            var levelGoals = _levelDefinitionProvider.GetLevelGoals();
+            var levelMoveCount = _levelDefinitionProvider.GetMoveCount();
+            _goalSlotFactory.PopulateSlotViews(levelGoals, out var slotViews);
+            _levelObjectiveModel.Initialize(levelGoals, levelMoveCount);
+            _hudView.Initialize(slotViews, levelMoveCount);
+        }
+
         public void Dispose() => _sceneLoadState.OnLoadComplete -= OnSceneLoadComplete;
     }
 }

@@ -1,8 +1,11 @@
 using System;
 using System.Linq;
+using Core.Generated;
 using Core.Handlers;
 using Core.Item;
+using Core.SceneService;
 using Core.UI;
+using Cysharp.Threading.Tasks;
 using VContainer.Unity;
 
 namespace Core.Models
@@ -14,22 +17,29 @@ namespace Core.Models
         private readonly ILevelProgressionModel _progressionModel;
         private readonly ILevelEndView _levelEndView;
         private readonly IGridStateHandler _stateHandler;
+        private readonly ISceneLoadService _sceneLoadService;
 
         public LevelEndPresenter(IGridModel model, ILevelObjectiveModel objectiveModel, ILevelProgressionModel progressionModel, ILevelEndView levelEndView, 
-            IGridStateHandler stateHandler)
+            IGridStateHandler stateHandler, ISceneLoadService sceneLoadService)
         {
             _gridModel = model;
             _objectiveModel = objectiveModel;
             _progressionModel = progressionModel;
             _levelEndView = levelEndView;
             _stateHandler = stateHandler;
+            _sceneLoadService = sceneLoadService;
         }
 
         public void Initialize()
         {
             _objectiveModel.OnGoalsComplete += OnLevelCompleted;
             _stateHandler.Context.OnGridDestructionComplete += OnGridDestructionComplete;
+            _levelEndView.OnClickNextButton.AddListener(OnClickNextButton);
+            _levelEndView.OnClickTryAgainButton.AddListener(OnClickTryAgainButton);
         }
+
+        private void OnClickNextButton() => _sceneLoadService.LoadSceneGroupAsync(SceneGroupType.MenuScene, true).Forget();
+        private void OnClickTryAgainButton() => _sceneLoadService.LoadSceneGroupAsync(SceneGroupType.MenuScene, true).Forget();
 
         private void OnLevelCompleted()
         {
@@ -51,6 +61,8 @@ namespace Core.Models
         
         public void Dispose()
         {
+            _levelEndView.OnClickTryAgainButton.RemoveListener(OnClickTryAgainButton);
+            _levelEndView.OnClickNextButton.RemoveListener(OnClickNextButton);
             _objectiveModel.OnGoalsComplete -= OnLevelCompleted;
             _stateHandler.Context.OnGridDestructionComplete -= OnGridDestructionComplete;
         }

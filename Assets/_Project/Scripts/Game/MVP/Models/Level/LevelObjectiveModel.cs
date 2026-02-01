@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Core.Item;
 using Core.Level;
+using Core.Utils;
 using UnityEngine;
 
 namespace Core.Models
@@ -23,6 +24,7 @@ namespace Core.Models
             _goals = goals.Select(g => g.Clone());
             _totalGoalCount = _goals.Sum(x => x.Count);
             MoveCount = moveCount;
+            if (IsAllGoalsComplete) OnGoalsComplete?.Invoke();
         }
 
         public void ProgressGoal(IDamageableObstacle damageableObstacle, Vector3 worldPos, Vector2 size)
