@@ -14,12 +14,12 @@ namespace Core.Views
         {
             SetActiveToggleObjects(true);
 
-            await FadeAnimationView.FadeInAsync(duration, delay, onComplete);
+            await FadeAnimationView.FadeInAsync(1f, duration, delay, onComplete);
         }
 
         public async UniTask DisableAsync(float duration = 0.2f, float delay = 1f, Action onComplete = null)
         {
-            await FadeAnimationView.FadeOutAsync(duration, delay, onComplete);
+            await FadeAnimationView.FadeOutAsync(0f, duration, delay, onComplete);
             
             SetActiveToggleObjects(false);
         }

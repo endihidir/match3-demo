@@ -5,16 +5,36 @@ namespace Core.Views
 {
     public class MoveAnimationView : MonoBehaviour
     {
+        [field: SerializeField] public Transform Transform { get; private set; }
+        
         private Tween _moveTween;
         
         public virtual Tween MoveTo(Vector3 position, float duration, float delay = 0f, Ease ease = Ease.Linear, bool useUnscaledTime = false)
         {
             _moveTween.Kill();
+            
+            var tr = Transform ?? transform;
 
-            _moveTween = transform.DOMove(position, duration)
-                                    .SetEase(ease)
-                                    .SetDelay(delay)
-                                    .SetUpdate(useUnscaledTime);
+            _moveTween = tr.DOMove(position, duration)
+                                            .SetEase(ease)
+                                            .SetDelay(delay)
+                                            .SetUpdate(useUnscaledTime);
+            
+            return _moveTween;
+        }
+        
+        public virtual Tween SetAnchoredPos(Vector3 position, float duration, float delay = 0f, Ease ease = Ease.Linear, bool useUnscaledTime = false)
+        {
+            _moveTween.Kill();
+            
+            var tr = Transform ?? transform;
+            
+            if (tr is not RectTransform rectTransform) return _moveTween;
+
+            _moveTween = rectTransform.DOAnchorPos(position, duration)
+                                        .SetEase(ease)
+                                        .SetDelay(delay)
+                                        .SetUpdate(useUnscaledTime);
             
             return _moveTween;
         }

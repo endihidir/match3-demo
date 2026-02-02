@@ -24,6 +24,7 @@ namespace Core.LifetimeScopes
     
             // INPUT
             builder.Register<GridInputService>(Lifetime.Scoped).As<IGridInputService, ITickable>();
+            builder.Register<GameplaySetupService>(Lifetime.Scoped).As<IGameplaySetupService>();
     
             // LEVEL
             builder.Register<LevelObjectiveModel>(Lifetime.Scoped).As<ILevelObjectiveModel>();

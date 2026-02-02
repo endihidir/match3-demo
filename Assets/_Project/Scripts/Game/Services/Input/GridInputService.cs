@@ -1,5 +1,4 @@
 using System;
-using Core.Utils;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -7,13 +6,6 @@ using VContainer.Unity;
 
 namespace Core.Services
 {
-    public interface IGridInputService
-    {
-        event Action<Vector2, Vector2Int> OnInputGet;
-        void Enable();
-        void Disable();
-    }
-
     public class GridInputService : IGridInputService, ITickable, IDisposable
     {
         private readonly InputActions _actions = new();

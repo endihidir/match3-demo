@@ -115,7 +115,7 @@ namespace Core.Pool
                 return;
             }
             
-            pooledObj.transform.SetParent(_poolParent.transform);
+            pooledObj.transform.SetParent(_poolParent.transform, false);
             pooledObj.transform.localPosition = Vector3.zero;
             Pool.Enqueue(pooledObject);
         }

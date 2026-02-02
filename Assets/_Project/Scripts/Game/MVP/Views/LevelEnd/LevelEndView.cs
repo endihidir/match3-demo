@@ -7,8 +7,8 @@ namespace Core.UI
 {
     public class LevelEndView : MonoBehaviour, ILevelEndView, IDisposable
     {
-        [field: SerializeField] private GameObject SuccessMenuView { get; set; }
-        [field: SerializeField] private GameObject FailMenuView { get; set; }
+        [field: SerializeField] private LevelEndMenuAnimationView SuccessMenuView { get; set; }
+        [field: SerializeField] private LevelEndMenuAnimationView FailMenuView { get; set; }
         
         [field: SerializeField] private Button NextButton { get; set; }
         [field: SerializeField] private Button TryAgainButton { get; set; }
@@ -18,23 +18,14 @@ namespace Core.UI
         
         public void Initialize()
         {
-            SuccessMenuView?.SetActive(false);
-            FailMenuView?.SetActive(false);
+            SuccessMenuView?.Hide();
+            FailMenuView?.Hide();
         }
 
-        public async UniTask OpenSuccessMenuViewAsync()
-        {
-            await UniTask.WaitForSeconds(0.5f);
-            
-            SuccessMenuView?.SetActive(true);
-        }
+        public async UniTask OpenSuccessMenuViewAsync() => await SuccessMenuView.ShowAsync(.5f);
+        public async UniTask OpenFailMenuViewAsync() => await FailMenuView.ShowAsync(0.5f);
 
-        public async UniTask OpenFailMenuViewAsync()
-        {
-            await UniTask.WaitForSeconds(0.5f);
-            
-            FailMenuView?.SetActive(true);
-        }
+        public void CloseFailMenu() => FailMenuView.Hide();
 
         public void Dispose()
         {

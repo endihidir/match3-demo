@@ -10,5 +10,6 @@ namespace Core.UI
         void Initialize();
         UniTask OpenSuccessMenuViewAsync();
         UniTask OpenFailMenuViewAsync();
+        public void CloseFailMenu();
     }
 }
