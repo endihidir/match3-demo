@@ -5,15 +5,6 @@ using UnityEngine;
 
 namespace Core.Level
 {
-    public interface ILevelDefinitionProvider
-    {
-        int GetLevelNumber(bool useInfiniteCount = false);
-        int GetMoveCount();
-        Vector2Int GetGridSize();
-        List<LevelGoal> GetLevelGoals();
-        GridObjectType[,] GetGridObjectTypes();
-    }
-    
     public class LevelDefinitionProvider : ILevelDefinitionProvider
     {
         private readonly ILevelDataReader _dataReader;

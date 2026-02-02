@@ -20,9 +20,7 @@ namespace Core.LifetimeScopes
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterInstance(GameplayConfigContainer);
-            
-            builder.RegisterEntryPoint<GameplayBootstrapper>();
-            builder.RegisterEntryPoint<GameplayFactoryRecycler>();
+            builder.RegisterEntryPoint<GameSceneSessionController>();
     
             // SERVICE
             builder.Register<GameplaySetupService>(Lifetime.Scoped).As<IGameplaySetupService>();
