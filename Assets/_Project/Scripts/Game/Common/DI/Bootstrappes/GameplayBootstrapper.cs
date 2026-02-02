@@ -12,7 +12,6 @@ namespace Core.Bootstrapper
         [Inject] private readonly IGameplaySetupService  _gameplaySetupService;
         
         public void Initialize() => _sceneLoadState.OnLoadComplete += OnSceneLoadComplete;
-
         private void OnSceneLoadComplete() => _gameplaySetupService.SetupGameplay();
         public void Dispose() => _sceneLoadState.OnLoadComplete -= OnSceneLoadComplete;
     }
