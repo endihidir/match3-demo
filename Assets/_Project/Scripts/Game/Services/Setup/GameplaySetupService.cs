@@ -38,6 +38,12 @@ namespace Core.Services
             ReleaseFactories();
             SetupGameplay();
         }
+        public void ReleaseFactories()
+        {
+            _gridItemFactory.ReleaseItemsByType<BaseGridObject>();
+            _fxViewFactory.ReleaseFXByType<BaseFxView>();
+            _goalSlotFactory.ReleaseSlotsByType<GoalSlotView>();
+        }
         
         private void GridSetup()
         {
@@ -58,13 +64,6 @@ namespace Core.Services
             _goalSlotFactory.PopulateSlotViews(levelGoals, out var slotViews);
             _levelObjectiveModel.Initialize(levelGoals, levelMoveCount);
             _hudView.Initialize(slotViews, levelMoveCount);
-        }
-
-        private void ReleaseFactories()
-        {
-            _gridItemFactory.ReleaseItemsByType<BaseGridObject>();
-            _fxViewFactory.ReleaseFXByType<BaseFxView>();
-            _goalSlotFactory.ReleaseSlotsByType<GoalSlotView>();
         }
     }
 }

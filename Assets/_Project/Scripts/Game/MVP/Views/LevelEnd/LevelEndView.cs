@@ -1,11 +1,10 @@
-using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Core.UI
 {
-    public class LevelEndView : MonoBehaviour, ILevelEndView, IDisposable
+    public class LevelEndView : MonoBehaviour, ILevelEndView
     {
         [field: SerializeField] private LevelEndMenuAnimationView SuccessMenuView { get; set; }
         [field: SerializeField] private LevelEndMenuAnimationView FailMenuView { get; set; }
@@ -18,18 +17,13 @@ namespace Core.UI
         
         public void Initialize()
         {
-            SuccessMenuView?.Hide();
-            FailMenuView?.Hide();
+            CloseFailMenu();
+            CloseSuccessMenu();
         }
 
         public async UniTask OpenSuccessMenuViewAsync() => await SuccessMenuView.ShowAsync(.5f);
-        public async UniTask OpenFailMenuViewAsync() => await FailMenuView.ShowAsync(0.5f);
-
+        public async UniTask OpenFailMenuViewAsync() => await FailMenuView.ShowAsync(.5f);
+        public void CloseSuccessMenu() => SuccessMenuView.Hide();
         public void CloseFailMenu() => FailMenuView.Hide();
-
-        public void Dispose()
-        {
-            
-        }
     }
 }

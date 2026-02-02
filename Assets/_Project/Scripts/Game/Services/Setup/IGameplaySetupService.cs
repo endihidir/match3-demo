@@ -4,5 +4,6 @@ namespace Core.Services
     {
         void SetupGameplay();
         void ResetGameplay();
+        void ReleaseFactories();
     }
 }

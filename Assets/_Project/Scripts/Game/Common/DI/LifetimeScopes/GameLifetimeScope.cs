@@ -15,16 +15,18 @@ namespace Core.LifetimeScopes
 {
     public class GameLifetimeScope : LifetimeScope
     {
-        [field: SerializeField] private GameplayConfigContainer GameplayConfigContainer {get; set;}
+        [field: SerializeField] private GameplayConfigContainer GameplayConfigContainer { get; set; }
 
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterInstance(GameplayConfigContainer);
+            
             builder.RegisterEntryPoint<GameplayBootstrapper>();
+            builder.RegisterEntryPoint<GameplayFactoryRecycler>();
     
-            // INPUT
-            builder.Register<GridInputService>(Lifetime.Scoped).As<IGridInputService, ITickable>();
+            // SERVICE
             builder.Register<GameplaySetupService>(Lifetime.Scoped).As<IGameplaySetupService>();
+            builder.Register<GridInputService>(Lifetime.Scoped).As<IGridInputService, ITickable>();
     
             // LEVEL
             builder.Register<LevelObjectiveModel>(Lifetime.Scoped).As<ILevelObjectiveModel>();
@@ -38,7 +40,6 @@ namespace Core.LifetimeScopes
             builder.Register<GoalFxAnimationHandler>(Lifetime.Scoped).As<IGoalFxAnimationHandler>();
     
             // GRID
-            builder.RegisterEntryPoint<GridItemRecycler>();
             builder.Register<GridItemFactory>(Lifetime.Scoped).As<IGridItemFactory>();
             builder.Register<GridModel>(Lifetime.Scoped).As<IGridModel>();
             builder.RegisterComponentInHierarchy<GridView>().As<IGridView>();
