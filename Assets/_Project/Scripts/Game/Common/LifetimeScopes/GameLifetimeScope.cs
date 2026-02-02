@@ -33,8 +33,8 @@ namespace Core.LifetimeScopes
     
             // HUD
             builder.RegisterEntryPoint<HudPresenter>();
-            builder.Register<GoalSlotFactory>(Lifetime.Scoped).As<IGoalSlotFactory>();
             builder.RegisterComponentInHierarchy<HudView>().As<IHudView>();
+            builder.Register<GoalSlotFactory>(Lifetime.Scoped).As<IGoalSlotFactory>();
             builder.Register<GoalFxAnimationHandler>(Lifetime.Scoped).As<IGoalFxAnimationHandler>();
     
             // GRID
