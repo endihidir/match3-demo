@@ -5,7 +5,7 @@ namespace Core.Views
 {
     public class BounceAnimationView : MonoBehaviour
     {
-        [field: SerializeField] private Transform BounceTransform { get; set; }
+        [field: SerializeField] public Transform BounceTransform { get; private set; }
         [field: SerializeField] private float Duration { get; set; } = 0.15f;
         [field: SerializeField] private float SizeUpMultiplier { get; set; } = 1.2f;
         

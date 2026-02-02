@@ -13,7 +13,6 @@ namespace Core.Item.Factories
         {
             var fx = _fxFactory.GetFX<T>(show);
             fx.transform.SetParent(parent, false);
-            fx.transform.localScale = Vector3.one;
             fx.transform.position = pos;
             fx.SetSprite(sprite);
             fx.SetSize(size);

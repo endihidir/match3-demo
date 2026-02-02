@@ -104,6 +104,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3de98027a1dc4ce58bd8cb64dcfe5b42, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <Transform>k__BackingField: {fileID: 582623437816026205}
+  <RectTransform>k__BackingField: {fileID: 582623437816026205}
 --- !u!114 &8102414354056981077
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -116,8 +118,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d184be5ab6d447dc8e52ddc0eac609bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <Transform>k__BackingField: {fileID: 0}
-  <RectTransform>k__BackingField: {fileID: 7277567924191133422}
+  <Transform>k__BackingField: {fileID: 582623437816026205}
   <SpriteRenderer>k__BackingField: {fileID: 0}
 --- !u!1 &8853292706010318724
 GameObject:

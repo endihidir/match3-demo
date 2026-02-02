@@ -133,13 +133,14 @@ GameObject:
   - component: {fileID: 1943746}
   - component: {fileID: 1943748}
   - component: {fileID: 1943747}
+  - component: {fileID: 1943749}
   m_Layer: 5
   m_Name: BG
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1943746
 RectTransform:
   m_ObjectHideFlags: 0
@@ -172,7 +173,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.023529414, g: 0.0627451, b: 0.13333334, a: 0.9882353}
+  m_Color: {r: 0.023529414, g: 0.0627451, b: 0.13333334, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -197,6 +198,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1943745}
   m_CullTransparentMesh: 1
+--- !u!114 &1943749
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1943745}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d6e5b9bafa543cb9059121566e23f3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <CanvasGroup>k__BackingField: {fileID: 0}
+  <Graphic>k__BackingField: {fileID: 1943747}
 --- !u!1 &195934559
 GameObject:
   m_ObjectHideFlags: 0
@@ -272,13 +287,14 @@ GameObject:
   - component: {fileID: 246681524}
   - component: {fileID: 246681523}
   - component: {fileID: 246681522}
+  - component: {fileID: 246681525}
   m_Layer: 5
   m_Name: NextBtn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &246681521
 RectTransform:
   m_ObjectHideFlags: 0
@@ -380,6 +396,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 246681520}
   m_CullTransparentMesh: 1
+--- !u!114 &246681525
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 246681520}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecadaf3e10843758b8b2a8eca382169, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <BounceTransform>k__BackingField: {fileID: 246681521}
+  <Duration>k__BackingField: 0.15
+  <SizeUpMultiplier>k__BackingField: 1.2
 --- !u!1 &262796440
 GameObject:
   m_ObjectHideFlags: 0
@@ -681,13 +712,14 @@ GameObject:
   - component: {fileID: 507845667}
   - component: {fileID: 507845669}
   - component: {fileID: 507845668}
+  - component: {fileID: 507845670}
   m_Layer: 5
   m_Name: BG
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &507845667
 RectTransform:
   m_ObjectHideFlags: 0
@@ -720,7 +752,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.023529414, g: 0.0627451, b: 0.13333334, a: 0.9882353}
+  m_Color: {r: 0.023529414, g: 0.0627451, b: 0.13333334, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -745,6 +777,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 507845666}
   m_CullTransparentMesh: 1
+--- !u!114 &507845670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 507845666}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d6e5b9bafa543cb9059121566e23f3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <CanvasGroup>k__BackingField: {fileID: 0}
+  <Graphic>k__BackingField: {fileID: 507845668}
 --- !u!1 &643351414
 GameObject:
   m_ObjectHideFlags: 0
@@ -1337,8 +1383,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 238b41e4409c4288b78ecb8c6794828f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <SuccessMenuView>k__BackingField: {fileID: 1761105759}
-  <FailMenuView>k__BackingField: {fileID: 1777415441}
+  <SuccessMenuView>k__BackingField: {fileID: 1761105762}
+  <FailMenuView>k__BackingField: {fileID: 1777415444}
   <NextButton>k__BackingField: {fileID: 246681522}
   <TryAgainButton>k__BackingField: {fileID: 1737921594}
 --- !u!1 &976744070
@@ -1352,13 +1398,14 @@ GameObject:
   - component: {fileID: 976744071}
   - component: {fileID: 976744073}
   - component: {fileID: 976744072}
+  - component: {fileID: 976744074}
   m_Layer: 5
   m_Name: Title
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &976744071
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1416,6 +1463,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 976744070}
   m_CullTransparentMesh: 1
+--- !u!114 &976744074
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 976744070}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecadaf3e10843758b8b2a8eca382169, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <BounceTransform>k__BackingField: {fileID: 976744071}
+  <Duration>k__BackingField: 0.15
+  <SizeUpMultiplier>k__BackingField: 1.2
 --- !u!1 &1032552417
 GameObject:
   m_ObjectHideFlags: 0
@@ -2044,13 +2106,14 @@ GameObject:
   - component: {fileID: 1730151052}
   - component: {fileID: 1730151054}
   - component: {fileID: 1730151053}
+  - component: {fileID: 1730151055}
   m_Layer: 5
   m_Name: Title
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1730151052
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2108,6 +2171,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1730151051}
   m_CullTransparentMesh: 1
+--- !u!114 &1730151055
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1730151051}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecadaf3e10843758b8b2a8eca382169, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <BounceTransform>k__BackingField: {fileID: 1730151052}
+  <Duration>k__BackingField: 0.15
+  <SizeUpMultiplier>k__BackingField: 1.2
 --- !u!1 &1737921592
 GameObject:
   m_ObjectHideFlags: 0
@@ -2120,13 +2198,14 @@ GameObject:
   - component: {fileID: 1737921596}
   - component: {fileID: 1737921595}
   - component: {fileID: 1737921594}
+  - component: {fileID: 1737921597}
   m_Layer: 5
   m_Name: TryAgainBtn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1737921593
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2228,6 +2307,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1737921592}
   m_CullTransparentMesh: 1
+--- !u!114 &1737921597
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1737921592}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecadaf3e10843758b8b2a8eca382169, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <BounceTransform>k__BackingField: {fileID: 1737921593}
+  <Duration>k__BackingField: 0.15
+  <SizeUpMultiplier>k__BackingField: 1.2
 --- !u!1 &1761105759
 GameObject:
   m_ObjectHideFlags: 0
@@ -2237,13 +2331,15 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1761105760}
+  - component: {fileID: 1761105761}
+  - component: {fileID: 1761105762}
   m_Layer: 5
   m_Name: SuccessMenuView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1761105760
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2266,6 +2362,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1761105761
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1761105759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4de46bca405d4b71bb65fd6f62561db0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1761105762
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1761105759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce7a172a87564829b445673bf1df9427, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <BgFadeAnimation>k__BackingField: {fileID: 507845670}
+  <TitleBounceAnimation>k__BackingField: {fileID: 976744074}
+  <ButtonBounceAnimation>k__BackingField: {fileID: 246681525}
 --- !u!1 &1777415441
 GameObject:
   m_ObjectHideFlags: 0
@@ -2275,13 +2398,15 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1777415442}
+  - component: {fileID: 1777415443}
+  - component: {fileID: 1777415444}
   m_Layer: 5
   m_Name: FailMenuView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1777415442
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2304,6 +2429,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1777415443
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1777415441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 737ed748ce3d40beb0bd3f338769b1ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1777415444
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1777415441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce7a172a87564829b445673bf1df9427, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <BgFadeAnimation>k__BackingField: {fileID: 1943749}
+  <TitleBounceAnimation>k__BackingField: {fileID: 1730151055}
+  <ButtonBounceAnimation>k__BackingField: {fileID: 1737921597}
 --- !u!1 &1812597629
 GameObject:
   m_ObjectHideFlags: 0

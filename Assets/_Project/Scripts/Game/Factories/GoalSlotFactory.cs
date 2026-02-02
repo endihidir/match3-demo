@@ -30,11 +30,8 @@ namespace Core.Item.Factories
         }
         
         public void ReleaseSlot(GoalSlotView slot) => _slotViewFactory.ReleaseSlot(slot);
-        
         public void ReleaseSlot(Transform slot) => _slotViewFactory.ReleaseSlot(slot);
-        
         public void ReleaseSlotsByType<T>() where T : GoalSlotView => _slotViewFactory.ReleaseSlotsByType<T>();
-        
         public void RemovePoolsByType<T>() where T : GoalSlotView => _slotViewFactory.RemoveSlotPoolByType<T>();
     }
 }

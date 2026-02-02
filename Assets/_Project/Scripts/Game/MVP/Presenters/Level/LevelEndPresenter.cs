@@ -4,6 +4,7 @@ using Core.Generated;
 using Core.Handlers;
 using Core.Item;
 using Core.SceneService;
+using Core.Services;
 using Core.UI;
 using Cysharp.Threading.Tasks;
 using VContainer.Unity;
@@ -18,9 +19,11 @@ namespace Core.Models
         private readonly ILevelEndView _levelEndView;
         private readonly IGridStateHandler _stateHandler;
         private readonly ISceneLoadService _sceneLoadService;
+        private readonly IGameplaySetupService _gameplaySetupService;
+        private bool _isLevelFailed = false;
 
         public LevelEndPresenter(IGridModel model, ILevelObjectiveModel objectiveModel, ILevelProgressionModel progressionModel, ILevelEndView levelEndView, 
-            IGridStateHandler stateHandler, ISceneLoadService sceneLoadService)
+            IGridStateHandler stateHandler, ISceneLoadService sceneLoadService, IGameplaySetupService gameplaySetupService)
         {
             _gridModel = model;
             _objectiveModel = objectiveModel;
@@ -28,6 +31,7 @@ namespace Core.Models
             _levelEndView = levelEndView;
             _stateHandler = stateHandler;
             _sceneLoadService = sceneLoadService;
+            _gameplaySetupService = gameplaySetupService;
         }
 
         public void Initialize()
@@ -39,7 +43,12 @@ namespace Core.Models
         }
 
         private void OnClickNextButton() => _sceneLoadService.LoadSceneGroupAsync(SceneGroupType.MenuScene, true).Forget();
-        private void OnClickTryAgainButton() => _sceneLoadService.LoadSceneGroupAsync(SceneGroupType.MenuScene, true).Forget();
+        private void OnClickTryAgainButton()
+        {
+            _isLevelFailed = false;
+            _levelEndView.CloseFailMenu();
+            _gameplaySetupService.ResetGameplay();
+        }
 
         private void OnLevelCompleted()
         {
@@ -53,8 +62,10 @@ namespace Core.Models
             
             var itemTypes = _gridModel.BuildGridTypeDataArray();
 
-            if (itemTypes.Count(x => x.ItemKind == GridItemKind.Obstacle) > 0)
+            if (itemTypes.Count(x => x.ItemKind == GridItemKind.Obstacle) > 0 && !_isLevelFailed)
             {
+                _isLevelFailed = true;
+                
                 _levelEndView.OpenFailMenuViewAsync().Forget();
             }
         }
