@@ -29,7 +29,7 @@ namespace Core.Presenters
             
             if(!_obstacleConfigContainer.Configs.TryGet(obstacleType, out var obstacleConfig)) return;
 
-            var sprite = obstacleConfig.BrokenSprites.Length > 0 ? obstacleConfig.BrokenSprites[0] : obstacleConfig.icon;
+            var sprite = obstacleConfig.CrackedSprites.Length > 0 ? obstacleConfig.CrackedSprites[0] : obstacleConfig.icon;
             
             var goalFxView = _factory.GetImageFX<GoalFxView>(_hudView.GoalFxHolder, worldPos, sprite, size,false);
             
