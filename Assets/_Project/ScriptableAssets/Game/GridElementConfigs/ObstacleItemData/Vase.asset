@@ -17,3 +17,16 @@ MonoBehaviour:
   isStationary: 1
   <Life>k__BackingField: 1
   <DamageSource>k__BackingField: -1
+  <IsCollectible>k__BackingField: 0
+  <CrackedSprites>k__BackingField: []
+  <ShatteredSprites>k__BackingField:
+  - {fileID: -1727595645, guid: df04b2c840e79f84e9153373ea077690, type: 3}
+  - {fileID: 1754861650, guid: df04b2c840e79f84e9153373ea077690, type: 3}
+  - {fileID: 1202892300, guid: df04b2c840e79f84e9153373ea077690, type: 3}
+  - {fileID: -136408752, guid: df04b2c840e79f84e9153373ea077690, type: 3}
+  - {fileID: 884503741, guid: df04b2c840e79f84e9153373ea077690, type: 3}
+  - {fileID: 78746824, guid: df04b2c840e79f84e9153373ea077690, type: 3}
+  - {fileID: -519923890, guid: df04b2c840e79f84e9153373ea077690, type: 3}
+  - {fileID: -1591831904, guid: df04b2c840e79f84e9153373ea077690, type: 3}
+  - {fileID: 1489937316, guid: df04b2c840e79f84e9153373ea077690, type: 3}
+  - {fileID: 1928554763, guid: df04b2c840e79f84e9153373ea077690, type: 3}

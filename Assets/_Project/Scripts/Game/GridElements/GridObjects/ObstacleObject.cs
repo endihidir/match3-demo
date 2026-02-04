@@ -26,7 +26,7 @@ namespace Core.Item
                 Life = obstacleConfigData.GetLife();
                 IsCollectible = obstacleConfigData.IsCollectible;
                 AllowedDamageSources = obstacleConfigData.DamageSource;
-                BrokenSprites = obstacleConfigData.BrokenSprites;
+                BrokenSprites = obstacleConfigData.CrackedSprites;
             }
         }
 
