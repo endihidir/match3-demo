@@ -68,6 +68,7 @@ namespace Core.Item
             SetPosition(Vector3.zero);
             Animation?.Dispose();
             SpriteRenderer.sprite = null;
+            SpriteRenderer.sortingOrder = 0;
             SpriteSizeMultiplier = Vector2.zero;
         }
     }

@@ -11,10 +11,10 @@ namespace Core.Config
         [field: SerializeField] public BoosterFamily First { get; private set; }
         [field: SerializeField] public BoosterFamily Second { get; private set; }
 
-        public static BoosterComboKey Create(BoosterType a, BoosterType b)
+        public static BoosterComboKey Create(BoosterType boosterTypeA, BoosterType boosterTypeB)
         {
-            var fa = a.ToFamily();
-            var fb = b.ToFamily();
+            var fa = boosterTypeA.ToFamily();
+            var fb = boosterTypeB.ToFamily();
 
             return (int)fa <= (int)fb ? new BoosterComboKey { First = fa, Second = fb } : new BoosterComboKey { First = fb, Second = fa };
         }

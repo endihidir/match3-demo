@@ -102,6 +102,7 @@ namespace Core.Handlers
                 Array.Resize(ref _usedColumnsByRecord, width);
 
             _usedColumnStampId++;
+            
             if (_usedColumnStampId == int.MaxValue)
             {
                 Array.Clear(_usedColumnStamp, 0, _usedColumnStamp.Length);
@@ -109,14 +110,6 @@ namespace Core.Handlers
             }
 
             var count = 0;
-
-            void MarkX(int x)
-            {
-                if ((uint)x >= (uint)width) return;
-                if (_usedColumnStamp[x] == _usedColumnStampId) return;
-                _usedColumnStamp[x] = _usedColumnStampId;
-                _usedColumnsByRecord[count++] = x;
-            }
 
             MarkX(record.FinalCoord.x);
 
@@ -131,6 +124,14 @@ namespace Core.Handlers
             }
 
             return count;
+
+            void MarkX(int x)
+            {
+                if ((uint)x >= (uint)width) return;
+                if (_usedColumnStamp[x] == _usedColumnStampId) return;
+                _usedColumnStamp[x] = _usedColumnStampId;
+                _usedColumnsByRecord[count++] = x;
+            }
         }
 
         private float GetStartTime(int usedCount)

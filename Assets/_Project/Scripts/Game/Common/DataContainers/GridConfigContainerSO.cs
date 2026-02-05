@@ -7,7 +7,7 @@ namespace Core.Config
     public class GridConfigContainerSO : ScriptableObject
     { 
         [field: SerializeField] public FillItemDecisionSettingsSO FillItemDecisionSettings { get; private set; }
-        [field: SerializeField] private BaseItemConfigContainerSO[] ConfigContainers { get; set; }
+        [field: SerializeField] private BaseItemConfigContainerSO[] GridItemConfigContainers { get; set; }
         
         public BaseItemDataSO GetConfigData(GridObjectType objectType) => objectType.ItemKind switch
         {
@@ -19,7 +19,7 @@ namespace Core.Config
         
         public T GetConfig<T>() where T : BaseItemConfigContainerSO
         {
-            foreach (var baseItemConfig in ConfigContainers)
+            foreach (var baseItemConfig in GridItemConfigContainers)
             {
                 if (baseItemConfig is T config)
                 {
