@@ -8,6 +8,9 @@ namespace Core.Handlers
 {
     public partial class SlideDownFillStrategy
     {
+        // Spawn
+        // =========================================================
+
         private bool SpawnTopOpenSegment(GridStateContext context, int x, int height)
         {
             var model = context.GridModel;
@@ -18,14 +21,15 @@ namespace Core.Handlers
             var segmentStartY = -1;
             var blockedInSegment = false;
             var segmentTopWorldY = 0f;
+
             var canSpawn = true;
             var seenAnyActive = false;
 
             for (int y = 0; y < height; y++)
             {
-                var coord = new Vector2Int(x, y);
+                var c = new Vector2Int(x, y);
 
-                if (!model.IsCellActive(coord))
+                if (!model.IsCellActive(c))
                 {
                     if (seenAnyActive)
                         canSpawn = false;
@@ -47,7 +51,7 @@ namespace Core.Handlers
                 if (!canSpawn)
                     continue;
 
-                var obj = model.GetGridObject(coord);
+                var obj = model.GetGridObject(c);
 
                 if (obj)
                 {
@@ -70,7 +74,7 @@ namespace Core.Handlers
 
             return spawnedAny;
         }
-
+        
         private void SpawnInto(IGridModel model, GridStateContext context, IGridView view, int x, int startY, int spawnCount, float segmentTopWorldY, float cellSize)
         {
             var baseStack = _spawnStackByX[x];
@@ -85,17 +89,19 @@ namespace Core.Handlers
                 item.SetParent(view.GridObjectsParent);
                 item.SetSpriteSize(cellSize);
 
-                var worldPos = view.GridToWorld(target);
+                var w = view.GridToWorld(target);
+
                 var reverseIndex = (spawnCount - 1) - i;
                 var spawnY = segmentTopWorldY + (baseStack + reverseIndex) * cellSize;
 
-                item.SetPosition(new Vector3(worldPos.x, spawnY, worldPos.z));
+                item.SetPosition(new Vector3(w.x, spawnY, w.z));
 
                 model.SetGridObject(target, item);
-                AddStep(item, target, isSpawn: true);
+                AddStep(item, target, true);
             }
 
             _spawnStackByX[x] = baseStack + spawnCount;
         }
+
     }
 }

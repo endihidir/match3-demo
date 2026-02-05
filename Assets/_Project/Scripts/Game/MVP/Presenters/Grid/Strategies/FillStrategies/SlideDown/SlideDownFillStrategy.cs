@@ -9,11 +9,8 @@ namespace Core.Handlers
         private readonly IFillItemDecider _itemDecider;
         private readonly IFallAnimationScheduler _fallAnimationScheduler;
         private readonly ISlideAnimationScheduler _slideAnimationScheduler;
-
-        public SlideDownFillStrategy(
-            IFillItemDecider itemDecider,
-            IFallAnimationScheduler fallAnimationScheduler,
-            ISlideAnimationScheduler slideAnimationScheduler)
+        
+        public SlideDownFillStrategy(IFillItemDecider itemDecider, IFallAnimationScheduler fallAnimationScheduler, ISlideAnimationScheduler slideAnimationScheduler)
         {
             _itemDecider = itemDecider;
             _fallAnimationScheduler = fallAnimationScheduler;
@@ -27,11 +24,12 @@ namespace Core.Handlers
             ResetWorkspace();
 
             var model = context.GridModel;
-            EnsureCapacity(model.Width, model.Height);
 
-            // Keep looping while we can apply any movement
+            EnsureBuffers(model.Width, model.Height);
+
             var movedAny = true;
-            
+
+            // Keep looping while we can apply any movement (vertical fall, diagonal slide, spawn)
             while (movedAny)
             {
                 movedAny = TryApplyAnyMove(context);

@@ -1,3 +1,4 @@
+using System;
 using Core.Views;
 using Cysharp.Threading.Tasks;
 
@@ -7,48 +8,53 @@ namespace Core.Handlers
     {
         private UniTask PlayAnimations(GridStateContext context)
         {
-            var recordCount = _recordBuffer.Count;
-            if (recordCount == 0)
-                return UniTask.CompletedTask;
-
             var view = context.GridView;
             var width = context.GridModel.Width;
 
-            // Prepare sort order
-            _sortOrder.Prepare(recordCount);
-            _sortOrder.Sort(recordCount, new FallMoveOrderComparer(_recordBuffer.Records));
+            if (_animTasks.Length < _recordCount)
+                Array.Resize(ref _animTasks, _recordCount);
 
-            // Reset timeline
-            _timeline.Reset(width);
-            _taskCollector.Reset();
+            for (int x = 0; x < width; x++)
+                _timelineByX[x] = 0f;
 
-            // Schedule non-spawn first, then spawn
-            SchedulePass(view, passIsSpawn: false);
-            SchedulePass(view, passIsSpawn: true);
+            EnsureBuffers(width);
 
-            return _taskCollector.WhenAll();
+            for (int i = 0; i < _recordCount; i++)
+                _order[i] = i;
+
+            Array.Sort(_order, 0, _recordCount, new FallMoveOrderComparer(_records));
+
+            var taskCount = 0;
+
+            ScheduleShiftByTimeline(view, passIsSpawn: false, ref taskCount);
+            ScheduleShiftByTimeline(view, passIsSpawn: true, ref taskCount);
+
+            if (taskCount == 0) 
+                return UniTask.CompletedTask;
+            
+            if (_animTasks.Length != taskCount)
+                Array.Resize(ref _animTasks, taskCount);
+
+            return UniTask.WhenAll(_animTasks);
         }
 
-        private void SchedulePass(IGridView view, bool passIsSpawn)
+        private void ScheduleShiftByTimeline(IGridView view, bool passIsSpawn, ref int taskCount)
         {
-            var recordCount = _recordBuffer.Count;
-            var order = _sortOrder.Order;
-
-            for (int i = 0; i < recordCount; i++)
+            for (int oi = 0; oi < _recordCount; oi++)
             {
-                var recordIndex = order[i];
-                ref readonly var record = ref _recordBuffer.GetReadonly(recordIndex);
+                var recordIndex = _order[oi];
+                ref readonly var fallRecord = ref _records[recordIndex];
 
-                if (!record.Item) continue;
-                if (record.IsSpawn != passIsSpawn) continue;
+                if (!fallRecord.Item) continue;
+                if (fallRecord.IsSpawn != passIsSpawn) continue;
 
-                var x = record.FinalCoord.x;
-                var startTime = _timeline.GetColumnTime(x);
+                var x = fallRecord.FinalCoord.x;
+                var startTime = _timelineByX[x];
 
-                if (_fallAnimationScheduler.TrySchedule(view, record, startTime, out var endTime, out var task))
+                if (_fallAnimationScheduler.TrySchedule(view, fallRecord, startTime, out var endTime, out var task))
                 {
-                    _timeline.SetColumnTime(x, endTime);
-                    _taskCollector.Add(task);
+                    _timelineByX[x] = endTime;
+                    _animTasks[taskCount++] = task;
                 }
             }
         }

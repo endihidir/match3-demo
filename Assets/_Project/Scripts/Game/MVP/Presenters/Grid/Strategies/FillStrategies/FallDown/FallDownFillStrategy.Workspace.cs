@@ -1,38 +1,39 @@
 using System;
-using Core.Models;
-using Core.Utils;
 using Cysharp.Threading.Tasks;
 
 namespace Core.Handlers
 {
     public partial class FallDownFillStrategy
     {
-        private SimpleMoveRecordBuffer<FallDownMoveRecord> _recordBuffer;
-        
-        // Animation scheduling
-        private AnimationTimeline _timeline;
-        private AnimationTaskCollector _taskCollector;
-        private SortOrderHelper _sortOrder;
-        
-        // State
+        private FallDownMoveRecord[] _records = Array.Empty<FallDownMoveRecord>();
+        private int _recordCount;
+
+        private float[] _timelineByX = Array.Empty<float>();
+        private int[] _order = Array.Empty<int>();
+        private UniTask[] _animTasks = new UniTask[128];
         private UniTask _runningAnimations;
 
-        private void EnsureCapacity(int width, int height)
+        private void EnsureBuffers(int width)
         {
-            _recordBuffer.EnsureCapacity(width * height);
-            _timeline.EnsureCapacity(width);
-            _taskCollector.EnsureCapacity(width * height);
+            if (_timelineByX.Length < width)
+                _timelineByX = new float[width];
+
+            if (_order.Length < _recordCount)
+                Array.Resize(ref _order, _recordCount);
         }
 
-        private void ResetWorkspace()
+        private void EnsureRecordCapacity(int capacity)
         {
-            _recordBuffer.Reset();
-            _taskCollector.Reset();
+            if (_records.Length < capacity)
+                Array.Resize(ref _records, capacity);
         }
 
         private void AddRecord(in FallDownMoveRecord record)
         {
-            _recordBuffer.Add(record);
+            if (_recordCount >= _records.Length)
+                Array.Resize(ref _records, _records.Length == 0 ? 256 : _records.Length * 2);
+
+            _records[_recordCount++] = record;
         }
     }
 }
