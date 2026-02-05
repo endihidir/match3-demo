@@ -1,3 +1,4 @@
+using System;
 using Core.Views;
 using Cysharp.Threading.Tasks;
 
@@ -5,95 +6,155 @@ namespace Core.Handlers
 {
     public partial class SlideDownFillStrategy
     {
+        // =========================================================
+        // Animation emit (column timeline scheduling)
+        // =========================================================
+
         private UniTask PlayAnimations(GridStateContext context)
         {
-            var recordCount = _recordBuffer.Count;
-            if (recordCount == 0)
+            if (_recordCount == 0)
                 return UniTask.CompletedTask;
 
-            var view = context.GridView;
-            var width = context.GridModel.Width;
+            EnsureOrderCapacity(_recordCount);
 
-            // Mark IsSlide for each record
-            for (int i = 0; i < recordCount; i++)
+            // Update per-record flags (IsSlide) and build sort order.
+            for (int i = 0; i < _recordCount; i++)
+                _order[i] = i;
+
+            for (int i = 0; i < _recordCount; i++)
             {
-                ref var record = ref _recordBuffer.GetRef(i);
-                if (record.Item && record.PathCount > 0)
-                    record.MarkAsSlide(ref _pathPool);
+                ref var record = ref _records[i];
+                if (!record.Item || record.PathCount == 0) continue;
+
+                var startCoord = _pathCoord[record.HeadNode];
+                record.IsSlide = startCoord.x != record.FinalCoord.x;
             }
 
-            // Prepare sort order
-            _sortOrder.Prepare(recordCount);
-            _sortOrder.Sort(recordCount, new SlideMoveOrderComparer(_recordBuffer.Records));
+            Array.Sort(_order, 0, _recordCount, new SlideMoveOrderComparer(_records));
 
-            // Reset timeline
-            _timeline.Reset(width);
-            _taskCollector.Reset();
+            if (_animTasks.Length < _recordCount)
+                Array.Resize(ref _animTasks, _recordCount);
 
-            // Schedule non-spawn first, then spawn
-            SchedulePass(view, passIsSpawn: false);
-            SchedulePass(view, passIsSpawn: true);
+            // Reset timelines.
+            var width = context.GridModel.Width;
+            for (int x = 0; x < width; x++)
+                _timelineByX[x] = 0f;
 
-            return _taskCollector.WhenAll();
+            var taskCount = 0;
+
+            var view = context.GridView;
+            ScheduleByTimeline(view, width, passIsSpawn: false, ref taskCount);
+            ScheduleByTimeline(view, width, passIsSpawn: true, ref taskCount);
+
+            if (taskCount == 0)
+                return UniTask.CompletedTask;
+
+            if (_animTasks.Length != taskCount)
+                Array.Resize(ref _animTasks, taskCount);
+
+            return UniTask.WhenAll(_animTasks);
         }
 
-        private void SchedulePass(IGridView view, bool passIsSpawn)
+        private void EnsureOrderCapacity(int need)
         {
-            var recordCount = _recordBuffer.Count;
-            var order = _sortOrder.Order;
+            if (_order.Length < need)
+                Array.Resize(ref _order, need);
+        }
 
-            for (int i = 0; i < recordCount; i++)
+        private void ScheduleByTimeline(IGridView view, int width, bool passIsSpawn, ref int taskCount)
+        {
+            for (int i = 0; i < _recordCount; i++)
             {
-                var recordIndex = order[i];
-                ref readonly var record = ref _recordBuffer.GetReadonly(recordIndex);
+                var recordIndex = _order[i];
+                ref readonly var record = ref _records[recordIndex];
 
                 if (!record.Item || record.PathCount == 0) continue;
                 if (record.IsSpawn != passIsSpawn) continue;
 
-                // Collect all columns used by this move
-                CollectUsedColumns(in record);
-                var startTime = _timeline.GetStartTime();
+                var usedCount = CollectUsedColumns(width, in record);
+                var startTime = GetStartTime(usedCount);
 
                 if (!record.IsSlide)
                 {
-                    // Simple fall
                     var fallRecord = new FallDownMoveRecord(record.Item, record.FinalCoord, record.IsSpawn);
 
                     if (_fallAnimationScheduler.TrySchedule(view, fallRecord, startTime, out var endTime, out var task))
                     {
-                        _timeline.UpdateEndTime(endTime);
-                        _taskCollector.Add(task);
+                        UpdateTimeline(usedCount, endTime);
+                        _animTasks[taskCount++] = task;
                     }
                 }
                 else
                 {
-                    // Diagonal slide
-                    if (_slideAnimationScheduler.TrySchedule(view, record, ref _pathPool, startTime, out var endTime, out var task))
+                    if (_slideAnimationScheduler.TrySchedule(view, record, _pathCoord, _pathNext, startTime, out var endTime, out var task))
                     {
-                        _timeline.UpdateEndTime(endTime);
-                        _taskCollector.Add(task);
+                        UpdateTimeline(usedCount, endTime);
+                        _animTasks[taskCount++] = task;
                     }
                 }
             }
         }
 
-        private void CollectUsedColumns(in SlideDownMoveRecord record)
+        private int CollectUsedColumns(int width, in SlideDownMoveRecord record)
         {
-            _timeline.BeginCollect();
+            // Reuse _usedColumnsByRecord as a dense list of used X values.
+            if (_usedColumnsByRecord.Length < width)
+                Array.Resize(ref _usedColumnsByRecord, width);
 
-            // Final position
-            _timeline.MarkColumn(record.FinalCoord.x);
+            _usedColumnStampId++;
+            
+            if (_usedColumnStampId == int.MaxValue)
+            {
+                Array.Clear(_usedColumnStamp, 0, _usedColumnStamp.Length);
+                _usedColumnStampId = 1;
+            }
 
-            // All path nodes
+            var count = 0;
+
+            MarkX(record.FinalCoord.x);
+
             if (record.IsSlide)
             {
                 var node = record.HeadNode;
                 while (node >= 0)
                 {
-                    _timeline.MarkColumn(_pathPool.GetCoord(node).x);
-                    node = _pathPool.GetNext(node);
+                    MarkX(_pathCoord[node].x);
+                    node = _pathNext[node];
                 }
             }
+
+            return count;
+
+            void MarkX(int x)
+            {
+                if ((uint)x >= (uint)width) return;
+                if (_usedColumnStamp[x] == _usedColumnStampId) return;
+                _usedColumnStamp[x] = _usedColumnStampId;
+                _usedColumnsByRecord[count++] = x;
+            }
         }
+
+        private float GetStartTime(int usedCount)
+        {
+            var start = 0f;
+            for (int i = 0; i < usedCount; i++)
+            {
+                var x = _usedColumnsByRecord[i];
+                var t = _timelineByX[x];
+                if (t > start) start = t;
+            }
+
+            return start;
+        }
+
+        private void UpdateTimeline(int usedCount, float endTime)
+        {
+            for (int i = 0; i < usedCount; i++)
+            {
+                var x = _usedColumnsByRecord[i];
+                _timelineByX[x] = endTime;
+            }
+        }
+
     }
 }

@@ -1,64 +1,72 @@
 using System;
+using System.Collections.Generic;
 using Core.Item;
 using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 namespace Core.Handlers
 {
     public partial class SlideDownFillStrategy
     {
-        // Records with item lookup
-        private MoveRecordBuffer<SlideDownMoveRecord, BaseGridObject> _recordBuffer;
-        private bool _recordBufferInitialized;
-        
-        // Path storage
-        private PathNodePool _pathPool;
-        
-        // Animation scheduling
-        private AnimationTimeline _timeline;
-        private AnimationTaskCollector _taskCollector;
-        private SortOrderHelper _sortOrder;
-        
-        // Simulation stamps
-        private StampTracker _targetStamp;
-        private StampTracker _sourceStamp;
-        
-        // Spawn tracking
-        private int[] _spawnStackByX;
-        
-        // State
-        private UniTask _runningAnimations;
+        // One record per item (array + count)
+        private readonly Dictionary<BaseGridObject, int> _recordIndexByItem = new(256);
+        private SlideDownMoveRecord[] _records = Array.Empty<SlideDownMoveRecord>();
+        private int _recordCount;
 
-        private void EnsureCapacity(int width, int height)
+        // Global path node pool (linked list per record)
+        private Vector2Int[] _pathCoord = Array.Empty<Vector2Int>();
+        private int[] _pathNext = Array.Empty<int>();
+        private int _pathNodeCount;
+
+        // Schedule helpers
+        private int[] _moveIndexByCell = Array.Empty<int>();
+        private float[] _timelineByX = Array.Empty<float>();
+        private int[] _usedColumnStamp = Array.Empty<int>();
+        private int _usedColumnStampId = 1;
+        private int[] _order = Array.Empty<int>();
+        private int[] _usedColumnsByRecord = Array.Empty<int>();
+        private UniTask[] _animTasks = new UniTask[128];
+        private UniTask _runningAnimations = UniTask.CompletedTask;
+
+        // Fill workspace
+        private int[] _usedTargetStamp = Array.Empty<int>();
+        private int[] _usedSourceStamp = Array.Empty<int>();
+        private int[] _spawnStackByX = Array.Empty<int>();
+        private int _usedTargetStampId = 1;
+        private int _usedSourceStampId = 0;
+        private void EnsureBuffers(int width, int height)
         {
+            if (_timelineByX.Length < width)
+                _timelineByX = new float[width];
+
+            if (_usedColumnStamp.Length < width)
+                _usedColumnStamp = new int[width];
+
             var cellCount = width * height;
-            
-            if (!_recordBufferInitialized)
-            {
-                _recordBuffer = new MoveRecordBuffer<SlideDownMoveRecord, BaseGridObject>(useKeyLookup: true);
-                _recordBufferInitialized = true;
-            }
-            
-            _recordBuffer.EnsureCapacity(cellCount);
-            _pathPool.EnsureCapacity(cellCount * 2);
-            _timeline.EnsureCapacity(width);
-            _taskCollector.EnsureCapacity(cellCount);
-            _targetStamp.EnsureCapacity(cellCount);
-            _sourceStamp.EnsureCapacity(cellCount);
-            
-            if (_spawnStackByX == null || _spawnStackByX.Length < width)
+
+            if (_usedTargetStamp.Length < cellCount)
+                _usedTargetStamp = new int[cellCount];
+
+            if (_usedSourceStamp.Length < cellCount)
+                _usedSourceStamp = new int[cellCount];
+
+            if (_moveIndexByCell.Length < cellCount)
+                _moveIndexByCell = new int[cellCount];
+
+            if (_spawnStackByX.Length < width)
                 _spawnStackByX = new int[width];
             else
                 Array.Clear(_spawnStackByX, 0, width);
+
+            if (_records.Length == 0)
+                _records = new SlideDownMoveRecord[256];
         }
 
         private void ResetWorkspace()
         {
-            _recordBuffer.Reset();
-            _pathPool.Reset();
-            _taskCollector.Reset();
-            _targetStamp.Reset();
-            _sourceStamp.Reset();
-            _passCounter = 0;
+            _recordIndexByItem.Clear();
+            _recordCount = 0;
+            _pathNodeCount = 0;
         }
     }
 }

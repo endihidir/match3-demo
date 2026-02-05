@@ -7,7 +7,7 @@ namespace Core.Handlers
 {
     public partial class FallDownFillStrategy
     {
-        private void ShiftColumn(IGridModel model, int x, int height)
+        private void ShiftColumnLogic(IGridModel model, int x, int height)
         {
             for (int y = height - 1; y >= 0; y--)
             {
@@ -27,14 +27,16 @@ namespace Core.Handlers
                 model.SetGridObject(coord, item);
                 model.SetGridObject(src, null);
 
-                AddRecord(new FallDownMoveRecord(item, coord, isSpawn: false));
+                var fallMoveRecord = new FallDownMoveRecord(item, coord, false);
+                AddRecord(fallMoveRecord);
             }
         }
 
-        private void FillColumn(GridStateContext context, int x, int height, float cellSize, float spawnY)
+        private void FillColumnLogic(GridStateContext stateContext, int x, int height, float cellSize, float spawnY)
         {
-            var model = context.GridModel;
-            var view = context.GridView;
+            var model = stateContext.GridModel;
+            var view = stateContext.GridView;
+
             var stack = 0;
 
             for (int y = height - 1; y >= 0; y--)
@@ -43,20 +45,24 @@ namespace Core.Handlers
 
                 if (!model.IsCellActive(coord)) continue;
                 if (model.GetGridObject(coord)) continue;
-                if (GridFillCalcUtil.HasStationaryAboveInSameSegment(model, coord, false)) continue;
+                
+                if(GridFillCalcUtil.HasStationaryAboveInSameSegment(model, coord, false)) continue;
 
                 var itemType = _itemDecider.Decide(model, coord);
-                var item = context.GridItemFactory.GetRegularItem(itemType);
+                var item = stateContext.GridItemFactory.GetRegularItem(itemType);
 
                 item.SetParent(view.GridObjectsParent);
                 item.SetSpriteSize(cellSize);
 
                 var worldPos = view.GridToWorld(coord);
                 var startY = spawnY + (stack * cellSize);
-                item.SetPosition(new Vector3(worldPos.x, startY, worldPos.z));
+                var start = new Vector3(worldPos.x, startY, worldPos.z);
 
+                item.SetPosition(start);
                 model.SetGridObject(coord, item);
-                AddRecord(new FallDownMoveRecord(item, coord, isSpawn: true));
+
+                var fallMoveRecord = new FallDownMoveRecord(item, coord, true);
+                AddRecord(fallMoveRecord);
                 stack++;
             }
         }
