@@ -6,30 +6,29 @@ namespace Core.Handlers
     public struct AnimationTaskCollector
     {
         private UniTask[] _tasks;
+        
         private int _count;
 
         private const int DefaultCapacity = 128;
-
         public int Count => _count;
 
         public void EnsureCapacity(int capacity)
         {
-            if (_tasks == null || _tasks.Length < capacity)
-            {
-                var newSize = _tasks?.Length ?? DefaultCapacity;
-                while (newSize < capacity) newSize *= 2;
-                Array.Resize(ref _tasks, newSize);
-            }
+            if (_tasks != null && _tasks.Length >= capacity) return;
+            
+            var newSize = _tasks?.Length ?? DefaultCapacity;
+            
+            while (newSize < capacity) newSize *= 2;
+            
+            Array.Resize(ref _tasks, newSize);
         }
 
-        public void Reset()
-        {
-            _count = 0;
-        }
+        public void Reset() => _count = 0;
 
         public void Add(UniTask task)
         {
             EnsureCapacity(_count + 1);
+            
             _tasks[_count++] = task;
         }
 
