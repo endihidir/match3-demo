@@ -40,9 +40,9 @@ namespace Core.Handlers
 
         private void ScheduleShiftByTimeline(IGridView view, bool passIsSpawn, ref int taskCount)
         {
-            for (int oi = 0; oi < _recordCount; oi++)
+            for (int i = 0; i < _recordCount; i++)
             {
-                var recordIndex = _order[oi];
+                var recordIndex = _order[i];
                 ref readonly var fallRecord = ref _records[recordIndex];
 
                 if (!fallRecord.Item) continue;
