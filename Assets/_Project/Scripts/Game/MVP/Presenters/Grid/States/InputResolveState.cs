@@ -204,11 +204,11 @@ namespace Core.Handlers
             {
                 var nextGroupId = Context.NextBoosterGroupId();
 
-                foreach (var boosterEffectBase in rule.Actions)
+                foreach (var boosterAction in rule.Actions)
                 {
-                    if (boosterEffectBase == null) continue;
+                    if (boosterAction == null) continue;
 
-                    var boosterActionContext = new BoosterActionContext(nextGroupId, origin, boosterEffectBase);
+                    var boosterActionContext = new BoosterActionContext(nextGroupId, origin, boosterAction);
 
                     Context.PendingBoosterActions.Add(boosterActionContext);
                 }

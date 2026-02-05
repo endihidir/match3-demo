@@ -132,12 +132,6 @@ namespace Core.Item
             Dispose();
         }
 
-        private void KillCachedTweens()
-        {
-            _shakeTween?.Kill();
-            _springTween?.Kill();
-        }
-
         public void Dispose()
         {
             KillPlacementTweens();
@@ -154,6 +148,11 @@ namespace Core.Item
         {
             _moveTween?.Kill(true);
             _pingPongTween?.Kill(true);
+        }
+        private void KillCachedTweens()
+        {
+            _shakeTween?.Kill();
+            _springTween?.Kill();
         }
     }
 }
