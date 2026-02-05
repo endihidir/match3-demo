@@ -6,7 +6,7 @@ namespace Core.Item
 {
     public class GridObjectAnimation : MonoBehaviour
     {
-        [field: SerializeField] private ItemAnimationSettings Settings { get; set; }
+        [field: SerializeField] private GridObjectAnimationSettings_SO Settings { get; set; }
         [field: SerializeField] private Transform ItemHolder { get; set; }
         
         public bool IsFallInProgress => (_shiftTween != null && _shiftTween.IsActive() && !_shiftTween.IsComplete()) ||

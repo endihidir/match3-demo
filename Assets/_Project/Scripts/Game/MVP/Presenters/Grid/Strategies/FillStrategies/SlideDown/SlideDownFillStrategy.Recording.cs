@@ -1,4 +1,3 @@
-using System;
 using Core.Item;
 using UnityEngine;
 
@@ -9,67 +8,22 @@ namespace Core.Handlers
         // Records & path nodes
         // =========================================================
 
-        private void AddStep(BaseGridObject item, Vector2Int step, bool isSpawn)
+        private void AddStep(BaseGridObject item, Vector2Int coord, bool isSpawn)
         {
-            if (!_recordIndexByItem.TryGetValue(item, out var index))
-            {
-                index = _recordCount;
-                _recordIndexByItem[item] = index;
-
-                EnsureRecordCapacity(_recordCount + 1);
-                _records[_recordCount++] = new SlideDownMoveRecord(item);
-            }
-
-            ref var record = ref _records[index];
+            var index = _recordBuffer.AddOrGet(item, new SlideDownMoveRecord(item));
+            ref var record = ref _recordBuffer.GetRef(index);
 
             record.IsSpawn |= isSpawn;
 
             // Avoid pushing the same coord twice in a row
-            if (record.TailNode >= 0 && _pathCoord[record.TailNode] == step)
+            if (record.TailNode >= 0 && _pathPool.GetCoord(record.TailNode) == coord)
             {
-                record.FinalCoord = step;
+                record.FinalCoord = coord;
                 return;
             }
 
-            var node = AllocPathNode(step);
-
-            if (record.HeadNode < 0)
-            {
-                record.HeadNode = node;
-            }
-            else
-            {
-                _pathNext[record.TailNode] = node;
-            }
-
-            record.TailNode = node;
-            record.PathCount++;
-            record.FinalCoord = step;
-        }
-
-        private void EnsureRecordCapacity(int need)
-        {
-            if (_records.Length >= need) return;
-
-            var newSize = _records.Length == 0 ? 256 : _records.Length * 2;
-            if (newSize < need) newSize = need;
-
-            Array.Resize(ref _records, newSize);
-        }
-
-        private int AllocPathNode(Vector2Int coord)
-        {
-            if (_pathNodeCount >= _pathCoord.Length)
-            {
-                var newSize = _pathCoord.Length == 0 ? 512 : _pathCoord.Length * 2;
-                Array.Resize(ref _pathCoord, newSize);
-                Array.Resize(ref _pathNext, newSize);
-            }
-
-            var idx = _pathNodeCount++;
-            _pathCoord[idx] = coord;
-            _pathNext[idx] = -1;
-            return idx;
+            var node = _pathPool.Allocate(coord);
+            record.AppendNode(node, coord, ref _pathPool);
         }
     }
 }

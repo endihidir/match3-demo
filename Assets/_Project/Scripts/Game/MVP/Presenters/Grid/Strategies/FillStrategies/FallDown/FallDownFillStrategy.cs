@@ -8,7 +8,6 @@ namespace Core.Handlers
     {
         private readonly IFillItemDecider _itemDecider;
         private readonly IFallAnimationScheduler _fallAnimationScheduler;
-        public bool CanHandle(IGridModel model) => !GridFillCalcUtil.HasStationaryAndBlocking(model);
 
         public FallDownFillStrategy(IFillItemDecider itemDecider, IFallAnimationScheduler fallAnimationScheduler)
         {
@@ -16,28 +15,31 @@ namespace Core.Handlers
             _fallAnimationScheduler = fallAnimationScheduler;
         }
 
+        public bool CanHandle(IGridModel model) => !GridFillCalcUtil.HasStationaryAndBlocking(model);
+
         public IFillStrategy Execute(GridStateContext context)
         {
-            _recordCount = 0;
+            ResetWorkspace();
 
             var model = context.GridModel;
             var view = context.GridView;
-
             var width = model.Width;
             var height = model.Height;
             var cellSize = view.GetCellSize();
 
-            EnsureBuffers(width);
-            EnsureRecordCapacity(width * height);
+            EnsureCapacity(width, height);
 
+            // Process each column
             for (int x = 0; x < width; x++)
             {
-                ShiftColumnLogic(model, x, height);
+                // First: shift existing items down
+                ShiftColumn(model, x, height);
 
-                if (GridFillCalcUtil.TryGetSpawnCellCoord(model, x, model.Height, out var spawnCell))
+                // Then: spawn new items at top
+                if (GridFillCalcUtil.TryGetSpawnCellCoord(model, x, height, out var spawnCell))
                 {
                     var spawnY = view.GridToWorld(spawnCell).y + cellSize;
-                    FillColumnLogic(context, x, height, cellSize, spawnY);
+                    FillColumn(context, x, height, cellSize, spawnY);
                 }
             }
 

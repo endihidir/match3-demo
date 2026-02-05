@@ -1,4 +1,3 @@
-using System;
 using Core.Models;
 using Core.Utils;
 using UnityEngine;
@@ -7,23 +6,20 @@ namespace Core.Handlers
 {
     public partial class SlideDownFillStrategy
     {
-        // =========================================================
-        // Simulation loop
-        // =========================================================
-
         private bool TryApplyAnyMove(GridStateContext context)
         {
-            var height = context.GridModel.Height;
-            var width = context.GridModel.Width;
-            
+            var model = context.GridModel;
+            var width = model.Width;
+            var height = model.Height;
+
             var movedAny = false;
             var movedByGravity = false;
-            
-            movedByGravity |= ApplyVerticalFalls(context.GridModel, width, height);
-            movedByGravity |= ApplyDiagonalSlides(context.GridModel, width, height);
-            
+
+            movedByGravity |= ApplyVerticalFalls(model, width, height);
+            movedByGravity |= ApplyDiagonalSlides(model, width, height);
+
             movedAny |= movedByGravity;
-            
+
             if (!movedByGravity)
                 movedAny |= ApplySpawns(context, width, height);
 
@@ -46,12 +42,12 @@ namespace Core.Handlers
                     var item = model.GetGridObject(src);
                     if (!item || item.IsStationary) continue;
 
-                    AddStep(item, src, false);
-                    
+                    AddStep(item, src, isSpawn: false);
+
                     model.SetGridObject(src, null);
                     model.SetGridObject(dst, item);
 
-                    AddStep(item, dst, false);
+                    AddStep(item, dst, isSpawn: false);
                     movedAny = true;
                 }
             }
@@ -62,7 +58,9 @@ namespace Core.Handlers
         private bool ApplyDiagonalSlides(IGridModel model, int width, int height)
         {
             var movedAny = false;
-            BumpStamps();
+            
+            _targetStamp.NextPass();
+            _sourceStamp.NextPass();
 
             for (int y = height - 1; y >= 1; y--)
             {
@@ -74,19 +72,42 @@ namespace Core.Handlers
                     if (GridFillCalcUtil.CanFallVertically(model, x, y, out _)) continue;
 
                     // Alternate side preference deterministically
-                    var firstDir = ((x ^ y ^ _usedTargetStampId) & 1) == 0 ? -1 : 1;
+                    var hash = x ^ y ^ GetPassHash();
+                    var firstDir = (hash & 1) == 0 ? -1 : 1;
                     var secondDir = -firstDir;
 
-                    if (TryApplySlideCandidate(model, width, targetCoord, firstDir) || 
+                    if (TryApplySlideCandidate(model, width, targetCoord, firstDir) ||
                         TryApplySlideCandidate(model, width, targetCoord, secondDir))
                     {
-                        //AddStep(movedItem, target, false);
                         movedAny = true;
                     }
                 }
             }
 
             return movedAny;
+        }
+
+        private bool TryApplySlideCandidate(IGridModel model, int width, Vector2Int targetCoord, int dirX)
+        {
+            if (!GridFillCalcUtil.TryCollectDiagonalSide(model, targetCoord, dirX, out var candidate))
+                return false;
+
+            if (model.GetGridObject(candidate.From) != candidate.Item) return false;
+            if (model.GetGridObject(candidate.To)) return false;
+
+            var ti = candidate.To.x + candidate.To.y * width;
+            if (!_targetStamp.TryMark(ti)) return false;
+
+            var fi = candidate.From.x + candidate.From.y * width;
+            if (!_sourceStamp.TryMark(fi)) return false;
+
+            AddStep(candidate.Item, candidate.From, isSpawn: false);
+
+            model.SetGridObject(candidate.From, null);
+            model.SetGridObject(candidate.To, candidate.Item);
+
+            AddStep(candidate.Item, candidate.To, isSpawn: false);
+            return true;
         }
 
         private bool ApplySpawns(GridStateContext context, int width, int height)
@@ -102,44 +123,8 @@ namespace Core.Handlers
             return movedAny;
         }
 
-        private void BumpStamps()
-        {
-            _usedTargetStampId++;
-            _usedSourceStampId++;
-
-            // Rare overflow guard
-            if (_usedTargetStampId == int.MaxValue || _usedSourceStampId == int.MaxValue)
-            {
-                Array.Clear(_usedTargetStamp, 0, _usedTargetStamp.Length);
-                Array.Clear(_usedSourceStamp, 0, _usedSourceStamp.Length);
-                _usedTargetStampId = 1;
-                _usedSourceStampId = 1;
-            }
-        }
-
-        private bool TryApplySlideCandidate(IGridModel model, int width, Vector2Int targetCoord, int dirX)
-        {
-            if (!GridFillCalcUtil.TryCollectDiagonalSide(model, targetCoord, dirX, out var candidate))
-                return false;
-
-            if (model.GetGridObject(candidate.From) != candidate.Item) return false;
-            if (model.GetGridObject(candidate.To)) return false;
-
-            var ti = candidate.To.x + candidate.To.y * width;
-            if (_usedTargetStamp[ti] == _usedTargetStampId) return false;
-            _usedTargetStamp[ti] = _usedTargetStampId;
-
-            var fi = candidate.From.x + candidate.From.y * width;
-            if (_usedSourceStamp[fi] == _usedSourceStampId) return false;
-            _usedSourceStamp[fi] = _usedSourceStampId;
-
-            AddStep(candidate.Item, candidate.From, false);
-
-            model.SetGridObject(candidate.From, null);
-            model.SetGridObject(candidate.To, candidate.Item);
-            
-            AddStep(candidate.Item, candidate.To, false);
-            return true;
-        }
+        // Simple hash for deterministic alternation
+        private int _passCounter;
+        private int GetPassHash() => _passCounter++;
     }
 }
