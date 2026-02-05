@@ -31,13 +31,13 @@ namespace Core.Handlers
             _taskCollector.Reset();
 
             // Schedule non-spawn first, then spawn
-            SchedulePass(view, width, passIsSpawn: false);
-            SchedulePass(view, width, passIsSpawn: true);
+            SchedulePass(view, passIsSpawn: false);
+            SchedulePass(view, passIsSpawn: true);
 
             return _taskCollector.WhenAll();
         }
 
-        private void SchedulePass(IGridView view, int width, bool passIsSpawn)
+        private void SchedulePass(IGridView view, bool passIsSpawn)
         {
             var recordCount = _recordBuffer.Count;
             var order = _sortOrder.Order;
@@ -51,7 +51,7 @@ namespace Core.Handlers
                 if (record.IsSpawn != passIsSpawn) continue;
 
                 // Collect all columns used by this move
-                CollectUsedColumns(width, in record);
+                CollectUsedColumns(in record);
                 var startTime = _timeline.GetStartTime();
 
                 if (!record.IsSlide)
@@ -77,7 +77,7 @@ namespace Core.Handlers
             }
         }
 
-        private void CollectUsedColumns(int width, in SlideDownMoveRecord record)
+        private void CollectUsedColumns(in SlideDownMoveRecord record)
         {
             _timeline.BeginCollect();
 
