@@ -10,25 +10,20 @@ namespace Core.Pool
 {
     public class ObjectPoolService : IObjectPoolService, IDisposable
     {
-        private const string ROOT_NAME = "PooledObjectHolder";
+        private const string ROOT_NAME = "PooledObjectsHolder";
         
         private readonly PoolServiceConfig _poolServiceConfig;
+        private readonly IDictionary<int, ObjectPoolHandler> _idPoolHandlers = new Dictionary<int, ObjectPoolHandler>();
+        private readonly IDictionary<Type, ObjectPoolHandler> _typePoolHandlers = new Dictionary<Type, ObjectPoolHandler>();
         
         private Transform _pooledObjectsParent;
-        
-        private readonly IDictionary<int, ObjectPoolHandler> _idPoolHandlers = new Dictionary<int, ObjectPoolHandler>();
-        
-        private IDictionary<Type, ObjectPoolHandler> _typePoolHandlers = new Dictionary<Type, ObjectPoolHandler>();
-        public ObjectPoolService(AppConfigContainer gameDataHolderSo) => _poolServiceConfig = gameDataHolderSo.poolServiceConfig;
+        public ObjectPoolService(AppConfigContainer appConfigContainer) => _poolServiceConfig = appConfigContainer.poolServiceConfig;
 
         public void Initialize()
         {
             var root = GameObject.Find(ROOT_NAME) ?? new GameObject(ROOT_NAME);
-            
             _pooledObjectsParent = root.transform;    
-            
             CacheAllPooledObjects();
-            
             CreateAllCachedPooledObjects();
         }
         
@@ -194,18 +189,14 @@ namespace Core.Pool
                 }
 
                 var isPooledObject = poolAssetConfig.PoolObject.TryGetComponent<IPooledObject>(out var pooledObjects);
-                
                 if(!isPooledObject) continue;
-                
                 var key = pooledObjects.GetType();
                 
                 if (_typePoolHandlers.ContainsKey(key)) continue;
-                
                 var size = poolAssetConfig.PoolSize;
                 var isLazy = poolAssetConfig.IsLazy;
                 
                 var objectPoolHandler = new ObjectPoolHandler(poolAssetConfig.PoolObject, _pooledObjectsParent, size, isLazy);
-                
                 _typePoolHandlers.Add(key, objectPoolHandler);
             }
         }
@@ -223,24 +214,17 @@ namespace Core.Pool
         private ObjectPoolHandler CreateNewHandler<T>(T prefab, int poolCount, bool isLazy = true) where T : Component
         {
             prefab.GetOrAddComponent<PooledObject>();
-
             var prefabObj = prefab.gameObject;
-            
             var objectPoolHandler = new ObjectPoolHandler(prefabObj, _pooledObjectsParent, poolCount, isLazy).CreatePool();
-
             var key = prefabObj.GetInstanceID();
-            
             _idPoolHandlers.Add(key, objectPoolHandler);
-            
             return objectPoolHandler;
         }
 
         private ObjectPoolHandler CreateNewHandler<T>() where T : Component, IPooledObject
         {
             var type = typeof(T);
-        
             var poolData = _poolServiceConfig.poolDataConfigs;
-        
             var poolAssetConfig = poolData.FirstOrDefault(x => x.PoolObject.GetComponent<T>());
 
             if (!poolAssetConfig)
@@ -251,11 +235,8 @@ namespace Core.Pool
 
             var size = poolAssetConfig.PoolSize;
             var isLazy = poolAssetConfig.IsLazy;
-        
             var objectPoolHandler = new ObjectPoolHandler(poolAssetConfig.PoolObject, _pooledObjectsParent, size, isLazy).CreatePool();
-            
             _typePoolHandlers.Add(type, objectPoolHandler);
-            
             return objectPoolHandler;
         }
         
