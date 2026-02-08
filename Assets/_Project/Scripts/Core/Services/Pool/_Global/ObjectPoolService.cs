@@ -215,15 +215,14 @@ namespace Core.Pool
         {
             prefab.GetOrAddComponent<PooledObject>();
             var prefabObj = prefab.gameObject;
-            var objectPoolHandler = new ObjectPoolHandler(prefabObj, _pooledObjectsParent, poolCount, isLazy).CreatePool();
             var key = prefabObj.GetInstanceID();
+            var objectPoolHandler = new ObjectPoolHandler(prefabObj, _pooledObjectsParent, poolCount, isLazy).CreatePool();
             _idPoolHandlers.Add(key, objectPoolHandler);
             return objectPoolHandler;
         }
 
         private ObjectPoolHandler CreateNewHandler<T>() where T : Component, IPooledObject
         {
-            var type = typeof(T);
             var poolData = _poolServiceConfig.poolDataConfigs;
             var poolAssetConfig = poolData.FirstOrDefault(x => x.PoolObject.GetComponent<T>());
 
@@ -233,10 +232,11 @@ namespace Core.Pool
                 return null;
             }
 
+            var key = typeof(T);
             var size = poolAssetConfig.PoolSize;
             var isLazy = poolAssetConfig.IsLazy;
             var objectPoolHandler = new ObjectPoolHandler(poolAssetConfig.PoolObject, _pooledObjectsParent, size, isLazy).CreatePool();
-            _typePoolHandlers.Add(type, objectPoolHandler);
+            _typePoolHandlers.Add(key, objectPoolHandler);
             return objectPoolHandler;
         }
         
