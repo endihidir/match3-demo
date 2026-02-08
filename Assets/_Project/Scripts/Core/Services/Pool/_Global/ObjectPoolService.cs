@@ -31,40 +31,32 @@ namespace Core.Pool
         {
             var key = prefab.gameObject.GetInstanceID();
             
-            if (_idPoolHandlers.TryGetValue(key, out var objectPoolHandler))
+            if (!_idPoolHandlers.TryGetValue(key, out var objectPoolHandler))
             {
-                var pooledObject = objectPoolHandler.GetObject<T>(show, showLogs);
+                objectPoolHandler = CreateNewHandler(prefab.gameObject, poolCount, isLazy);
                 
-                return pooledObject;
+                _idPoolHandlers.Add(key, objectPoolHandler);
             }
-            else
-            {
-                objectPoolHandler = CreateNewHandler(prefab, poolCount, isLazy);
-                
-                var pooledObject = objectPoolHandler.GetObject<T>(show, showLogs);
+            
+            var pooledObject = objectPoolHandler.GetObject<T>(show, showLogs);
 
-                return pooledObject;
-            }
+            return pooledObject;
         }
 
         public T GetObject<T>(bool show = true, bool showLogs = false) where T : Component, IPooledObject
         {
             var key = typeof(T);
 
-            if (_typePoolHandlers.TryGetValue(key, out var objectPoolHandler))
-            {
-                var pooledObject = objectPoolHandler.GetObject<T>(show, showLogs);
-                
-                return pooledObject;
-            }
-            else
+            if (!_typePoolHandlers.TryGetValue(key, out var objectPoolHandler))
             {
                 objectPoolHandler = CreateNewHandler<T>();
                 
-                var pooledObject = objectPoolHandler.GetObject<T>(show, showLogs);
-
-                return pooledObject;
+                _typePoolHandlers.Add(key, objectPoolHandler);
             }
+            
+            var pooledObject = objectPoolHandler.GetObject<T>(show, showLogs);
+
+            return pooledObject;
         }
 
         public void ReturnObject<T>(T objectRef, bool hide = true) where T : Component
@@ -211,14 +203,10 @@ namespace Core.Pool
             }
         }
         
-        private ObjectPoolHandler CreateNewHandler<T>(T prefab, int poolCount, bool isLazy = true) where T : Component
+        private ObjectPoolHandler CreateNewHandler(GameObject prefab, int poolCount, bool isLazy = true)
         {
             prefab.GetOrAddComponent<PooledObject>();
-            var prefabObj = prefab.gameObject;
-            var key = prefabObj.GetInstanceID();
-            var objectPoolHandler = new ObjectPoolHandler(prefabObj, _pooledObjectsParent, poolCount, isLazy).CreatePool();
-            _idPoolHandlers.Add(key, objectPoolHandler);
-            return objectPoolHandler;
+            return new ObjectPoolHandler(prefab, _pooledObjectsParent, poolCount, isLazy).CreatePool();
         }
 
         private ObjectPoolHandler CreateNewHandler<T>() where T : Component, IPooledObject
@@ -231,13 +219,10 @@ namespace Core.Pool
                 EditorLogger.LogError("Required component not found!");
                 return null;
             }
-
-            var key = typeof(T);
+            
             var size = poolAssetConfig.PoolSize;
             var isLazy = poolAssetConfig.IsLazy;
-            var objectPoolHandler = new ObjectPoolHandler(poolAssetConfig.PoolObject, _pooledObjectsParent, size, isLazy).CreatePool();
-            _typePoolHandlers.Add(key, objectPoolHandler);
-            return objectPoolHandler;
+            return new ObjectPoolHandler(poolAssetConfig.PoolObject, _pooledObjectsParent, size, isLazy).CreatePool();
         }
         
         public void Dispose() => RemoveAllPools();
