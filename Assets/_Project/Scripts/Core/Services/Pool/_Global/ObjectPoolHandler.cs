@@ -114,9 +114,13 @@ namespace Core.Pool
                 EditorLogger.LogError($"{pooledObject.GetType().Name} is not Component!");
                 return;
             }
+
+            if (pooledObj && _poolParent)
+            {
+                pooledObj.transform.SetParent(_poolParent.transform, false);
+                pooledObj.transform.localPosition = Vector3.zero;
+            }
             
-            pooledObj.transform.SetParent(_poolParent.transform, false);
-            pooledObj.transform.localPosition = Vector3.zero;
             Pool.Enqueue(pooledObject);
         }
         
