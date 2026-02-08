@@ -6,7 +6,7 @@ using Object = UnityEngine.Object;
 
 namespace Core.Pool
 {
-    public sealed class ObjectPoolHandler
+    public sealed class ObjectPool
     {
         private readonly GameObject _prefabObj;
         private readonly int _poolCount;
@@ -15,7 +15,7 @@ namespace Core.Pool
         private Queue<IPooledObject> Pool { get; } = new();
         public bool IsLazy { get; private set; }
 
-        public ObjectPoolHandler(GameObject prefabObj, Transform rootParent, int poolCount, bool isLazy = true)
+        public ObjectPool(GameObject prefabObj, Transform rootParent, int poolCount, bool isLazy = true)
         {
             _prefabObj = prefabObj;
             _pooledObjectRoot = rootParent;
@@ -24,7 +24,7 @@ namespace Core.Pool
             CreatePoolParent();
         }
 
-        public ObjectPoolHandler CreatePool()
+        public ObjectPool CreatePool()
         {
             for (int i = 0; i < _poolCount; i++) 
                 CreateNewObject(true);
@@ -45,7 +45,6 @@ namespace Core.Pool
             while (Pool.TryDequeue(out var candidate))
             {
                 if (candidate is Component c && !c) continue;
-
                 pooledObject = candidate;
                 break;
             }
@@ -54,8 +53,7 @@ namespace Core.Pool
             
             if (activate) 
                 pooledObject?.Activate();
-
-
+            
             switch (pooledObject)
             {
                 case T tComp:
