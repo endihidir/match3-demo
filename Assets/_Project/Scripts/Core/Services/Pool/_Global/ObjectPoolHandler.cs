@@ -20,7 +20,6 @@ namespace Core.Pool
             _prefabObj = prefabObj;
             _pooledObjectRoot = rootParent;
             _poolCount = poolCount;
-            
             IsLazy = isLazy;
             CreatePoolParent();
         }
@@ -88,20 +87,15 @@ namespace Core.Pool
         private IPooledObject GetNewPooledObject()
         {
             CreateNewObject(false);
-            
             return Pool.Dequeue();
         }
 
         private void CreateNewObject(bool onInitialize)
         {
             var objClone = Object.Instantiate(_prefabObj, _poolParent.transform);
-            
             var pooledObject = objClone.GetOrAddComponent<PooledObject>();
-            
             pooledObject.PoolKey = _prefabObj.GetInstanceID();
-            
             if (onInitialize) pooledObject.Deactivate();
-
             Pool.Enqueue(pooledObject);
         }
 
