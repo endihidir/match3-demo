@@ -6,7 +6,7 @@ namespace Core.Level
 {
     public interface ILevelDefinitionProvider
     {
-        int GetLevelNumber(bool useInfiniteCount = false);
+        int GetLevelNumber(bool useLevelCompletionCount = false);
         int GetMoveCount();
         Vector2Int GetGridSize();
         List<LevelGoal> GetLevelGoals();

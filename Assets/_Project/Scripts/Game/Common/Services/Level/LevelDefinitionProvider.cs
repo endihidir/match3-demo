@@ -20,8 +20,8 @@ namespace Core.Level
         public Vector2Int GetGridSize() => _dataReader.GetLevelDefinition(_progressionModel.CurrentLevelIndex).GridSize;
         public List<LevelGoal> GetLevelGoals() => _dataReader.GetLevelDefinition(_progressionModel.CurrentLevelIndex).Goals;
         public GridObjectType[,] GetGridObjectTypes() => _dataReader.GetLevelDefinition(_progressionModel.CurrentLevelIndex).GridObjectTypes;
-        public int GetLevelNumber(bool useInfiniteCount = false) => useInfiniteCount 
-                                                                  ? _progressionModel.DisplayLevelNumber
+        public int GetLevelNumber(bool useLevelCompletionCount = false) => useLevelCompletionCount 
+                                                                  ? _progressionModel.LevelCompletionCount
                                                                   : _dataReader.GetLevelDefinition(_progressionModel.CurrentLevelIndex).LevelNumber;
     }
 }
