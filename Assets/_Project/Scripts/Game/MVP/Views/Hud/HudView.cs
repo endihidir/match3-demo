@@ -38,10 +38,10 @@ namespace Core.UI
             return false;
         }
         
-        public void DecreaseGoalCount(ObstacleType obstacleType)
+        public void DecreaseGoalCount(ObstacleType obstacleType, bool useBounceAnim = true)
         {
             if (TryGetGoalSlotView(obstacleType, out var goalSlotView)) 
-                goalSlotView.DecreaseGoalCount();
+                goalSlotView.DecreaseGoalCount(useBounceAnim);
         }
     }
 }

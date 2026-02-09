@@ -248,11 +248,11 @@ namespace Core.Handlers
 
                 if (!obj) continue;
 
-                if (obj is not IDamageableObstacle damageableItem) continue;
+                if (obj is not IDamageableGridObject damageableItem) continue;
 
-                var result = damageableItem.TakeDamage(1, DamageSource.Match);
+                var result = damageableItem.TakeDamage(1, GridDamageSource.Match);
 
-                if (result == DamageResult.Destroyed)
+                if (result == GridDamageResult.Destroyed)
                 {
                     Context.ProgressGoal(damageableItem, obj.Coord, obj.SpriteRenderer.size);
                     

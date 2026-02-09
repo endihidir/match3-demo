@@ -16,36 +16,19 @@ MonoBehaviour:
   spriteSizeMultiplier: {x: 0.85, y: 0.85}
   isStationary: 1
   <Life>k__BackingField: 2
-  <DamageSource>k__BackingField: 2
+  <GridDamageSource>k__BackingField: 2
   <IsCollectible>k__BackingField: 1
   <CrackedSprites>k__BackingField:
   - {fileID: 21300000, guid: 60d96abf3d68cb24bb9f526078eea98a, type: 3}
   <ShatteredSprites>k__BackingField:
-  - {fileID: -1743152289, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
-  - {fileID: -1831577953, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
   - {fileID: 489132522, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
   - {fileID: 746554281, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
-  - {fileID: 152333928, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
   - {fileID: -1961873384, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
-  - {fileID: -168814001, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
-  - {fileID: -842928988, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
-  - {fileID: 1360212249, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
-  - {fileID: 1813190624, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
   - {fileID: 897294839, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
   - {fileID: 2102105164, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
-  - {fileID: -1478367369, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
-  - {fileID: 1186544135, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
-  - {fileID: -1922411287, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
-  - {fileID: 1874292709, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
   - {fileID: 32407270, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
   - {fileID: 187548038, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
   - {fileID: 1724665904, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
   - {fileID: -713812851, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
-  - {fileID: -1410960313, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
-  - {fileID: 2002577222, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
   - {fileID: 334862259, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
   - {fileID: 1855873688, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
-  - {fileID: -1060801158, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
-  - {fileID: -754244917, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
-  - {fileID: 2081722000, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}
-  - {fileID: -1052446578, guid: 7a3c9df8b21fa1b4288250b3a107b3ff, type: 3}

@@ -12,14 +12,14 @@ namespace Core.Presenters
     {
         private readonly ILevelObjectiveModel _levelObjectiveModel;
         private readonly IHudView _hudView;
-        private readonly IGoalFxAnimationHandler _fxHandler;
+        private readonly IGoalFxHandler _goalFxHandler;
         private readonly IGridStateHandler _gridStateHandler;
 
-        public HudPresenter(ILevelObjectiveModel levelObjectiveModel, IHudView hudView, IGoalFxAnimationHandler fxHandler, IGridStateHandler stateHandler)
+        public HudPresenter(ILevelObjectiveModel levelObjectiveModel, IHudView hudView, IGoalFxHandler goalFxHandler, IGridStateHandler stateHandler)
         {
             _levelObjectiveModel = levelObjectiveModel;
             _hudView = hudView;
-            _fxHandler = fxHandler;
+            _goalFxHandler = goalFxHandler;
             _gridStateHandler = stateHandler;
         }
 
@@ -27,14 +27,16 @@ namespace Core.Presenters
         {
             _levelObjectiveModel.OnMoveCountUpdate += OnMoveCountUpdate;
             _levelObjectiveModel.OnGoalProgressUpdate += OnObjectiveCountUpdate;
-            _gridStateHandler.Context.OnGridDestructionComplete += _fxHandler.PlayQueuedAnimations;
+            _gridStateHandler.Context.OnGridDestructionComplete += _goalFxHandler.PlayQueuedFX;
         }
 
-        private void OnObjectiveCountUpdate(IDamageableObstacle obstacle, Vector3 worldPos, Vector2 size)
+        private void OnObjectiveCountUpdate(IDamageableGridObject damageableGridObject, Vector3 worldPos, Vector2 size)
         {
-            if (obstacle.IsCollectible)
+            if (damageableGridObject is not ObstacleObject obstacle) return;
+           
+            if (damageableGridObject.IsCollectible)
             {
-                _fxHandler.QueueAnimation(obstacle, worldPos, size);
+                _goalFxHandler.QueueFX(obstacle.ObstacleType, worldPos, size);
             }
             else
             {
@@ -51,7 +53,7 @@ namespace Core.Presenters
 
         public void Dispose()
         {
-            _gridStateHandler.Context.OnGridDestructionComplete -= _fxHandler.PlayQueuedAnimations;
+            _gridStateHandler.Context.OnGridDestructionComplete -= _goalFxHandler.PlayQueuedFX;
             _levelObjectiveModel.OnGoalProgressUpdate -= OnObjectiveCountUpdate;
             _levelObjectiveModel.OnMoveCountUpdate -= OnMoveCountUpdate;
         }

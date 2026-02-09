@@ -189,7 +189,7 @@ MonoBehaviour:
   <ObstacleType>k__BackingField: 0
   <GoalIcon>k__BackingField: {fileID: 4301171992361423469}
   <GoalCountTxt>k__BackingField: {fileID: 7574754415665464615}
-  <BounceAnimationView>k__BackingField: {fileID: -8554596260821298268}
+  <BounceAnimationModule>k__BackingField: {fileID: -8554596260821298268}
   <GoalCount>k__BackingField: 0
 --- !u!114 &-8554596260821298268
 MonoBehaviour:

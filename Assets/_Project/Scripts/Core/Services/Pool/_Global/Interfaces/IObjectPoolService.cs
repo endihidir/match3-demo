@@ -5,12 +5,12 @@ namespace Core.Pool
     public interface IObjectPoolService
     {
         void Initialize();
-        T GetObject<T>(T prefab, bool show = true, int poolCount = 1, bool isLazy = true, bool showLogs = false) where T : Component;
-        T GetObject<T>(bool show = true, bool showLogs = false) where T : Component, IPooledObject;
+        T GetObject<T>(T prefab, bool activate = true, int poolCount = 1, bool isLazy = true, bool showLogs = false) where T : Component;
+        T GetObject<T>(bool activate = true, bool showLogs = false) where T : Component, IPooledObject;
         
-        void ReturnObject<T>(T objectRef, bool hide = true) where T : Component;
-        void ReturnObjectsByType<T>(bool hide = true) where T : Component, IPooledObject;
-        void ReturnAll(bool hide = true);
+        void ReturnObject<T>(T objectRef, bool deactivate = true) where T : Component;
+        void ReturnObjectsByType<T>(bool deactivate = true) where T : Component, IPooledObject;
+        void ReturnAll(bool deactivate = true);
         
         void RemovePoolsByType<T>() where T : IPooledObject;
         void RemovePoolsByPrefab<T>(T prefab) where T : Component, IPooledObject;

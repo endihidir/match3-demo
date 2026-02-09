@@ -16,7 +16,7 @@ MonoBehaviour:
   spriteSizeMultiplier: {x: 0.95, y: 0.95}
   isStationary: 1
   <Life>k__BackingField: 1
-  <DamageSource>k__BackingField: -1
+  <GridDamageSource>k__BackingField: -1
   <IsCollectible>k__BackingField: 0
   <CrackedSprites>k__BackingField: []
   <ShatteredSprites>k__BackingField:

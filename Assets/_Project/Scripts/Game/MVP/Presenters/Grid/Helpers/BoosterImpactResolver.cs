@@ -43,7 +43,7 @@ namespace Core.Utils
             
             ref var cell = ref markData[coord.x, coord.y];
             
-            var damageable = obj as IDamageableObstacle;
+            var damageable = obj as IDamageableGridObject;
             var trigger = obj as IBoosterActionSource;
             
             var isDamageable = damageable != null;
@@ -51,7 +51,7 @@ namespace Core.Utils
 
             if (isDamageable)
             {
-                cell.AddDamage(actionGroupId, damageAmount, DamageSource.Booster);
+                cell.AddDamage(actionGroupId, damageAmount, GridDamageSource.Booster);
             }
 
             var shouldTrigger = isTrigger && (!isDamageable || damageable.Life - damageAmount <= 0);

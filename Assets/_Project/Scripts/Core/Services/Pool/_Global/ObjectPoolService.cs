@@ -27,7 +27,7 @@ namespace Core.Pool
             CreateAllCachedPooledObjects();
         }
         
-        public T GetObject<T>(T prefab, bool show = true, int poolCount = 1, bool isLazy = true, bool showLogs = false) where T : Component
+        public T GetObject<T>(T prefab, bool activate = true, int poolCount = 1, bool isLazy = true, bool showLogs = false) where T : Component
         {
             var key = prefab.gameObject.GetInstanceID();
             
@@ -38,12 +38,12 @@ namespace Core.Pool
                 _idPools.Add(key, objectPool);
             }
             
-            var pooledObject = objectPool.GetObject<T>(show, showLogs);
+            var pooledObject = objectPool.GetObject<T>(activate, showLogs);
 
             return pooledObject;
         }
 
-        public T GetObject<T>(bool show = true, bool showLogs = false) where T : Component, IPooledObject
+        public T GetObject<T>(bool activate = true, bool showLogs = false) where T : Component, IPooledObject
         {
             var key = typeof(T);
 
@@ -54,12 +54,12 @@ namespace Core.Pool
                 _typePools.Add(key, objectPool);
             }
             
-            var pooledObject = objectPool.GetObject<T>(show, showLogs);
+            var pooledObject = objectPool.GetObject<T>(activate, showLogs);
 
             return pooledObject;
         }
 
-        public void ReturnObject<T>(T objectRef, bool hide = true) where T : Component
+        public void ReturnObject<T>(T objectRef, bool deactivate = true) where T : Component
         {
             if (!objectRef) { EditorLogger.LogError($"[{GetType().Name}] Return failed: null/destroyed object"); return; }
 
@@ -83,20 +83,20 @@ namespace Core.Pool
                 }
             }
             
-            objectPool.ReturnObject(pooledObject, hide);
+            objectPool.ReturnObject(pooledObject, deactivate);
         }
         
-        public void ReturnObjectsByType<T>(bool hide = true) where T : Component, IPooledObject
+        public void ReturnObjectsByType<T>(bool deactivate = true) where T : Component, IPooledObject
         {
             var pooledObjects = PoolSearchUtils.FindPooledObjectsOfType<T>();
             
             foreach (var pooledObject in pooledObjects)
             {
-                ReturnObject(pooledObject, hide);
+                ReturnObject(pooledObject, deactivate);
             }
         }
         
-        public void ReturnAll(bool hide = true)
+        public void ReturnAll(bool deactivate = true)
         {
             var pooledObjects = PoolSearchUtils.FindPooledObjectsOfType<IPooledObject>();
             
@@ -104,7 +104,7 @@ namespace Core.Pool
             {
                 if (pooledObject is Component component)
                 {
-                    ReturnObject(component, hide);
+                    ReturnObject(component, deactivate);
                 }
             }
         }

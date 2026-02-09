@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Core.Views
 {
-    public class SizeAnimationView : MonoBehaviour
+    public class SizeAnimationModule : MonoBehaviour
     {
         [field: SerializeField] public Transform Transform { get; private set; }
         

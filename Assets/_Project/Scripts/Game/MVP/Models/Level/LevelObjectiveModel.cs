@@ -16,7 +16,7 @@ namespace Core.Models
         public bool IsAllGoalsComplete => _totalGoalCount <= 0;
         public event Action OnGoalsComplete;
         public event Action OnMoveCountUpdate;
-        public event Action<IDamageableObstacle, Vector3, Vector2> OnGoalProgressUpdate;
+        public event Action<IDamageableGridObject, Vector3, Vector2> OnGoalProgressUpdate;
         
         public void Initialize(List<LevelGoal> goals, int moveCount)
         {
@@ -26,13 +26,15 @@ namespace Core.Models
             if (IsAllGoalsComplete) OnGoalsComplete?.Invoke();
         }
 
-        public void ProgressGoal(IDamageableObstacle damageableObstacle, Vector3 worldPos, Vector2 size)
+        public void ProgressGoal(IDamageableGridObject damageableGridObject, Vector3 worldPos, Vector2 size)
         {
             if (IsAllGoalsComplete) return;
 
+            if(damageableGridObject is not ObstacleObject obstacle) return;
+            
             foreach (var levelGoal in _goals)
             {
-                if (levelGoal.ObstacleType != damageableObstacle.ObstacleType) continue;
+                if (levelGoal.ObstacleType != obstacle.ObstacleType) continue;
                 if (levelGoal.Count == 0) continue;
 
                 var before = levelGoal.Count;
@@ -41,7 +43,7 @@ namespace Core.Models
                 levelGoal.Count = before - removed;
                 _totalGoalCount -= removed;
 
-                OnGoalProgressUpdate?.Invoke(damageableObstacle, worldPos, size);
+                OnGoalProgressUpdate?.Invoke(damageableGridObject, worldPos, size);
                 break;
             }
 

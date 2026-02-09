@@ -1118,7 +1118,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <ProgressBarView>k__BackingField: {fileID: 1140368674}
-  <FadeAnimationView>k__BackingField: {fileID: 2045105132}
+  <FadeAnimationModule>k__BackingField: {fileID: 2045105132}
   <ToggleObjects>k__BackingField:
   - {fileID: 1594220465}
   - {fileID: 1393686377}

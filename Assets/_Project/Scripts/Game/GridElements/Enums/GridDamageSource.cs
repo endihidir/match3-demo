@@ -3,7 +3,7 @@ using System;
 namespace Core.Item
 {
     [Flags]
-    public enum DamageSource
+    public enum GridDamageSource
     {
         None = 0,
         Match = 1 << 0,
