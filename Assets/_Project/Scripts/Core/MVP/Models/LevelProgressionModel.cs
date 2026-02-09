@@ -26,7 +26,7 @@ namespace Core.Models
             var defaultState = new LevelProgressionData
             {
                 currentLevelIndex = 0,
-                levelCompletionCount = 1
+                levelCompletionCount = 0
             };
             
             _levelProgressionData = _saveService.LoadFromTextFile(SaveKey, defaultState);
@@ -65,7 +65,7 @@ namespace Core.Models
         public void ResetProgress()
         {
             _levelProgressionData.currentLevelIndex = 0;
-            _levelProgressionData.levelCompletionCount = 1;
+            _levelProgressionData.levelCompletionCount = 0;
             RaiseChanged();
         }
 
