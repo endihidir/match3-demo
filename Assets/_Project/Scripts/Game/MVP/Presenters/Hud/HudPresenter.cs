@@ -8,7 +8,7 @@ using VContainer.Unity;
 
 namespace Core.Presenters
 {
-    public sealed class HudPresenter : IInitializable, IDisposable
+     public sealed class HudPresenter : IInitializable, IDisposable
     {
         private readonly ILevelObjectiveModel _levelObjectiveModel;
         private readonly IHudView _hudView;
@@ -28,26 +28,33 @@ namespace Core.Presenters
             _levelObjectiveModel.OnMoveCountUpdate += OnMoveCountUpdate;
             _levelObjectiveModel.OnGoalProgressUpdate += OnObjectiveCountUpdate;
             _gridStateHandler.Context.OnGridDestructionComplete += _goalFxHandler.PlayQueuedFX;
+            _goalFxHandler.OnGoalFxCompleted += UpdateGoalView;
         }
 
         private void OnObjectiveCountUpdate(IDamageableGridObject damageableGridObject, Vector3 worldPos, Vector2 size)
         {
             if (damageableGridObject is not ObstacleObject obstacle) return;
-           
+       
             if (damageableGridObject.IsCollectible)
             {
-                _goalFxHandler.QueueFX(obstacle.ObstacleType, worldPos, size);
+                if (!_hudView.TryGetGoalSlotView(obstacle.ObstacleType, out var targetSlotView)) return;
+
+                _goalFxHandler.QueueFX(targetSlotView, _hudView.GoalFxHolder, worldPos, size);
             }
             else
             {
-                _hudView.DecreaseGoalCount(obstacle.ObstacleType);
+                UpdateGoalView(obstacle.ObstacleType);
             }
+        }
+
+        private void UpdateGoalView(ObstacleType obstacleType)
+        {
+            _hudView.DecreaseGoalCount(obstacleType);
         }
 
         private void OnMoveCountUpdate()
         {
             var moveCount = _levelObjectiveModel.MoveCount;
-            
             _hudView.SetMoveCount(moveCount);
         }
 
@@ -56,6 +63,7 @@ namespace Core.Presenters
             _gridStateHandler.Context.OnGridDestructionComplete -= _goalFxHandler.PlayQueuedFX;
             _levelObjectiveModel.OnGoalProgressUpdate -= OnObjectiveCountUpdate;
             _levelObjectiveModel.OnMoveCountUpdate -= OnMoveCountUpdate;
+            _goalFxHandler.OnGoalFxCompleted -= UpdateGoalView;
         }
     }
 }

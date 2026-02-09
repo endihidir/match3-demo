@@ -1,11 +1,14 @@
+using System;
 using Core.Item;
+using Core.UI;
 using UnityEngine;
 
 namespace Core.Presenters
 {
     public interface IGoalFxHandler
     {
-        void QueueFX(ObstacleType obstacleType, Vector3 worldPos, Vector2 size);
+        event Action<ObstacleType> OnGoalFxCompleted;
+        void QueueFX(GoalSlotView targetSlotView, Transform fxHolder, Vector3 startWorldPos, Vector2 startSize);
         void PlayQueuedFX();
     }
 }
