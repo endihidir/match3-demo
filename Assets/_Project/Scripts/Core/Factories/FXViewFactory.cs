@@ -10,7 +10,7 @@ namespace Core.Item.Factories
 
         public FXViewFactory(IObjectPoolService objectPoolService) => _objectPoolService = objectPoolService;
 
-        public T GetFX<T>(bool show = true) where T : BaseFxView => _objectPoolService.GetObject<T>(show);
+        public T GetFX<T>(bool activate = true) where T : BaseFxView => _objectPoolService.GetObject<T>(activate);
 
         public void ReleaseFX(BaseFxView fx) => _objectPoolService.ReturnObject(fx);
         public void ReleaseFX(Transform fx) => _objectPoolService.ReturnObject(fx);

@@ -72,9 +72,9 @@ namespace Core.Pool
             return component;
         }
 
-        public void ReturnObject<T>(T pooledObject, bool hide = true) where T : IPooledObject
+        public void ReturnObject<T>(T pooledObject, bool deactivate = true) where T : IPooledObject
         {
-            if (pooledObject.IsActive && hide)
+            if (pooledObject.IsActive && deactivate)
             {
                 pooledObject.Deactivate();
             }

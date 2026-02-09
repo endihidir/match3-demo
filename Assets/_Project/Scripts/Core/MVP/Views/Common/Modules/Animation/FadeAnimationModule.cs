@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace Core.Views
 {
-    public class FadeAnimationView : MonoBehaviour
+    public class FadeAnimationModule : MonoBehaviour
     {
         [field: SerializeField, HideIf(nameof(HasGraphic))] public CanvasGroup CanvasGroup { get; private set; }
         [field: SerializeField, HideIf(nameof(HasCanvasGroup))] public Graphic Graphic { get; private set; }

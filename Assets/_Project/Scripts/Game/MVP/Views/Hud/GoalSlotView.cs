@@ -13,7 +13,7 @@ namespace Core.UI
         [field: SerializeField, ReadOnly] public ObstacleType ObstacleType { get; private set; }
         [field: SerializeField] private Image GoalIcon { get; set; }
         [field: SerializeField] private TextMeshProUGUI GoalCountTxt { get; set; }
-        [field: SerializeField] private BounceAnimationView BounceAnimationView { get; set; }
+        [field: SerializeField] private BounceAnimationModule BounceAnimationModule { get; set; }
         [field: SerializeField, ReadOnly] private int GoalCount { get; set; }
 
         public void Initialize(ObstacleType obstacleType)
@@ -34,11 +34,11 @@ namespace Core.UI
             GoalCountTxt?.SetText(GoalCount.ToString());
         }
 
-        public void DecreaseGoalCount()
+        public void DecreaseGoalCount(bool useBounceAnim = true)
         {
-            if (GoalCount > 0)
+            if (GoalCount > 0 && useBounceAnim)
             {
-                BounceAnimationView?.PlayBounce();
+                BounceAnimationModule?.PlayBounce();
             }
             
             GoalCount = Mathf.Max(GoalCount - 1, 0);

@@ -7,9 +7,9 @@ namespace Core.UI
 {
     public class LevelEndMenuAnimationView : MonoBehaviour
     {
-        [field: SerializeField] private FadeAnimationView BgFadeAnimation { get; set; }
-        [field: SerializeField] private BounceAnimationView TitleBounceAnimation { get; set; }
-        [field: SerializeField] private BounceAnimationView ButtonBounceAnimation { get; set; }
+        [field: SerializeField] private FadeAnimationModule BgFadeAnimation { get; set; }
+        [field: SerializeField] private BounceAnimationModule TitleBounceAnimation { get; set; }
+        [field: SerializeField] private BounceAnimationModule ButtonBounceAnimation { get; set; }
 
         public async UniTask ShowAsync(float duration)
         {

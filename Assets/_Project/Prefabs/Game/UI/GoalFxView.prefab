@@ -89,9 +89,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <UseUnscaledTime>k__BackingField: 0
   <FxViewHolder>k__BackingField: {fileID: 8098826787367918283}
-  <Image>k__BackingField: {fileID: 5902407023251381303}
   <MoveAnimation>k__BackingField: {fileID: 7672111661685643027}
   <SizeAnimation>k__BackingField: {fileID: 8102414354056981077}
+  <ImageFxModule>k__BackingField: {fileID: 6079973255520051288}
 --- !u!114 &7672111661685643027
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -105,7 +105,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <Transform>k__BackingField: {fileID: 582623437816026205}
-  <RectTransform>k__BackingField: {fileID: 582623437816026205}
 --- !u!114 &8102414354056981077
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -119,7 +118,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <Transform>k__BackingField: {fileID: 582623437816026205}
-  <SpriteRenderer>k__BackingField: {fileID: 0}
 --- !u!1 &8853292706010318724
 GameObject:
   m_ObjectHideFlags: 0
@@ -131,6 +129,7 @@ GameObject:
   - component: {fileID: 7277567924191133422}
   - component: {fileID: 1533576455825477603}
   - component: {fileID: 5902407023251381303}
+  - component: {fileID: 6079973255520051288}
   m_Layer: 5
   m_Name: IconImg
   m_TagString: Untagged
@@ -195,3 +194,16 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &6079973255520051288
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8853292706010318724}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14874f265f4a8c2418a36345646d1137, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <Icon>k__BackingField: {fileID: 5902407023251381303}

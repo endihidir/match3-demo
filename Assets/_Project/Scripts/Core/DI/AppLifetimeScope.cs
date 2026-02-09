@@ -37,8 +37,6 @@ namespace Core.LifetimeScopes
             builder.Register<JsonSaveService>(Lifetime.Singleton).As<IJsonSaveService>();
             builder.Register<SlotViewFactory>(Lifetime.Singleton).As<ISlotViewFactory>();
             builder.Register<FXViewFactory>(Lifetime.Singleton).As<IFXViewFactory>();
-            builder.Register<ImageFXViewFactory>(Lifetime.Singleton).As<IAnimatedFXViewFactory>();
-            builder.Register<ParticleFXViewFactory>(Lifetime.Singleton).As<IParticleFXViewFactory>();
         }
 
         private static void RegisterProviders(IContainerBuilder builder)

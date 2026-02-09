@@ -122,15 +122,15 @@ namespace Core.Handlers
                         continue;
                     }
 
-                    if (data.HasDamage && obj is IDamageableObstacle damageableItem)
+                    if (data.HasDamage && obj is IDamageableGridObject damageableItem)
                     {
-                        var damageResult = damageableItem.TakeDamage(data.DamageAmount, data.DamageSource);
+                        var damageResult = damageableItem.TakeDamage(data.DamageAmount, data.GridDamageSource);
 
-                        if (damageResult == DamageResult.Damaged)
+                        if (damageResult == GridDamageResult.Damaged)
                         {
                             // TODO: play damaged effect!
                         }
-                        else if (damageResult == DamageResult.Destroyed)
+                        else if (damageResult == GridDamageResult.Destroyed)
                         {
                             if (obj is IBoosterActionSource source)
                             {

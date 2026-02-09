@@ -4,11 +4,11 @@ using UnityEngine;
 
 namespace Core.Item
 {
-    public class ObstacleObject : BaseGridObject, IDamageableObstacle
+    public class ObstacleObject : BaseGridObject, IDamageableGridObject
     {
         [field: SerializeField, ReadOnly] public ObstacleType ObstacleType { get; private set; }
         [field: SerializeField, ReadOnly] public int Life { get; private set; }
-        [field: SerializeField, ReadOnly] public DamageSource AllowedDamageSources { get; private set; }
+        [field: SerializeField, ReadOnly] public GridDamageSource AllowedGridDamageSources { get; private set; }
         [field: SerializeField, ReadOnly] public bool IsCollectible { get; private set; }
         [field: SerializeField, ReadOnly] public Sprite[] BrokenSprites { get; private set; }
 
@@ -25,18 +25,18 @@ namespace Core.Item
             {
                 Life = obstacleConfigData.GetLife();
                 IsCollectible = obstacleConfigData.IsCollectible;
-                AllowedDamageSources = obstacleConfigData.DamageSource;
+                AllowedGridDamageSources = obstacleConfigData.GridDamageSource;
                 BrokenSprites = obstacleConfigData.CrackedSprites;
             }
         }
 
-        public DamageResult TakeDamage(int damage, DamageSource source)
+        public GridDamageResult TakeDamage(int damage, GridDamageSource source)
         {
-            if ((AllowedDamageSources & source) == 0 || Life <= 0) return DamageResult.Ignored;
+            if ((AllowedGridDamageSources & source) == 0 || Life <= 0) return GridDamageResult.Ignored;
             Life -= damage;
             Life = Mathf.Max(0, Life);
             SetBrokenSprite(Life);
-            return Life <= 0 ? DamageResult.Destroyed : DamageResult.Damaged;
+            return Life <= 0 ? GridDamageResult.Destroyed : GridDamageResult.Damaged;
         }
 
         protected override void OnDespawned()

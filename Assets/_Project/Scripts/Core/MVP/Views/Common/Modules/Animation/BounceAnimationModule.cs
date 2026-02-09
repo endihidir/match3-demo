@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Core.Views
 {
-    public class BounceAnimationView : MonoBehaviour
+    public class BounceAnimationModule : MonoBehaviour
     {
         [field: SerializeField] public Transform BounceTransform { get; private set; }
         [field: SerializeField] private float Duration { get; set; } = 0.15f;
