@@ -5,13 +5,13 @@ using UnityEngine;
 
 namespace Core.Utils
 {
-    public static class GridMatchBoosterDecision
+    public static class GridBoosterDecisionUtil
     {
-        public static BoosterType? DecideBoosterTypeFromGroup(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int id)
+        public static BoosterType? DecideBoosterTypeFromGroup(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int typeId)
         {
             GetGroupLineLengths(group, out var hLen, out var vLen);
 
-            var hasSquare = Has2X2SquareInGroup(model, matchMask, group, id);
+            var hasSquare = Has2X2SquareInGroup(model, matchMask, group, typeId);
 
             if (hLen >= 5 || vLen >= 5)
             {
