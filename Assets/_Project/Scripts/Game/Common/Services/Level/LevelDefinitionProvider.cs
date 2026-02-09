@@ -21,7 +21,7 @@ namespace Core.Level
         public List<LevelGoal> GetLevelGoals() => _dataReader.GetLevelDefinition(_progressionModel.CurrentLevelIndex).Goals;
         public GridObjectType[,] GetGridObjectTypes() => _dataReader.GetLevelDefinition(_progressionModel.CurrentLevelIndex).GridObjectTypes;
         public int GetLevelNumber(bool useLevelCompletionCount = false) => useLevelCompletionCount 
-                                                                  ? _progressionModel.LevelCompletionCount
+                                                                  ? _progressionModel.LevelCompletionCount + 1
                                                                   : _dataReader.GetLevelDefinition(_progressionModel.CurrentLevelIndex).LevelNumber;
     }
 }
