@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Core.Config;
 using Core.Configs;
@@ -11,54 +12,65 @@ namespace Core.Presenters
 {
     public sealed class GoalFxHandler : IGoalFxHandler
     {
-        private readonly IHudView _hudView;
         private readonly IFXViewFactory _fxFactory;
-        private readonly ObstacleConfigContainerSO  _obstacleConfigContainer;
-        private readonly List<PendingGoalFX> _pendingGoalFxList = new();
+        private readonly ObstacleConfigContainerSO _obstacleConfigContainer;
+        private readonly List<GoalFxData> _goalFxDataList = new();
+        public event Action<ObstacleType> OnGoalFxCompleted;
 
-        public GoalFxHandler(IHudView hudView, IFXViewFactory fxFactory, GameplayConfigContainer gameplayConfigContainer)
+        public GoalFxHandler(IFXViewFactory fxFactory, GameplayConfigContainer gameplayConfigContainer)
         {
-            _hudView = hudView;
             _fxFactory = fxFactory;
             _obstacleConfigContainer = gameplayConfigContainer.GridConfigContainer.GetConfig<ObstacleConfigContainerSO>();
         }
-    
-        public void QueueFX(ObstacleType obstacleType, Vector3 worldPos, Vector2 size)
+        
+        public void QueueFX(GoalSlotView targetSlotView, Transform fxHolder, Vector3 startWorldPos, Vector2 startSize)
         {
-            if(!_obstacleConfigContainer.Configs.TryGet(obstacleType, out var obstacleConfig)) return;
+            if (!_obstacleConfigContainer.Configs.TryGet(targetSlotView.ObstacleType, out var config)) return;
             
-            var goalFxView = _fxFactory.GetFX<GoalFxView>(false);
-            var sprite = obstacleConfig.CrackedSprites.Length > 0 ? obstacleConfig.CrackedSprites[0] : obstacleConfig.icon;
-            goalFxView.Initialize(_hudView.GoalFxHolder, worldPos, sprite, size);
-            var pendingFoalFx = new PendingGoalFX(obstacleType, goalFxView);
-            _pendingGoalFxList.Add(pendingFoalFx);
+            var goalFxView = PrepareFxView(fxHolder, startWorldPos, startSize, config);
+            var goalFxData = CreateFxData(targetSlotView, goalFxView);
+            _goalFxDataList.Add(goalFxData);
         }
-    
+        
         public void PlayQueuedFX()
         {
-            for (var i = 0; i < _pendingGoalFxList.Count; i++)
+            for (var i = 0; i < _goalFxDataList.Count; i++)
             {
-                var pending = _pendingGoalFxList[i];
-                
-                PlayFX(pending, i * 0.05f);
+                var goalFxData = _goalFxDataList[i];
+                PlayFX(goalFxData, i * 0.05f);
             }
             
-            _pendingGoalFxList.Clear();
+            _goalFxDataList.Clear();
         }
-    
-        private void PlayFX(PendingGoalFX data, float delay)
+        
+        private GoalFxView PrepareFxView(Transform fxHolder, Vector3 startWorldPos, Vector2 startSize, ObstacleDataSO config)
         {
-            if (!_hudView.TryGetGoalSlotView(data.ObstacleType, out var slotView)) return;
-            
-            data.FxView.Activate();
-            data.FxView.SizeAnimation.SetRectSize(slotView.GetIconSize(), 0.75f, delay);
-            data.FxView.MoveAnimation.MoveTo(slotView.transform.position, 0.75f, delay, Ease.InBack).OnComplete(()=> UpdateView(data));
+            var goalFxView = _fxFactory.GetFX<GoalFxView>(false);
+            var sprite = config.CrackedSprites.Length > 0 ? config.CrackedSprites[0] : config.icon;
+            goalFxView.Initialize(fxHolder, startWorldPos, sprite, startSize);
+            return goalFxView;
         }
-    
-        private void UpdateView(PendingGoalFX data)
+        
+        private static GoalFxData CreateFxData(GoalSlotView targetSlotView, GoalFxView goalFxView)
+        {
+            var targetWorldPos = targetSlotView.transform.position;
+            var targetSize = targetSlotView.GetIconSize();
+            var goalFxData = new GoalFxData(goalFxView, targetSlotView.ObstacleType, targetWorldPos, targetSize);
+            return goalFxData;
+        }
+        
+        private void PlayFX(GoalFxData goalFxData, float delay)
+        {
+            goalFxData.FxView.Activate();
+            goalFxData.FxView.SizeAnimation.SetRectSize(goalFxData.TargetSize, .75f, delay);
+            goalFxData.FxView.MoveAnimation.MoveTo(goalFxData.TargetWorldPos, .75f, delay, Ease.InBack)
+                                              .OnComplete(() => OnFxComplete(goalFxData));
+        }
+        
+        private void OnFxComplete(GoalFxData data)
         {
             _fxFactory.ReleaseFX(data.FxView);
-            _hudView.DecreaseGoalCount(data.ObstacleType);
+            OnGoalFxCompleted?.Invoke(data.ObstacleType);
         }
     }
 }
