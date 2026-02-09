@@ -6,7 +6,7 @@ namespace Core.Models
     {
         event Action OnLevelChanged;
         int CurrentLevelIndex { get; }
-        int DisplayLevelNumber { get; }
+        int LevelCompletionCount { get; }
         void SetLevel(int levelIndex);
         void AdvanceLevel();
         void ResetProgress();

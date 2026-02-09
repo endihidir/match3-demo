@@ -6,6 +6,6 @@ namespace Core.Models
     public struct LevelProgressionData
     {
         public int currentLevelIndex;
-        public int displayLevelNumber;
+        public int levelCompletionCount;
     }
 }

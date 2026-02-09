@@ -15,7 +15,7 @@ namespace Core.Models
         private LevelProgressionData _levelProgressionData;
         public int MaxLevel => _levelDataReader.LevelSize;
         public int CurrentLevelIndex => _levelProgressionData.currentLevelIndex;
-        public int DisplayLevelNumber => _levelProgressionData.displayLevelNumber;
+        public int LevelCompletionCount => _levelProgressionData.levelCompletionCount;
         private bool ResetIndexOnLimit => true; //TODO: Get this form config
         public event Action OnLevelChanged;
         public LevelProgressionModel(IJsonSaveService saveService, ILevelDataReader levelDataReader)
@@ -26,7 +26,7 @@ namespace Core.Models
             var defaultState = new LevelProgressionData
             {
                 currentLevelIndex = 0,
-                displayLevelNumber = 1
+                levelCompletionCount = 1
             };
             
             _levelProgressionData = _saveService.LoadFromTextFile(SaveKey, defaultState);
@@ -57,7 +57,7 @@ namespace Core.Models
             
             _levelProgressionData.currentLevelIndex = next;
             
-            _levelProgressionData.displayLevelNumber++;
+            _levelProgressionData.levelCompletionCount++;
             
             RaiseChanged();
         }
@@ -65,7 +65,7 @@ namespace Core.Models
         public void ResetProgress()
         {
             _levelProgressionData.currentLevelIndex = 0;
-            _levelProgressionData.displayLevelNumber = 1;
+            _levelProgressionData.levelCompletionCount = 1;
             RaiseChanged();
         }
 
