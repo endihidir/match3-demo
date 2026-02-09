@@ -205,13 +205,13 @@ namespace Core.Utils
 
             if (!IsRegularItem(data)) return false;
 
-            var id = data.TypeId;
-            if (id <= 0) return false;
+            var typeId = data.TypeId;
+            if (typeId <= 0) return false;
 
             var visited = new bool[width, height];
             var buffer = new Vector2Int[width * height];
 
-            var count = CollectMatchShapeFromCenter(model, grid, targetCoord.x, targetCoord.y, id, visited, buffer);
+            var count = CollectMatchShapeFromCenter(model, grid, targetCoord.x, targetCoord.y, typeId, visited, buffer);
             if (count <= 0) return false;
 
             if (shouldBoosterResult)
@@ -221,7 +221,7 @@ namespace Core.Utils
                 for (int i = 0; i < count; i++)
                     group.Add(buffer[i]);
 
-                var boosterType = GridMatchBoosterDecision.DecideBoosterTypeFromGroup(model, matchMask, group, id);
+                var boosterType = GridBoosterDecisionUtil.DecideBoosterTypeFromGroup(model, matchMask, group, typeId);
                 
                 if (!boosterType.HasValue) return false;
             }

@@ -97,10 +97,10 @@ namespace Core.Handlers
                 var data = grid[x, y];
                 if (!GridMatchCalcUtil.IsRegularItem(data)) return;
 
-                var id = data.TypeId;
-                if (id <= 0) return;
+                var typeId = data.TypeId;
+                if (typeId <= 0) return;
 
-                var count = GridMatchCalcUtil.CollectMatchShapeFromCenter(model, grid, x, y, id, visited, _coordBuffer);
+                var count = GridMatchCalcUtil.CollectMatchShapeFromCenter(model, grid, x, y, typeId, visited, _coordBuffer);
                 if (count < minCount || count > maxCount) return;
 
                 CommitVisited(count);
@@ -109,7 +109,7 @@ namespace Core.Handlers
                 for (int i = 0; i < count; i++)
                     group.Add(_coordBuffer[i]);
 
-                _animationTasks[taskCount++] = ResolveGroupParallelAnimationAsync(model, matchMask, group, id);
+                _animationTasks[taskCount++] = ResolveGroupParallelAnimationAsync(model, matchMask, group, typeId);
             }
 
             void CommitVisited(int count)
@@ -138,13 +138,13 @@ namespace Core.Handlers
             return UniTask.WhenAll(_animationTasks);
         }
 
-        private UniTask ResolveGroupParallelAnimationAsync(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int id)
+        private UniTask ResolveGroupParallelAnimationAsync(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int typeID)
         {
             var isAnyGroupObjectFall = GridMatchCalcUtil.IsAnyGroupObjectFall(model, group);
 
             if (isAnyGroupObjectFall) return UniTask.CompletedTask;
             
-            var boosterType = GridMatchBoosterDecision.DecideBoosterTypeFromGroup(model, matchMask, group, id);
+            var boosterType = GridBoosterDecisionUtil.DecideBoosterTypeFromGroup(model, matchMask, group, typeID);
 
             if (!boosterType.HasValue)
             {
@@ -154,7 +154,7 @@ namespace Core.Handlers
 
             var anyForced = TryConsumeForcedCenterCoord(group, out var forcedCoord);
 
-            var centerCoord = anyForced ? forcedCoord : GridMatchBoosterDecision.SelectMergeCenter(group);
+            var centerCoord = anyForced ? forcedCoord : GridBoosterDecisionUtil.SelectMergeCenter(group);
 
             var mergeObjs = GridMatchCalcUtil.GetMergedGroupObject(group, model, centerCoord);
 
