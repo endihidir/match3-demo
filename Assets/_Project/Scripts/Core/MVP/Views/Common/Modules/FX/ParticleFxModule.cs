@@ -99,10 +99,27 @@ namespace Core.UI
             }
         }
         
+        public void SetTextureSheetSprites(Sprite[] sprites)
+        {
+            var textureSheet = ParticleSystem.textureSheetAnimation;
+            textureSheet.enabled = true;
+            textureSheet.mode = ParticleSystemAnimationMode.Sprites;
+            
+            for (int i = textureSheet.spriteCount - 1; i >= 0; i--)
+            {
+                textureSheet.RemoveSprite(i);
+            }
+            
+            foreach (var sprite in sprites)
+            {
+                textureSheet.AddSprite(sprite);
+            }
+        }
+        
         public void Emit(int count) => ParticleSystem.Emit(count);
         
         public bool IsPlaying => ParticleSystem.isPlaying;
-        public bool IsAlive => ParticleSystem.IsAlive();
+        public bool IsAlive => ParticleSystem.IsAlive(true);
         public int ParticleCount => ParticleSystem.particleCount;
     }
 }
