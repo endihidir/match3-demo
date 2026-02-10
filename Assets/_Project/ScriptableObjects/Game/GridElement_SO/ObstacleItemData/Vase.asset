@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a14d24e252ea441187343188b27dd937, type: 3}
   m_Name: Vase
   m_EditorClassIdentifier: 
-  icon: {fileID: 21300000, guid: f1284f1fe9eb2a545b2ef886c61ba241, type: 3}
-  spriteSizeMultiplier: {x: 0.95, y: 0.95}
+  icon: {fileID: 1852594712, guid: f1284f1fe9eb2a545b2ef886c61ba241, type: 3}
+  spriteSizeMultiplier: {x: 0.75, y: 0.95}
   isStationary: 1
   <Life>k__BackingField: 1
   <GridDamageSource>k__BackingField: -1

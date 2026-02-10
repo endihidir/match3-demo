@@ -28,7 +28,7 @@ namespace Core.Presenters
             if (!_obstacleConfigContainer.Configs.TryGet(targetSlotView.ObstacleType, out var config)) return;
             
             var goalFxView = PrepareFxView(fxHolder, startWorldPos, startSize, config);
-            var goalFxData = CreateFxData(targetSlotView, goalFxView);
+            var goalFxData = CreateFxData(goalFxView, targetSlotView);
             _goalFxDataList.Add(goalFxData);
         }
         
@@ -51,7 +51,7 @@ namespace Core.Presenters
             return goalFxView;
         }
         
-        private static GoalFxData CreateFxData(GoalSlotView targetSlotView, GoalFxView goalFxView)
+        private static GoalFxData CreateFxData(GoalFxView goalFxView, GoalSlotView targetSlotView)
         {
             var targetWorldPos = targetSlotView.transform.position;
             var targetSize = targetSlotView.GetIconSize();
