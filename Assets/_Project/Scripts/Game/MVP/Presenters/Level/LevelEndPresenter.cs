@@ -60,14 +60,15 @@ namespace Core.Models
         {
             if(!_objectiveModel.IsAllMovesFinished) return;
             
+            if(_isLevelFailed) return;
+            
             var itemTypes = _gridModel.BuildGridTypeDataArray();
 
-            if (itemTypes.Count(x => x.ItemKind == GridItemKind.Obstacle) > 0 && !_isLevelFailed)
-            {
-                _isLevelFailed = true;
+            if (itemTypes.Count(x => x.ItemKind == GridItemKind.Obstacle) <= 0) return;
+            
+            _isLevelFailed = true;
                 
-                _levelEndView.OpenFailMenuViewAsync().Forget();
-            }
+            _levelEndView.OpenFailMenuViewAsync().Forget();
         }
         
         public void Dispose()

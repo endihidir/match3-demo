@@ -41,8 +41,8 @@ namespace Core.Services
         public void ReleaseFactories()
         {
             _gridItemFactory.ReleaseItemsByType<BaseGridObject>();
-            _fxViewFactory.ReleaseFXByType<BaseFxView>();
             _goalSlotFactory.ReleaseSlotsByType<GoalSlotView>();
+            _fxViewFactory.ReleaseFXByType<BaseFxView>();
         }
         
         private void GridSetup()
