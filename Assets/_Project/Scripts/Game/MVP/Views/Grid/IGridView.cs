@@ -9,6 +9,7 @@ namespace Core.Views
         Camera Cam { get; }
         bool IsInitialized { get; }
         Transform GridObjectsParent { get; }
+        Transform FXParent { get; }
         void Initialize(int width, int height, bool[,] isCellActive);
         Vector2Int ScreenToGridCoordinate(Vector2 mousePosition);
         Vector3 GridToWorld(Vector2Int itemCoordinate);

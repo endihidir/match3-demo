@@ -16,6 +16,7 @@ namespace Core.Views
         [field: SerializeField] public Canvas Canvas { get; private set; }
         [field: SerializeField] public Transform GridRoot { get; private set; }
         [field: SerializeField] public Transform GridObjectsParent { get; private set; }
+        [field: SerializeField] public Transform FXParent { get; private set; }
         [field: SerializeField] public MeshFilter GridMeshFilter { get; private set; }
         [field: SerializeField] public GridMeshSettingsSO MeshSettings { get; private set; }
         [field: SerializeField] public GridLayoutSettingsSO LayoutSettings { get; private set; }
