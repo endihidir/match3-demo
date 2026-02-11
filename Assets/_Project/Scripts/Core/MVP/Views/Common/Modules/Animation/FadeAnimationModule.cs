@@ -5,7 +5,7 @@ using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Core.Views
+namespace Core.Modules
 {
     public class FadeAnimationModule : MonoBehaviour
     {

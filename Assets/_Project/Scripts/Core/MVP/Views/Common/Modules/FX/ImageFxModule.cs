@@ -2,7 +2,7 @@ using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Core.UI
+namespace Core.Modules
 {
     public class ImageFxModule : MonoBehaviour
     {

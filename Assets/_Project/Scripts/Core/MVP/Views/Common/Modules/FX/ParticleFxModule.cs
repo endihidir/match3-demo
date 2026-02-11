@@ -1,11 +1,16 @@
 using NaughtyAttributes;
 using UnityEngine;
 
-namespace Core.UI
+namespace Core.Modules
 {
     public class ParticleFxModule : MonoBehaviour
     {
         [field: SerializeField, Required] public ParticleSystem ParticleSystem { get; private set; }
+        
+        public void Emit(int count) => ParticleSystem.Emit(count);
+        public bool IsPlaying => ParticleSystem&& ParticleSystem.isPlaying;
+        public bool IsAlive => ParticleSystem&& ParticleSystem.IsAlive(true);
+        public int ParticleCount => ParticleSystem.particleCount;
         
         public void Play() => ParticleSystem.Play();
         
@@ -15,7 +20,6 @@ namespace Core.UI
         }
         
         public void Pause() => ParticleSystem.Pause();
-        
         public void Clear() => ParticleSystem.Clear();
         
         public void Restart()
@@ -115,10 +119,5 @@ namespace Core.UI
                 textureSheet.AddSprite(sprite);
             }
         }
-        
-        public void Emit(int count) => ParticleSystem.Emit(count);
-        public bool IsPlaying => ParticleSystem&& ParticleSystem.isPlaying;
-        public bool IsAlive => ParticleSystem&& ParticleSystem.IsAlive(true);
-        public int ParticleCount => ParticleSystem.particleCount;
     }
 }

@@ -1,6 +1,6 @@
 using Core.Config;
 using Core.Item;
-using Core.Views;
+using Core.Modules;
 using NaughtyAttributes;
 using TMPro;
 using UnityEngine;
