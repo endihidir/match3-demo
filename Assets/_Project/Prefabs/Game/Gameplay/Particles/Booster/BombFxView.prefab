@@ -1,0 +1,118 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &3778094746767076541
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2663642907379699354, guid: 2b1229b626668f64ab72ede68fc0f30b,
+        type: 3}
+      propertyPath: m_Name
+      value: BombFxView
+      objectReference: {fileID: 0}
+    - target: {fileID: 4264062161787055687, guid: 2b1229b626668f64ab72ede68fc0f30b,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4264062161787055687, guid: 2b1229b626668f64ab72ede68fc0f30b,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4264062161787055687, guid: 2b1229b626668f64ab72ede68fc0f30b,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4264062161787055687, guid: 2b1229b626668f64ab72ede68fc0f30b,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4264062161787055687, guid: 2b1229b626668f64ab72ede68fc0f30b,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4264062161787055687, guid: 2b1229b626668f64ab72ede68fc0f30b,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4264062161787055687, guid: 2b1229b626668f64ab72ede68fc0f30b,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4264062161787055687, guid: 2b1229b626668f64ab72ede68fc0f30b,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4264062161787055687, guid: 2b1229b626668f64ab72ede68fc0f30b,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4264062161787055687, guid: 2b1229b626668f64ab72ede68fc0f30b,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2663642907379699354, guid: 2b1229b626668f64ab72ede68fc0f30b,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -3626823213464866624}
+    - targetCorrespondingSourceObject: {fileID: 2663642907379699354, guid: 2b1229b626668f64ab72ede68fc0f30b,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7583599042364057968}
+  m_SourcePrefab: {fileID: 100100000, guid: 2b1229b626668f64ab72ede68fc0f30b, type: 3}
+--- !u!4 &1059116777999060937 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4241476323955467124, guid: 2b1229b626668f64ab72ede68fc0f30b,
+    type: 3}
+  m_PrefabInstance: {fileID: 3778094746767076541}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1196079789397058087 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2663642907379699354, guid: 2b1229b626668f64ab72ede68fc0f30b,
+    type: 3}
+  m_PrefabInstance: {fileID: 3778094746767076541}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &-3626823213464866624
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1196079789397058087}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d223ef686474d75acca5627ef8417f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <UseUnscaledTime>k__BackingField: 0
+  <FxViewHolder>k__BackingField: {fileID: 1059116777999060937}
+  <ParticleFxModule>k__BackingField: {fileID: 7583599042364057968}
+--- !u!114 &7583599042364057968
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1196079789397058087}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72984a1331b191044ae76d2455ea02de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <ParticleSystem>k__BackingField: {fileID: 0}
