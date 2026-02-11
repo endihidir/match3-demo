@@ -117,9 +117,8 @@ namespace Core.UI
         }
         
         public void Emit(int count) => ParticleSystem.Emit(count);
-        
-        public bool IsPlaying => ParticleSystem.isPlaying;
-        public bool IsAlive => ParticleSystem.IsAlive(true);
+        public bool IsPlaying => ParticleSystem&& ParticleSystem.isPlaying;
+        public bool IsAlive => ParticleSystem&& ParticleSystem.IsAlive(true);
         public int ParticleCount => ParticleSystem.particleCount;
     }
 }

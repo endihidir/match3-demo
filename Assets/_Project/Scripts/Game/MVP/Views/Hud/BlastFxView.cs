@@ -10,6 +10,7 @@ namespace Core.UI
 
         public virtual async UniTask Play(Action onComplete = null)
         {
+            if (!ParticleFxModule) return;
             ParticleFxModule.Play();
             await UniTask.WaitUntil(() => !ParticleFxModule.IsAlive);
             onComplete?.Invoke();

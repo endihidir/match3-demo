@@ -16,15 +16,13 @@ namespace Core.Pool
         private readonly IDictionary<int, ObjectPool> _idPools = new Dictionary<int, ObjectPool>();
         private readonly IDictionary<Type, ObjectPool> _typePools = new Dictionary<Type, ObjectPool>();
         
-        private Transform _pooledObjectsParent;
+        private Transform _pooledObjectsRoot;
         public ObjectPoolService(AppConfigContainer appConfigContainer) => _poolServiceConfig = appConfigContainer.poolServiceConfig;
 
         public void Initialize()
         {
             var root = GameObject.Find(ROOT_NAME) ?? new GameObject(ROOT_NAME);
-            _pooledObjectsParent = root.transform;    
-            CacheAllPooledObjects();
-            CreateAllCachedPooledObjects();
+            _pooledObjectsRoot = root.transform;
         }
         
         public T GetObject<T>(T prefab, bool activate = true, int poolCount = 1, bool isLazy = true, bool showLogs = false) where T : Component
@@ -59,13 +57,20 @@ namespace Core.Pool
             return pooledObject;
         }
 
-        public void ReturnObject<T>(T objectRef, bool deactivate = true) where T : Component
+        public void ReturnObject<T>(T objectRef, bool deactivate = true, bool showLogs = false) where T : Component
         {
-            if (!objectRef) { EditorLogger.LogError($"[{GetType().Name}] Return failed: null/destroyed object"); return; }
+            if (!objectRef)
+            {
+                if(showLogs)
+                    EditorLogger.LogError($"[{GetType().Name}] Return failed: null/destroyed object"); 
+                
+                return;
+            }
 
             if (!objectRef.TryGetComponent<IPooledObject>(out var pooledObject))
             {
-                EditorLogger.LogError($"[{GetType().Name}] Return failed: object is not IPooledObject.");
+                if(showLogs)
+                    EditorLogger.LogError($"[{GetType().Name}] Return failed: object is not IPooledObject.");
                 return;
             }
 
@@ -78,7 +83,9 @@ namespace Core.Pool
             {
                 if (!_typePools.TryGetValue(typeKey, out objectPool))
                 {
-                    EditorLogger.LogError($"[{GetType().Name}] Return failed: no pool for '{objectRef.name}' ({objectRef.GetType().Name}).");
+                    if(showLogs)
+                        EditorLogger.LogError($"[{GetType().Name}] Return failed: no pool for '{objectRef.name}' ({objectRef.GetType().Name}).");
+                    
                     return;
                 }
             }
@@ -167,46 +174,11 @@ namespace Core.Pool
 
             _idPools.Clear();
         }
-
-        private void CacheAllPooledObjects()
-        {
-            var poolData = _poolServiceConfig.poolDataConfigs;
-
-            foreach (var pooledAssetConfig in poolData.Distinct())
-            {
-                if (!pooledAssetConfig.PoolObject)
-                {
-                    EditorLogger.LogError("There is missing prefab in pool object list!");
-                    continue;
-                }
-
-                var canGet = pooledAssetConfig.PoolObject.TryGetComponent<IPooledObject>(out var pooledObjects);
-                if(!canGet) continue;
-                var key = pooledObjects.GetType();
-                
-                if (_typePools.ContainsKey(key)) continue;
-                var size = pooledAssetConfig.PoolSize;
-                var isLazy = pooledAssetConfig.IsLazy;
-                
-                var objectPool = new ObjectPool(pooledAssetConfig.PoolObject, _pooledObjectsParent, size, isLazy);
-                _typePools.Add(key, objectPool);
-            }
-        }
         
-        private void CreateAllCachedPooledObjects()
-        {
-            var nonLazyPooledObjects = _typePools.Where(poolData => !poolData.Value.IsLazy).ToDictionary(x=> x.Key,y => y.Value);
-
-            foreach (var keyValuePair in nonLazyPooledObjects)
-            {
-               keyValuePair.Value?.CreatePool(); 
-            }
-        }
-        
-        private ObjectPool CreateNewPool(GameObject prefab, int poolCount, bool isLazy = true)
+        private ObjectPool CreateNewPool(GameObject prefab, int startPoolCount, bool isLazy = true)
         {
             prefab.GetOrAddComponent<PooledObject>();
-            return new ObjectPool(prefab, _pooledObjectsParent, poolCount, isLazy).CreatePool();
+            return new ObjectPool(prefab, _pooledObjectsRoot, startPoolCount, isLazy);
         }
 
         private ObjectPool CreateNewPool<T>() where T : Component, IPooledObject
@@ -220,9 +192,9 @@ namespace Core.Pool
                 return null;
             }
             
-            var size = pooledAssetConfig.PoolSize;
+            var startPoolCount = pooledAssetConfig.PoolSize;
             var isLazy = pooledAssetConfig.IsLazy;
-            return new ObjectPool(pooledAssetConfig.PoolObject, _pooledObjectsParent, size, isLazy).CreatePool();
+            return new ObjectPool(pooledAssetConfig.PoolObject, _pooledObjectsRoot, startPoolCount, isLazy);
         }
         
         public void Dispose() => RemoveAllPools();

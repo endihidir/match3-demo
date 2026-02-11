@@ -9,27 +9,26 @@ namespace Core.Pool
     public sealed class ObjectPool
     {
         private readonly GameObject _prefabObj;
-        private readonly int _poolCount;
-        private readonly Transform _pooledObjectRoot;
+        private readonly int _startPoolCount;
+        private readonly Transform _rootTransform;
         private GameObject _poolParent;
         private Queue<IPooledObject> Pool { get; } = new();
         public bool IsLazy { get; private set; }
 
-        public ObjectPool(GameObject prefabObj, Transform rootParent, int poolCount, bool isLazy = true)
+        public ObjectPool(GameObject prefabObj, Transform rootTransformTransform, int startPoolCount, bool isLazy = true)
         {
             _prefabObj = prefabObj;
-            _pooledObjectRoot = rootParent;
-            _poolCount = poolCount;
+            _rootTransform = rootTransformTransform;
+            _startPoolCount = startPoolCount;
             IsLazy = isLazy;
             CreatePoolParent();
+            CreatePool();
         }
 
-        public ObjectPool CreatePool()
+        private void CreatePool()
         {
-            for (int i = 0; i < _poolCount; i++) 
+            for (int i = 0; i < _startPoolCount; i++) 
                 CreateNewObject(true);
-
-            return this;
         }
 
         public T GetObject<T>(bool activate = true, bool showLogs = false) where T : Component
@@ -129,7 +128,7 @@ namespace Core.Pool
         private void CreatePoolParent()
         {
             _poolParent = new GameObject("Pool_" + _prefabObj.name);
-            _poolParent.transform.SetParent(_pooledObjectRoot);
+            _poolParent.transform.SetParent(_rootTransform);
         }
         
         private void ClearPool()
