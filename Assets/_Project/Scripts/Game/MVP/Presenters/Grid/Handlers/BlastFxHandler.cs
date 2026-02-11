@@ -28,8 +28,8 @@ namespace Core.Handlers
 
         private void PlayBlastAt(BlastFxView blastFxView, Vector3 pos, Transform parent)
         {
-            blastFxView.transform.position = pos;
             blastFxView.transform.SetParent(parent, false);
+            blastFxView.transform.position = pos;
             blastFxView.Play(()=> OnBlastFxComplete(blastFxView)).Forget();
         }
 

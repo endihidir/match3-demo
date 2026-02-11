@@ -1,4 +1,4 @@
-using Core.Views;
+using Core.Modules;
 using UnityEngine;
 
 namespace Core.UI

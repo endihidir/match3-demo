@@ -1,7 +1,7 @@
 using DG.Tweening;
 using UnityEngine;
 
-namespace Core.Views
+namespace Core.Modules
 {
     public class BounceAnimationModule : MonoBehaviour
     {

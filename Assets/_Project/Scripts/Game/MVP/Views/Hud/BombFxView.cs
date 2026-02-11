@@ -5,11 +5,16 @@ using UnityEngine;
 
 namespace Core.UI
 {
-    public abstract class BlastFxView : BaseFxView
+    public class BombFxView : BoosterFxView
     {
-        [field: SerializeField] public ParticleFxModule ParticleFxModule { get; private set; }
+        [field: SerializeField] public ParticleFxModule ParticleFxModule { get; set; }
         
-        public async UniTask Play(Action onComplete = null)
+        public void Initialize(int radius)
+        {
+                
+        }
+        
+        public override async UniTask Play(Action onComplete = null)
         {
             if (!ParticleFxModule) return;
             ParticleFxModule.Play();
@@ -17,7 +22,7 @@ namespace Core.UI
             onComplete?.Invoke();
         }
 
-        public void Stop()
+        public override void Stop()
         {
             if (!ParticleFxModule) return;
             ParticleFxModule.Stop();
