@@ -9,7 +9,6 @@ namespace Core.Handlers
     public sealed class BlastFxHandler : IBlastFxHandler
     {
         private readonly IBlastFxFactory _blastFxFactory;
-
         public BlastFxHandler(IBlastFxFactory blastFxFactory) => _blastFxFactory = blastFxFactory;
 
         public void PlayBlastParticle(BaseGridObject obj, Vector3 pos, Transform parent)
