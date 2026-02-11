@@ -39,6 +39,8 @@ namespace Core.LifetimeScopes
     
             // GRID
             builder.Register<BlastFxFactory>(Lifetime.Scoped).As<IBlastFxFactory>();
+            builder.Register<BlastFxHandler>(Lifetime.Scoped).As<IBlastFxHandler>();
+            
             builder.Register<GridItemFactory>(Lifetime.Scoped).As<IGridItemFactory>();
             builder.Register<GridModel>(Lifetime.Scoped).As<IGridModel>();
             builder.RegisterComponentInHierarchy<GridView>().As<IGridView>();

@@ -61,7 +61,7 @@ PrefabInstance:
     - target: {fileID: 4514184784731174037, guid: 2d208b0690d2e6141996b1522aa20867,
         type: 3}
       propertyPath: m_Name
-      value: ObstacleBlastFx
+      value: ObstacleBlastFxView
       objectReference: {fileID: 0}
     - target: {fileID: 6139844261251310241, guid: 2d208b0690d2e6141996b1522aa20867,
         type: 3}
@@ -146,22 +146,22 @@ PrefabInstance:
     - target: {fileID: 2127031921830900061, guid: 156e93cdc85b75b448e0f725632aeb1f,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2127031921830900061, guid: 156e93cdc85b75b448e0f725632aeb1f,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2127031921830900061, guid: 156e93cdc85b75b448e0f725632aeb1f,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2127031921830900061, guid: 156e93cdc85b75b448e0f725632aeb1f,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2127031921830900061, guid: 156e93cdc85b75b448e0f725632aeb1f,
         type: 3}
@@ -171,7 +171,7 @@ PrefabInstance:
     - target: {fileID: 2127031921830900061, guid: 156e93cdc85b75b448e0f725632aeb1f,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: 180
       objectReference: {fileID: 0}
     - target: {fileID: 2127031921830900061, guid: 156e93cdc85b75b448e0f725632aeb1f,
         type: 3}

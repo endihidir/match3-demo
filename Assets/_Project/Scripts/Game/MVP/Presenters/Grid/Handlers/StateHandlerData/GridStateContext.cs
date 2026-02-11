@@ -11,12 +11,14 @@ namespace Core.Handlers
 {
     public sealed class GridStateContext
     {
+        public Queue<GridInputSource> Inputs { get; } = new();
+        
         public IGridModel GridModel { get; }
         public IGridView GridView { get; }
         public IGridItemFactory GridItemFactory { get; }
         public ILevelObjectiveModel LevelObjectiveModel { get; }
         public GridConfigContainerSO GridConfigs { get; }
-        public Queue<GridInputSource> Inputs { get; } = new();
+        public IBlastFxHandler BlastFxHandler { get; }
         
         public bool HasMergeCenterCoordRequested { get; set; }
         public Vector2Int MergeCenterCoord { get; set; }
@@ -24,21 +26,23 @@ namespace Core.Handlers
         public bool HasUnmarkRemoveRequested { get; set; }
         public Vector2Int UnmarkRemoveCoord { get; set; }
         
-        public List<BoosterActionContext> PendingBoosterActions { get; } = new();
         public bool HasPendingBoosterActions => PendingBoosterActions.Count > 0;
+        public List<BoosterActionContext> PendingBoosterActions { get; } = new();
         
         public bool MatchResolveRequested { get; set; }
         public int GroupIdCounter { get; set; }
+        
         public event Action OnGridDestructionComplete;
 
         public GridStateContext(IGridModel gridModel, IGridView gridView, IGridItemFactory gridItemFactory, ILevelObjectiveModel levelObjectiveModel, 
-            GridConfigContainerSO gridConfigs)
+            GridConfigContainerSO gridConfigs, IBlastFxHandler blastFxHandler)
         {
             GridModel = gridModel;
             GridView = gridView;
             GridItemFactory = gridItemFactory;
             LevelObjectiveModel = levelObjectiveModel;
             GridConfigs = gridConfigs;
+            BlastFxHandler = blastFxHandler;
         }
         
         public int NextBoosterGroupId()
@@ -48,10 +52,11 @@ namespace Core.Handlers
             return GroupIdCounter;
         }
         
-        public void ReleaseAndSetNull(BaseGridObject sourceObj, Vector2Int sourceCoord)
+        public void ReleaseAndSetNull(BaseGridObject obj, Vector2Int coord)
         {
-            GridItemFactory.ReleaseItem(sourceObj);
-            GridModel.SetGridObject(sourceCoord, null);
+            BlastFxHandler.PlayBlastParticle(obj, GridView.GridToWorld(coord));
+            GridItemFactory.ReleaseItem(obj);
+            GridModel.SetGridObject(coord, null);
         }
 
         public void ProgressGoal(IDamageableGridObject damageableGridObject, Vector2Int coord, Vector2 spriteSize)
@@ -60,7 +65,7 @@ namespace Core.Handlers
             var size = GridView.SpriteToUISize(spriteSize);
             LevelObjectiveModel.ProgressGoal(damageableGridObject, worldPos, size);
         }
-
+        
         public void RaiseObjectsDestroyed() => OnGridDestructionComplete?.Invoke();
     }
 }

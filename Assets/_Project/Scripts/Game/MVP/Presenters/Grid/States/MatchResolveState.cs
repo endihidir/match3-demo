@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Core.Extensions;
 using Core.Item;
+using Core.Item.Factories;
 using Core.Models;
 using Core.StateMachineCore;
 using Core.Utils;
@@ -16,9 +17,7 @@ namespace Core.Handlers
         public override bool NeedsExitPermission => true;
 
         private UniTask[] _animationTasks = Array.Empty<UniTask>();
-
         private Vector2Int[] _coordBuffer = Array.Empty<Vector2Int>();
-        
         private int _lastTaskCount;
 
         public MatchResolveState(GridStateContext context) : base(context) { }
@@ -231,7 +230,7 @@ namespace Core.Handlers
                 if (!obj) continue;
 
                 ApplyNeighbourDamage(model, coord);
-
+                
                 Context.ReleaseAndSetNull(obj, coord);
             }
             
