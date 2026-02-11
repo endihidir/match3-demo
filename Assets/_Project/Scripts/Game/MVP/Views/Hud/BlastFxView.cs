@@ -8,7 +8,7 @@ namespace Core.UI
     {
         [field: SerializeField] public ParticleFxModule ParticleFxModule { get; private set; }
 
-        public virtual async UniTask Play(Action onComplete = null)
+        public async UniTask Play(Action onComplete = null)
         {
             if (!ParticleFxModule) return;
             ParticleFxModule.Play();
@@ -16,6 +16,6 @@ namespace Core.UI
             onComplete?.Invoke();
         }
 
-        public virtual void Stop() => ParticleFxModule.Stop();
+        public void Stop() => ParticleFxModule.Stop();
     }
 }

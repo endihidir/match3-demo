@@ -5,6 +5,6 @@ namespace Core.Handlers
 {
     public interface IBlastFxHandler
     {
-        void PlayBlastParticle(BaseGridObject obj, Vector3 pos);
+        void PlayBlastParticle(BaseGridObject obj, Vector3 pos, Transform parent);
     }
 }

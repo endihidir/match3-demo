@@ -10,31 +10,30 @@ namespace Core.Handlers
     {
         private readonly IBlastFxFactory _blastFxFactory;
 
-        public BlastFxHandler(IBlastFxFactory blastFxFactory)
-        {
-            _blastFxFactory = blastFxFactory;
-        }
-        
-        public void PlayBlastParticle(BaseGridObject obj, Vector3 pos)
+        public BlastFxHandler(IBlastFxFactory blastFxFactory) => _blastFxFactory = blastFxFactory;
+
+        public void PlayBlastParticle(BaseGridObject obj, Vector3 pos, Transform parent)
         {
             switch (obj)
             {
                 case ItemObject item:
                     var itemBlast = _blastFxFactory.GetItemBlast(item.ItemType);
-                    itemBlast.transform.position = pos;
-                    itemBlast.Play(()=> OnBlastFxComplete(itemBlast)).Forget();
+                    PlayBlastAt(itemBlast, pos, parent);
                     break;
                 case ObstacleObject obstacle:
                     var obstacleBlast = _blastFxFactory.GetObstacleBlast(obstacle.ObstacleType);
-                    obstacleBlast.transform.position = pos;
-                    obstacleBlast.Play(()=> OnBlastFxComplete(obstacleBlast)).Forget();
+                    PlayBlastAt(obstacleBlast, pos, parent);
                     break;
             }
         }
 
-        private void OnBlastFxComplete(BlastFxView blastFxView)
+        private void PlayBlastAt(BlastFxView blastFxView, Vector3 pos, Transform parent)
         {
-            _blastFxFactory.ReleaseBlast(blastFxView);
+            blastFxView.transform.position = pos;
+            blastFxView.transform.SetParent(parent, false);
+            blastFxView.Play(()=> OnBlastFxComplete(blastFxView)).Forget();
         }
+
+        private void OnBlastFxComplete(BlastFxView blastFxView) => _blastFxFactory.ReleaseBlast(blastFxView);
     }
 }

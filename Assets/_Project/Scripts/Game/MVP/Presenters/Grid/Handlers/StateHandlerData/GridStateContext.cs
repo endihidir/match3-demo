@@ -54,7 +54,7 @@ namespace Core.Handlers
         
         public void ReleaseAndSetNull(BaseGridObject obj, Vector2Int coord)
         {
-            BlastFxHandler.PlayBlastParticle(obj, GridView.GridToWorld(coord));
+            BlastFxHandler.PlayBlastParticle(obj, GridView.GridToWorld(coord), GridView.FXParent);
             GridItemFactory.ReleaseItem(obj);
             GridModel.SetGridObject(coord, null);
         }
