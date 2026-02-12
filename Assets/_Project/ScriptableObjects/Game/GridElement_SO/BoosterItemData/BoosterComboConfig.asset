@@ -17,44 +17,44 @@ MonoBehaviour:
       <First>k__BackingField: 0
       <Second>k__BackingField: 0
     <Actions>k__BackingField:
-    - rid: 4085054608288776198
-    - rid: 4085054608288776199
+    - rid: 1071696463582461955
+    - rid: 1071696463582461956
   - <Key>k__BackingField:
       <First>k__BackingField: 0
       <Second>k__BackingField: 1
     <Actions>k__BackingField:
-    - rid: 4085054608288776200
-    - rid: 4085054608288776201
+    - rid: 1071696463582461957
+    - rid: 1071696463582461958
   - <Key>k__BackingField:
       <First>k__BackingField: 1
       <Second>k__BackingField: 1
     <Actions>k__BackingField:
-    - rid: 4085054608288776202
+    - rid: 1071696463582461959
   references:
     version: 2
     RefIds:
-    - rid: 4085054608288776198
-      type: {class: RocketHorizontalAction, ns: Core.Config, asm: Assembly-CSharp}
+    - rid: 1071696463582461955
+      type: {class: RocketHorizontalAction, ns: Core.Configs, asm: Assembly-CSharp}
       data:
         <DamageAmount>k__BackingField: 1
         <LineCount>k__BackingField: 1
-    - rid: 4085054608288776199
-      type: {class: RocketVerticalAction, ns: Core.Config, asm: Assembly-CSharp}
+    - rid: 1071696463582461956
+      type: {class: RocketVerticalAction, ns: Core.Configs, asm: Assembly-CSharp}
       data:
         <DamageAmount>k__BackingField: 1
         <LineCount>k__BackingField: 1
-    - rid: 4085054608288776200
-      type: {class: RocketHorizontalAction, ns: Core.Config, asm: Assembly-CSharp}
+    - rid: 1071696463582461957
+      type: {class: RocketHorizontalAction, ns: Core.Configs, asm: Assembly-CSharp}
       data:
         <DamageAmount>k__BackingField: 1
         <LineCount>k__BackingField: 3
-    - rid: 4085054608288776201
-      type: {class: RocketVerticalAction, ns: Core.Config, asm: Assembly-CSharp}
+    - rid: 1071696463582461958
+      type: {class: RocketVerticalAction, ns: Core.Configs, asm: Assembly-CSharp}
       data:
         <DamageAmount>k__BackingField: 1
         <LineCount>k__BackingField: 3
-    - rid: 4085054608288776202
-      type: {class: BombAction, ns: Core.Config, asm: Assembly-CSharp}
+    - rid: 1071696463582461959
+      type: {class: BombAction, ns: Core.Configs, asm: Assembly-CSharp}
       data:
         <DamageAmount>k__BackingField: 1
         <Radius>k__BackingField: 3

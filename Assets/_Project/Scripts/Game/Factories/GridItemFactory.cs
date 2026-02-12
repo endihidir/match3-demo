@@ -1,4 +1,3 @@
-using Core.Config;
 using Core.Configs;
 using Core.Pool;
 using UnityEngine;

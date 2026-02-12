@@ -19,7 +19,8 @@ namespace Core.Handlers
         private bool MatchResolveRequested => Context.MatchResolveRequested;
 
         public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory, GameplayConfigContainer configContainer, 
-             ILevelObjectiveModel levelObjectiveModel, IFillStrategyResolver fillStrategyResolver, IBlastFxHandler blastFxHandler)
+             ILevelObjectiveModel levelObjectiveModel, IFillStrategyResolver fillStrategyResolver, IBlastFxHandler blastFxHandler, 
+             IBoosterFxHandler boosterFxHandler)
         {
             var gridConfigContainer = configContainer.GridConfigContainer;
             
@@ -27,7 +28,7 @@ namespace Core.Handlers
 
             var idleState = new IdleState(Context);
             var inputState = new InputResolveState(Context);
-            var boosterState = new BoosterResolveState(Context);
+            var boosterState = new BoosterResolveState(Context, boosterFxHandler);
             var matchState = new MatchResolveState(Context);
             var shuffleState = new ShuffleState(Context);
             var fillState = new FillResolveState(Context, fillStrategyResolver);

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Core.Config;
 using Core.Configs;
 using Core.Item;
 using Core.Item.Factories;

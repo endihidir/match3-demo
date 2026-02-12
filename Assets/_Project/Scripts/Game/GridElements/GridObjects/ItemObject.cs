@@ -10,9 +10,9 @@ namespace Core.Item
         {
             ItemType = (ItemType)TypeId;
         }
-        protected override void OnDespawned()
+        protected override void OnDeactivate()
         {
-            base.OnDespawned();
+            base.OnDeactivate();
             ItemType = (ItemType)TypeId;
             UpdateIdentity();
         }

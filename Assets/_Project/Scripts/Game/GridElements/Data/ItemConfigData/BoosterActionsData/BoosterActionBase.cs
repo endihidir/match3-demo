@@ -1,6 +1,6 @@
 using System;
 
-namespace Core.Config
+namespace Core.Configs
 {
     [Serializable]
     public abstract class BoosterActionBase

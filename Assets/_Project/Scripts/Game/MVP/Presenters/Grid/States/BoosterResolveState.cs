@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Core.Config;
+using Core.Configs;
 using Core.Item;
 using Core.Models;
 using Core.StateMachineCore;
@@ -12,7 +12,12 @@ namespace Core.Handlers
     public class BoosterResolveState : StateBase<GridStateContext>
     {
         public override bool NeedsExitPermission => true;
-        public BoosterResolveState(GridStateContext context) : base(context) { }
+        private readonly IBoosterFxHandler _boosterFxHandler;
+
+        public BoosterResolveState(GridStateContext context, IBoosterFxHandler boosterFxHandler) : base(context)
+        {
+            _boosterFxHandler = boosterFxHandler;
+        }
 
         protected override void OnEnter()
         {
@@ -24,11 +29,11 @@ namespace Core.Handlers
         {
             var model = Context.GridModel;
             var view = Context.GridView;
-            MarkPendingActions(model, out var markData);
-            ApplyMarkedActions(model, view, markData);
+            MarkPendingActions(model, view, out var markData);
+            ApplyMarkedActions(model, markData);
         }
 
-        private void MarkPendingActions(IGridModel model, out BoosterImpactRecord[,] markData)
+        private void MarkPendingActions(IGridModel model, IGridView view, out BoosterImpactRecord[,] markData)
         {
             markData = new BoosterImpactRecord[model.Width, model.Height]; 
             var queue = new Queue<BoosterActionContext>();
@@ -93,11 +98,13 @@ namespace Core.Handlers
                 if (boosterActionContext.GroupId == 0)
                     boosterActionContext.SetGroupId(Context.NextBoosterGroupId());
                 
+                _boosterFxHandler.PlayBoosterFx(boosterActionContext.BoosterAction, boosterActionContext.OriginCoord, model, view);
+                
                 queue.Enqueue(boosterActionContext);
             }
         }
         
-        private void ApplyMarkedActions(IGridModel model, IGridView view, BoosterImpactRecord[,] markData)
+        private void ApplyMarkedActions(IGridModel model, BoosterImpactRecord[,] markData)
         { 
             for (int x = 0; x < model.Width; x++)
             {
@@ -111,13 +118,6 @@ namespace Core.Handlers
 
                     if (data.Remove)
                     {
-                        if (obj is IBoosterActionSource source)
-                        {
-                            // TODO: play booster effect!
-                        }
-
-                        // TODO: play destroy effect!
-                     
                         Context.ReleaseAndSetNull(obj, coord);
                         continue;
                     }
@@ -126,19 +126,8 @@ namespace Core.Handlers
                     {
                         var damageResult = damageableItem.TakeDamage(data.DamageAmount, data.GridDamageSource);
 
-                        if (damageResult == GridDamageResult.Damaged)
+                        if (damageResult == GridDamageResult.Destroyed)
                         {
-                            // TODO: play damaged effect!
-                        }
-                        else if (damageResult == GridDamageResult.Destroyed)
-                        {
-                            if (obj is IBoosterActionSource source)
-                            {
-                                // TODO: play booster effect!
-                            }
-                            
-                            // TODO: play destroy effect!
-                            
                             Context.ProgressGoal(damageableItem, obj.Coord, obj.SpriteRenderer.size);
                             Context.ReleaseAndSetNull(obj, coord);
                         }

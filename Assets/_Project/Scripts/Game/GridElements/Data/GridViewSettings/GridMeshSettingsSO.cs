@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Core.Config
+namespace Core.Configs
 {
     //[CreateAssetMenu(fileName = "GridMeshSettingsConfig", menuName = "Match3/GridConfigs/GridMeshSettings", order = 0)]
     public class GridMeshSettingsSO : ScriptableObject

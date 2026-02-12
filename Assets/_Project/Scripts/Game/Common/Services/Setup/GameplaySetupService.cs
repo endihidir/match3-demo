@@ -38,6 +38,7 @@ namespace Core.Services
             ReleaseFactories();
             SetupGameplay();
         }
+        
         public void ReleaseFactories()
         {
             _gridItemFactory.ReleaseItemsByType<BaseGridObject>();

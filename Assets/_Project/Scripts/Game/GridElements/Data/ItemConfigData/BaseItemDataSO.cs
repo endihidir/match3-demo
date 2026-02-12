@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Core.Config
+namespace Core.Configs
 {
     public abstract class BaseItemDataSO : ScriptableObject
     {

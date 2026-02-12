@@ -1,4 +1,4 @@
-using Core.Config;
+using Core.Configs;
 using NaughtyAttributes;
 using UnityEngine;
 
@@ -39,9 +39,9 @@ namespace Core.Item
             return Life <= 0 ? GridDamageResult.Destroyed : GridDamageResult.Damaged;
         }
 
-        protected override void OnDespawned()
+        protected override void OnDeactivate()
         {
-            base.OnDespawned();
+            base.OnDeactivate();
             ObstacleType = (ObstacleType)TypeId;
             Life = 0;
             UpdateIdentity();

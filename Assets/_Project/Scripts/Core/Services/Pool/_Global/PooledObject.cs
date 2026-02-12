@@ -11,16 +11,16 @@ namespace Core.Pool
         public virtual void Activate()
         {
             gameObject.SetActive(true);
-            OnSpawned();
+            OnActivate();
         }
 
         public virtual void Deactivate()
         {
             gameObject.SetActive(false);
-            OnDespawned();
+            OnDeactivate();
         }
         
-        protected virtual void OnSpawned() { }
-        protected virtual void OnDespawned() { }
+        protected virtual void OnActivate() { }
+        protected virtual void OnDeactivate() { }
     }
 }

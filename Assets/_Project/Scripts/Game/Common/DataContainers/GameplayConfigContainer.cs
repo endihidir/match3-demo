@@ -1,4 +1,3 @@
-using Core.Config;
 using NaughtyAttributes;
 using UnityEngine;
 

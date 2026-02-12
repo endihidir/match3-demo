@@ -16,11 +16,11 @@ namespace Core.Handlers
             switch (obj)
             {
                 case ItemObject item:
-                    var itemBlast = _blastFxFactory.GetItemBlast(item.ItemType);
+                    var itemBlast = _blastFxFactory.GetItemBlastFx(item.ItemType);
                     PlayBlastAt(itemBlast, pos, parent);
                     break;
                 case ObstacleObject obstacle:
-                    var obstacleBlast = _blastFxFactory.GetObstacleBlast(obstacle.ObstacleType);
+                    var obstacleBlast = _blastFxFactory.GetObstacleBlastFx(obstacle.ObstacleType);
                     PlayBlastAt(obstacleBlast, pos, parent);
                     break;
             }

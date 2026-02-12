@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Core.Config
+namespace Core.Configs
 {
     [Serializable]
     public struct ComboRule

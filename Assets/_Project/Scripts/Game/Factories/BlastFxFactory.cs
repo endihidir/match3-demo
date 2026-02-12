@@ -1,4 +1,3 @@
-using Core.Config;
 using Core.Configs;
 using Core.UI;
 using UnityEngine;
@@ -16,7 +15,7 @@ namespace Core.Item.Factories
             _gridConfigContainer = gameplayConfigContainer.GridConfigContainer;
         }
 
-        public ItemBlastFxView GetItemBlast(ItemType itemType, bool activate = true)
+        public ItemBlastFxView GetItemBlastFx(ItemType itemType, bool activate = true)
         {
             var fx = _fxViewFactory.GetFX<ItemBlastFxView>(activate);
             var itemConfigContainer = _gridConfigContainer.GetConfig<ItemConfigContainerSO>();
@@ -25,7 +24,7 @@ namespace Core.Item.Factories
             return fx;
         }
 
-        public ObstacleBlastFxView GetObstacleBlast(ObstacleType obstacleType, bool activate = true)
+        public ObstacleBlastFxView GetObstacleBlastFx(ObstacleType obstacleType, bool activate = true)
         {
             var fx = _fxViewFactory.GetFX<ObstacleBlastFxView>(activate);
             var obstacleConfigContainer = _gridConfigContainer.GetConfig<ObstacleConfigContainerSO>();

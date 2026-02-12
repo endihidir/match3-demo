@@ -1,4 +1,4 @@
-namespace Core.Config
+namespace Core.Configs
 {
     public enum TargetSelectionMode
     {
