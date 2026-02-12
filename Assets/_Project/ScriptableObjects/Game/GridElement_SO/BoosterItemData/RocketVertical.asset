@@ -16,12 +16,12 @@ MonoBehaviour:
   spriteSizeMultiplier: {x: 0.95, y: 0.95}
   isStationary: 0
   <BoosterAction>k__BackingField:
-    rid: 4085054608288776205
+    rid: 1071696463582461953
   references:
     version: 2
     RefIds:
-    - rid: 4085054608288776205
-      type: {class: RocketVerticalAction, ns: Core.Config, asm: Assembly-CSharp}
+    - rid: 1071696463582461953
+      type: {class: RocketVerticalAction, ns: Core.Configs, asm: Assembly-CSharp}
       data:
         <DamageAmount>k__BackingField: 1
         <LineCount>k__BackingField: 1

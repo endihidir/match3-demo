@@ -1,7 +1,7 @@
 using NaughtyAttributes;
 using UnityEngine;
 
-namespace Core.Config
+namespace Core.Configs
 {
     public abstract class BaseItemConfigContainerSO : ScriptableObject
     {

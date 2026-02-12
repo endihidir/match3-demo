@@ -5,8 +5,8 @@ namespace Core.Item.Factories
 {
     public interface IBlastFxFactory
     {
-        public ItemBlastFxView GetItemBlast(ItemType itemType, bool activate = true);
-        public ObstacleBlastFxView GetObstacleBlast(ObstacleType obstacleType, bool activate = true);
+        public ItemBlastFxView GetItemBlastFx(ItemType itemType, bool activate = true);
+        public ObstacleBlastFxView GetObstacleBlastFx(ObstacleType obstacleType, bool activate = true);
         public void ReleaseBlast(BlastFxView blastFxView);
         public void ReleaseSlot(Transform blastFxView);
         public void ReleaseBlastsByType<T>() where T : BlastFxView;

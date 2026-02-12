@@ -1,4 +1,4 @@
-using Core.Config;
+using Core.Configs;
 using NaughtyAttributes;
 using UnityEngine;
 
@@ -14,9 +14,9 @@ namespace Core.Item
             BoosterType = (BoosterType)TypeId;
         }
 
-        protected override void OnDespawned()
+        protected override void OnDeactivate()
         {
-            base.OnDespawned();
+            base.OnDeactivate();
             BoosterType = (BoosterType)TypeId;
             UpdateIdentity();
         }

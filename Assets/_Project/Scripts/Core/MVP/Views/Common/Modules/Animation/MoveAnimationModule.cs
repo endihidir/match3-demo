@@ -1,21 +1,22 @@
 using DG.Tweening;
+using NaughtyAttributes;
 using UnityEngine;
 
 namespace Core.Modules
 {
     public class MoveAnimationModule : MonoBehaviour
     {
-        [field: SerializeField] public Transform Transform { get; private set; }
+        [field: SerializeField, Required] public Transform Transform { get; private set; }
+        public bool IsAlive => _moveTween != null && _moveTween.IsActive() && !_moveTween.IsComplete();
         
         private Tween _moveTween;
-        
+        public Transform GetTransform() => Transform ?? transform;
+
         public virtual Tween MoveTo(Vector3 position, float duration, float delay = 0f, Ease ease = Ease.Linear, bool useUnscaledTime = false)
         {
             _moveTween.Kill();
-            
-            var tr = Transform ?? transform;
 
-            _moveTween = tr.DOMove(position, duration)
+            _moveTween = GetTransform().DOMove(position, duration)
                                             .SetEase(ease)
                                             .SetDelay(delay)
                                             .SetUpdate(useUnscaledTime);
@@ -23,13 +24,11 @@ namespace Core.Modules
             return _moveTween;
         }
         
-        public virtual Tween SetAnchoredPos(Vector3 position, float duration, float delay = 0f, Ease ease = Ease.Linear, bool useUnscaledTime = false)
+        public virtual Tween SetAnchoredPos(Vector2 position, float duration, float delay = 0f, Ease ease = Ease.Linear, bool useUnscaledTime = false)
         {
             _moveTween.Kill();
             
-            var tr = Transform ?? transform;
-            
-            if (tr is not RectTransform rectTransform) return _moveTween;
+            if (GetTransform() is not RectTransform rectTransform) return _moveTween;
 
             _moveTween = rectTransform.DOAnchorPos(position, duration)
                                         .SetEase(ease)

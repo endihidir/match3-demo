@@ -3,7 +3,7 @@ using Core.Extensions;
 using Core.Item;
 using UnityEngine;
 
-namespace Core.Config
+namespace Core.Configs
 {
     [Serializable]
     public struct BoosterComboKey : IEquatable<BoosterComboKey>

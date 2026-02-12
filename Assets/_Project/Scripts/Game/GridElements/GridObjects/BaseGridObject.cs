@@ -1,4 +1,4 @@
-using Core.Config;
+using Core.Configs;
 using Core.Pool;
 using NaughtyAttributes;
 using UnityEngine;
@@ -58,8 +58,8 @@ namespace Core.Item
         public void SetSpriteSize(float cellSize) => SpriteRenderer.size = cellSize * SpriteSizeMultiplier;
         public void SetPosition(Vector3 position) => transform.position = position;
         public void SetParent(Transform parent) => transform.SetParent(parent);
-        protected override void OnSpawned() => Animation.CacheAnimations();
-        protected override void OnDespawned() => ResetItem();
+        protected override void OnActivate() => Animation.CacheAnimations();
+        protected override void OnDeactivate() => ResetItem();
         
         public void ResetItem()
         {

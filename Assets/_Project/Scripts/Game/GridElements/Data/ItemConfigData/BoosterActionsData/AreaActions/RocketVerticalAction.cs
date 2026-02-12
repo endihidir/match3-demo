@@ -1,6 +1,6 @@
 using System;
 
-namespace Core.Config
+namespace Core.Configs
 {
     [Serializable]
     public class RocketVerticalAction : RocketActionBase

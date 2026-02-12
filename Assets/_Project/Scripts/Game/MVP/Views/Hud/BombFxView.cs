@@ -9,9 +9,9 @@ namespace Core.UI
     {
         [field: SerializeField] public ParticleFxModule ParticleFxModule { get; set; }
         
-        public void Initialize(int radius)
+        public void Initialize(Vector3 pos, int radius)
         {
-                
+            transform.position = pos;
         }
         
         public override async UniTask Play(Action onComplete = null)

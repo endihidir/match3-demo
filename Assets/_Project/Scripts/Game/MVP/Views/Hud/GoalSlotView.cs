@@ -1,4 +1,4 @@
-using Core.Config;
+using Core.Configs;
 using Core.Item;
 using Core.Modules;
 using NaughtyAttributes;

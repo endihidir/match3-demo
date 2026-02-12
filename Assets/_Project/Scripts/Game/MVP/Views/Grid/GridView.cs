@@ -1,5 +1,5 @@
 using System;
-using Core.Config;
+using Core.Configs;
 using Core.Extensions;
 using Core.Utils;
 using NaughtyAttributes;

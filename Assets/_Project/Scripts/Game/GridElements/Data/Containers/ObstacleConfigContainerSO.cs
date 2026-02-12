@@ -2,7 +2,7 @@ using Core.Item;
 using NaughtyAttributes;
 using UnityEngine;
 
-namespace Core.Config
+namespace Core.Configs
 {
     [CreateAssetMenu(fileName = "ObstacleConfigContainer", menuName = "Match3/ItemConfigs/ObstacleConfigContainer", order = -1)]
     public class ObstacleConfigContainerSO : BaseItemConfigContainerSO

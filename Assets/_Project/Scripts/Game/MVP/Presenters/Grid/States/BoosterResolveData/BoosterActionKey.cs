@@ -1,5 +1,5 @@
 using System;
-using Core.Config;
+using Core.Configs;
 using UnityEngine;
 
 namespace Core.Handlers

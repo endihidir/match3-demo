@@ -3,7 +3,7 @@ using Core.Item;
 using NaughtyAttributes;
 using UnityEngine;
 
-namespace Core.Config
+namespace Core.Configs
 {
     [CreateAssetMenu(fileName = "ObstacleData", menuName = "Match3/ItemConfigs/Data/ObstacleData", order = -1)]
     public class ObstacleDataSO : BaseItemDataSO

@@ -75,43 +75,58 @@ namespace Core.Utils
 
         private static void VisitLineExceptSelf(IGridModel model, Vector2Int origin, Vector2Int dir, int lineCount, Action<BaseGridObject> visit)
         {
-            if (lineCount <= 0) return;
-
-            var half = (lineCount - 1) / 2;
-            var start = (lineCount & 1) == 1 ? -half : 0;
-            var end   = (lineCount & 1) == 1 ?  half : lineCount - 1;
-
+            var offsets = BuildLineOffsets(lineCount);
+            
             if (dir.x != 0)
             {
-                for (int dy = start; dy <= end; dy++)
+                foreach (var offset in offsets)
                 {
-                    var y = origin.y + dy;
-
+                    var y = origin.y + offset;
+                    if (y < 0 || y >= model.Height) continue;
+            
                     for (int x = 0; x < model.Width; x++)
                     {
                         var c = new Vector2Int(x, y);
-                        if (c == origin || !model.IsInRange(c)) continue;
-
+                        if (c == origin) continue;
+                
                         var obj = model.GetGridObject(c);
                         if (obj) visit(obj);
                     }
                 }
                 return;
             }
-
-            for (int dx = start; dx <= end; dx++)
+            
+            foreach (var offset in offsets)
             {
-                var x = origin.x + dx;
-
+                var x = origin.x + offset;
+                if (x < 0 || x >= model.Width) continue;
+        
                 for (int y = 0; y < model.Height; y++)
                 {
                     var c = new Vector2Int(x, y);
-                    if (c == origin || !model.IsInRange(c)) continue;
-
+                    if (c == origin) continue;
+            
                     var obj = model.GetGridObject(c);
                     if (obj) visit(obj);
                 }
             }
+        }
+
+        public static int[] BuildLineOffsets(int lineCount)
+        {
+            if (lineCount <= 0) return Array.Empty<int>();
+    
+            var offsets = new int[lineCount];
+            offsets[0] = 0;
+    
+            for (int i = 1; i < lineCount; i++)
+            {
+                var distance = (i + 1) / 2;
+                var sign = (i % 2 == 1) ? 1 : -1;
+                offsets[i] = distance * sign;
+            }
+    
+            return offsets;
         }
         
         private static void VisitRingExceptSelf(IGridModel model, Vector2Int origin, int radius, Action<BaseGridObject> visit)

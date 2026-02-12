@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Core.Config
+namespace Core.Configs
 {
     /// <summary>
     /// External configuration for spawn behavior.
