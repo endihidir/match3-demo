@@ -35,7 +35,7 @@ namespace Core.Handlers
                 await ResolveMaskAsync(matchMask);
             }
             
-            Context.RaiseDestructionComplete();
+            Context.RaiseDestructionStateComplete();
             RequestExit();
         }
 
@@ -253,10 +253,10 @@ namespace Core.Handlers
                     Context.ProgressGoal(damageableItem, obj.Coord, obj.SpriteRenderer.size);
                     
                     Context.ReleaseAndSetNull(obj, obj.Coord);
-                    
-                    Context.RaiseAnyObstacleDestroyed();
                 }
             }
+            
+            Context.RaiseObjectsDestroyed();
         }
 
         private async UniTask PlayMergeAnimationAsync(BaseGridObject[] mergeObjs, Vector2Int centerCoord)

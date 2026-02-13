@@ -52,8 +52,7 @@ namespace Core.Handlers
                 await UniTask.Yield();
             }
             
-            Context.RaiseDestructionComplete();
-            
+            Context.RaiseDestructionStateComplete();
             RequestExit();
         }
 
@@ -79,11 +78,13 @@ namespace Core.Handlers
                 var waitTime = entry.Delay - lastDelay;
                 
                 if (waitTime > 0)
-                    await UniTask.Delay((int)(waitTime * 1000), DelayType.DeltaTime);
+                    await UniTask.WaitForSeconds(waitTime);
 
                 lastDelay = entry.Delay;
                 ApplyImpact(entry.Coord, damageAmount);
             }
+            
+            Context.RaiseObjectsDestroyed();
         }
 
         private void ApplyImpact(Vector2Int coord, int damageAmount)
@@ -112,7 +113,6 @@ namespace Core.Handlers
                 {
                     Context.ProgressGoal(damageable, coord, obj.SpriteRenderer.size);
                     Context.ReleaseAndSetNull(obj, coord);
-                    Context.RaiseAnyObstacleDestroyed();
                 }
             }
             else
