@@ -36,7 +36,7 @@ namespace Core.Presenters
             for (var i = 0; i < _goalFxDataList.Count; i++)
             {
                 var goalFxData = _goalFxDataList[i];
-                PlayFX(goalFxData, i * 0.05f);
+                PlayFX(goalFxData, i * .05f);
             }
             
             _goalFxDataList.Clear();
