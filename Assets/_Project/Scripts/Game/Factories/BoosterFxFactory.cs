@@ -15,14 +15,18 @@ namespace Core.Item.Factories
         public BombFxView GetBombFx(Vector3 pos, int radius, bool activate = true)
         {
             var fx = _fxViewFactory.GetFX<BombFxView>(activate);
-            fx.Initialize(pos, radius);
+            fx.transform.position = pos;
+            fx.ApplyData(radius);
             return fx;
         }
 
-        public T GetRocketFx<T>(Vector3 pos, float size, bool activate = true) where T : RocketFxView
+        public T GetRocketFx<T>(Vector3 pos, float cellSize, float animSpeed, bool activate = true) where T : RocketFxView
         {
             var fx = _fxViewFactory.GetFX<T>(activate);
-            fx.Initialize(pos, size);
+            fx.transform.position = pos;
+            fx.CalculateRocketsSize(cellSize);
+            fx.CalculateTargetPositions();
+            fx.ApplyData(animSpeed);
             return fx;
         }
 

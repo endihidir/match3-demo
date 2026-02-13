@@ -10,6 +10,14 @@ namespace Core.Configs
         [field: SerializeField] public BoosterComboConfigSO BoosterComboConfigSo { get; private set; }
         [field: SerializeField] public EnumConfigMap<BoosterType, BoosterDataSO> Configs { get; private set; }
         
+        public float GetAnimationSpeed(BoosterActionContext action) => action.BoosterAction switch
+        {
+            RocketHorizontalAction => Configs.Get(BoosterType.RocketHorizontal).AnimationSpeed,
+            RocketVerticalAction => Configs.Get(BoosterType.RocketVertical).AnimationSpeed,
+            BombAction => Configs.Get(BoosterType.Bomb).AnimationSpeed,
+            _ => 80f
+        };
+        
         [Button]
         protected void EnsureAllKeysExist() => Configs.EnsureAllKeysExist();
     }

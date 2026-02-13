@@ -1,4 +1,5 @@
 using Core.Pool;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Core.UI
@@ -7,5 +8,8 @@ namespace Core.UI
     {
         [field: SerializeField] protected bool UseUnscaledTime { get; private set; }
         [field: SerializeField] protected Transform FxViewHolder { get; private set; }
+        
+        public virtual UniTask Play() => UniTask.CompletedTask;
+        public virtual void Stop(){}
     }
 }

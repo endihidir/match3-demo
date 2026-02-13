@@ -8,6 +8,5 @@ namespace Core.Configs
     { 
         [field: SerializeReference] public BoosterActionBase[] Payloads { get; private set; }
         [field: SerializeField] public TargetSelectionMode SelectionMode { get; private set; }
-        [field: SerializeField,] public int DamageAmount { get; private set; }
     }
 }

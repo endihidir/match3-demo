@@ -37,7 +37,7 @@ namespace Core.Models
         public void Initialize()
         {
             _objectiveModel.OnGoalsComplete += OnLevelCompleted;
-            _stateHandler.Context.OnGridDestructionComplete += OnGridDestructionComplete;
+            _stateHandler.Context.OnAnyDestructionComplete += OnAnyDestructionComplete;
             _levelEndView.OnClickNextButton.AddListener(OnClickNextButton);
             _levelEndView.OnClickTryAgainButton.AddListener(OnClickTryAgainButton);
         }
@@ -56,7 +56,7 @@ namespace Core.Models
             _progressionModel.AdvanceLevel();
         }
 
-        private void OnGridDestructionComplete()
+        private void OnAnyDestructionComplete()
         {
             if(!_objectiveModel.IsAllMovesFinished) return;
             
@@ -76,7 +76,7 @@ namespace Core.Models
             _levelEndView.OnClickTryAgainButton.RemoveListener(OnClickTryAgainButton);
             _levelEndView.OnClickNextButton.RemoveListener(OnClickNextButton);
             _objectiveModel.OnGoalsComplete -= OnLevelCompleted;
-            _stateHandler.Context.OnGridDestructionComplete -= OnGridDestructionComplete;
+            _stateHandler.Context.OnAnyDestructionComplete -= OnAnyDestructionComplete;
         }
     }
 }

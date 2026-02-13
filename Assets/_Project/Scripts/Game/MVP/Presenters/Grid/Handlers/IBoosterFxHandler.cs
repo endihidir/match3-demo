@@ -1,12 +1,10 @@
-using Core.Configs;
-using Core.Models;
+using System;
 using Core.Views;
-using UnityEngine;
 
 namespace Core.Handlers
 {
     public interface IBoosterFxHandler
     {
-        void PlayBoosterFx(BoosterActionBase boosterAction, Vector2Int originCoord, IGridModel model, IGridView view);
+        float PlayBoosterFx(BoosterActionContext action, IGridView view, Action onComplete);
     }
 }
