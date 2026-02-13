@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Core.Configs;
 using Core.Item;
 using Core.Item.Factories;
@@ -13,7 +12,9 @@ namespace Core.Presenters
     {
         private readonly IFXViewFactory _fxFactory;
         private readonly ObstacleConfigContainerSO _obstacleConfigContainer;
-        private readonly List<GoalFxData> _goalFxDataList = new();
+        private float _lastFxTime;
+        private const float FX_INTERVAL = 0.05f;
+
         public event Action<ObstacleType> OnGoalFxCompleted;
 
         public GoalFxHandler(IFXViewFactory fxFactory, GameplayConfigContainer gameplayConfigContainer)
@@ -21,27 +22,37 @@ namespace Core.Presenters
             _fxFactory = fxFactory;
             _obstacleConfigContainer = gameplayConfigContainer.GridConfigContainer.GetConfig<ObstacleConfigContainerSO>();
         }
-        
-        public void QueueFX(GoalSlotView targetSlotView, Transform fxHolder, Vector3 startWorldPos, Vector2 startSize)
+
+        public void PlayFX(GoalSlotView targetSlotView, Transform fxHolder, Vector3 startWorldPos, Vector2 startSize)
         {
             if (!_obstacleConfigContainer.Configs.TryGet(targetSlotView.ObstacleType, out var config)) return;
+
+            var currentTime = Time.time;
             
-            var goalFxView = PrepareFxView(fxHolder, startWorldPos, startSize, config);
-            var goalFxData = CreateFxData(goalFxView, targetSlotView);
-            _goalFxDataList.Add(goalFxData);
-        }
-        
-        public void PlayQueuedFX()
-        {
-            for (var i = 0; i < _goalFxDataList.Count; i++)
+            var delay = 0f;
+            
+            if (currentTime - _lastFxTime < FX_INTERVAL)
             {
-                var goalFxData = _goalFxDataList[i];
-                PlayFX(goalFxData, i * .05f);
+                delay = FX_INTERVAL - (currentTime - _lastFxTime);
             }
-            
-            _goalFxDataList.Clear();
+
+            _lastFxTime = currentTime + delay;
+
+            PlayFXInternal(targetSlotView, fxHolder, startWorldPos, startSize, config, delay);
         }
-        
+
+        private void PlayFXInternal(GoalSlotView targetSlotView, Transform fxHolder, Vector3 startWorldPos, Vector2 startSize, ObstacleDataSO config, float delay)
+        {
+            var goalFxView = PrepareFxView(fxHolder, startWorldPos, startSize, config);
+            var targetWorldPos = targetSlotView.transform.position;
+            var targetSize = targetSlotView.GetIconSize();
+
+            goalFxView.Activate();
+            goalFxView.SizeAnimation.SetRectSize(targetSize, 0.75f, delay);
+            goalFxView.MoveAnimation.MoveTo(targetWorldPos, 0.75f, delay, Ease.InBack)
+                .OnComplete(() => OnFxComplete(goalFxView, targetSlotView.ObstacleType));
+        }
+
         private GoalFxView PrepareFxView(Transform fxHolder, Vector3 startWorldPos, Vector2 startSize, ObstacleDataSO config)
         {
             var goalFxView = _fxFactory.GetFX<GoalFxView>(false);
@@ -52,27 +63,11 @@ namespace Core.Presenters
             goalFxView.ImageFxModule.SetSize(startSize);
             return goalFxView;
         }
-        
-        private static GoalFxData CreateFxData(GoalFxView goalFxView, GoalSlotView targetSlotView)
+
+        private void OnFxComplete(GoalFxView fxView, ObstacleType obstacleType)
         {
-            var targetWorldPos = targetSlotView.transform.position;
-            var targetSize = targetSlotView.GetIconSize();
-            var goalFxData = new GoalFxData(goalFxView, targetSlotView.ObstacleType, targetWorldPos, targetSize);
-            return goalFxData;
-        }
-        
-        private void PlayFX(GoalFxData goalFxData, float delay)
-        {
-            goalFxData.FxView.Activate();
-            goalFxData.FxView.SizeAnimation.SetRectSize(goalFxData.TargetSize, .75f, delay);
-            goalFxData.FxView.MoveAnimation.MoveTo(goalFxData.TargetWorldPos, .75f, delay, Ease.InBack)
-                                              .OnComplete(() => OnFxComplete(goalFxData));
-        }
-        
-        private void OnFxComplete(GoalFxData data)
-        {
-            _fxFactory.ReleaseFX(data.FxView);
-            OnGoalFxCompleted?.Invoke(data.ObstacleType);
+            _fxFactory.ReleaseFX(fxView);
+            OnGoalFxCompleted?.Invoke(obstacleType);
         }
     }
 }

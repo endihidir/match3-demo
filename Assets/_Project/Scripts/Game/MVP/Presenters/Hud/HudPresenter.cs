@@ -15,19 +15,17 @@ namespace Core.Presenters
         private readonly IGoalFxHandler _goalFxHandler;
         private readonly IGridStateHandler _gridStateHandler;
 
-        public HudPresenter(ILevelObjectiveModel levelObjectiveModel, IHudView hudView, IGoalFxHandler goalFxHandler, IGridStateHandler stateHandler)
+        public HudPresenter(ILevelObjectiveModel levelObjectiveModel, IHudView hudView, IGoalFxHandler goalFxHandler)
         {
             _levelObjectiveModel = levelObjectiveModel;
             _hudView = hudView;
             _goalFxHandler = goalFxHandler;
-            _gridStateHandler = stateHandler;
         }
 
         public void Initialize()
         {
             _levelObjectiveModel.OnMoveCountUpdate += OnMoveCountUpdate;
             _levelObjectiveModel.OnGoalProgressUpdate += OnObjectiveCountUpdate;
-            _gridStateHandler.Context.OnObjectsDestructionComplete += _goalFxHandler.PlayQueuedFX;
             _goalFxHandler.OnGoalFxCompleted += UpdateGoalView;
         }
 
@@ -39,7 +37,7 @@ namespace Core.Presenters
             {
                 if (!_hudView.TryGetGoalSlotView(obstacle.ObstacleType, out var targetSlotView)) return;
 
-                _goalFxHandler.QueueFX(targetSlotView, _hudView.GoalFxHolder, worldPos, size);
+                _goalFxHandler.PlayFX(targetSlotView, _hudView.GoalFxHolder, worldPos, size);
             }
             else
             {
@@ -60,7 +58,6 @@ namespace Core.Presenters
 
         public void Dispose()
         {
-            _gridStateHandler.Context.OnObjectsDestructionComplete -= _goalFxHandler.PlayQueuedFX;
             _levelObjectiveModel.OnGoalProgressUpdate -= OnObjectiveCountUpdate;
             _levelObjectiveModel.OnMoveCountUpdate -= OnMoveCountUpdate;
             _goalFxHandler.OnGoalFxCompleted -= UpdateGoalView;
