@@ -46,7 +46,10 @@ namespace Core.Presenters
         {
             var goalFxView = _fxFactory.GetFX<GoalFxView>(false);
             var sprite = config.CrackedSprites.Length > 0 ? config.CrackedSprites[0] : config.icon;
-            goalFxView.Initialize(fxHolder, startWorldPos, sprite, startSize);
+            goalFxView.transform.SetParent(fxHolder, false);
+            goalFxView.transform.position = startWorldPos;
+            goalFxView.ImageFxModule.SetSprite(sprite);
+            goalFxView.ImageFxModule.SetSize(startSize);
             return goalFxView;
         }
         

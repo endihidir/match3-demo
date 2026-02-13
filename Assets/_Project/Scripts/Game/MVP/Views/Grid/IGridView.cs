@@ -18,5 +18,6 @@ namespace Core.Views
         Vector2 SpriteToUISize(Vector2 spriteSize);
         Vector2Int InputToGridDirection(Vector2Int inputDirection);
         float GetCellSize();
+        Vector2Int GridSize { get; }
     }
 }

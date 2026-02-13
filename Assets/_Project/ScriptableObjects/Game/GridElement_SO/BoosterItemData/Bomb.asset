@@ -15,6 +15,7 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 6a4eb1c8bed10e54bb8efee845ef3fc3, type: 3}
   spriteSizeMultiplier: {x: 0.95, y: 0.95}
   isStationary: 0
+  <AnimationSpeed>k__BackingField: 0
   <BoosterAction>k__BackingField:
     rid: 1071696463582461954
   references:

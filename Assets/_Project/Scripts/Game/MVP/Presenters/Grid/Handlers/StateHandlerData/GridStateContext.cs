@@ -32,7 +32,8 @@ namespace Core.Handlers
         public bool MatchResolveRequested { get; set; }
         public int GroupIdCounter { get; set; }
         
-        public event Action OnGridDestructionComplete;
+        public event Action OnAnyDestructionComplete;
+        public event Action OnAnyObstacleDestroyed;
 
         public GridStateContext(IGridModel gridModel, IGridView gridView, IGridItemFactory gridItemFactory, ILevelObjectiveModel levelObjectiveModel, 
             GridConfigContainerSO gridConfigs, IBlastFxHandler blastFxHandler)
@@ -66,6 +67,7 @@ namespace Core.Handlers
             LevelObjectiveModel.ProgressGoal(damageableGridObject, worldPos, size);
         }
         
-        public void RaiseObjectsDestroyed() => OnGridDestructionComplete?.Invoke();
+        public void RaiseAnyObstacleDestroyed() => OnAnyObstacleDestroyed?.Invoke();
+        public void RaiseDestructionComplete() => OnAnyDestructionComplete?.Invoke();
     }
 }

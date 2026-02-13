@@ -9,15 +9,14 @@ namespace Core.UI
     {
         [field: SerializeField] public ParticleFxModule ParticleFxModule { get; private set; }
         
-        public async UniTask Play(Action onComplete = null)
+        public override async UniTask Play()
         {
             if (!ParticleFxModule) return;
             ParticleFxModule.Play();
             await UniTask.WaitUntil(() => !ParticleFxModule.IsAlive);
-            onComplete?.Invoke();
         }
 
-        public void Stop()
+        public override void Stop()
         {
             if (!ParticleFxModule) return;
             ParticleFxModule.Stop();

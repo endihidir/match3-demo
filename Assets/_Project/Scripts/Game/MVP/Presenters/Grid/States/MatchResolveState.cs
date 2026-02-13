@@ -34,7 +34,8 @@ namespace Core.Handlers
             {
                 await ResolveMaskAsync(matchMask);
             }
-
+            
+            Context.RaiseDestructionComplete();
             RequestExit();
         }
 
@@ -174,8 +175,6 @@ namespace Core.Handlers
                 
                 model.SetGridObject(coord, null);
             }
-            
-            Context.RaiseObjectsDestroyed();
         }
 
         private void OnMergeComplete(BaseGridObject[] mergeObjs, BaseGridObject centerObj, Vector2Int centerCoord, BoosterType boosterValue)
@@ -233,8 +232,6 @@ namespace Core.Handlers
                 
                 Context.ReleaseAndSetNull(obj, coord);
             }
-            
-            Context.RaiseObjectsDestroyed();
         }
 
         private void ApplyNeighbourDamage(IGridModel model, Vector2Int origin)
@@ -256,6 +253,8 @@ namespace Core.Handlers
                     Context.ProgressGoal(damageableItem, obj.Coord, obj.SpriteRenderer.size);
                     
                     Context.ReleaseAndSetNull(obj, obj.Coord);
+                    
+                    Context.RaiseAnyObstacleDestroyed();
                 }
             }
         }

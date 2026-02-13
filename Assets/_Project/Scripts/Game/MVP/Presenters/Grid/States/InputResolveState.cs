@@ -136,6 +136,7 @@ namespace Core.Handlers
             onComplete?.Invoke();
         }
         
+         
         private void SetInputFlags(BaseGridObject sourceObj, BaseGridObject targetObj, Vector2Int sourceCoord, Vector2Int targetCoord)
         {
             var sourceIsBooster = sourceObj.ItemKind == GridItemKind.Booster;

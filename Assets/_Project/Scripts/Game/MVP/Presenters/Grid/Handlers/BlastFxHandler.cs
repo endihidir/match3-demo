@@ -17,20 +17,21 @@ namespace Core.Handlers
             {
                 case ItemObject item:
                     var itemBlast = _blastFxFactory.GetItemBlastFx(item.ItemType);
-                    PlayBlastAt(itemBlast, pos, parent);
+                    PlayBlastAt(itemBlast, pos, parent).Forget();
                     break;
                 case ObstacleObject obstacle:
                     var obstacleBlast = _blastFxFactory.GetObstacleBlastFx(obstacle.ObstacleType);
-                    PlayBlastAt(obstacleBlast, pos, parent);
+                    PlayBlastAt(obstacleBlast, pos, parent).Forget();
                     break;
             }
         }
 
-        private void PlayBlastAt(BlastFxView blastFxView, Vector3 pos, Transform parent)
+        private async UniTask PlayBlastAt(BlastFxView blastFxView, Vector3 pos, Transform parent)
         {
             blastFxView.transform.SetParent(parent, false);
             blastFxView.transform.position = pos;
-            blastFxView.Play(()=> OnBlastFxComplete(blastFxView)).Forget();
+            await blastFxView.Play();
+            OnBlastFxComplete(blastFxView);
         }
 
         private void OnBlastFxComplete(BlastFxView blastFxView) => _blastFxFactory.ReleaseBlast(blastFxView);
