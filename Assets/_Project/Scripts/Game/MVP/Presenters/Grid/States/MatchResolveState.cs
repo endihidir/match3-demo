@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Core.Extensions;
 using Core.Item;
-using Core.Item.Factories;
 using Core.Models;
 using Core.StateMachineCore;
 using Core.Utils;
@@ -255,8 +254,6 @@ namespace Core.Handlers
                     Context.ReleaseAndSetNull(obj, obj.Coord);
                 }
             }
-            
-            Context.RaiseObjectsDestroyed();
         }
 
         private async UniTask PlayMergeAnimationAsync(BaseGridObject[] mergeObjs, Vector2Int centerCoord)

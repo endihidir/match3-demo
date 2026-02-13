@@ -70,7 +70,7 @@ namespace Core.Handlers
 
         private async UniTask ProcessTimelineAsync(ImpactTimeline timeline, int damageAmount)
         {
-            timeline.SortByDelay();
+            timeline.SortByDelayThenCoord();
             var lastDelay = 0f;
 
             foreach (var entry in timeline.Entries)
@@ -83,8 +83,6 @@ namespace Core.Handlers
                 lastDelay = entry.Delay;
                 ApplyImpact(entry.Coord, damageAmount);
             }
-            
-            Context.RaiseObjectsDestroyed();
         }
 
         private void ApplyImpact(Vector2Int coord, int damageAmount)
