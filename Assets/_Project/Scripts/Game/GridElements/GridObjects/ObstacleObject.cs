@@ -8,7 +8,7 @@ namespace Core.Item
     {
         [field: SerializeField, ReadOnly] public ObstacleType ObstacleType { get; private set; }
         [field: SerializeField, ReadOnly] public int Life { get; private set; }
-        [field: SerializeField, ReadOnly] public GridDamageSource AllowedGridDamageSources { get; private set; }
+        [field: SerializeField, ReadOnly] public GridDamageSource AllowedDamageSources { get; private set; }
         [field: SerializeField, ReadOnly] public bool IsCollectible { get; private set; }
         [field: SerializeField, ReadOnly] public Sprite[] BrokenSprites { get; private set; }
 
@@ -25,14 +25,14 @@ namespace Core.Item
             {
                 Life = obstacleConfigData.GetLife();
                 IsCollectible = obstacleConfigData.IsCollectible;
-                AllowedGridDamageSources = obstacleConfigData.GridDamageSource;
+                AllowedDamageSources = obstacleConfigData.GridDamageSource;
                 BrokenSprites = obstacleConfigData.CrackedSprites;
             }
         }
 
         public GridDamageResult TakeDamage(int damage, GridDamageSource source)
         {
-            if ((AllowedGridDamageSources & source) == 0 || Life <= 0) return GridDamageResult.Ignored;
+            if ((AllowedDamageSources & source) == 0 || Life <= 0) return GridDamageResult.Ignored;
             Life -= damage;
             Life = Mathf.Max(0, Life);
             SetBrokenSprite(Life);
