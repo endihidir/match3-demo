@@ -1,3 +1,4 @@
+using Core.Handlers;
 using Core.Item;
 using NaughtyAttributes;
 using UnityEngine;
@@ -15,7 +16,7 @@ namespace Core.Configs
             RocketHorizontalAction => Configs.Get(BoosterType.RocketHorizontal).AnimationSpeed,
             RocketVerticalAction => Configs.Get(BoosterType.RocketVertical).AnimationSpeed,
             BombAction => Configs.Get(BoosterType.Bomb).AnimationSpeed,
-            _ => 80f
+            _ => 0f
         };
         
         [Button]

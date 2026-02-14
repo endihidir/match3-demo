@@ -17,23 +17,16 @@ namespace Core.Handlers
         private readonly HashSet<Vector2Int> _unmarkProtectedCells = new();
         private readonly List<UniTask> _activeTasks = new();
 
-        public BoosterResolveState(GridStateContext context, IBoosterFxHandler boosterFxHandler) : base(context)
-        {
-            _boosterFxHandler = boosterFxHandler;
-        }
+        public BoosterResolveState(GridStateContext context, IBoosterFxHandler boosterFxHandler) : base(context) => _boosterFxHandler = boosterFxHandler;
 
         protected override void OnEnter()
         {
-            _impactedCells.Clear();
-            _processedBoosters.Clear();
-            _activeTasks.Clear();
-            _unmarkProtectedCells.Clear();
-
+            ClearBuffers();
             BuildUnmarkProtectedCells();
             ProcessBoostersAsync().Forget();
         }
 
-        private async UniTaskVoid ProcessBoostersAsync()
+        private async UniTask ProcessBoostersAsync()
         {
             while (Context.PendingBoosterActions.Count > 0 || _activeTasks.Count > 0)
             {
@@ -63,7 +56,7 @@ namespace Core.Handlers
             var fxCompleted = false;
             
             var animSpeed = _boosterFxHandler.PlayBoosterFx(action, view, () => fxCompleted = true);
-            var timeline = BoosterImpactResolver.BuildTimeline(action, model, view, animSpeed);
+            var timeline = BoosterTimelineBuilder.BuildTimeline(action, model, view, animSpeed);
             await ProcessTimelineAsync(timeline, action.BoosterAction.DamageAmount);
             await UniTask.WaitUntil(() => fxCompleted);
         }
@@ -76,10 +69,7 @@ namespace Core.Handlers
             foreach (var entry in timeline.Entries)
             {
                 var waitTime = entry.Delay - lastDelay;
-                
-                if (waitTime > 0)
-                    await UniTask.WaitForSeconds(waitTime);
-
+                await UniTask.WaitForSeconds(waitTime);
                 lastDelay = entry.Delay;
                 ApplyImpact(entry.Coord, damageAmount);
             }
@@ -92,7 +82,6 @@ namespace Core.Handlers
 
             var model = Context.GridModel;
             var obj = model.GetGridObject(coord);
-            
             if (!obj) return;
 
             if (obj is IBoosterActionSource source && source.TryBuildAction(coord, out var newAction))
@@ -122,7 +111,6 @@ namespace Core.Handlers
         private void BuildUnmarkProtectedCells()
         {
             if (!Context.HasUnmarkRemoveRequested) return;
-
             Context.HasUnmarkRemoveRequested = false;
 
             var model = Context.GridModel;
@@ -139,6 +127,14 @@ namespace Core.Handlers
                     _unmarkProtectedCells.Add(new Vector2Int(x, y));
                 }
             }
+        }
+        
+        private void ClearBuffers()
+        {
+            _impactedCells.Clear();
+            _processedBoosters.Clear();
+            _activeTasks.Clear();
+            _unmarkProtectedCells.Clear();
         }
     }
 }

@@ -25,12 +25,6 @@ namespace Core.Handlers
         {
             var animSpeed = _boosterConfigContainer.GetAnimationSpeed(action);
 
-            if (animSpeed == 0)
-            {
-                onComplete?.Invoke();
-                return float.MaxValue;
-            }
-
             switch (action.BoosterAction)
             {
                 case RocketHorizontalAction rha:
@@ -40,7 +34,7 @@ namespace Core.Handlers
                     PlayVerticalRocketFxAsync(animSpeed, action.OriginCoord, rva.LineCount, view).ContinueWith(() => onComplete?.Invoke()).Forget();
                     break;
                 case BombAction bmb:
-                    PlayBombFxAsync(bmb.Radius, action.OriginCoord, view).ContinueWith(() => onComplete?.Invoke()).Forget();
+                    PlayBombFxAsync(animSpeed, bmb.Radius, action.OriginCoord, view).ContinueWith(() => onComplete?.Invoke()).Forget();
                     break;
             }
             
@@ -49,7 +43,8 @@ namespace Core.Handlers
 
         private async UniTask PlayHorizontalRocketFxAsync(float animSpeed, Vector2Int originCoord, int lineCount, IGridView view)
         {
-            var offsets = BoosterImpactResolver.BuildLineOffsets(lineCount);
+            animSpeed = animSpeed <= 0 ? float.MaxValue : animSpeed;
+            var offsets = BoosterTimelineBuilder.BuildLineOffsets(lineCount);
             var cellSize = view.GetCellSize();
             var gridSize = view.GridSize;
 
@@ -76,7 +71,8 @@ namespace Core.Handlers
 
         private async UniTask PlayVerticalRocketFxAsync(float animSpeed, Vector2Int originCoord, int lineCount, IGridView view)
         {
-            var offsets = BoosterImpactResolver.BuildLineOffsets(lineCount);
+            animSpeed = animSpeed <= 0 ? float.MaxValue : animSpeed;
+            var offsets = BoosterTimelineBuilder.BuildLineOffsets(lineCount);
             var cellSize = view.GetCellSize();
             var gridSize = view.GridSize;
 
@@ -100,8 +96,9 @@ namespace Core.Handlers
             await UniTask.WhenAll(tasks);
         }
 
-        private async UniTask PlayBombFxAsync(int radius, Vector2Int originCoord, IGridView view)
+        private async UniTask PlayBombFxAsync(float animSpeed, int radius, Vector2Int originCoord, IGridView view)
         {
+            if(animSpeed <= 0) return;
             var pos = view.GridToWorld(originCoord);
             var fx = _boosterFxFactory.GetBombFx(pos, radius);
             await PlayAndReleaseAsync(fx, pos, view.FXParent);

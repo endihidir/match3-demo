@@ -25,11 +25,11 @@ namespace Core.Presenters
         public void Initialize()
         {
             _levelObjectiveModel.OnMoveCountUpdate += OnMoveCountUpdate;
-            _levelObjectiveModel.OnGoalProgressUpdate += OnObjectiveCountUpdate;
-            _goalFxHandler.OnGoalFxCompleted += UpdateGoalView;
+            _levelObjectiveModel.OnGoalProgressUpdate += OnGoalProgressUpdate;
+            _goalFxHandler.OnGoalFxComplete += UpdateGoalView;
         }
 
-        private void OnObjectiveCountUpdate(IDamageableGridObject damageableGridObject, Vector3 worldPos, Vector2 size)
+        private void OnGoalProgressUpdate(IDamageableGridObject damageableGridObject, Vector3 worldPos, Vector2 size)
         {
             if (damageableGridObject is not ObstacleObject obstacle) return;
        
@@ -45,10 +45,7 @@ namespace Core.Presenters
             }
         }
 
-        private void UpdateGoalView(ObstacleType obstacleType)
-        {
-            _hudView.DecreaseGoalCount(obstacleType);
-        }
+        private void UpdateGoalView(ObstacleType obstacleType) => _hudView.DecreaseGoalCount(obstacleType);
 
         private void OnMoveCountUpdate()
         {
@@ -58,9 +55,9 @@ namespace Core.Presenters
 
         public void Dispose()
         {
-            _levelObjectiveModel.OnGoalProgressUpdate -= OnObjectiveCountUpdate;
+            _levelObjectiveModel.OnGoalProgressUpdate -= OnGoalProgressUpdate;
             _levelObjectiveModel.OnMoveCountUpdate -= OnMoveCountUpdate;
-            _goalFxHandler.OnGoalFxCompleted -= UpdateGoalView;
+            _goalFxHandler.OnGoalFxComplete -= UpdateGoalView;
         }
     }
 }
