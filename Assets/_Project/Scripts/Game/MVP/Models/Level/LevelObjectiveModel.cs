@@ -9,7 +9,7 @@ namespace Core.Models
 {
     public sealed class LevelObjectiveModel : ILevelObjectiveModel
     {
-        private IEnumerable<LevelGoal> _goals;
+        private List<LevelGoal> _goals;
         private int _totalGoalCount;
         public int MoveCount { get; private set; }
         public bool IsAllMovesFinished => MoveCount <= 0;
@@ -20,7 +20,7 @@ namespace Core.Models
         
         public void Initialize(List<LevelGoal> goals, int moveCount)
         {
-            _goals = goals.Select(g => g.Clone());
+            _goals = goals.Select(g => g.Clone()).ToList();
             _totalGoalCount = _goals.Sum(x => x.Count);
             
             MoveCount = moveCount;
