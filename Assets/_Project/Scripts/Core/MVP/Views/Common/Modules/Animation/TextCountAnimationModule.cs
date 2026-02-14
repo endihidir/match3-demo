@@ -15,7 +15,7 @@ namespace Core.Modules
         {
             if(!int.TryParse(TextMeshProUGUI.text, out var startCount)) return;
             
-            Dispose();
+            _textTween.Kill();
             
             _textTween = DOVirtual.Int(startCount, endCount, duration, x => TextMeshProUGUI.SetText(x.ToString()))
                 .SetDelay(delay)

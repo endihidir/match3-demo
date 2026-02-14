@@ -47,9 +47,7 @@ namespace Core.Presenters
         {
             if(!_hudView.TryGetGoalSlotView(obstacleType, out var targetSlotView)) return;
             
-            if(!_levelObjectiveModel.TryGetGoal(obstacleType, out var goal)) return;
-            
-            targetSlotView.AnimateToCount(goal.Count);
+            targetSlotView.DecrementGoalCount();
         }
 
         private void OnMoveCountUpdate()
