@@ -82,7 +82,7 @@ namespace Core.Handlers
         {
             fx.transform.SetParent(parent, false);
             fx.transform.position = pos;
-            await fx.Play();
+            await fx.PlayAsync();
             _fxViewFactory.ReleaseFX(fx);
         }
     }

@@ -20,7 +20,7 @@ namespace Core.UI
         public void ApplyData(float animSpeed) => AnimSpeed = animSpeed;
         public abstract void UpdateRocketVisuals(float cellSize, float sizeMultiplier = .75f);
         public abstract void UpdateTargetPositions(Camera cam, Vector3 pos, float screenPadding = .2f);
-        public override async UniTask Play()
+        public override async UniTask PlayAsync()
         {
             Stop();
             

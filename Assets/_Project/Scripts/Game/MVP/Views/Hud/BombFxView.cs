@@ -13,7 +13,7 @@ namespace Core.UI
             
         }
         
-        public override async UniTask Play()
+        public override async UniTask PlayAsync()
         {
             if (!ParticleFxModule) return;
             ParticleFxModule.Play();

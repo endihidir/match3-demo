@@ -29,7 +29,7 @@ namespace Core.Models
                 OnGoalsComplete?.Invoke();
         }
 
-        public void ProgressGoal(IDamageableGridObject damageableGridObject, Vector3 worldPos, Vector2 size)
+        public void ProgressGoal(IDamageableGridObject damageableGridObject, Vector3 worldPos, Vector2 rectSize)
         {
             if (IsAllGoalsComplete) return;
 
@@ -46,7 +46,7 @@ namespace Core.Models
                 levelGoal.Count = before - removed;
                 _totalGoalCount -= removed;
 
-                OnGoalProgressUpdate?.Invoke(damageableGridObject, worldPos, size);
+                OnGoalProgressUpdate?.Invoke(damageableGridObject, worldPos, rectSize);
                 break;
             }
 

@@ -84,7 +84,7 @@ namespace Core.Views
             var worldPos = Layout.GridToWorld(_gridSize, itemCoordinate, Cam);
             return Cam.WorldToScreenPoint(worldPos);
         }
-        public Vector2 SpriteToUISize(Vector2 spriteSize) => UIWorldSpaceUtils.WorldSizeToUISize(spriteSize, Cam, Canvas);
+        public Vector2 SpriteToRectSize(Vector2 spriteSize) => UIWorldSpaceUtils.WorldSizeToUISize(spriteSize, Cam, Canvas);
 
         public Vector2Int InputToGridDirection(Vector2Int inputDirection)
         {

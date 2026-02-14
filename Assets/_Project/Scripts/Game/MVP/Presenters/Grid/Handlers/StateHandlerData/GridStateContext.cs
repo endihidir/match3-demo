@@ -63,8 +63,8 @@ namespace Core.Handlers
         public void ProgressGoal(IDamageableGridObject damageableGridObject, Vector2Int coord, Vector2 spriteSize)
         {
             var worldPos = GridView.GridToWorld(coord);
-            var size = GridView.SpriteToUISize(spriteSize);
-            LevelObjectiveModel.ProgressGoal(damageableGridObject, worldPos, size);
+            var rectSize = GridView.SpriteToRectSize(spriteSize);
+            LevelObjectiveModel.ProgressGoal(damageableGridObject, worldPos, rectSize);
         }
         
         public void RaiseDestructionStateComplete() => OnDestructionStateComplete?.Invoke();

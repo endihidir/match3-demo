@@ -26,10 +26,10 @@ namespace Core.Presenters
         {
             _levelObjectiveModel.OnMoveCountUpdate += OnMoveCountUpdate;
             _levelObjectiveModel.OnGoalProgressUpdate += OnGoalProgressUpdate;
-            _goalFxHandler.OnGoalFxComplete += UpdateGoalView;
+            _goalFxHandler.OnGoalFxComplete += UpdateGoalSlotView;
         }
 
-        private void OnGoalProgressUpdate(IDamageableGridObject damageableGridObject, Vector3 worldPos, Vector2 size)
+        private void OnGoalProgressUpdate(IDamageableGridObject damageableGridObject, Vector3 startWorldPos, Vector2 cellSize)
         {
             if (damageableGridObject is not ObstacleObject obstacle) return;
        
@@ -37,15 +37,15 @@ namespace Core.Presenters
             {
                 if (!_hudView.TryGetGoalSlotView(obstacle.ObstacleType, out var targetSlotView)) return;
 
-                _goalFxHandler.PlayFX(targetSlotView, _hudView.GoalFxHolder, worldPos, size);
+                _goalFxHandler.PlayFX(targetSlotView, startWorldPos, cellSize, _hudView.GoalFxHolder);
             }
             else
             {
-                UpdateGoalView(obstacle.ObstacleType);
+                UpdateGoalSlotView(obstacle.ObstacleType);
             }
         }
 
-        private void UpdateGoalView(ObstacleType obstacleType) => _hudView.DecreaseGoalCount(obstacleType);
+        private void UpdateGoalSlotView(ObstacleType obstacleType) => _hudView.DecreaseGoalCount(obstacleType);
 
         private void OnMoveCountUpdate()
         {
@@ -57,7 +57,7 @@ namespace Core.Presenters
         {
             _levelObjectiveModel.OnGoalProgressUpdate -= OnGoalProgressUpdate;
             _levelObjectiveModel.OnMoveCountUpdate -= OnMoveCountUpdate;
-            _goalFxHandler.OnGoalFxComplete -= UpdateGoalView;
+            _goalFxHandler.OnGoalFxComplete -= UpdateGoalSlotView;
         }
     }
 }

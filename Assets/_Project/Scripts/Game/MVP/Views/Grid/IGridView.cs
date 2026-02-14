@@ -15,7 +15,7 @@ namespace Core.Views
         Vector3 GridToWorld(Vector2Int itemCoordinate);
         Vector2Int WorldToGrid(Vector3 worldPosition);
         Vector3 GridToScreen(Vector2Int itemCoordinate);
-        Vector2 SpriteToUISize(Vector2 spriteSize);
+        Vector2 SpriteToRectSize(Vector2 spriteSize);
         Vector2Int InputToGridDirection(Vector2Int inputDirection);
         float GetCellSize();
     }

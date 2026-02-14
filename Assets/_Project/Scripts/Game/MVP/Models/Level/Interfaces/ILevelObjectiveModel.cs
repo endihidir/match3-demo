@@ -15,7 +15,7 @@ namespace Core.Models
         bool IsAllGoalsComplete { get; }
         bool IsAllMovesFinished { get; }
         void Initialize(List<LevelGoal> goals, int moveCount);
-        void ProgressGoal(IDamageableGridObject damageableGridObject, Vector3 worldPos, Vector2 size);
+        void ProgressGoal(IDamageableGridObject damageableGridObject, Vector3 worldPos, Vector2 rectSize);
         void ConsumeMove();
         bool TryGetGoal(ObstacleType obstacleType, out LevelGoal levelGoal);
     }

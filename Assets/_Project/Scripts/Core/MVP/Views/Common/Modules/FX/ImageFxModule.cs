@@ -9,7 +9,7 @@ namespace Core.Modules
         [field: SerializeField, Required] public Image Icon { get; set; }
         
         public void SetSprite(Sprite sprite) => Icon.sprite = sprite;
-        public void SetSize(Vector2 size) => Icon.rectTransform.sizeDelta = size;
+        public void SetRectSize(Vector2 size) => Icon.rectTransform.sizeDelta = size;
         
         public void SetColor(Color color) => Icon.color = color;
         
