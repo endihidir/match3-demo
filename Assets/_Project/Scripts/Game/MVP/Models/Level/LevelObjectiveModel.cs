@@ -29,15 +29,13 @@ namespace Core.Models
                 OnGoalsComplete?.Invoke();
         }
 
-        public void ProgressGoal(IDamageableGridObject damageableGridObject, Vector3 worldPos, Vector2 rectSize)
+        public void ProgressGoal(IDamageableGridObject damagableObj, Vector3 worldPos, Vector2 rectSize)
         {
             if (IsAllGoalsComplete) return;
-
-            if(damageableGridObject is not ObstacleObject obstacle) return;
             
             foreach (var levelGoal in _goals)
             {
-                if (levelGoal.ObstacleType != obstacle.ObstacleType) continue;
+                if (levelGoal.ObstacleType != damagableObj.ObstacleType) continue;
                 if (levelGoal.Count == 0) continue;
 
                 var before = levelGoal.Count;
@@ -46,7 +44,7 @@ namespace Core.Models
                 levelGoal.Count = before - removed;
                 _totalGoalCount -= removed;
 
-                OnGoalProgressUpdate?.Invoke(damageableGridObject, worldPos, rectSize);
+                OnGoalProgressUpdate?.Invoke(damagableObj, worldPos, rectSize);
                 break;
             }
 
