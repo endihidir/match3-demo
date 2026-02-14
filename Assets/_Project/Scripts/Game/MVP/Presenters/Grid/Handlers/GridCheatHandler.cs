@@ -71,7 +71,7 @@ namespace Core.Handlers
             if(!IsCellActive(context, coord)) return;
             ClearCell(context, coord);
 
-            var obstacle = context.GridItemFactory.GetRegularItem(type);
+            var obstacle = context.GridObjectHandler.GetRegularItem(type);
             PlaceItem(context, coord, obstacle);
         }
 
@@ -83,7 +83,7 @@ namespace Core.Handlers
             if(!IsCellActive(context, coord)) return;
             ClearCell(context, coord);
 
-            var booster = context.GridItemFactory.GetBoosterItem(type);
+            var booster = context.GridObjectHandler.GetBoosterItem(type);
             PlaceItem(context, coord, booster);
         }
 
@@ -95,7 +95,7 @@ namespace Core.Handlers
             if(!IsCellActive(context, coord)) return;
             ClearCell(context, coord);
 
-            var obstacle = context.GridItemFactory.GetObstacleItem(type);
+            var obstacle = context.GridObjectHandler.GetObstacleItem(type);
             PlaceItem(context, coord, obstacle);
         }
 

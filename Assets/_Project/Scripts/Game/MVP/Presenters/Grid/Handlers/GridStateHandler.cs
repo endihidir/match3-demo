@@ -18,13 +18,13 @@ namespace Core.Handlers
         private bool HasPendingBoosterActions => Context.HasPendingBoosterActions;
         private bool MatchResolveRequested => Context.MatchResolveRequested;
 
-        public GridStateHandler(IGridModel model, IGridView view, IGridItemFactory factory, GameplayConfigContainer configContainer, 
+        public GridStateHandler(IGridModel model, IGridView view, IGridObjectHandler objectHandler, GameplayConfigContainer configContainer, 
              ILevelObjectiveModel levelObjectiveModel, IFillStrategyResolver fillStrategyResolver, IBlastFxHandler blastFxHandler, 
              IBoosterFxHandler boosterFxHandler)
         {
             var gridConfigContainer = configContainer.GridConfigContainer;
             
-            Context = new GridStateContext(model, view, factory, levelObjectiveModel, gridConfigContainer, blastFxHandler);
+            Context = new GridStateContext(model, view, objectHandler, levelObjectiveModel, gridConfigContainer, blastFxHandler);
 
             var idleState = new IdleState(Context);
             var inputState = new InputResolveState(Context);

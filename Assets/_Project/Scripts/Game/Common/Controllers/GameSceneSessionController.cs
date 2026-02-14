@@ -8,8 +8,13 @@ namespace Core.Bootstrapper
 {
     public class GameSceneSessionController : IInitializable, IDisposable
     {
-        [Inject] private readonly ISceneLoadState _sceneLoadState;
-        [Inject] private readonly IGameplaySetupService  _gameplaySetupService;
+        private readonly ISceneLoadState _sceneLoadState;
+        private readonly IGameplaySetupService  _gameplaySetupService;
+        public GameSceneSessionController(ISceneLoadState sceneLoadState, IGameplaySetupService gameplaySetupService)
+        {
+            _sceneLoadState = sceneLoadState;
+            _gameplaySetupService = gameplaySetupService;
+        }
         
         public void Initialize()
         {

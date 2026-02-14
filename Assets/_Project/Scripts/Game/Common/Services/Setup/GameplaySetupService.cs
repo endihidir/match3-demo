@@ -1,5 +1,4 @@
-using Core.Extensions;
-using Core.Item;
+using Core.Handlers;
 using Core.Item.Factories;
 using Core.Level;
 using Core.Models;
@@ -15,11 +14,11 @@ namespace Core.Services
         [Inject] private readonly ISceneLoadState _sceneLoadState;
         [Inject] private readonly ILevelDefinitionProvider _levelDefinitionProvider;
         
-        [Inject] private readonly IGridItemFactory _gridItemFactory;
+        [Inject] private readonly IGridObjectHandler _gridObjectHandler;
         [Inject] private readonly IGridModel _gridModel;
         [Inject] private readonly IGridView _gridView;
         
-        [Inject] private readonly IGoalSlotFactory _goalSlotFactory;
+        [Inject] private readonly IGoalSlotHandler _goalSlotHandler;
         [Inject] private readonly ILevelObjectiveModel _levelObjectiveModel;
         [Inject] private readonly IHudView _hudView;
         
@@ -41,9 +40,9 @@ namespace Core.Services
         
         public void ReleaseFactories()
         {
-            _gridItemFactory.ReleaseItemsByType<BaseGridObject>();
-            _goalSlotFactory.ReleaseSlotsByType<GoalSlotView>();
-            _fxViewFactory.ReleaseFXByType<BaseFxView>();
+            _gridObjectHandler.ReleaseAllGridItems();
+            _goalSlotHandler.ReleaseAllGoalSlots();
+            _fxViewFactory.ReleaseFXesByType<BaseFxView>();
         }
         
         private void GridSetup()
@@ -51,7 +50,7 @@ namespace Core.Services
             var gridObjectTypes = _levelDefinitionProvider.GetGridObjectTypes();
             var width = gridObjectTypes.GetLength(0);
             var height = gridObjectTypes.GetLength(1);
-            _gridItemFactory.PopulateGridItems(gridObjectTypes, width, height, out var gridItemObjects);
+            _gridObjectHandler.PopulateGridItems(gridObjectTypes, width, height, out var gridItemObjects);
             _gridModel.Initialize(gridItemObjects, width, height, out var activeCells);
             _gridView.Initialize(width, height, activeCells);
         }
@@ -62,7 +61,7 @@ namespace Core.Services
         {
             var levelGoals = _levelDefinitionProvider.GetLevelGoals();
             var levelMoveCount = _levelDefinitionProvider.GetMoveCount();
-            _goalSlotFactory.PopulateSlotViews(levelGoals, out var slotViews);
+            _goalSlotHandler.PopulateSlotViews(levelGoals, out var slotViews);
             _levelObjectiveModel.Initialize(levelGoals, levelMoveCount);
             _hudView.Initialize(slotViews, levelMoveCount);
         }

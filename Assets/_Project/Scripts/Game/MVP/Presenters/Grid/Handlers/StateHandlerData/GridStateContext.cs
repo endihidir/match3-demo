@@ -2,10 +2,8 @@ using System;
 using System.Collections.Generic;
 using Core.Configs;
 using Core.Item;
-using Core.Item.Factories;
 using Core.Models;
 using Core.Views;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Core.Handlers
@@ -16,7 +14,7 @@ namespace Core.Handlers
         
         public IGridModel GridModel { get; }
         public IGridView GridView { get; }
-        public IGridItemFactory GridItemFactory { get; }
+        public IGridObjectHandler GridObjectHandler { get; }
         public ILevelObjectiveModel LevelObjectiveModel { get; }
         public GridConfigContainerSO GridConfigs { get; }
         public IBlastFxHandler BlastFxHandler { get; }
@@ -35,12 +33,12 @@ namespace Core.Handlers
         
         public event Action OnDestructionStateComplete;
 
-        public GridStateContext(IGridModel gridModel, IGridView gridView, IGridItemFactory gridItemFactory, ILevelObjectiveModel levelObjectiveModel, 
+        public GridStateContext(IGridModel gridModel, IGridView gridView, IGridObjectHandler gridObjectHandler, ILevelObjectiveModel levelObjectiveModel, 
             GridConfigContainerSO gridConfigs, IBlastFxHandler blastFxHandler)
         {
             GridModel = gridModel;
             GridView = gridView;
-            GridItemFactory = gridItemFactory;
+            GridObjectHandler = gridObjectHandler;
             LevelObjectiveModel = levelObjectiveModel;
             GridConfigs = gridConfigs;
             BlastFxHandler = blastFxHandler;
@@ -56,7 +54,7 @@ namespace Core.Handlers
         public void ReleaseAndSetNull(BaseGridObject obj, Vector2Int coord)
         {
             BlastFxHandler.PlayBlastParticle(obj, GridView.GridToWorld(coord), GridView.FXParent);
-            GridItemFactory.ReleaseItem(obj);
+            GridObjectHandler.ReleaseItem(obj);
             GridModel.SetGridObject(coord, null);
         }
 

@@ -182,7 +182,7 @@ namespace Core.Handlers
 
             if (centerObj)
             {
-                Context.GridItemFactory.ReleaseItem(centerObj);
+                Context.GridObjectHandler.ReleaseItem(centerObj);
             }
             
             SpawnBooster(centerCoord, boosterValue);
@@ -215,7 +215,7 @@ namespace Core.Handlers
             {
                 if (!obj) continue;
 
-                Context.GridItemFactory.ReleaseItem(obj);
+                Context.GridObjectHandler.ReleaseItem(obj);
             }
         }
 
@@ -282,7 +282,7 @@ namespace Core.Handlers
 
         private void SpawnBooster(Vector2Int pos, BoosterType boosterType)
         {
-            var booster = Context.GridItemFactory.GetBoosterItem(boosterType);
+            var booster = Context.GridObjectHandler.GetBoosterItem(boosterType);
             Context.GridModel.SetGridObject(pos, booster);
             booster.SetPosition(Context.GridView.GridToWorld(pos));
             booster.SetSpriteSize(Context.GridView.GetCellSize());
