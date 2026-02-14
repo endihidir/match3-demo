@@ -29,19 +29,17 @@ namespace Core.Presenters
             _goalFxHandler.OnGoalFxComplete += UpdateGoalSlotView;
         }
 
-        private void OnGoalProgressUpdate(IDamageableGridObject damageableGridObject, Vector3 startWorldPos, Vector2 cellSize)
+        private void OnGoalProgressUpdate(IDamageableGridObject damageableObj, Vector3 startWorldPos, Vector2 cellSize)
         {
-            if (damageableGridObject is not ObstacleObject obstacle) return;
-       
-            if (damageableGridObject.IsCollectible)
+            if (damageableObj.IsCollectible)
             {
-                if (!_hudView.TryGetGoalSlotView(obstacle.ObstacleType, out var targetSlotView)) return;
+                if (!_hudView.TryGetGoalSlotView(damageableObj.ObstacleType, out var targetSlotView)) return;
 
                 _goalFxHandler.PlayFX(targetSlotView, startWorldPos, cellSize, _hudView.GoalFxHolder);
             }
             else
             {
-                UpdateGoalSlotView(obstacle.ObstacleType);
+                UpdateGoalSlotView(damageableObj.ObstacleType);
             }
         }
 
