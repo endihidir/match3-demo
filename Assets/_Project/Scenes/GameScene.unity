@@ -1091,7 +1091,7 @@ GameObject:
   m_Component:
   - component: {fileID: 710867839}
   m_Layer: 0
-  m_Name: GridFXParent
+  m_Name: FXParent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2677,7 +2677,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1824729426}
   m_Layer: 0
-  m_Name: GridObjectsParent
+  m_Name: ObjectsParent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

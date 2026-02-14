@@ -53,12 +53,11 @@ namespace Core.Handlers
         {
             var model = Context.GridModel;
             var view = Context.GridView;
-            var fxCompleted = false;
-            
-            var animSpeed = _boosterFxHandler.PlayBoosterFx(action, view, () => fxCompleted = true);
+
+            var fxTask = _boosterFxHandler.PlayBoosterFxAsync(action, model, view, out var animSpeed);
             var timeline = BoosterTimelineBuilder.BuildTimeline(action, model, view, animSpeed);
-            await ProcessTimelineAsync(timeline, action.BoosterAction.DamageAmount);
-            await UniTask.WaitUntil(() => fxCompleted);
+            var timelineTask = ProcessTimelineAsync(timeline, action.BoosterAction.DamageAmount);
+            await UniTask.WhenAll(timelineTask, fxTask);
         }
 
         private async UniTask ProcessTimelineAsync(ImpactTimeline timeline, int damageAmount)

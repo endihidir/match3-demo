@@ -16,7 +16,7 @@ namespace Core.Configs
             RocketHorizontalAction => Configs.Get(BoosterType.RocketHorizontal).AnimationSpeed,
             RocketVerticalAction => Configs.Get(BoosterType.RocketVertical).AnimationSpeed,
             BombAction => Configs.Get(BoosterType.Bomb).AnimationSpeed,
-            _ => 0f
+            _ => float.MaxValue
         };
         
         [Button]

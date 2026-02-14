@@ -9,8 +9,6 @@ namespace Core.UI
     public abstract class RocketFxView : BoosterFxView
     {
         [field: SerializeField, ReadOnly] protected float AnimSpeed { get; set; }
-        [field: SerializeField] protected float SizeMultiplier { get; set; } = .75f;
-        [field: SerializeField] protected float ScreenPadding { get; set; } = 0.2f;
         [field: SerializeField] protected Ease Ease { get; set; } = Ease.Linear;
         [field: SerializeField] protected MoveAnimationModule PositiveSideMove { get; set; }
         [field: SerializeField] protected MoveAnimationModule NegativeSideMove { get; set; }
@@ -19,10 +17,9 @@ namespace Core.UI
         
         protected Vector3 _negativeSideTargetPos, _positiveSideTargetPos;
         
-        protected Camera _cam;
-        
         public void ApplyData(float animSpeed) => AnimSpeed = animSpeed;
-
+        public abstract void UpdateRocketVisuals(float cellSize, float sizeMultiplier = .75f);
+        public abstract void UpdateTargetPositions(Camera cam, Vector3 pos, float screenPadding = .2f);
         public override async UniTask Play()
         {
             Stop();
@@ -35,28 +32,21 @@ namespace Core.UI
     
             await UniTask.WhenAll(positiveTween.ToUniTask(), negativeTween.ToUniTask());
         }
-        
-        protected abstract float GetDistance(Vector3 from, Vector3 to);
-
-        public abstract void CalculateTargetPositions();
-        public abstract void CalculateRocketsSize(float cellSize);
-
         public override void Stop()
         {
             ResetAnimation(PositiveSideMove);
             ResetAnimation(NegativeSideMove);
         }
-
         protected override void OnDeactivate()
         {
             base.OnDeactivate();
             Stop();
         }
-
         private static void ResetAnimation(MoveAnimationModule animationModule)
         {
             animationModule.Dispose();
             animationModule.GetTransform().localPosition = Vector3.zero;
         }
+        protected abstract float GetDistance(Vector3 from, Vector3 to);
     }
 }
