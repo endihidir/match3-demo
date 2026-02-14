@@ -1,4 +1,3 @@
-using AYellowpaper.SerializedCollections;
 using Core.Item;
 using UnityEngine;
 
