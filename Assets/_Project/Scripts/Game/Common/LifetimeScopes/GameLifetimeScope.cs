@@ -32,16 +32,19 @@ namespace Core.LifetimeScopes
             builder.RegisterEntryPoint<LevelEndPresenter>();
     
             // HUD
+            builder.Register<GoalSlotHandler>(Lifetime.Scoped).As<IGoalSlotHandler>();
+            builder.Register<GoalFxHandler>(Lifetime.Scoped).As<IGoalFxHandler>();
+            
             builder.RegisterEntryPoint<HudPresenter>();
             builder.RegisterComponentInHierarchy<HudView>().As<IHudView>();
-            builder.Register<GoalSlotFactory>(Lifetime.Scoped).As<IGoalSlotFactory>();
-            builder.Register<GoalFxHandler>(Lifetime.Scoped).As<IGoalFxHandler>();
     
             // GRID
+            builder.Register<GridObjectFactory>(Lifetime.Scoped).As<IGridObjectFactory>();
+            
+            builder.Register<GridObjectHandler>(Lifetime.Scoped).As<IGridObjectHandler>();
             builder.Register<BlastFxHandler>(Lifetime.Scoped).As<IBlastFxHandler>();
             builder.Register<BoosterFxHandler>(Lifetime.Scoped).As<IBoosterFxHandler>();
             
-            builder.Register<GridItemFactory>(Lifetime.Scoped).As<IGridItemFactory>();
             builder.Register<GridModel>(Lifetime.Scoped).As<IGridModel>();
             builder.RegisterComponentInHierarchy<GridView>().As<IGridView>();
             builder.RegisterEntryPoint<GridPresenter>();

@@ -84,7 +84,7 @@ namespace Core.Handlers
                 var target = new Vector2Int(x, startY + i);
 
                 var type = _itemDecider.Decide(model, target);
-                var item = context.GridItemFactory.GetRegularItem(type);
+                var item = context.GridObjectHandler.GetRegularItem(type);
 
                 item.SetParent(view.GridObjectsParent);
                 item.SetSpriteSize(cellSize);

@@ -49,7 +49,7 @@ namespace Core.Handlers
                 if(GridFillCalcUtil.HasStationaryAboveInSameSegment(model, coord, false)) continue;
 
                 var itemType = _itemDecider.Decide(model, coord);
-                var item = stateContext.GridItemFactory.GetRegularItem(itemType);
+                var item = stateContext.GridObjectHandler.GetRegularItem(itemType);
 
                 item.SetParent(view.GridObjectsParent);
                 item.SetSpriteSize(cellSize);
