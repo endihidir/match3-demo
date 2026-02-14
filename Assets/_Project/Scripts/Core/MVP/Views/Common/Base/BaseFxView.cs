@@ -9,7 +9,7 @@ namespace Core.UI
         [field: SerializeField] protected bool UseUnscaledTime { get; private set; }
         [field: SerializeField] protected Transform FxViewHolder { get; private set; }
         
-        public virtual UniTask Play() => UniTask.CompletedTask;
+        public virtual UniTask PlayAsync() => UniTask.CompletedTask;
         public virtual void Stop(){}
     }
 }

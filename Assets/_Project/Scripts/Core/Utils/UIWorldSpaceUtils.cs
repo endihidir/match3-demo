@@ -14,7 +14,7 @@ namespace Core.Utils
             var pixelH = Mathf.Abs(py.y - p0.y);
 
            
-            var sf = canvas != null ? canvas.scaleFactor : 1f;
+            var sf = canvas ? canvas.scaleFactor : 1f;
             return new Vector2(pixelW / sf, pixelH / sf);
         }
         

@@ -22,28 +22,28 @@ namespace Core.Handlers
             _obstacleConfigContainer = gameplayConfigContainer.GridConfigContainer.GetConfig<ObstacleConfigContainerSO>();
         }
 
-        public void PlayFX(GoalSlotView targetSlotView, Transform fxHolder, Vector3 startWorldPos, Vector2 startSize)
+        public void PlayFX(GoalSlotView targetSlotView, Vector3 startWorldPos, Vector2 rectSize, Transform fxHolder)
         {
             if (!_obstacleConfigContainer.Configs.TryGet(targetSlotView.ObstacleType, out var config)) return;
             
-            var goalFxView = PrepareFxView(fxHolder, startWorldPos, startSize, config);
+            var goalFxView = PrepareFxView(fxHolder, startWorldPos, rectSize, config);
             var targetPos = targetSlotView.transform.position;
             var targetSize = targetSlotView.GetIconSize();
             
             var delay = CalculateDelay();
             goalFxView.SizeAnimation.SetRectSize(targetSize, 0.75f, delay);
             goalFxView.MoveAnimation.MoveTo(targetPos, 0.75f, delay, Ease.InBack)
-                      .OnComplete(() => OnFxComplete(goalFxView, targetSlotView.ObstacleType));
+                                    .OnComplete(() => OnFxComplete(goalFxView, targetSlotView.ObstacleType));
         }
 
-        private GoalFxView PrepareFxView(Transform fxHolder, Vector3 startWorldPos, Vector2 startSize, ObstacleDataSO config)
+        private GoalFxView PrepareFxView(Transform fxHolder, Vector3 startWorldPos, Vector2 rectSize, ObstacleDataSO config)
         {
             var goalFxView = _fxFactory.GetFX<GoalFxView>();
             var sprite = config.CrackedSprites.Length > 0 ? config.CrackedSprites[0] : config.icon;
             goalFxView.transform.SetParent(fxHolder, false);
             goalFxView.transform.position = startWorldPos;
             goalFxView.ImageFxModule.SetSprite(sprite);
-            goalFxView.ImageFxModule.SetSize(startSize);
+            goalFxView.ImageFxModule.SetRectSize(rectSize);
             return goalFxView;
         }
 

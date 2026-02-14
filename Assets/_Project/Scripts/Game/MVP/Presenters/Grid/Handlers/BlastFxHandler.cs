@@ -55,7 +55,7 @@ namespace Core.Handlers
         {
             blastFxView.transform.SetParent(parent, false);
             blastFxView.transform.position = pos;
-            await blastFxView.Play();
+            await blastFxView.PlayAsync();
             OnBlastFxComplete(blastFxView);
         }
 
