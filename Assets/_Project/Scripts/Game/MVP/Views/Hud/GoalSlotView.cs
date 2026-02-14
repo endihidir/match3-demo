@@ -14,7 +14,7 @@ namespace Core.UI
         [field: SerializeField] private Image GoalIcon { get; set; }
         [field: SerializeField] private TextMeshProUGUI GoalCountTxt { get; set; }
         [field: SerializeField] private BounceAnimationModule BounceAnimationModule { get; set; }
-        [field: SerializeField, ReadOnly] private int GoalCount { get; set; }
+        [field: SerializeField] private TextCountAnimationModule GoalCountAnimationModule { get; set; }
 
         public void Initialize(ObstacleType obstacleType)
         {
@@ -27,22 +27,14 @@ namespace Core.UI
         }
         
         public Vector2 GetIconSize() => GoalIcon.rectTransform.rect.size;
-        
-        public void SetGoalCount(int goalCount)
-        {
-            GoalCount = goalCount;
-            GoalCountTxt?.SetText(GoalCount.ToString());
-        }
+        public void SetGoalCount(int goalCount) => GoalCountTxt?.SetText(goalCount.ToString());
 
-        public void DecreaseGoalCount(bool useBounceAnim = true)
+        public void AnimateToCount(int targetValue, bool useBounceAnim = true)
         {
-            if (GoalCount > 0 && useBounceAnim)
-            {
+            if (useBounceAnim) 
                 BounceAnimationModule?.PlayBounce();
-            }
             
-            GoalCount = Mathf.Max(GoalCount - 1, 0);
-            GoalCountTxt.SetText(GoalCount.ToString());
+            GoalCountAnimationModule?.PlayTextCount(targetValue, .1f);
         }
     }
 }

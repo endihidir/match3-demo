@@ -147,6 +147,7 @@ GameObject:
   - component: {fileID: 7062951995387277777}
   - component: {fileID: 2626314640824585696}
   - component: {fileID: -8554596260821298268}
+  - component: {fileID: 4375468816503463505}
   m_Layer: 5
   m_Name: GoalSlotView
   m_TagString: Untagged
@@ -190,6 +191,7 @@ MonoBehaviour:
   <GoalIcon>k__BackingField: {fileID: 4301171992361423469}
   <GoalCountTxt>k__BackingField: {fileID: 7574754415665464615}
   <BounceAnimationModule>k__BackingField: {fileID: -8554596260821298268}
+  <GoalCountAnimationModule>k__BackingField: {fileID: 4375468816503463505}
   <GoalCount>k__BackingField: 0
 --- !u!114 &-8554596260821298268
 MonoBehaviour:
@@ -206,6 +208,19 @@ MonoBehaviour:
   <BounceTransform>k__BackingField: {fileID: 5249607260581398094}
   <Duration>k__BackingField: 0.15
   <SizeUpMultiplier>k__BackingField: 1.2
+--- !u!114 &4375468816503463505
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6996242838893979593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1adf5ea8f64849b390768d8067441ddd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <TextMeshProUGUI>k__BackingField: {fileID: 7574754415665464615}
 --- !u!1 &8238262607789857437
 GameObject:
   m_ObjectHideFlags: 0

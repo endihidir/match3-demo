@@ -43,11 +43,19 @@ namespace Core.Presenters
             }
         }
 
-        private void UpdateGoalSlotView(ObstacleType obstacleType) => _hudView.DecreaseGoalCount(obstacleType);
+        private void UpdateGoalSlotView(ObstacleType obstacleType)
+        {
+            if(!_hudView.TryGetGoalSlotView(obstacleType, out var targetSlotView)) return;
+            
+            if(!_levelObjectiveModel.TryGetGoal(obstacleType, out var goal)) return;
+            
+            targetSlotView.AnimateToCount(goal.Count);
+        }
 
         private void OnMoveCountUpdate()
         {
             var moveCount = _levelObjectiveModel.MoveCount;
+            
             _hudView.SetMoveCount(moveCount);
         }
 
