@@ -1,3 +1,4 @@
+using Core.Configs;
 using Core.Item;
 using Core.Item.Factories;
 using Core.UI;
@@ -8,25 +9,49 @@ namespace Core.Handlers
 {
     public sealed class BlastFxHandler : IBlastFxHandler
     {
-        private readonly IBlastFxFactory _blastFxFactory;
-        public BlastFxHandler(IBlastFxFactory blastFxFactory) => _blastFxFactory = blastFxFactory;
+        private readonly IFXViewFactory _fxViewFactory;
+        private readonly GridConfigContainerSO _gridConfigContainer;
+        
+        public BlastFxHandler(IFXViewFactory fxViewFactory, GameplayConfigContainer gameplayConfigContainer)
+        {
+            _fxViewFactory = fxViewFactory;
+            _gridConfigContainer = gameplayConfigContainer.GridConfigContainer;
+        }
 
         public void PlayBlastParticle(BaseGridObject obj, Vector3 pos, Transform parent)
         {
             switch (obj)
             {
                 case ItemObject item:
-                    var itemBlast = _blastFxFactory.GetItemBlastFx(item.ItemType);
-                    PlayBlastAt(itemBlast, pos, parent).Forget();
+                    if (TryGetItemBlastFx(item, out var itemBlastFx)) return;
+                    PlayBlastFxAsync(itemBlastFx, pos, parent).Forget();
                     break;
                 case ObstacleObject obstacle:
-                    var obstacleBlast = _blastFxFactory.GetObstacleBlastFx(obstacle.ObstacleType);
-                    PlayBlastAt(obstacleBlast, pos, parent).Forget();
+                    if (TryGetObstacleBlastFx(obstacle, out var obstacleBlastFx)) return;
+                    PlayBlastFxAsync(obstacleBlastFx, pos, parent).Forget();
                     break;
             }
         }
 
-        private async UniTask PlayBlastAt(BlastFxView blastFxView, Vector3 pos, Transform parent)
+        private bool TryGetItemBlastFx(ItemObject item, out ItemBlastFxView itemBlastFx)
+        {
+            itemBlastFx = _fxViewFactory.GetFX<ItemBlastFxView>();
+            var itemConfigContainer = _gridConfigContainer.GetConfig<ItemConfigContainerSO>();
+            if (!itemConfigContainer.Configs.TryGet(item.ItemType, out var itemConfig)) return true;
+            itemBlastFx.Initialize(itemConfig.BlastColor);
+            return false;
+        }
+
+        private bool TryGetObstacleBlastFx(ObstacleObject obstacle, out ObstacleBlastFxView obstacleBlastFx)
+        {
+            obstacleBlastFx = _fxViewFactory.GetFX<ObstacleBlastFxView>();
+            var obstacleConfigContainer = _gridConfigContainer.GetConfig<ObstacleConfigContainerSO>();
+            if (!obstacleConfigContainer.Configs.TryGet(obstacle.ObstacleType, out var obstacleConfig)) return true;
+            obstacleBlastFx.Initialize(obstacleConfig.ShatteredSprites);
+            return false;
+        }
+
+        private async UniTask PlayBlastFxAsync(BlastFxView blastFxView, Vector3 pos, Transform parent)
         {
             blastFxView.transform.SetParent(parent, false);
             blastFxView.transform.position = pos;
@@ -34,6 +59,6 @@ namespace Core.Handlers
             OnBlastFxComplete(blastFxView);
         }
 
-        private void OnBlastFxComplete(BlastFxView blastFxView) => _blastFxFactory.ReleaseBlast(blastFxView);
+        private void OnBlastFxComplete(BlastFxView blastFxView) => _fxViewFactory.ReleaseFX(blastFxView);
     }
 }

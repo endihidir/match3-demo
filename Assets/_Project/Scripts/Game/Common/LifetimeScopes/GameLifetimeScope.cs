@@ -38,9 +38,7 @@ namespace Core.LifetimeScopes
             builder.Register<GoalFxHandler>(Lifetime.Scoped).As<IGoalFxHandler>();
     
             // GRID
-            builder.Register<BlastFxFactory>(Lifetime.Scoped).As<IBlastFxFactory>();
             builder.Register<BlastFxHandler>(Lifetime.Scoped).As<IBlastFxHandler>();
-            builder.Register<BoosterFxFactory>(Lifetime.Scoped).As<IBoosterFxFactory>();
             builder.Register<BoosterFxHandler>(Lifetime.Scoped).As<IBoosterFxHandler>();
             
             builder.Register<GridItemFactory>(Lifetime.Scoped).As<IGridItemFactory>();

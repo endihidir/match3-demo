@@ -22,13 +22,14 @@ namespace Core.Views
         [field: SerializeField] public GridLayoutSettingsSO LayoutSettings { get; private set; }
         [field: SerializeField] public bool DrawGridGizmos { get; private set; }
         [field: SerializeField, ShowIf(nameof(DrawGridGizmos))] public Color GizmosColor { get; private set; } = Color.yellow;
-        public Vector2Int GridSize { get; private set; }
         public event Action OnViewInitialized;
+        
+        private Vector2Int _gridSize;
         private bool[,] _activeCells;
         
         public void Initialize(int width, int height, bool[,] isCellActive)
         {
-            GridSize = new Vector2Int(width, height);
+            _gridSize = new Vector2Int(width, height);
             _activeCells = isCellActive;
             
             CalculateCellSize();
@@ -49,14 +50,14 @@ namespace Core.Views
                 cellSize = 0f
             };
             
-            var cellSize = layout.CalculateCellSize(GridSize, Cam);
+            var cellSize = layout.CalculateCellSize(_gridSize, Cam);
             layout.cellSize = Mathf.Clamp(cellSize, 0f, LayoutSettings.MaxCellSize);
             Layout = layout;
         }
         
         private void CalculateOrigin()
         {
-            var yOffset = GridRoot.position.y + (GridSize.y * Layout.cellSize * 0.5f);
+            var yOffset = GridRoot.position.y + (_gridSize.y * Layout.cellSize * 0.5f);
             var topY = Layout.GetTopYRaw(Cam);
             var originOffsetY = topY - yOffset;
             var layout = Layout;
@@ -74,13 +75,13 @@ namespace Core.Views
         private void GenerateMesh()
         {
             var ms = MeshSettings;
-            Layout.BuildGridMesh(GridSize, GridMeshFilter, ms.FrameThickness, ms.CornerSmoothness, ms.GetCornerSegments(), IsCellActive);
+            Layout.BuildGridMesh(_gridSize, GridMeshFilter, ms.FrameThickness, ms.CornerSmoothness, ms.GetCornerSegments(), IsCellActive);
         }
-        public Vector3 GridToWorld(Vector2Int itemCoordinate) => Layout.GridToWorld(GridSize, itemCoordinate, Cam);
-        public Vector2Int WorldToGrid(Vector3 worldPosition) => Layout.WorldToGrid(GridSize, worldPosition, Cam);
+        public Vector3 GridToWorld(Vector2Int itemCoordinate) => Layout.GridToWorld(_gridSize, itemCoordinate, Cam);
+        public Vector2Int WorldToGrid(Vector3 worldPosition) => Layout.WorldToGrid(_gridSize, worldPosition, Cam);
         public Vector3 GridToScreen(Vector2Int itemCoordinate)
         {
-            var worldPos = Layout.GridToWorld(GridSize, itemCoordinate, Cam);
+            var worldPos = Layout.GridToWorld(_gridSize, itemCoordinate, Cam);
             return Cam.WorldToScreenPoint(worldPos);
         }
         public Vector2 SpriteToUISize(Vector2 spriteSize) => UIWorldSpaceUtils.WorldSizeToUISize(spriteSize, Cam, Canvas);
@@ -102,7 +103,7 @@ namespace Core.Views
 
             if (!DrawGridGizmos) return;
             
-            Layout.DrawGrid(GridSize, GizmosColor, Cam, IsCellActive);
+            Layout.DrawGrid(_gridSize, GizmosColor, Cam, IsCellActive);
         }
 #endif
         
