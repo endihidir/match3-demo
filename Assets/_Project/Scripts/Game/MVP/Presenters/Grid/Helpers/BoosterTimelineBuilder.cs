@@ -1,13 +1,13 @@
 using System;
-using System.Collections.Generic;
 using Core.Configs;
+using Core.Handlers;
 using Core.Models;
 using Core.Views;
 using UnityEngine;
 
 namespace Core.Utils
 {
-    public static class BoosterImpactResolver
+    public static class BoosterTimelineBuilder
     {
         public static ImpactTimeline BuildTimeline(BoosterActionContext action, IGridModel model, IGridView view, float speed)
         {
@@ -20,6 +20,23 @@ namespace Core.Utils
                 BombAction ba => BuildSquareTimeline(action.OriginCoord, ba.Radius, model),
                 _ => new ImpactTimeline()
             };
+        }
+        
+        public static int[] BuildLineOffsets(int lineCount)
+        {
+            if (lineCount <= 0) return Array.Empty<int>();
+
+            var offsets = new int[lineCount];
+            offsets[0] = 0;
+
+            for (int i = 1; i < lineCount; i++)
+            {
+                var distance = (i + 1) / 2;
+                var sign = (i % 2 == 1) ? 1 : -1;
+                offsets[i] = distance * sign;
+            }
+
+            return offsets;
         }
         
         private static ImpactTimeline BuildLinearTimeline(Vector2Int origin, int lineCount, bool isHorizontal, IGridModel model, float cellSize, float speed)
@@ -75,57 +92,6 @@ namespace Core.Utils
             }
 
             return timeline;
-        }
-
-        public static int[] BuildLineOffsets(int lineCount)
-        {
-            if (lineCount <= 0) return Array.Empty<int>();
-
-            var offsets = new int[lineCount];
-            offsets[0] = 0;
-
-            for (int i = 1; i < lineCount; i++)
-            {
-                var distance = (i + 1) / 2;
-                var sign = (i % 2 == 1) ? 1 : -1;
-                offsets[i] = distance * sign;
-            }
-
-            return offsets;
-        }
-    }
-
-    public class ImpactTimeline
-    {
-        private readonly List<ImpactEntry> _entries = new();
-        public IReadOnlyList<ImpactEntry> Entries => _entries;
-        public void Add(Vector2Int coord, float delay) => _entries.Add(new ImpactEntry(coord, delay));
-        public void SortByDelay() => _entries.Sort((a, b) => a.Delay.CompareTo(b.Delay));
-        
-        public void SortByDelayThenCoord()
-        {
-            _entries.Sort((a, b) =>
-            {
-                var delayCompare = a.Delay.CompareTo(b.Delay);
-                if (delayCompare != 0) return delayCompare;
-        
-                var xCompare = a.Coord.x.CompareTo(b.Coord.x);
-                if (xCompare != 0) return xCompare;
-     
-                return a.Coord.y.CompareTo(b.Coord.y);
-            });
-        }
-    }
-
-    public readonly struct ImpactEntry
-    {
-        public readonly Vector2Int Coord;
-        public readonly float Delay;
-
-        public ImpactEntry(Vector2Int coord, float delay)
-        {
-            Coord = coord;
-            Delay = delay;
         }
     }
 }
