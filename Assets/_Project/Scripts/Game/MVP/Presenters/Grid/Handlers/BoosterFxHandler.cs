@@ -29,7 +29,7 @@ namespace Core.Handlers
             {
                 RocketHorizontalAction rha => PlayRocketFxAsync(rha, view, animSpeed, action.OriginCoord, model.GridSize),
                 RocketVerticalAction rva => PlayRocketFxAsync(rva, view, animSpeed, action.OriginCoord, model.GridSize),
-                BombAction bmb => PlayBombFxAsync(bmb, view, animSpeed,  action.OriginCoord),
+                BombAction bmb => PlayBombFxAsync(bmb, view, animSpeed, action.OriginCoord),
                 _ => UniTask.CompletedTask
             };
         }
