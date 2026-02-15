@@ -40,6 +40,7 @@ namespace Core.Presenters
                 goalSlotView.transform.SetParent(_hudView.GoalsHolder, false);
             }
         }
+        private void OnMoveCountUpdate() => _hudView.SetMoveCount(_levelObjectiveModel.MoveCount);
 
         private void OnGoalProgressUpdate(IDamageableGridObject damageableObj, Vector3 startWorldPos, Vector2 cellSize)
         {
@@ -61,14 +62,12 @@ namespace Core.Presenters
             
             targetSlotView.DecrementGoalCount();
         }
-
-        private void OnMoveCountUpdate() => _hudView.SetMoveCount(_levelObjectiveModel.MoveCount);
-
+        
         public void Dispose()
         {
             _hudView.OnInitialize -= OnHudViewInitialized;
-            _levelObjectiveModel.OnGoalProgressUpdate -= OnGoalProgressUpdate;
             _levelObjectiveModel.OnMoveCountUpdate -= OnMoveCountUpdate;
+            _levelObjectiveModel.OnGoalProgressUpdate -= OnGoalProgressUpdate;
             _goalFxHandler.OnGoalFxComplete -= UpdateGoalSlotView;
         }
     }
