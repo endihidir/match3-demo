@@ -70,10 +70,9 @@ namespace Core.Handlers
 
         private async UniTask PlayBombFxAsync(BombAction bombAction, IGridView view, float animSpeed, Vector2Int originCoord)
         {
-            if(animSpeed is 0) return; // TODO: Delete it after preparing bomb fx prefab!!
             var pos = view.GridToWorld(originCoord);
             var fx = _fxViewFactory.GetFX<BombFxView>();
-            fx.ApplyData(bombAction.Radius);
+            fx.ApplyData(bombAction.Radius, view.GetCellSize(), animSpeed);
             await PlayAndReleaseAsync(fx, pos, view.FXParent);
         }
 

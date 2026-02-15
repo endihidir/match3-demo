@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 85d1cd021bdc484e81ee8f2723d6df97, type: 3}
-  m_Name: BoosterVerticalRocketFx
+  m_Name: BombFxPool
   m_EditorClassIdentifier: 
   <IsLazy>k__BackingField: 1
   <PoolSize>k__BackingField: 5
-  <PoolObject>k__BackingField: {fileID: 5956053115950063829, guid: 04c3d4a8a3572f248932573db35b1adc,
+  <PoolObject>k__BackingField: {fileID: 1196079789397058087, guid: 88f36e9524fb8cf44b874bc2a06d2b2b,
     type: 3}
