@@ -29,8 +29,6 @@ namespace Core.Handlers
         public List<BoosterActionContext> PendingBoosterActions { get; } = new();
         
         public bool MatchResolveRequested { get; set; }
-        public int GroupIdCounter { get; set; }
-        
         public event Action OnDestructionStateComplete;
 
         public GridStateContext(IGridModel gridModel, IGridView gridView, IGridObjectHandler gridObjectHandler, ILevelObjectiveModel levelObjectiveModel, 
@@ -42,13 +40,6 @@ namespace Core.Handlers
             LevelObjectiveModel = levelObjectiveModel;
             GridConfigs = gridConfigs;
             BlastFxHandler = blastFxHandler;
-        }
-        
-        public int NextBoosterGroupId()
-        {
-            GroupIdCounter++;
-            if (GroupIdCounter == int.MaxValue) GroupIdCounter = 1;
-            return GroupIdCounter;
         }
         
         public void ReleaseAndSetNull(BaseGridObject obj, Vector2Int coord)
