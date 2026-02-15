@@ -8,7 +8,6 @@ namespace Core.UI
     {
         [field: SerializeField] public ParticleFxModule ParticleFxModule { get; set; }
         
-
         public void ApplyData(float radius, float cellSize, float animSpeed)
         {
             var scale = (radius + 1) * cellSize;
