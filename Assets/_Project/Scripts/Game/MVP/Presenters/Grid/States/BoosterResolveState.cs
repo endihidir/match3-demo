@@ -111,11 +111,13 @@ namespace Core.Handlers
         
         private void BuildUnmarkProtectedCells()
         {
-            if (!Context.HasUnmarkRemoveRequested) return;
-            Context.HasUnmarkRemoveRequested = false;
+            if (!Context.UnmarkRemoveCoord.HasValue) return;
+            
+            var unmarkRemoveCoord = Context.UnmarkRemoveCoord.Value;
+            
+            Context.UnmarkRemoveCoord = null;
 
             var model = Context.GridModel;
-            var unmarkRemoveCoord = Context.UnmarkRemoveCoord;
 
             if (!GridMatchMaskBuilder.TryBuildMatchMask(model, out var matchMask)) return;
             if (!GridMatchCalcUtil.TryBuildMatchGroupMaskAt(model, unmarkRemoveCoord, matchMask, out var groupMask)) return;

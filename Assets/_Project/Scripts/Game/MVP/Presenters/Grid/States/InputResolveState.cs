@@ -144,21 +144,8 @@ namespace Core.Handlers
 
             if (sourceIsBooster && targetIsBooster) return;
 
-            Context.HasMergeCenterCoordRequested = true;
             Context.MergeCenterCoord = targetCoord;
-
-            if (sourceIsBooster)
-            {
-                Context.HasUnmarkRemoveRequested = true;
-                Context.UnmarkRemoveCoord = sourceCoord;
-                return;
-            }
-
-            if (targetIsBooster)
-            {
-                Context.HasUnmarkRemoveRequested = true;
-                Context.UnmarkRemoveCoord = targetCoord;
-            }
+            Context.UnmarkRemoveCoord = sourceIsBooster ? sourceCoord : targetIsBooster ? targetCoord : null;
         }
 
         private void CreateBoosterActions(BaseGridObject sourceObj, BaseGridObject targetObj)
