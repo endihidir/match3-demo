@@ -38,27 +38,27 @@ namespace Core.Handlers
         {
             var offsets = BoosterTimelineBuilder.BuildLineOffsets(action.LineCount);
             var cellSize = view.GetCellSize();
+            var isHorizontal = action is RocketHorizontalAction;
 
             List<UniTask> tasks = null;
 
-            var direction = action is RocketHorizontalAction ? originCoord.x : originCoord.y;
-            var size = action is RocketHorizontalAction ? gridSize.x : gridSize.y;
-
             foreach (var offset in offsets)
             {
-                var lineIndex = direction + offset;
-                if (lineIndex < 0 || lineIndex >= size) continue;
+                var lineIndex = isHorizontal ? originCoord.y + offset : originCoord.x + offset;
+                var maxIndex = isHorizontal ? gridSize.y : gridSize.x;
+        
+                if (lineIndex < 0 || lineIndex >= maxIndex) continue;
 
-                var rocketOrigin = action is RocketHorizontalAction ? new Vector2Int(lineIndex, originCoord.y) : new Vector2Int(originCoord.x, lineIndex);
+                var rocketOrigin = isHorizontal ? new Vector2Int(originCoord.x, lineIndex) : new Vector2Int(lineIndex, originCoord.y);
+
                 var pos = view.GridToWorld(rocketOrigin);
 
-                RocketFxView fx = action is RocketHorizontalAction ? _fxViewFactory.GetFX<HorizontalRocketFxView>() : 
-                                                                     _fxViewFactory.GetFX<VerticalRocketFxView>();
-                
+                RocketFxView fx = isHorizontal ? _fxViewFactory.GetFX<HorizontalRocketFxView>() : _fxViewFactory.GetFX<VerticalRocketFxView>();
+
                 fx.ApplyData(animSpeed);
                 fx.UpdateRocketVisuals(cellSize);
                 fx.UpdateTargetPositions(view.Cam, pos);
-                
+
                 tasks ??= new List<UniTask>(offsets.Length);
                 tasks.Add(PlayAndReleaseAsync(fx, pos, view.FXParent));
             }
