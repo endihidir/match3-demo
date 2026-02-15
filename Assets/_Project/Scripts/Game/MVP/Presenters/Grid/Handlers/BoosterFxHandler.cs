@@ -24,7 +24,6 @@ namespace Core.Handlers
         public UniTask PlayBoosterFxAsync(BoosterActionContext action, IGridModel model, IGridView view, out float animSpeed)
         {
             animSpeed = _boosterConfigContainer.GetAnimationSpeed(action);
-            animSpeed = animSpeed <= 0 ? float.MaxValue : animSpeed;
 
             return action.BoosterAction switch
             {
@@ -71,7 +70,7 @@ namespace Core.Handlers
 
         private async UniTask PlayBombFxAsync(BombAction bombAction, IGridView view, float animSpeed, Vector2Int originCoord)
         {
-            if(animSpeed is float.MaxValue) return; // TODO: Delete it after preparing bomb fx prefab!!
+            if(animSpeed is 0) return; // TODO: Delete it after preparing bomb fx prefab!!
             var pos = view.GridToWorld(originCoord);
             var fx = _fxViewFactory.GetFX<BombFxView>();
             fx.ApplyData(bombAction.Radius);
