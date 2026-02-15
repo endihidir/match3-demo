@@ -13,27 +13,39 @@ namespace Core.Presenters
         private readonly ILevelObjectiveModel _levelObjectiveModel;
         private readonly IHudView _hudView;
         private readonly IGoalFxHandler _goalFxHandler;
-        private readonly IGridStateHandler _gridStateHandler;
+        private readonly IGoalSlotHandler _goalSlotHandler;
 
-        public HudPresenter(ILevelObjectiveModel levelObjectiveModel, IHudView hudView, IGoalFxHandler goalFxHandler)
+        public HudPresenter(ILevelObjectiveModel levelObjectiveModel, IHudView hudView, IGoalSlotHandler goalSlotHandler, IGoalFxHandler goalFxHandler)
         {
             _levelObjectiveModel = levelObjectiveModel;
             _hudView = hudView;
+            _goalSlotHandler = goalSlotHandler;
             _goalFxHandler = goalFxHandler;
         }
 
         public void Initialize()
         {
+            _hudView.OnInitialize += OnHudViewInitialized;
             _levelObjectiveModel.OnMoveCountUpdate += OnMoveCountUpdate;
             _levelObjectiveModel.OnGoalProgressUpdate += OnGoalProgressUpdate;
             _goalFxHandler.OnGoalFxComplete += UpdateGoalSlotView;
+        }
+
+        private void OnHudViewInitialized() => PlaceSlotViews();
+        
+        private void PlaceSlotViews()
+        {
+            foreach (var goalSlotView in _goalSlotHandler.GoalSlotViews)
+            {
+                goalSlotView.transform.SetParent(_hudView.GoalsHolder, false);
+            }
         }
 
         private void OnGoalProgressUpdate(IDamageableGridObject damageableObj, Vector3 startWorldPos, Vector2 cellSize)
         {
             if (damageableObj.IsCollectible)
             {
-                if (!_hudView.TryGetGoalSlotView(damageableObj.ObstacleType, out var targetSlotView)) return;
+                if (!_goalSlotHandler.TryGetGoalSlotView(damageableObj.ObstacleType, out var targetSlotView)) return;
 
                 _goalFxHandler.PlayFX(targetSlotView, startWorldPos, cellSize, _hudView.GoalFxHolder);
             }
@@ -45,7 +57,7 @@ namespace Core.Presenters
 
         private void UpdateGoalSlotView(ObstacleType obstacleType)
         {
-            if(!_hudView.TryGetGoalSlotView(obstacleType, out var targetSlotView)) return;
+            if(!_goalSlotHandler.TryGetGoalSlotView(obstacleType, out var targetSlotView)) return;
             
             targetSlotView.DecrementGoalCount();
         }
@@ -59,6 +71,7 @@ namespace Core.Presenters
 
         public void Dispose()
         {
+            _hudView.OnInitialize -= OnHudViewInitialized;
             _levelObjectiveModel.OnGoalProgressUpdate -= OnGoalProgressUpdate;
             _levelObjectiveModel.OnMoveCountUpdate -= OnMoveCountUpdate;
             _goalFxHandler.OnGoalFxComplete -= UpdateGoalSlotView;

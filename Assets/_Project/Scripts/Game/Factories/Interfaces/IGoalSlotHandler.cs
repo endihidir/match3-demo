@@ -1,13 +1,15 @@
 using System.Collections.Generic;
+using Core.Item;
 using Core.Level;
 using Core.UI;
-using UnityEngine;
 
 namespace Core.Handlers
 {
     public interface IGoalSlotHandler
     {
-        void PopulateSlotViews(List<LevelGoal> levelGoals, out GoalSlotView[] slotViews);
+        GoalSlotView[] GoalSlotViews { get; }
+        void PopulateSlotViews(List<LevelGoal> levelGoals);
+        bool TryGetGoalSlotView(ObstacleType obstacleType, out GoalSlotView goalSlotView);
         void ReleaseAllGoalSlots();
     }
 }

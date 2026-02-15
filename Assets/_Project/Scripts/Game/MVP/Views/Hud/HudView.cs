@@ -1,8 +1,4 @@
-using System.Linq;
-using AYellowpaper.SerializedCollections;
-using Core.Item;
-using Core.Utils;
-using NaughtyAttributes;
+using System;
 using TMPro;
 using UnityEngine;
 
@@ -10,32 +6,25 @@ namespace Core.UI
 {
     public class HudView : MonoBehaviour, IHudView
     {
-        [field: SerializeField] private Transform GoalsHolder { get; set; }
-        [field: SerializeField] public Transform GoalFxHolder { get; set; }
+        [field: SerializeField] public Transform GoalsHolder { get; private set; }
+        [field: SerializeField] public Transform GoalFxHolder { get; private set; }
         [field: SerializeField] private TextMeshProUGUI MoveCountTxt { get; set; }
-        [field: SerializeField, ReadOnly] private SerializedDictionary<ObstacleType, GoalSlotView> SlotByType { get; set; }
+        public event Action OnInitialize;
         
-        public void Initialize(GoalSlotView[] goalSlotViews, int moveCount)
+        public void Initialize(int goalCount, int moveCount)
         {
-            SlotByType = new SerializedDictionary<ObstacleType, GoalSlotView>(goalSlotViews.ToDictionary(x => x.ObstacleType));
-            
-            foreach (var goalSlotView in goalSlotViews)
-            {
-                goalSlotView.transform.SetParent(GoalsHolder, false);
-            }
+            ResizeLayoutGroup(goalCount);
             
             SetMoveCount(moveCount);
+            
+            OnInitialize?.Invoke();
+        }
+
+        private void ResizeLayoutGroup(int goalCount)
+        {
+            
         }
         
         public void SetMoveCount(int moveCount) => MoveCountTxt.SetText(moveCount.ToString());
-
-        public bool TryGetGoalSlotView(ObstacleType obstacleType, out GoalSlotView goalSlotView)
-        {
-            if (SlotByType.TryGetValue(obstacleType, out goalSlotView)) return true;
-            
-            EditorLogger.LogError($"{obstacleType} slot view not found!");
-            
-            return false;
-        }
     }
 }
