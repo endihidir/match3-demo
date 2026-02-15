@@ -1,13 +1,14 @@
-using Core.Item;
+using System;
 using UnityEngine;
 
 namespace Core.UI
 {
     public interface IHudView
     {
-        public Transform GoalFxHolder { get; }
-        void Initialize(GoalSlotView[] goalSlotViews, int moveCount);
+        event Action OnInitialize;
+        Transform GoalsHolder { get; }
+        Transform GoalFxHolder { get; }
+        void Initialize(int goalCount, int moveCount);
         void SetMoveCount(int moveCount);
-        bool TryGetGoalSlotView(ObstacleType obstacleType, out GoalSlotView goalSlotView);
     }
 }

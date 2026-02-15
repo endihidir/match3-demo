@@ -61,9 +61,9 @@ namespace Core.Services
         {
             var levelGoals = _levelDefinitionProvider.GetLevelGoals();
             var levelMoveCount = _levelDefinitionProvider.GetMoveCount();
-            _goalSlotHandler.PopulateSlotViews(levelGoals, out var slotViews);
+            _goalSlotHandler.PopulateSlotViews(levelGoals);
             _levelObjectiveModel.Initialize(levelGoals, levelMoveCount);
-            _hudView.Initialize(slotViews, levelMoveCount);
+            _hudView.Initialize(levelGoals.Count, levelMoveCount);
         }
     }
 }
