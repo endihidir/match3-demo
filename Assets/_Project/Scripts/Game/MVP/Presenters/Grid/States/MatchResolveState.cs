@@ -57,12 +57,10 @@ namespace Core.Handlers
             var grid = model.BuildGridTypeData();
 
             var taskCount = 0;
-
-            var hasForcedCenter = Context.HasMergeCenterCoordRequested;
-            var forcedCenter = Context.MergeCenterCoord;
-
-            if (hasForcedCenter)
+            
+            if (Context.MergeCenterCoord.HasValue)
             {
+                var forcedCenter = Context.MergeCenterCoord.Value;
                 // 1) Forced center pass
                 ScanRect(forcedCenter.x, forcedCenter.y, forcedCenter.x + 1, forcedCenter.y + 1, 3, 999);
             }
@@ -190,17 +188,17 @@ namespace Core.Handlers
 
         private bool TryConsumeForcedCenterCoord(List<Vector2Int> group, out Vector2Int forcedCoord)
         {
-            if (!Context.HasMergeCenterCoordRequested)
+            if (!Context.MergeCenterCoord.HasValue)
             {
                 forcedCoord = default;
                 return false;
             }
 
-            var coord = Context.MergeCenterCoord;
+            var coord = Context.MergeCenterCoord.Value;
 
             if (group.Any(t => t == coord))
             {
-                Context.HasMergeCenterCoordRequested = false;
+                Context.MergeCenterCoord = null;
                 forcedCoord = coord;
                 return true;
             }

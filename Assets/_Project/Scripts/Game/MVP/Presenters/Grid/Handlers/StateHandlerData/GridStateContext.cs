@@ -19,11 +19,8 @@ namespace Core.Handlers
         public GridConfigContainerSO GridConfigs { get; }
         public IBlastFxHandler BlastFxHandler { get; }
         
-        public bool HasMergeCenterCoordRequested { get; set; }
-        public Vector2Int MergeCenterCoord { get; set; }
-        
-        public bool HasUnmarkRemoveRequested { get; set; }
-        public Vector2Int UnmarkRemoveCoord { get; set; }
+        public Vector2Int? MergeCenterCoord { get; set; }
+        public Vector2Int? UnmarkRemoveCoord { get; set; }
         
         public bool HasPendingBoosterActions => PendingBoosterActions.Count > 0;
         public List<BoosterActionContext> PendingBoosterActions { get; } = new();
