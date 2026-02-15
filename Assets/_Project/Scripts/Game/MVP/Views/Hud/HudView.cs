@@ -22,7 +22,7 @@ namespace Core.UI
 
         private void ResizeLayoutGroup(int goalCount)
         {
-            
+            // TODO: Resize Layout Group
         }
         
         public void SetMoveCount(int moveCount) => MoveCountTxt.SetText(moveCount.ToString());
