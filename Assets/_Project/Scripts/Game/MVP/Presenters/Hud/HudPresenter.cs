@@ -62,12 +62,7 @@ namespace Core.Presenters
             targetSlotView.DecrementGoalCount();
         }
 
-        private void OnMoveCountUpdate()
-        {
-            var moveCount = _levelObjectiveModel.MoveCount;
-            
-            _hudView.SetMoveCount(moveCount);
-        }
+        private void OnMoveCountUpdate() => _hudView.SetMoveCount(_levelObjectiveModel.MoveCount);
 
         public void Dispose()
         {
