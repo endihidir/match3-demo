@@ -1595,8 +1595,6 @@ MonoBehaviour:
   <GoalsHolder>k__BackingField: {fileID: 465905219}
   <GoalFxHolder>k__BackingField: {fileID: 881154357}
   <MoveCountTxt>k__BackingField: {fileID: 824079499}
-  <SlotByType>k__BackingField:
-    _serializedList: []
 --- !u!1 &1200224483
 GameObject:
   m_ObjectHideFlags: 0
