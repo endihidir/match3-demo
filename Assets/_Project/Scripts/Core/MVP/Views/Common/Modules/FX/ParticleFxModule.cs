@@ -9,7 +9,7 @@ namespace Core.Modules
         
         public void Emit(int count) => ParticleSystem.Emit(count);
         public bool IsPlaying => ParticleSystem&& ParticleSystem.isPlaying;
-        public bool IsAlive => ParticleSystem&& ParticleSystem.IsAlive(true);
+        public bool IsAlive => ParticleSystem && GetTotalParticleCount() > 0;
         public int ParticleCount => ParticleSystem.particleCount;
         
         public void Play() => ParticleSystem.Play();
@@ -70,10 +70,20 @@ namespace Core.Modules
             main.gravityModifier = gravity;
         }
         
-        public void SetSimulationSpeed(float speed)
+        public void SetSimulationSpeed(float speed, bool withChildren = true)
         {
             var main = ParticleSystem.main;
             main.simulationSpeed = speed;
+    
+            if (!withChildren) return;
+    
+            var children = ParticleSystem.GetComponentsInChildren<ParticleSystem>();
+    
+            foreach (var child in children)
+            {
+                var childMain = child.main;
+                childMain.simulationSpeed = speed;
+            }
         }
         
         public void SetMaxParticles(int max)
@@ -119,5 +129,22 @@ namespace Core.Modules
                 textureSheet.AddSprite(sprite);
             }
         }
+        
+        private int GetTotalParticleCount()
+        {
+            int total = ParticleSystem.particleCount;
+    
+            foreach (Transform child in transform)
+            {
+                if (child.TryGetComponent<ParticleSystem>(out var childPs))
+                {
+                    total += childPs.particleCount;
+                }
+            }
+    
+            return total;
+        }
+
+        public void SetLocalScale(Vector3 scale) => ParticleSystem.transform.localScale = scale;
     }
 }
