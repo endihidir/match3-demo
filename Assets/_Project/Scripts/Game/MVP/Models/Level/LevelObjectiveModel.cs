@@ -22,7 +22,6 @@ namespace Core.Models
         {
             _goals = goals.Select(g => g.Clone()).ToList();
             _totalGoalCount = _goals.Sum(x => x.Count);
-            
             MoveCount = moveCount;
             
             if (IsAllGoalsComplete) 
