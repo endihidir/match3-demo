@@ -68,7 +68,10 @@ namespace Core.Handlers
             foreach (var entry in timeline.Entries)
             {
                 var waitTime = entry.Delay - lastDelay;
-                await UniTask.WaitForSeconds(waitTime);
+                
+                if(waitTime > 0f)
+                    await UniTask.WaitForSeconds(waitTime);
+                
                 lastDelay = entry.Delay;
                 ApplyImpact(entry.Coord, damageAmount);
             }
@@ -85,7 +88,6 @@ namespace Core.Handlers
 
             if (obj is IBoosterActionSource source && source.TryBuildAction(coord, out var newAction))
             {
-                newAction.SetGroupId(Context.NextBoosterGroupId());
                 Context.PendingBoosterActions.Add(newAction);
                 Context.ReleaseAndSetNull(obj, coord);
                 return;

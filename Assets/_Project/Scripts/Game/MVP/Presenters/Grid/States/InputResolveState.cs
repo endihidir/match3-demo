@@ -192,7 +192,7 @@ namespace Core.Handlers
         {
             if (!booster || booster.BoosterAction == null) return;
 
-            var boosterActionContext = new BoosterActionContext(Context.NextBoosterGroupId(), originCoord, booster.BoosterAction);
+            var boosterActionContext = new BoosterActionContext(originCoord, booster.BoosterAction);
 
             Context.PendingBoosterActions.Add(boosterActionContext);
         }
@@ -203,13 +203,11 @@ namespace Core.Handlers
 
             if (boosterComboConfig && boosterComboConfig.TryGetRule(sourceBoosterType, targetBoosterType, out var rule) && rule.Actions != null)
             {
-                var nextGroupId = Context.NextBoosterGroupId();
-
                 foreach (var boosterAction in rule.Actions)
                 {
                     if (boosterAction == null) continue;
 
-                    var boosterActionContext = new BoosterActionContext(nextGroupId, origin, boosterAction);
+                    var boosterActionContext = new BoosterActionContext(origin, boosterAction);
 
                     Context.PendingBoosterActions.Add(boosterActionContext);
                 }
