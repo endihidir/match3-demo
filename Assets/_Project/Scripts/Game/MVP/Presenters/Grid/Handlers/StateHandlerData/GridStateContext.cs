@@ -19,13 +19,14 @@ namespace Core.Handlers
         public GridConfigContainerSO GridConfigs { get; }
         public IBlastFxHandler BlastFxHandler { get; }
         
-        public Vector2Int? MergeCenterCoord { get; set; }
-        public Vector2Int? UnmarkRemoveCoord { get; set; }
+        public bool MatchResolveRequested { get; set; }
         
         public bool HasPendingBoosterActions => PendingBoosterActions.Count > 0;
         public List<BoosterActionContext> PendingBoosterActions { get; } = new();
         
-        public bool MatchResolveRequested { get; set; }
+        public Vector2Int? MergeCenterCoord { get; set; }
+        public Vector2Int? UnmarkRemoveCoord { get; set; }
+        
         public event Action OnDestructionStateComplete;
 
         public GridStateContext(IGridModel gridModel, IGridView gridView, IGridObjectHandler gridObjectHandler, ILevelObjectiveModel levelObjectiveModel, 
