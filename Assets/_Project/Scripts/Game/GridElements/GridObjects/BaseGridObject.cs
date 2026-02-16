@@ -46,11 +46,11 @@ namespace Core.Item
             IsNone = TypeId == 0;
         }
         
-        public virtual void ApplyData(BaseItemDataSO baseItemDataSo)
+        public virtual void ApplyData(BaseGridObjectDataSO baseGridObjectDataSo)
         {
-            SpriteRenderer.sprite = baseItemDataSo.icon;
-            SpriteSizeMultiplier = baseItemDataSo.spriteSizeMultiplier;
-            IsStationary = baseItemDataSo.isStationary;
+            SpriteRenderer.sprite = baseGridObjectDataSo.icon;
+            SpriteSizeMultiplier = baseGridObjectDataSo.spriteSizeMultiplier;
+            IsStationary = baseGridObjectDataSo.isStationary;
         }
 
         public void SetFrontOf(BaseGridObject targetObj) => SpriteRenderer.sortingOrder = targetObj.SpriteRenderer.sortingOrder + 1;

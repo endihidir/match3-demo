@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Core.Configs
 {
     [CreateAssetMenu(fileName = "ItemAnimationSettings", menuName = "Match3/ItemConfigs/ItemAnimationSettings", order = 0)]
-    public sealed class GridObjectAnimationSettings_SO : ScriptableObject
+    public sealed class GridObjectAnimationSettingsSO : ScriptableObject
     {
         [field: SerializeField] public bool UseUnscaledTime { get; private set; } = true;
         [field: SerializeField, Header("SHIFT SETTINGS")] public float BaseShiftDuration { get; private set; } = 0.15f;

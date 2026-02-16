@@ -6,8 +6,8 @@ namespace Core.UI
 {
     public class LevelEndView : MonoBehaviour, ILevelEndView
     {
-        [field: SerializeField] private LevelEndMenuAnimationView SuccessMenuView { get; set; }
-        [field: SerializeField] private LevelEndMenuAnimationView FailMenuView { get; set; }
+        [field: SerializeField] private AnimatedPanelModule SuccessMenuModule { get; set; }
+        [field: SerializeField] private AnimatedPanelModule FailMenuModule { get; set; }
         
         [field: SerializeField] private Button NextButton { get; set; }
         [field: SerializeField] private Button TryAgainButton { get; set; }
@@ -21,9 +21,9 @@ namespace Core.UI
             CloseSuccessMenu();
         }
 
-        public async UniTask OpenSuccessMenuViewAsync() => await SuccessMenuView.ShowAsync(.5f);
-        public async UniTask OpenFailMenuViewAsync() => await FailMenuView.ShowAsync(.5f);
-        public void CloseSuccessMenu() => SuccessMenuView.Hide();
-        public void CloseFailMenu() => FailMenuView.Hide();
+        public async UniTask OpenSuccessMenuViewAsync() => await SuccessMenuModule.ShowAsync(.5f);
+        public async UniTask OpenFailMenuViewAsync() => await FailMenuModule.ShowAsync(.5f);
+        public void CloseSuccessMenu() => SuccessMenuModule.Hide();
+        public void CloseFailMenu() => FailMenuModule.Hide();
     }
 }
