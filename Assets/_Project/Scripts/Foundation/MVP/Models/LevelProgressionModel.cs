@@ -1,5 +1,4 @@
 using System;
-using Core.Level;
 using Core.SaveSystem;
 using UnityEngine;
 
@@ -10,19 +9,19 @@ namespace Core.Models
         private const string SaveKey = "level_progression";
 
         private readonly IJsonSaveService _saveService;
-        private readonly ILevelDataReader _levelDataReader;
 
         private LevelProgressionData _levelProgressionData;
-        public int MaxLevel => _levelDataReader.LevelSize;
+        public int MaxLevelCount { get; private set; }
         public int CurrentLevelIndex => _levelProgressionData.currentLevelIndex;
         public int LevelCompletionCount => _levelProgressionData.levelCompletionCount;
         private bool ResetIndexOnLimit => true; //TODO: Get this form config
         public event Action OnLevelChanged;
-        public LevelProgressionModel(IJsonSaveService saveService, ILevelDataReader levelDataReader)
-        {
-            _saveService = saveService;
-            _levelDataReader = levelDataReader;
+        public LevelProgressionModel(IJsonSaveService saveService) => _saveService = saveService;
 
+        public void Initialize(int maxLevelCount)
+        {
+            MaxLevelCount = maxLevelCount;
+            
             var defaultState = new LevelProgressionData
             {
                 currentLevelIndex = 0,
@@ -30,15 +29,14 @@ namespace Core.Models
             };
             
             _levelProgressionData = _saveService.LoadFromTextFile(SaveKey, defaultState);
-            
-            _levelProgressionData.currentLevelIndex = Mathf.Clamp(_levelProgressionData.currentLevelIndex, 0, MaxLevel - 1);
+            _levelProgressionData.currentLevelIndex = Mathf.Clamp(_levelProgressionData.currentLevelIndex, 0, MaxLevelCount - 1);
         }
 
         public void SetLevel(int levelIndex)
         {
-            if (MaxLevel <= 0) return;
+            if (MaxLevelCount <= 0) return;
 
-            var index = Mathf.Clamp(levelIndex, 0, MaxLevel - 1);
+            var index = Mathf.Clamp(levelIndex, 0, MaxLevelCount - 1);
             
             if (index == _levelProgressionData.currentLevelIndex) return;
 
@@ -49,11 +47,11 @@ namespace Core.Models
 
         public void AdvanceLevel()
         {
-            if (MaxLevel <= 0) return;
+            if (MaxLevelCount <= 0) return;
 
             var next = _levelProgressionData.currentLevelIndex + 1;
             
-            next = next >= MaxLevel ? (ResetIndexOnLimit ? 0 : MaxLevel - 1) : next;
+            next = next >= MaxLevelCount ? (ResetIndexOnLimit ? 0 : MaxLevelCount - 1) : next;
             
             _levelProgressionData.currentLevelIndex = next;
             

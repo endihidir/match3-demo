@@ -7,21 +7,21 @@ namespace Core.Level
 {
     public class LevelDefinitionProvider : ILevelDefinitionProvider
     {
-        private readonly ILevelDataReader _dataReader;
+        private readonly ILevelDataService _levelDataService;
         private readonly ILevelProgressionModel _progressionModel;
 
-        public LevelDefinitionProvider(ILevelDataReader dataReader, ILevelProgressionModel progressionModel)
+        public LevelDefinitionProvider(ILevelDataService levelDataService, ILevelProgressionModel progressionModel)
         {
-            _dataReader = dataReader;
+            _levelDataService = levelDataService;
             _progressionModel = progressionModel;
         }
 
-        public int GetMoveCount() => _dataReader.GetLevelDefinition(_progressionModel.CurrentLevelIndex).MoveCount;
-        public Vector2Int GetGridSize() => _dataReader.GetLevelDefinition(_progressionModel.CurrentLevelIndex).GridSize;
-        public List<LevelGoal> GetLevelGoals() => _dataReader.GetLevelDefinition(_progressionModel.CurrentLevelIndex).Goals;
-        public GridObjectType[,] GetGridObjectTypes() => _dataReader.GetLevelDefinition(_progressionModel.CurrentLevelIndex).GridObjectTypes;
+        public int GetMoveCount() => _levelDataService.GetLevelDefinition(_progressionModel.CurrentLevelIndex).MoveCount;
+        public Vector2Int GetGridSize() => _levelDataService.GetLevelDefinition(_progressionModel.CurrentLevelIndex).GridSize;
+        public List<LevelGoal> GetLevelGoals() => _levelDataService.GetLevelDefinition(_progressionModel.CurrentLevelIndex).Goals;
+        public GridObjectType[,] GetGridObjectTypes() => _levelDataService.GetLevelDefinition(_progressionModel.CurrentLevelIndex).GridObjectTypes;
         public int GetLevelNumber(bool useLevelCompletionCount = false) => useLevelCompletionCount 
                                                                   ? _progressionModel.LevelCompletionCount + 1
-                                                                  : _dataReader.GetLevelDefinition(_progressionModel.CurrentLevelIndex).LevelNumber;
+                                                                  : _levelDataService.GetLevelDefinition(_progressionModel.CurrentLevelIndex).LevelNumber;
     }
 }
