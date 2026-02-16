@@ -17,7 +17,6 @@ namespace Core.UI
         
         public override async UniTask PlayAsync()
         {
-            if (!ParticleFxModule) return;
             ParticleFxModule.Play();
             await UniTask.WaitUntil(() => !ParticleFxModule.IsAlive);
         }
@@ -28,10 +27,6 @@ namespace Core.UI
             Stop();
         }
 
-        public override void Stop()
-        {
-            if (!ParticleFxModule) return;
-            ParticleFxModule.Stop();
-        }
+        public override void Stop() => ParticleFxModule.Stop();
     }
 }
