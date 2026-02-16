@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 803ffae681c248541bf8e86e4b94f80f, type: 3}
-  m_Name: GridConfigContainer
+  m_Name: _GridConfigContainer
   m_EditorClassIdentifier: 
   <FillItemDecisionSettings>k__BackingField: {fileID: 11400000, guid: becfe7e5b59c2dd4c9fc46fc0f2cdda3,
     type: 2}
