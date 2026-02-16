@@ -3,7 +3,7 @@ using Core.SceneService;
 using Core.Services;
 using VContainer.Unity;
 
-namespace Core.Bootstrapper
+namespace Core.Bootstrappers
 {
     public class GameplayBootstrapper : IInitializable, IDisposable
     {

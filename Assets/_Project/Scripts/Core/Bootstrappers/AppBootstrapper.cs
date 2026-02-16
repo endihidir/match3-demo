@@ -7,7 +7,7 @@ using DG.Tweening;
 using VContainer;
 using VContainer.Unity;
 
-namespace Core.Bootstrapper
+namespace Core.Bootstrappers
 {
     public class AppBootstrapper : IInitializable
     {
