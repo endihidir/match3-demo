@@ -1,4 +1,4 @@
-using Core.Bootstrapper;
+using Core.Bootstrappers;
 using Core.Configs;
 using Core.Item.Factories;
 using Core.Level;
