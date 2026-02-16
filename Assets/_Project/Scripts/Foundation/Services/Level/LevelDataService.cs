@@ -1,14 +1,12 @@
-using System;
 using System.Collections.Generic;
 using Core.Configs;
 using Core.Utils;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using VContainer.Unity;
 
 namespace Core.Level
 {
-    public class LevelDataService : IInitializable, ILevelDataBootState, ILevelSerializer, ILevelDataReader
+    public class LevelDataService : ILevelDataService
     {
         private readonly LevelDataServiceConfig _levelDataServiceConfig;
         public bool IsInitialized { get; private set; }
@@ -23,9 +21,8 @@ namespace Core.Level
         {
             _levelDataServiceConfig = appConfigContainer.levelDataServiceConfig;
         }
-        public void Initialize() => Init().Forget();
 
-        private async UniTask Init()
+        public async UniTask<bool> InitializeAsync()
         {
             switch (_levelDataServiceConfig.sourceType)
             {
@@ -34,49 +31,44 @@ namespace Core.Level
                     break;
                 case LevelSourceType.Addressables:
                     EditorLogger.LogError("Addressables are not supported yet!");
-                    return;
+                    return false;
             }
-
+            
             await UniTask.Yield();
             
             IsInitialized = true;
+            
+            return IsInitialized;
         }
         
         private void InitializeFromResources()
         {
             var assets = Resources.LoadAll<TextAsset>(_levelDataServiceConfig.resourcesFolder);
             var list = new List<LevelDefinition>(assets.Length);
-            
+
             foreach (var asset in assets)
             {
-                var levelDefinition = LevelJsonRuntimeUtils.ParseToLevelDefinition(asset, PreventInitialMatches, UseSeededPattern, SeedOverride);
-                list.Add(levelDefinition);
+                var definition = LevelJsonRuntimeUtils.ParseToLevelDefinition(
+                    asset, PreventInitialMatches, UseSeededPattern, SeedOverride);
+                list.Add(definition);
             }
-            
+
             list.Sort(static (a, b) => a.LevelNumber.CompareTo(b.LevelNumber));
             LevelDefinitions = list.ToArray();
         }
         
-        public LevelDefinition SerializeToLevelDefinition(int level)
+        public async UniTask<LevelDefinition> LoadLevelDefinitionAsync(int level)
         {
-            try
-            {
-                var jsonFile = Resources.Load<TextAsset>(_levelDataServiceConfig.GetResourcePath(level));
-                return LevelJsonRuntimeUtils.ParseToLevelDefinition(jsonFile, PreventInitialMatches, UseSeededPattern, SeedOverride);
-            }
-            catch (Exception e)
-            {
-                EditorLogger.LogError("JSON error:" + e);
-                return null;
-            }
+            var textAsset = await LoadTextAssetAsync(level);
+            return !textAsset ? null : LevelJsonRuntimeUtils.ParseToLevelDefinition(textAsset, PreventInitialMatches, UseSeededPattern, SeedOverride);
         }
-        
-        public async UniTask WaitUntilInitializedAsync()
+
+        private async UniTask<TextAsset> LoadTextAssetAsync(int level)
         {
-            while (!IsInitialized)
-            {
-                await UniTask.Yield();
-            }
+            var path = _levelDataServiceConfig.GetResourcePath(level);
+            var request = Resources.LoadAsync<TextAsset>(path);
+            await request.ToUniTask();
+            return request.asset as TextAsset;
         }
         
         public LevelDefinition GetLevelDefinition(int index) => LevelDefinitions[index];

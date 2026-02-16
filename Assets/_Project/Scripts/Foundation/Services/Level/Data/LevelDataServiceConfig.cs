@@ -28,7 +28,7 @@ namespace Core.Configs
         [Tooltip("Optional seed override. Set to 0 to use level-based seed.")]
         public int seedOverride = 0;
         
-        public string GetResourcePath(int level) => resourcesFolder + "/" + level.ToString(fileNameFormat);
+        public string GetResourcePath(int level) => $"{resourcesFolder}/{string.Format(fileNameFormat, level)}";
         private bool IsAddressable => sourceType == LevelSourceType.Addressables;
         private bool IsResources => sourceType == LevelSourceType.Resources;
     }

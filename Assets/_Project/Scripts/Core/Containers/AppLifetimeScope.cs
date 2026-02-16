@@ -21,32 +21,36 @@ namespace Core.LifetimeScopes
             AppConfigContainer?.Initialize();
             
             builder.RegisterInstance(AppConfigContainer);
-            
             builder.RegisterEntryPoint<AppBootstrapper>();
 
             RegisterServices(builder);
+            RegisterModels(builder);
+            RegisterFactories(builder);
             RegisterProviders(builder);
-            RegisterGlobalModels(builder);
         }
-
+        
         private static void RegisterServices(IContainerBuilder builder)
         {
             builder.Register<SceneLoadService>(Lifetime.Singleton).As<ISceneLoadService, ISceneLoadState, ITickable>();
             builder.Register<ObjectPoolService>(Lifetime.Singleton).As<IObjectPoolService>();
-            builder.Register<LevelDataService>(Lifetime.Singleton).As<IInitializable, ILevelDataBootState, ILevelSerializer, ILevelDataReader>();
+            builder.Register<LevelDataService>(Lifetime.Singleton).As<ILevelDataService>();
             builder.Register<JsonSaveService>(Lifetime.Singleton).As<IJsonSaveService>();
+        }
+        
+        private static void RegisterModels(IContainerBuilder builder)
+        {
+            builder.Register<LevelProgressionModel>(Lifetime.Singleton).As<ILevelProgressionModel>();
+        }
+        
+        private static void RegisterFactories(IContainerBuilder builder)
+        {
             builder.Register<SlotViewFactory>(Lifetime.Singleton).As<ISlotViewFactory>();
             builder.Register<FXViewFactory>(Lifetime.Singleton).As<IFXViewFactory>();
         }
-
+        
         private static void RegisterProviders(IContainerBuilder builder)
         {
             builder.Register<LevelDefinitionProvider>(Lifetime.Singleton).As<ILevelDefinitionProvider>();
-        }
-
-        private static void RegisterGlobalModels(IContainerBuilder builder)
-        {
-            builder.Register<LevelProgressionModel>(Lifetime.Singleton).As<ILevelProgressionModel>();
         }
     }
 }

@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using Core.Generated;
 using Core.Level;
+using Core.Models;
 using Core.SceneService;
 using Core.Pool;
 using DG.Tweening;
@@ -14,7 +15,8 @@ namespace Core.Bootstrappers
         [Inject] private readonly IObjectResolver _objectResolver;
         [Inject] private readonly ISceneLoadService _sceneLoadService;
         [Inject] private readonly IObjectPoolService _objectPoolService;
-        [Inject] private readonly ILevelDataBootState _levelDataBootState;
+        [Inject] private readonly ILevelDataService _levelDataService;
+        [Inject] private readonly ILevelProgressionModel _levelProgressionModel;
         
         public void Initialize()
         {
@@ -27,7 +29,11 @@ namespace Core.Bootstrappers
 
             await _sceneLoadService.InitBootSceneAsync();
             
-            await _levelDataBootState.WaitUntilInitializedAsync();
+            var isInitialized = await _levelDataService.InitializeAsync();
+            
+            if (!isInitialized) return;
+            
+            _levelProgressionModel.Initialize(_levelDataService.LevelSize);
             
             _objectPoolService.Initialize();
             
