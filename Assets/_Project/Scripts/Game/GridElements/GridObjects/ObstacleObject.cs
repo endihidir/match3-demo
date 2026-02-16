@@ -17,11 +17,11 @@ namespace Core.Item
             ObstacleType = (ObstacleType)TypeId;
         }
 
-        public override void ApplyData(BaseItemDataSO baseItemDataSo)
+        public override void ApplyData(BaseGridObjectDataSO baseGridObjectDataSo)
         {
-            base.ApplyData(baseItemDataSo);
+            base.ApplyData(baseGridObjectDataSo);
 
-            if (baseItemDataSo is ObstacleDataSO obstacleConfigData)
+            if (baseGridObjectDataSo is ObstacleDataSO obstacleConfigData)
             {
                 Life = obstacleConfigData.GetLife();
                 IsCollectible = obstacleConfigData.IsCollectible;

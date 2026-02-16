@@ -263,8 +263,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 238b41e4409c4288b78ecb8c6794828f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <SuccessMenuView>k__BackingField: {fileID: 468821373}
-  <FailMenuView>k__BackingField: {fileID: 1341706358}
+  <SuccessMenuModule>k__BackingField: {fileID: 468821373}
+  <FailMenuModule>k__BackingField: {fileID: 1341706358}
   <NextButton>k__BackingField: {fileID: 1716512039}
   <TryAgainButton>k__BackingField: {fileID: 1607387664}
 --- !u!1 &195934559
