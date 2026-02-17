@@ -25,7 +25,7 @@ namespace Core.Editor
                 text= "Scenes";
                 tooltip = "Select a scene to load";
 
-                dropdownClicked += ShowSceneMenu;
+                dropdownClicked += ShowBuildSettingsSceneMenu;
             }
 
             private void ShowSceneMenu()
