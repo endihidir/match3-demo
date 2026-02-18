@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Core.Configs
+namespace Game.Configs
 {
     [CreateAssetMenu(fileName = "ItemAnimationSettings", menuName = "Match3/ItemConfigs/ItemAnimationSettings", order = 0)]
     public sealed class GridObjectAnimationSettingsSO : ScriptableObject

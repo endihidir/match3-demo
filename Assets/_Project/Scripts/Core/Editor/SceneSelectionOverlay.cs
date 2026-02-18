@@ -8,7 +8,7 @@ using UnityEditor.Toolbars;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Core.Editor
+namespace Core.Editors
 {
     [Overlay(typeof(SceneView), "Scene Selection")]
     public class SceneSelectionOverlay : ToolbarOverlay
@@ -32,7 +32,7 @@ namespace Core.Editor
             {
                 GenericMenu menu = new GenericMenu();
 
-                Scene currentScene = EditorSceneManager.GetActiveScene();
+                var currentScene = EditorSceneManager.GetActiveScene();
 
                 string[] sceneGuids = AssetDatabase.FindAssets("t:scene", new string[] { "Assets" });
 
@@ -52,7 +52,7 @@ namespace Core.Editor
             {
                 GenericMenu menu = new GenericMenu();
                 
-                Scene currentScene = SceneManager.GetActiveScene();
+                var currentScene = SceneManager.GetActiveScene();
                 
                 List<string> scenePaths = GetBuildSettingsScenes();
 
@@ -66,7 +66,7 @@ namespace Core.Editor
                 menu.ShowAsContext();
             }
 
-            void OpenScene(Scene currentScene, string path)
+            void OpenScene(UnityEngine.SceneManagement.Scene currentScene, string path)
             {
                 if (currentScene.isDirty)
                 {

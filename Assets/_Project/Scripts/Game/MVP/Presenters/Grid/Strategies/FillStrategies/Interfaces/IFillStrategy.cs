@@ -1,7 +1,8 @@
-using Core.Models;
 using Cysharp.Threading.Tasks;
+using Game.Grid.Contexts;
+using Game.Models;
 
-namespace Core.Handlers
+namespace Game.Grid.Strategies
 {
     public interface IFillStrategy
     {

@@ -1,7 +1,7 @@
-using Core.Item;
+using Game.Grid.Item;
 using UnityEngine;
 
-namespace Core.Configs
+namespace Game.Configs
 {
     //[CreateAssetMenu(fileName = "GridConfigContainer", menuName = "Match3/GridConfigContainer", order = 0)]
     public class GridConfigContainerSO : ScriptableObject

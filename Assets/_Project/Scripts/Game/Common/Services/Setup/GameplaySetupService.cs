@@ -1,13 +1,14 @@
-using Core.Handlers;
-using Core.Item.Factories;
-using Core.Level;
-using Core.Models;
-using Core.SceneService;
-using Core.UI;
-using Core.Views;
+using Core.Scene.Services;
+using Game.View.Factories;
+using Game.Grid.Handlers;
+using Game.HUD.Handlers;
+using Game.Level.Models;
+using Game.Level.Services;
+using Game.Models;
+using Game.Views;
 using VContainer;
 
-namespace Core.Services
+namespace Game.Services
 {
     public class GameplaySetupService : IGameplaySetupService
     {

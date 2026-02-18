@@ -1,8 +1,9 @@
-using Core.Item;
-using Core.Utils;
+using Core.Models;
+using Game.Grid.Item;
+using Game.Utils;
 using UnityEngine;
 
-namespace Core.Models
+namespace Game.Models
 {
     public class GridModel : BaseGridModel<BaseGridObject>, IGridModel
     {

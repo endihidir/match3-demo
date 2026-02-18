@@ -1,9 +1,9 @@
-using Core.Configs;
-using Core.Item;
-using Core.Item.Factories;
-using Core.Utils;
+using Game.Configs;
+using Game.Grid.Item;
+using Game.Grid.Item.Factories;
+using Game.Utils;
 
-namespace Core.Handlers
+namespace Game.Grid.Handlers
 {
     public sealed class GridObjectHandler : IGridObjectHandler
     {

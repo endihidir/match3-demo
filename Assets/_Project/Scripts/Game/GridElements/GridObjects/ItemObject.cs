@@ -1,7 +1,7 @@
 using NaughtyAttributes;
 using UnityEngine;
 
-namespace Core.Item
+namespace Game.Grid.Item
 {
     public class ItemObject : BaseGridObject
     {

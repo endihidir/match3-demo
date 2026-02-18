@@ -1,12 +1,12 @@
 using System;
 using Core.Generated;
-using Core.Level;
-using Core.SceneService;
-using Core.Views;
+using Core.Scene.Services;
 using Cysharp.Threading.Tasks;
+using Game.Level.Services;
+using Game.Menu.Views;
 using VContainer.Unity;
 
-namespace Core.Presenters
+namespace Game.Presenters
 {
     public sealed class MainMenuPresenter : IInitializable, IDisposable
     {

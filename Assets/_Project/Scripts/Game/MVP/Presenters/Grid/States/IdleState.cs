@@ -1,8 +1,9 @@
+using Game.Grid.Contexts;
 using Core.StateMachineCore;
 
-namespace Core.Handlers
+namespace Game.Grid.States
 {
-    public class IdleState : StateBase<GridStateContext>
+    public sealed class IdleState : StateBase<GridStateContext>
     {
         public IdleState(GridStateContext context) : base(context)
         {

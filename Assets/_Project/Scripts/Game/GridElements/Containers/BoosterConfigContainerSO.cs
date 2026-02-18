@@ -1,9 +1,9 @@
-using Core.Handlers;
-using Core.Item;
+using Game.Grid.Item;
+using Game.Grid.Contexts;
 using NaughtyAttributes;
 using UnityEngine;
 
-namespace Core.Configs
+namespace Game.Configs
 {
     [CreateAssetMenu(fileName = "BoosterConfigContainer", menuName = "Match3/ItemConfigs/BoosterConfigContainer", order = -1)]
     public class BoosterConfigContainerSO : BaseGridObjectConfigContinerSO

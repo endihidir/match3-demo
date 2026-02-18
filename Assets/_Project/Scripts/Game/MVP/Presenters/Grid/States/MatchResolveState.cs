@@ -1,15 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Core.Extensions;
-using Core.Item;
-using Core.Models;
+using Game.Grid.Contexts;
+using Game.Grid.Item;
 using Core.StateMachineCore;
 using Core.Utils;
 using Cysharp.Threading.Tasks;
+using Game.Models;
+using Game.Utils;
 using UnityEngine;
 
-namespace Core.Handlers
+namespace Game.Grid.States
 {
     public sealed class MatchResolveState : StateBase<GridStateContext>
     {

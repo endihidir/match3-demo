@@ -3,68 +3,36 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-[CustomPropertyDrawer(typeof(Core.Configs.BoosterActionBase), true)]
-public sealed class BoosterActionBaseDrawer : PropertyDrawer
+namespace Game.Editors
 {
-    private static Type[] _cachedTypes;
-
-    private static Type[] GetConcreteTypes()
+    [CustomPropertyDrawer(typeof(Configs.BoosterActionBase), true)]
+    public sealed class BoosterActionBaseDrawer : PropertyDrawer
     {
-        if (_cachedTypes != null) return _cachedTypes;
+        private static Type[] _cachedTypes;
 
-        _cachedTypes = TypeCache.GetTypesDerivedFrom<Core.Configs.BoosterActionBase>()
-            .Where(t => !t.IsAbstract && !t.IsGenericType && t.GetConstructor(Type.EmptyTypes) != null)
-            .OrderBy(t => t.Name)
-            .ToArray();
-
-        return _cachedTypes;
-    }
-
-    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-    {
-        var h = EditorGUIUtility.singleLineHeight;
-
-        if (property.managedReferenceValue == null)
-            return h;
-
-        if (!property.isExpanded)
-            return h;
-
-        h += EditorGUIUtility.standardVerticalSpacing;
-
-        var it = property.Copy();
-        var end = it.GetEndProperty();
-        var enterChildren = true;
-
-        while (it.NextVisible(enterChildren) && !SerializedProperty.EqualContents(it, end))
+        private static Type[] GetConcreteTypes()
         {
-            enterChildren = false;
-            h += EditorGUI.GetPropertyHeight(it, true) + EditorGUIUtility.standardVerticalSpacing;
+            if (_cachedTypes != null) return _cachedTypes;
+
+            _cachedTypes = TypeCache.GetTypesDerivedFrom<Game.Configs.BoosterActionBase>()
+                .Where(t => !t.IsAbstract && !t.IsGenericType && t.GetConstructor(Type.EmptyTypes) != null)
+                .OrderBy(t => t.Name)
+                .ToArray();
+
+            return _cachedTypes;
         }
 
-        return h;
-    }
-
-    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-    {
-        EditorGUI.BeginProperty(position, label, property);
-
-        var row = new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight);
-
-        if (property.managedReferenceValue == null)
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            DrawNullRow(row, property);
-            EditorGUI.EndProperty();
-            return;
-        }
+            var h = EditorGUIUtility.singleLineHeight;
 
-        DrawHeaderRow(row, property);
+            if (property.managedReferenceValue == null)
+                return h;
 
-        if (property.isExpanded)
-        {
-            var y = row.yMax + EditorGUIUtility.standardVerticalSpacing;
+            if (!property.isExpanded)
+                return h;
 
-            EditorGUI.indentLevel++;
+            h += EditorGUIUtility.standardVerticalSpacing;
 
             var it = property.Copy();
             var end = it.GetEndProperty();
@@ -73,89 +41,124 @@ public sealed class BoosterActionBaseDrawer : PropertyDrawer
             while (it.NextVisible(enterChildren) && !SerializedProperty.EqualContents(it, end))
             {
                 enterChildren = false;
-
-                var h = EditorGUI.GetPropertyHeight(it, true);
-                var r = new Rect(position.x, y, position.width, h);
-
-                EditorGUI.PropertyField(r, it, true);
-
-                y += h + EditorGUIUtility.standardVerticalSpacing;
+                h += EditorGUI.GetPropertyHeight(it, true) + EditorGUIUtility.standardVerticalSpacing;
             }
 
-            EditorGUI.indentLevel--;
+            return h;
         }
 
-        EditorGUI.EndProperty();
-    }
-
-    private static void DrawNullRow(Rect row, SerializedProperty property)
-    {
-        var btn = row;
-        btn.width -= 90f;
-
-        if (GUI.Button(btn, "Add Effect"))
-            ShowCreateMenu(property);
-
-        var clr = row;
-        clr.xMin = btn.xMax + 4f;
-
-        if (GUI.Button(clr, "Clear"))
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            property.serializedObject.Update();
-            property.managedReferenceValue = null;
-            property.serializedObject.ApplyModifiedProperties();
+            EditorGUI.BeginProperty(position, label, property);
+
+            var row = new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight);
+
+            if (property.managedReferenceValue == null)
+            {
+                DrawNullRow(row, property);
+                EditorGUI.EndProperty();
+                return;
+            }
+
+            DrawHeaderRow(row, property);
+
+            if (property.isExpanded)
+            {
+                var y = row.yMax + EditorGUIUtility.standardVerticalSpacing;
+
+                EditorGUI.indentLevel++;
+
+                var it = property.Copy();
+                var end = it.GetEndProperty();
+                var enterChildren = true;
+
+                while (it.NextVisible(enterChildren) && !SerializedProperty.EqualContents(it, end))
+                {
+                    enterChildren = false;
+
+                    var h = EditorGUI.GetPropertyHeight(it, true);
+                    var r = new Rect(position.x, y, position.width, h);
+
+                    EditorGUI.PropertyField(r, it, true);
+
+                    y += h + EditorGUIUtility.standardVerticalSpacing;
+                }
+
+                EditorGUI.indentLevel--;
+            }
+
+            EditorGUI.EndProperty();
         }
-    }
 
-    private static void DrawHeaderRow(Rect row, SerializedProperty property)
-    {
-        var typeName = property.managedReferenceValue.GetType().Name;
-
-        var fold = row;
-        fold.width -= 90f;
-
-        property.isExpanded = EditorGUI.Foldout(fold, property.isExpanded, typeName, true);
-
-        var menu = row;
-        menu.xMin = fold.xMax + 4f;
-        menu.width = 86f;
-
-        if (GUI.Button(menu, "Change"))
-            ShowCreateMenu(property, keepExpanded: true);
-
-        var remove = row;
-        remove.xMin = menu.xMax + 4f;
-        remove.xMax = row.xMax;
-
-        if (GUI.Button(remove, "X"))
+        private static void DrawNullRow(Rect row, SerializedProperty property)
         {
-            property.serializedObject.Update();
-            property.managedReferenceValue = null;
-            property.serializedObject.ApplyModifiedProperties();
-        }
-    }
+            var btn = row;
+            btn.width -= 90f;
 
-    private static void ShowCreateMenu(SerializedProperty property, bool keepExpanded = false)
-    {
-        var menu = new GenericMenu();
-        var types = GetConcreteTypes();
+            if (GUI.Button(btn, "Add Effect"))
+                ShowCreateMenu(property);
 
-        for (int i = 0; i < types.Length; i++)
-        {
-            var t = types[i];
-            menu.AddItem(new GUIContent(t.Name), false, () =>
+            var clr = row;
+            clr.xMin = btn.xMax + 4f;
+
+            if (GUI.Button(clr, "Clear"))
             {
                 property.serializedObject.Update();
-
-                property.managedReferenceValue = Activator.CreateInstance(t);
-
-                if (keepExpanded)
-                    property.isExpanded = true;
-
+                property.managedReferenceValue = null;
                 property.serializedObject.ApplyModifiedProperties();
-            });
+            }
         }
 
-        menu.ShowAsContext();
+        private static void DrawHeaderRow(Rect row, SerializedProperty property)
+        {
+            var typeName = property.managedReferenceValue.GetType().Name;
+
+            var fold = row;
+            fold.width -= 90f;
+
+            property.isExpanded = EditorGUI.Foldout(fold, property.isExpanded, typeName, true);
+
+            var menu = row;
+            menu.xMin = fold.xMax + 4f;
+            menu.width = 86f;
+
+            if (GUI.Button(menu, "Change"))
+                ShowCreateMenu(property, keepExpanded: true);
+
+            var remove = row;
+            remove.xMin = menu.xMax + 4f;
+            remove.xMax = row.xMax;
+
+            if (GUI.Button(remove, "X"))
+            {
+                property.serializedObject.Update();
+                property.managedReferenceValue = null;
+                property.serializedObject.ApplyModifiedProperties();
+            }
+        }
+
+        private static void ShowCreateMenu(SerializedProperty property, bool keepExpanded = false)
+        {
+            var menu = new GenericMenu();
+            var types = GetConcreteTypes();
+
+            for (int i = 0; i < types.Length; i++)
+            {
+                var t = types[i];
+                menu.AddItem(new GUIContent(t.Name), false, () =>
+                {
+                    property.serializedObject.Update();
+
+                    property.managedReferenceValue = Activator.CreateInstance(t);
+
+                    if (keepExpanded)
+                        property.isExpanded = true;
+
+                    property.serializedObject.ApplyModifiedProperties();
+                });
+            }
+
+            menu.ShowAsContext();
+        }
     }
 }

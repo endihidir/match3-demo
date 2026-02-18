@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Core.Pool
+namespace Core.Pool.Services
 {
     public interface IObjectPoolService
     {

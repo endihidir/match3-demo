@@ -1,6 +1,6 @@
 using System;
-using Core.SceneService;
-using Core.Services;
+using Core.Scene.Services;
+using Game.Services;
 using VContainer.Unity;
 
 namespace Core.Bootstrappers

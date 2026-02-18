@@ -1,7 +1,7 @@
-using Core.Configs;
+using Game.Configs;
 using UnityEngine;
 
-namespace Core.Handlers
+namespace Game.Grid.Contexts
 {
     public struct BoosterActionContext
     {

@@ -1,7 +1,7 @@
 using System;
-using Core.Configs;
-using Core.Item;
-using Core.Models;
+using Game.Configs;
+using Game.Grid.Item;
+using Game.Models;
 using UnityEngine;
 
 namespace Core.Utils

@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
-using Core.Item;
-using Core.Level;
+using Game.Grid.Item;
+using Game.Level.Data;
+using Core.Utils;
 using UnityEngine;
 using Random = System.Random;
 
-namespace Core.Utils
+namespace Game.Utils
 {
     public static class LevelJsonRuntimeUtils
     {

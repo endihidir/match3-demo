@@ -1,13 +1,14 @@
 using System;
-using Core.Handlers;
-using Core.Models;
-using Core.Services;
-using Core.Utils;
-using Core.Views;
+using Game.Grid.Handlers;
+using Game.Grid.Services;
+using Game.Level.Models;
+using Game.Models;
+using Game.Utils;
+using Game.Views;
 using UnityEngine;
 using VContainer.Unity;
 
-namespace Core.Presenters
+namespace Game.Presenters
 {
     public sealed class GridPresenter : IInitializable, IDisposable
     {

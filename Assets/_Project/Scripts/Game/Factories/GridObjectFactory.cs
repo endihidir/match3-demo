@@ -1,7 +1,7 @@
-using Core.Pool;
+using Core.Pool.Services;
 using UnityEngine;
 
-namespace Core.Item.Factories
+namespace Game.Grid.Item.Factories
 {
     public class GridObjectFactory : IGridObjectFactory
     {

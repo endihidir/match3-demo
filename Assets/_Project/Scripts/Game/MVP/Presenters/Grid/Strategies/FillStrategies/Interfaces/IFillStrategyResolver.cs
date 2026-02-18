@@ -1,6 +1,6 @@
-using Core.Models;
+using Game.Models;
 
-namespace Core.Handlers
+namespace Game.Grid.Strategies
 {
     public interface IFillStrategyResolver
     {

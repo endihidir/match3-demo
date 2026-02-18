@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Core.Configs
+namespace Game.Configs
 {
     [CreateAssetMenu(fileName = "BoosterData", menuName = "Match3/ItemConfigs/Data/BoosterData", order = -1)]
     public class BoosterDataSO : BaseGridObjectDataSO

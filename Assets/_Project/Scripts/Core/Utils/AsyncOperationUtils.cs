@@ -1,4 +1,4 @@
-using Core.SceneService;
+using Core.Scene.Services;
 
 namespace Core.Utils
 {

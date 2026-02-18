@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Core.Configs;
+using Game.Configs;
 using Core.Extensions;
 using Core.Utils;
 using UnityEngine;
 
-namespace Core.Pool
+namespace Core.Pool.Services
 {
     public class ObjectPoolService : IObjectPoolService, IDisposable
     {

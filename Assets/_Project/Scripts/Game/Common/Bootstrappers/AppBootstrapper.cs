@@ -1,10 +1,10 @@
 using Cysharp.Threading.Tasks;
 using Core.Generated;
-using Core.Level;
-using Core.Models;
-using Core.SceneService;
-using Core.Pool;
+using Core.Scene.Services;
+using Core.Pool.Services;
 using DG.Tweening;
+using Game.Level.Models;
+using Game.Level.Services;
 using VContainer;
 using VContainer.Unity;
 

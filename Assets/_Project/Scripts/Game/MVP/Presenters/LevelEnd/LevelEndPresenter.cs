@@ -1,15 +1,17 @@
 using System;
 using System.Linq;
+using Core.Scene.Services;
 using Core.Generated;
-using Core.Handlers;
-using Core.Item;
-using Core.SceneService;
-using Core.Services;
-using Core.UI;
+using Game.Views;
+using Game.Grid.Item;
+using Game.Grid.Handlers;
+using Game.Level.Models;
+using Game.Models;
+using Game.Services;
 using Cysharp.Threading.Tasks;
 using VContainer.Unity;
 
-namespace Core.Models
+namespace Game.Presenters
 {
     public class LevelEndPresenter : IInitializable, IDisposable
     {

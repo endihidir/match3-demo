@@ -1,10 +1,12 @@
 using System.Collections.Generic;
-using Core.Configs;
+using Game.Configs;
 using Core.Utils;
 using Cysharp.Threading.Tasks;
+using Game.Level.Data;
+using Game.Utils;
 using UnityEngine;
 
-namespace Core.Level
+namespace Game.Level.Services
 {
     public class LevelDataService : ILevelDataService
     {

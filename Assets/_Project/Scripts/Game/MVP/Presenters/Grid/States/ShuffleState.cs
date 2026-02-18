@@ -1,13 +1,14 @@
 using System;
-using Core.Item;
-using Core.Models;
+using Game.Grid.Contexts;
+using Game.Grid.Item;
 using Core.StateMachineCore;
 using Core.Utils;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Game.Models;
 using UnityEngine;
 
-namespace Core.Handlers
+namespace Game.Grid.States
 {
     public sealed class ShuffleState : StateBase<GridStateContext>
     {

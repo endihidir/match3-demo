@@ -1,8 +1,8 @@
-using Core.Configs;
-using Core.Handlers;
+using Game.Configs;
+using Game.Grid.Contexts;
 using UnityEngine;
 
-namespace Core.Item
+namespace Game.Grid.Item
 {
     public interface IBoosterActionSource
     {

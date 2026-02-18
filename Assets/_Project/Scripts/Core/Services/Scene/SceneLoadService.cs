@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Eflatun.SceneReference;
-using Core.Configs;
+using Game.Configs;
 using Core.Generated;
 using Core.Utils;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
 
-namespace Core.SceneService
+namespace Core.Scene.Services
 {
     public class SceneLoadService : ISceneLoadService, ISceneLoadState
     {

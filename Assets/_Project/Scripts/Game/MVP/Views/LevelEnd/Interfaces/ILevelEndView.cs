@@ -1,7 +1,7 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine.UI;
 
-namespace Core.UI
+namespace Game.Views
 {
     public interface ILevelEndView
     {

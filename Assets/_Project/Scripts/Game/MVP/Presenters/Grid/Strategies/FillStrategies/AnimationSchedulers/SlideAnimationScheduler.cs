@@ -1,9 +1,10 @@
-using Core.Pool;
-using Core.Views;
+using Core.Pool.Services;
 using Cysharp.Threading.Tasks;
+using Game.Grid.Strategies.Data;
+using Game.Views;
 using UnityEngine;
 
-namespace Core.Handlers
+namespace Game.Grid.Strategies.Schedulers
 {
     public sealed class SlideAnimationScheduler : ISlideAnimationScheduler
     {

@@ -2,7 +2,7 @@ using System;
 using NaughtyAttributes;
 using UnityEngine;
 
-namespace Core.Item
+namespace Game.Grid.Item
 {
     [Serializable]
     public struct GridObjectType

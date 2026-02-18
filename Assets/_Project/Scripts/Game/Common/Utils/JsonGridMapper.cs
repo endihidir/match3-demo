@@ -1,8 +1,8 @@
 using System;
-using Core.Item;
-using Core.Level;
+using Game.Grid.Item;
+using Game.Level.Data;
 
-namespace Core.Utils
+namespace Game.Utils
 {
     public static class JsonGridMapper
     {

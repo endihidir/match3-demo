@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Core.UI
+namespace Game.Views
 {
     public class VerticalRocketFxView : RocketFxView
     {

@@ -1,12 +1,14 @@
 using System;
-using Core.Configs;
-using Core.Item;
+using Game.Configs;
+using Game.Grid.Contexts;
+using Game.Grid.Item;
 using Core.StateMachineCore;
 using Core.Utils;
 using Cysharp.Threading.Tasks;
+using Game.Grid.Handlers.Data;
 using UnityEngine;
 
-namespace Core.Handlers
+namespace Game.Grid.States
 {
     public sealed class InputResolveState : StateBase<GridStateContext>
     { 

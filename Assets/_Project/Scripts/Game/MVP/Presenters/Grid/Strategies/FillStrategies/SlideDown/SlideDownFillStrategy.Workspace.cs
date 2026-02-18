@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
-using Core.Item;
+using Game.Grid.Item;
 using Cysharp.Threading.Tasks;
+using Game.Grid.Strategies.Data;
 using UnityEngine;
 
-namespace Core.Handlers
+namespace Game.Grid.Strategies
 {
     public partial class SlideDownFillStrategy
     {

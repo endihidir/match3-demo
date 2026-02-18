@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Core.Configs;
+using Game.Configs;
 using UnityEditor;
 
-namespace Core.Editor
+namespace Core.Editors
 {
     public static class SceneIdGeneratorEditor
     {

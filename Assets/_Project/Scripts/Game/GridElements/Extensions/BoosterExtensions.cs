@@ -1,6 +1,6 @@
-using Core.Item;
+using Game.Grid.Item;
 
-namespace Core.Extensions
+namespace Game.Extensions
 {
     public static class BoosterExtensions
     {

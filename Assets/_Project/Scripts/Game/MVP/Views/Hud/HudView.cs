@@ -2,7 +2,7 @@ using System;
 using TMPro;
 using UnityEngine;
 
-namespace Core.UI
+namespace Game.Views
 {
     public class HudView : MonoBehaviour, IHudView
     {

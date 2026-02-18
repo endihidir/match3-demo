@@ -1,12 +1,12 @@
 using System;
-using Core.Handlers;
-using Core.Item;
-using Core.Models;
-using Core.UI;
+using Game.Grid.Item;
+using Game.Views;
+using Game.HUD.Handlers;
+using Game.Level.Models;
 using UnityEngine;
 using VContainer.Unity;
 
-namespace Core.Presenters
+namespace Game.Presenters
 {
      public sealed class HudPresenter : IInitializable, IDisposable
     {

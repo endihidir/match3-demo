@@ -1,8 +1,9 @@
 using System;
 using Core.SaveSystem;
+using Game.Level.Data;
 using UnityEngine;
 
-namespace Core.Models
+namespace Game.Level.Models
 {
     public sealed class LevelProgressionModel : ILevelProgressionModel
     {

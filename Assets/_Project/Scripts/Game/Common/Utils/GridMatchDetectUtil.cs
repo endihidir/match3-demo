@@ -1,6 +1,6 @@
-using Core.Item;
+using Game.Grid.Item;
 
-namespace Core.Utils
+namespace Game.Utils
 {
     public static class GridMatchDetectUtil
     {

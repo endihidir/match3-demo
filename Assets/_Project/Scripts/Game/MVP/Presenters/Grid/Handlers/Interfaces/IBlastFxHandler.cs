@@ -1,7 +1,7 @@
-using Core.Item;
+using Game.Grid.Item;
 using UnityEngine;
 
-namespace Core.Handlers
+namespace Game.Grid.Handlers
 {
     public interface IBlastFxHandler
     {

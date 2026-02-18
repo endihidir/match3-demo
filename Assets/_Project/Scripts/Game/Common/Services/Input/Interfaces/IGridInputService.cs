@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Core.Services
+namespace  Game.Grid.Services
 {
     public interface IGridInputService
     {

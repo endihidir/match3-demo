@@ -1,8 +1,9 @@
 using System.Collections.Generic;
-using Core.Item;
+using Game.Grid.Item;
+using Game.Level.Data;
 using UnityEngine;
 
-namespace Core.Level
+namespace Game.Level.Services
 {
     public interface ILevelDefinitionProvider
     {

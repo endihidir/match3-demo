@@ -1,6 +1,6 @@
 using System;
 
-namespace Core.Item
+namespace Game.Grid.Item
 {
     [Flags]
     public enum GridDamageSource

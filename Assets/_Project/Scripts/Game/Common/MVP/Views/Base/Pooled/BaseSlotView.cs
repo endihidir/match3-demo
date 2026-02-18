@@ -1,6 +1,6 @@
-using Core.Pool;
+using Core.Pool.Services;
 
-namespace Core.UI
+namespace Game.Views
 {
     public abstract class BaseSlotView : PooledObject
     {

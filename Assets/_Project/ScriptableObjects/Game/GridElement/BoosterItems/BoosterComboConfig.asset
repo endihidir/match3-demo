@@ -17,44 +17,44 @@ MonoBehaviour:
       <First>k__BackingField: 0
       <Second>k__BackingField: 0
     <Actions>k__BackingField:
-    - rid: 1071696598056042499
-    - rid: 1071696598056042500
+    - rid: 1071696598056042509
+    - rid: 1071696598056042510
   - <Key>k__BackingField:
       <First>k__BackingField: 0
       <Second>k__BackingField: 1
     <Actions>k__BackingField:
-    - rid: 1071696598056042501
-    - rid: 1071696598056042502
+    - rid: 1071696598056042511
+    - rid: 1071696598056042512
   - <Key>k__BackingField:
       <First>k__BackingField: 1
       <Second>k__BackingField: 1
     <Actions>k__BackingField:
-    - rid: 1071696598056042503
+    - rid: 1071696598056042513
   references:
     version: 2
     RefIds:
-    - rid: 1071696598056042499
-      type: {class: RocketHorizontalAction, ns: Core.Configs, asm: Game}
+    - rid: 1071696598056042509
+      type: {class: RocketHorizontalAction, ns: Game.Configs, asm: Game}
       data:
         <DamageAmount>k__BackingField: 1
         <LineCount>k__BackingField: 1
-    - rid: 1071696598056042500
-      type: {class: RocketVerticalAction, ns: Core.Configs, asm: Game}
+    - rid: 1071696598056042510
+      type: {class: RocketVerticalAction, ns: Game.Configs, asm: Game}
       data:
         <DamageAmount>k__BackingField: 1
         <LineCount>k__BackingField: 1
-    - rid: 1071696598056042501
-      type: {class: RocketHorizontalAction, ns: Core.Configs, asm: Game}
+    - rid: 1071696598056042511
+      type: {class: RocketVerticalAction, ns: Game.Configs, asm: Game}
       data:
         <DamageAmount>k__BackingField: 1
         <LineCount>k__BackingField: 3
-    - rid: 1071696598056042502
-      type: {class: RocketVerticalAction, ns: Core.Configs, asm: Game}
+    - rid: 1071696598056042512
+      type: {class: RocketHorizontalAction, ns: Game.Configs, asm: Game}
       data:
         <DamageAmount>k__BackingField: 1
         <LineCount>k__BackingField: 3
-    - rid: 1071696598056042503
-      type: {class: BombAction, ns: Core.Configs, asm: Game}
+    - rid: 1071696598056042513
+      type: {class: BombAction, ns: Game.Configs, asm: Game}
       data:
         <DamageAmount>k__BackingField: 1
         <Radius>k__BackingField: 3

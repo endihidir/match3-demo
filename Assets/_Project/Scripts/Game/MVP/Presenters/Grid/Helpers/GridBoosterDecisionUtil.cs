@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using Core.Item;
-using Core.Models;
+using Game.Grid.Item;
+using Game.Models;
 using UnityEngine;
 
 namespace Core.Utils

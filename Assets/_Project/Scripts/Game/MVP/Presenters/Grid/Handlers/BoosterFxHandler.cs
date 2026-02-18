@@ -1,14 +1,14 @@
 using System.Collections.Generic;
-using Core.Configs;
-using Core.Item.Factories;
-using Core.Models;
-using Core.UI;
-using Core.Utils;
-using Core.Views;
+using Game.Configs;
+using Game.View.Factories;
 using Cysharp.Threading.Tasks;
+using Game.Grid.Contexts;
+using Game.Grid.Utils;
+using Game.Models;
+using Game.Views;
 using UnityEngine;
 
-namespace Core.Handlers
+namespace Game.Grid.Handlers
 {
     public class BoosterFxHandler : IBoosterFxHandler
     {

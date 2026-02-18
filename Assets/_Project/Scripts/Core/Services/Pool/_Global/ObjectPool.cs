@@ -4,7 +4,7 @@ using Core.Utils;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Core.Pool
+namespace Core.Pool.Services
 {
     public sealed class ObjectPool
     {

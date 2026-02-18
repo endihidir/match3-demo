@@ -1,8 +1,8 @@
-using Core.Configs;
+using Game.Configs;
 using DG.Tweening;
 using UnityEngine;
 
-namespace Core.Item
+namespace Game.Grid.Item
 {
     public class GridObjectAnimation : MonoBehaviour
     {

@@ -1,9 +1,10 @@
 using System;
-using Core.Models;
-using Core.Utils;
+using Game.Grid.Contexts;
+using Game.Grid.Utils;
+using Game.Models;
 using UnityEngine;
 
-namespace Core.Handlers
+namespace Game.Grid.Strategies
 {
     public partial class SlideDownFillStrategy
     {

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using System.Linq;
-using Core.Item;
-using Core.Models;
+using Game.Grid.Item;
+using Game.Models;
+using Game.Utils;
 using UnityEngine;
 
 namespace Core.Utils

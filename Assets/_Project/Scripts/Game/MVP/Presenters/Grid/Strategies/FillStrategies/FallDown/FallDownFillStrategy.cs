@@ -1,10 +1,12 @@
-using Core.Models;
-using Core.Utils;
 using Cysharp.Threading.Tasks;
+using Game.Grid.Contexts;
+using Game.Grid.Strategies.Schedulers;
+using Game.Grid.Utils;
+using Game.Models;
 
-namespace Core.Handlers
+namespace Game.Grid.Strategies
 {
-    public sealed partial class FallDownFillStrategy : IFillStrategy
+    public partial class FallDownFillStrategy : IFillStrategy
     {
         private readonly IFillItemDecider _itemDecider;
         private readonly IFallAnimationScheduler _fallAnimationScheduler;

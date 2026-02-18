@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Core.Configs
+namespace Game.Configs
 {
     //[CreateAssetMenu(fileName = "GridLayoutSettingsConfig", menuName = "Match3/GridConfigs/GridLayoutSettings", order = 0)]
     public class GridLayoutSettingsSO : ScriptableObject

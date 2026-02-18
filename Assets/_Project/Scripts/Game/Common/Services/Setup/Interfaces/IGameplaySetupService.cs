@@ -1,4 +1,4 @@
-namespace Core.Services
+namespace Game.Services
 {
     public interface IGameplaySetupService
     {

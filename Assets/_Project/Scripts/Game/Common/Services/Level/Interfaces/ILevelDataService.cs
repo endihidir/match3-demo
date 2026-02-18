@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
+using Game.Level.Data;
 
-namespace Core.Level
+namespace Game.Level.Services
 {
     public interface ILevelDataService
     {

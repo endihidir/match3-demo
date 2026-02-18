@@ -1,6 +1,6 @@
 using UnityEngine.UI;
 
-namespace Core.Views
+namespace Game.Menu.Views
 {
     public interface IMainMenuView
     {

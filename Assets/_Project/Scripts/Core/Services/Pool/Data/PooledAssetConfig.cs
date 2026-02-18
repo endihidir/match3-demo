@@ -1,9 +1,9 @@
 using System.Linq;
-using Core.Pool;
+using Core.Pool.Services;
 using NaughtyAttributes;
 using UnityEngine;
 
-namespace Core.Configs
+namespace Game.Configs
 {
     [CreateAssetMenu(fileName = "PoolAsset", menuName = "Match3/Pool/PoolAsset")]
     public class PooledAssetConfig : ScriptableObject

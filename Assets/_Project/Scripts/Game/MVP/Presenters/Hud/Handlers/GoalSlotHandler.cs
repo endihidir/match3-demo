@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using AYellowpaper.SerializedCollections;
-using Core.Configs;
-using Core.Item;
-using Core.Item.Factories;
-using Core.Level;
-using Core.UI;
+using Game.Configs;
+using Game.Grid.Item;
+using Game.Views;
 using Core.Utils;
+using Game.View.Factories;
+using Game.Level.Data;
 
-namespace Core.Handlers
+namespace Game.HUD.Handlers
 {
     public class GoalSlotHandler : IGoalSlotHandler
     {

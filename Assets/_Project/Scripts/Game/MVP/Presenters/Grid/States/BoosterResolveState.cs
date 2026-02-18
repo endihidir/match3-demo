@@ -1,13 +1,17 @@
 using System.Collections.Generic;
-using Core.Item;
+using Game.Grid.Contexts;
+using Game.Grid.Item;
 using Core.StateMachineCore;
 using Core.Utils;
 using Cysharp.Threading.Tasks;
+using Game.Grid.Handlers;
 using UnityEngine;
+using Game.Grid.States.Data;
+using Game.Grid.Utils;
 
-namespace Core.Handlers
+namespace Game.Grid.States
 {
-    public class BoosterResolveState : StateBase<GridStateContext>
+    public sealed class BoosterResolveState : StateBase<GridStateContext>
     {
         public override bool NeedsExitPermission => true;
 

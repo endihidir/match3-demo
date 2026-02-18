@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using Core.Item;
-using Core.Level;
-using Core.UI;
+using Game.Grid.Item;
+using Game.Views;
+using Game.Level.Data;
 
-namespace Core.Handlers
+namespace Game.HUD.Handlers
 {
     public interface IGoalSlotHandler
     {

@@ -2,7 +2,7 @@ using System;
 using Core.Generated;
 using Cysharp.Threading.Tasks;
 
-namespace Core.SceneService
+namespace Core.Scene.Services
 {
     public interface ISceneLoadState
     {
