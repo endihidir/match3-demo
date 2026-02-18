@@ -17,10 +17,10 @@ namespace Core.Handlers
         public GoalSlotView[] GoalSlotViews { get; private set; }
         private SerializedDictionary<ObstacleType, GoalSlotView> SlotByType { get; set; }
 
-        public GoalSlotHandler(ISlotViewFactory slotViewFactory, GameplayConfigContainer gameplayConfigContainer)
+        public GoalSlotHandler(ISlotViewFactory slotViewFactory, GridConfigContainerSO gridConfigContainer)
         {
             _slotViewFactory = slotViewFactory;
-            _obstacleConfigContainer = gameplayConfigContainer.GridConfigContainer.GetConfig<ObstacleConfigContainerSO>();
+            _obstacleConfigContainer = gridConfigContainer.GetConfig<ObstacleConfigContainerSO>();
         }
         
         public void PopulateSlotViews(List<LevelGoal> levelGoals)

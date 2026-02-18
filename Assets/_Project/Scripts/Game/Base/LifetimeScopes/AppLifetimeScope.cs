@@ -18,9 +18,10 @@ namespace Core.LifetimeScopes
         
         protected override void Configure(IContainerBuilder builder)
         {
-            AppConfigContainer?.Initialize();
+            builder.RegisterInstance(AppConfigContainer.LevelDataServiceConfig);
+            builder.RegisterInstance(AppConfigContainer.PoolServiceConfig);
+            builder.RegisterInstance(AppConfigContainer.SceneLoadServiceConfig);
             
-            builder.RegisterInstance(AppConfigContainer);
             builder.RegisterEntryPoint<AppBootstrapper>();
 
             RegisterServices(builder);

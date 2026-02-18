@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 
 [CustomPropertyDrawer(typeof(Core.Configs.BoosterActionBase), true)]
-public sealed class BoosterEffectBaseDrawer : PropertyDrawer
+public sealed class BoosterActionBaseDrawer : PropertyDrawer
 {
     private static Type[] _cachedTypes;
 

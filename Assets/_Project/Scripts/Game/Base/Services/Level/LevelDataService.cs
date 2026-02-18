@@ -17,9 +17,9 @@ namespace Core.Level
         private bool UseSeededPattern => _levelDataServiceConfig.useSeededPattern;
         private int SeedOverride => _levelDataServiceConfig.seedOverride;
 
-        public LevelDataService(AppConfigContainer appConfigContainer)
+        public LevelDataService(LevelDataServiceConfig levelDataServiceConfig)
         {
-            _levelDataServiceConfig = appConfigContainer.levelDataServiceConfig;
+            _levelDataServiceConfig = levelDataServiceConfig;
         }
 
         public async UniTask<bool> InitializeAsync()

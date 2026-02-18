@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abd289f77ff14105a25984cc8ff9f74c, type: 3}
   m_Name: AppConfigContainer
   m_EditorClassIdentifier: 
-  sceneLoadServiceConfig: {fileID: 11400000, guid: 4d6eab558b2ec6b41b8945150b149cfa,
+  <SceneLoadServiceConfig>k__BackingField: {fileID: 11400000, guid: 4d6eab558b2ec6b41b8945150b149cfa,
     type: 2}
-  poolServiceConfig: {fileID: 11400000, guid: c3b82a1ade8844248924be7eca5ebfa5, type: 2}
-  levelDataServiceConfig: {fileID: 11400000, guid: 4c80ae77d5bd7a04d905910a05d7a523,
+  <PoolServiceConfig>k__BackingField: {fileID: 11400000, guid: c3b82a1ade8844248924be7eca5ebfa5,
+    type: 2}
+  <LevelDataServiceConfig>k__BackingField: {fileID: 11400000, guid: 4c80ae77d5bd7a04d905910a05d7a523,
     type: 2}

@@ -10,10 +10,10 @@ namespace Core.Handlers
         private readonly IGridObjectFactory _gridObjectFactory;
         private readonly GridConfigContainerSO _gridConfigContainer;
         
-        public GridObjectHandler(IGridObjectFactory gridObjectFactory, GameplayConfigContainer gameplayConfigContainer)
+        public GridObjectHandler(IGridObjectFactory gridObjectFactory, GridConfigContainerSO gridConfigContainer)
         {
             _gridObjectFactory = gridObjectFactory;
-            _gridConfigContainer = gameplayConfigContainer.GridConfigContainer;
+            _gridConfigContainer = gridConfigContainer;
         }
         
         public bool TryGetItem<T>(GridObjectType typeData, out T gridObject) where T : BaseGridObject
