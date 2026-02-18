@@ -10,7 +10,7 @@ namespace Core.Editor
 {
     public static class SceneIdGeneratorEditor
     {
-        private static readonly string OutputFolder = "Assets/_Project/Scripts/Game/Base/Services/Scene/Generated";
+        private static readonly string OutputFolder = "Assets/_Project/Scripts/Core/Services/Scene/Generated";
         private static readonly string ScriptName = "SceneIdLookup";
         private static readonly string FullPath = Path.Combine(OutputFolder, $"{ScriptName}.cs");
         private const string SessionKey = "SceneIdGenerator_Ran";
