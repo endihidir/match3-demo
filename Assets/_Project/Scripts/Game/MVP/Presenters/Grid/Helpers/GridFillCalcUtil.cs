@@ -253,19 +253,5 @@ namespace Core.Utils
 
             return false;
         }
-        
-        public static bool IsAnyObjectFallAboveInSameSegment(IGridModel model, Vector2Int from)
-        {
-            for (int y = from.y - 1; y >= 0; y--)
-            {
-                var c = new Vector2Int(from.x, y);
-
-                var obj = model.GetGridObject(c);
-                
-                if (obj && obj.IsFallInProgress) return true;
-            }
-
-            return false;
-        }
     }
 }
