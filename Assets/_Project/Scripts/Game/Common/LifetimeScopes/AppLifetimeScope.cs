@@ -32,7 +32,7 @@ namespace Core.LifetimeScopes
         
         private static void RegisterServices(IContainerBuilder builder)
         {
-            builder.Register<SceneLoadService>(Lifetime.Singleton).As<ISceneLoadService, ISceneLoadState, ITickable>();
+            builder.Register<SceneLoadService>(Lifetime.Singleton).As<ISceneLoadService, ISceneLoadState>();
             builder.Register<ObjectPoolService>(Lifetime.Singleton).As<IObjectPoolService>();
             builder.Register<LevelDataService>(Lifetime.Singleton).As<ILevelDataService>();
             builder.Register<JsonSaveService>(Lifetime.Singleton).As<IJsonSaveService>();
