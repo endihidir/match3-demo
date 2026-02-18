@@ -9,11 +9,10 @@ using Core.Utils;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
-using VContainer.Unity;
 
 namespace Core.SceneService
 {
-    public class SceneLoadService : ISceneLoadService, ISceneLoadState, ITickable
+    public class SceneLoadService : ISceneLoadService, ISceneLoadState
     {
         private readonly SceneLoadServiceConfig _sceneLoadConfig;
         private readonly AsyncOperationHandleGroup _handleGroup;
@@ -176,17 +175,6 @@ namespace Core.SceneService
             _operationGroup.Operations.Clear();
 
             await Resources.UnloadUnusedAssets();
-        }
-
-        public void Tick()
-        {
-#if UNITY_EDITOR
-            if (!Input.GetKeyDown(KeyCode.Space)) return;
-            
-            if(CurrentSceneGroupType == SceneGroupType.MenuScene) return;
-                
-            LoadSceneGroupAsync(SceneGroupType.MenuScene, true).Forget();
-#endif
         }
     }
 }
