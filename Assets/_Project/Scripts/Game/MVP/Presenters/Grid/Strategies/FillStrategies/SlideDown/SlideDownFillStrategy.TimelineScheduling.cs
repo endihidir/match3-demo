@@ -25,9 +25,8 @@ namespace Core.Handlers
             {
                 ref var record = ref _records[i];
                 if (!record.Item || record.PathCount == 0) continue;
-
-                var startCoord = _pathCoord[record.HeadNode];
-                record.IsSlide = startCoord.x != record.FinalCoord.x;
+                
+                record.IsSlide = HasAnyXChangeInPath(in record);
             }
 
             Array.Sort(_order, 0, _recordCount, new SlideMoveOrderComparer(_records));
@@ -53,6 +52,22 @@ namespace Core.Handlers
                 Array.Resize(ref _animTasks, taskCount);
 
             return UniTask.WhenAll(_animTasks);
+        }
+        
+        private bool HasAnyXChangeInPath(in SlideDownMoveRecord record)
+        {
+            if (record.HeadNode < 0) return false;
+    
+            var firstX = _pathCoord[record.HeadNode].x;
+            var node = _pathNext[record.HeadNode];
+    
+            while (node >= 0)
+            {
+                if (_pathCoord[node].x != firstX) return true;
+                node = _pathNext[node];
+            }
+    
+            return false;
         }
 
         private void EnsureOrderCapacity(int need)
