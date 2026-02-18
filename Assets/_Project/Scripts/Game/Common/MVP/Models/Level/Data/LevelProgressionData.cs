@@ -1,6 +1,6 @@
 using System;
 
-namespace Core.Models
+namespace Game.Level.Data
 {
     [Serializable]
     public struct LevelProgressionData

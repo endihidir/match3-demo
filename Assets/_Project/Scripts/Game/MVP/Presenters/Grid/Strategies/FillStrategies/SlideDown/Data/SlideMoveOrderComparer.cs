@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Core.Handlers
+namespace Game.Grid.Strategies.Data
 {
     public readonly struct SlideMoveOrderComparer : IComparer<int>
     {

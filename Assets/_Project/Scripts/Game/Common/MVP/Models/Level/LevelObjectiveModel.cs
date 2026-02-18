@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Core.Item;
-using Core.Level;
+using Game.Grid.Item;
+using Game.Level.Data;
 using UnityEngine;
 
-namespace Core.Models
+namespace Game.Level.Models
 {
     public sealed class LevelObjectiveModel : ILevelObjectiveModel
     {

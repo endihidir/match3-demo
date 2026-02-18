@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using VContainer.Unity;
 
-namespace Core.Services
+namespace Game.Grid.Services
 {
     public class GridInputService : IGridInputService, ITickable, IDisposable
     {

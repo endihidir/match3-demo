@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Core.Handlers
+namespace Game.Grid.States.Data
 {
     public readonly struct ImpactEntry
     {

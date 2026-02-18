@@ -1,7 +1,8 @@
 using System;
 using Cysharp.Threading.Tasks;
+using Game.Grid.Strategies.Data;
 
-namespace Core.Handlers
+namespace Game.Grid.Strategies
 {
     public partial class FallDownFillStrategy
     {

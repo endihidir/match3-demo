@@ -1,8 +1,9 @@
 using System;
-using Core.Item;
+using Game.Grid.Item;
+using Game.Grid.Strategies.Data;
 using UnityEngine;
 
-namespace Core.Handlers
+namespace Game.Grid.Strategies
 {
     public partial class SlideDownFillStrategy
     {

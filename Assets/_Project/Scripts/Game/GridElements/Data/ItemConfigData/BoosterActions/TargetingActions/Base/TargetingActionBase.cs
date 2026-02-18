@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Core.Configs
+namespace Game.Configs
 {
     [Serializable]
     public abstract class TargetingActionBase : BoosterActionBase

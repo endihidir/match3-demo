@@ -1,7 +1,7 @@
-using Core.Item;
+using Game.Grid.Item;
 using UnityEngine;
 
-namespace Core.Configs
+namespace Game.Configs
 {
     //[CreateAssetMenu(fileName = "BoosterMergeConfig", menuName = "Match3/ItemConfigs/BoosterMergeConfig", order = 0)]
     public sealed class BoosterComboConfigSO : ScriptableObject

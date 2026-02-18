@@ -1,11 +1,12 @@
 using System;
-using Core.Configs;
-using Core.Handlers;
-using Core.Models;
-using Core.Views;
+using Game.Configs;
+using Game.Grid.Contexts;
+using Game.Grid.States.Data;
+using Game.Models;
+using Game.Views;
 using UnityEngine;
 
-namespace Core.Utils
+namespace Game.Grid.Utils
 {
     public static class BoosterTimelineBuilder
     {

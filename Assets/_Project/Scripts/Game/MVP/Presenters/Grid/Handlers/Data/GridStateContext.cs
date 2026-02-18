@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
-using Core.Configs;
-using Core.Item;
-using Core.Models;
-using Core.Views;
+using Game.Configs;
+using Game.Grid.Item;
+using Game.Grid.Handlers;
+using Game.Grid.Handlers.Data;
+using Game.Level.Models;
+using Game.Models;
+using Game.Views;
 using UnityEngine;
 
-namespace Core.Handlers
+namespace Game.Grid.Contexts
 {
     public sealed class GridStateContext
     {

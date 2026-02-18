@@ -1,12 +1,12 @@
 using System;
-using Core.Configs;
-using Core.Extensions;
+using Game.Configs;
 using Core.Utils;
+using Game.Extensions;
 using NaughtyAttributes;
 using UnityEngine;
 using GridLayout = Core.Grid.GridLayout;
 
-namespace Core.Views
+namespace Game.Views
 {
     public class GridView : MonoBehaviour, IGridView
     {

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Core.Handlers
+namespace Game.Grid.Handlers.Data
 {
     public readonly struct GridInputSource
     {

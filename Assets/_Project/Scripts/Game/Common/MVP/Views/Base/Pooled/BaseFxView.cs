@@ -1,8 +1,8 @@
-using Core.Pool;
+using Core.Pool.Services;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace Core.UI
+namespace Game.Views
 {
     public abstract class BaseFxView : PooledObject
     {

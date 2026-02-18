@@ -1,4 +1,4 @@
-namespace Core.Handlers
+namespace Game.Grid.Handlers.Data
 {
     public enum GridInputType
     {

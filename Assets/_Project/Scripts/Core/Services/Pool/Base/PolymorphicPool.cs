@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Core.Pool
+namespace Core.Pool.Services
 {
     public abstract class PolymorphicPool<TBase, TData> where TBase : class where TData : struct
     {

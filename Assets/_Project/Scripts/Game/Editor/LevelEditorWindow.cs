@@ -1,11 +1,11 @@
 using System.IO;
-using Core.Configs;
-using Core.Level;
+using Game.Configs;
+using Game.Level.Data;
 using Core.Utils;
 using UnityEditor;
 using UnityEngine;
 
-namespace Editor
+namespace Game.Editors
 {
     public class LevelEditorWindow : EditorWindow
     {

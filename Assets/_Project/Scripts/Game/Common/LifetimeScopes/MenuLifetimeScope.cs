@@ -1,9 +1,9 @@
-using Core.Presenters;
-using Core.Views;
+using Game.Menu.Views;
+using Game.Presenters;
 using VContainer;
 using VContainer.Unity;
 
-namespace Core.LifetimeScopes
+namespace Game.LifetimeScopes
 {
     public class MenuLifetimeScope : LifetimeScope
     {

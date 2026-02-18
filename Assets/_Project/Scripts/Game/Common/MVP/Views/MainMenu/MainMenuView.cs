@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using ButtonClickedEvent = UnityEngine.UI.Button.ButtonClickedEvent;
 
-namespace Core.Views
+namespace Game.Menu.Views
 {
     public class MainMenuView : MonoBehaviour, IMainMenuView
     {

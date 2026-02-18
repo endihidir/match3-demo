@@ -1,8 +1,8 @@
-using Core.Item;
+using Game.Grid.Item;
 using NaughtyAttributes;
 using UnityEngine;
 
-namespace Core.Configs
+namespace Game.Configs
 {
     [CreateAssetMenu(fileName = "ObstacleConfigContainer", menuName = "Match3/ItemConfigs/ObstacleConfigContainer", order = -1)]
     public class ObstacleConfigContainerSO : BaseGridObjectConfigContinerSO

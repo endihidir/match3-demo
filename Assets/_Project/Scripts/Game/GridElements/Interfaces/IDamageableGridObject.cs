@@ -1,6 +1,6 @@
 using Core.Interfaces;
 
-namespace Core.Item
+namespace Game.Grid.Item
 {
     public interface IDamageableGridObject : IDamageable<GridDamageSource, GridDamageResult>
     {

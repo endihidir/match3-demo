@@ -1,12 +1,12 @@
 using System;
-using Core.Configs;
-using Core.Item;
-using Core.Item.Factories;
-using Core.UI;
+using Game.Configs;
+using Game.Grid.Item;
+using Game.Views;
+using Game.View.Factories;
 using DG.Tweening;
 using UnityEngine;
 
-namespace Core.Handlers
+namespace Game.HUD.Handlers
 {
     public sealed class GoalFxHandler : IGoalFxHandler
     {

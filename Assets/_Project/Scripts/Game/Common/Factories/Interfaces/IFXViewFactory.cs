@@ -1,7 +1,7 @@
-using Core.UI;
+using Game.Views;
 using UnityEngine;
 
-namespace Core.Item.Factories
+namespace Game.View.Factories
 {
     public interface IFXViewFactory
     {

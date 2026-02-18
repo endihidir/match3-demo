@@ -1,8 +1,10 @@
 using System;
-using Core.Views;
 using Cysharp.Threading.Tasks;
+using Game.Grid.Contexts;
+using Game.Grid.Strategies.Data;
+using Game.Views;
 
-namespace Core.Handlers
+namespace Game.Grid.Strategies
 {
     public partial class SlideDownFillStrategy
     {

@@ -1,4 +1,4 @@
-namespace Core.Level
+namespace Game.Level.Data
 {
     public enum JsonGridObjectType
     {

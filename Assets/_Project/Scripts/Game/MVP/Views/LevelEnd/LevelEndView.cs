@@ -2,7 +2,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Core.UI
+namespace Game.Views
 {
     public class LevelEndView : MonoBehaviour, ILevelEndView
     {

@@ -1,7 +1,7 @@
 using Core.Modules;
 using UnityEngine;
 
-namespace Core.UI
+namespace Game.Views
 {
     public class GoalFxView : BaseFxView
     {

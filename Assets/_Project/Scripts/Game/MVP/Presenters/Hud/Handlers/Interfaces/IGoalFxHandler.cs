@@ -1,9 +1,9 @@
 using System;
-using Core.Item;
-using Core.UI;
+using Game.Grid.Item;
+using Game.Views;
 using UnityEngine;
 
-namespace Core.Handlers
+namespace Game.HUD.Handlers
 {
     public interface IGoalFxHandler
     {

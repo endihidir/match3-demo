@@ -1,17 +1,21 @@
 using Core.Bootstrappers;
-using Core.Configs;
-using Core.Handlers;
-using Core.Item.Factories;
-using Core.Models;
-using Core.Presenters;
-using Core.Services;
-using Core.UI;
-using Core.Views;
+using Game.Configs;
+using Game.Grid.Item.Factories;
+using Game.Grid.Strategies;
+using Game.Grid.Strategies.Schedulers;
+using Game.Grid.Handlers;
+using Game.Grid.Services;
+using Game.HUD.Handlers;
+using Game.Level.Models;
+using Game.Models;
+using Game.Presenters;
+using Game.Services;
+using Game.Views;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
-namespace Core.LifetimeScopes
+namespace Game.LifetimeScopes
 {
     public class GameLifetimeScope : LifetimeScope
     {

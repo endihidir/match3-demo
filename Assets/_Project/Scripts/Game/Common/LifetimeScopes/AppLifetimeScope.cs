@@ -1,16 +1,16 @@
 using Core.Bootstrappers;
-using Core.Configs;
-using Core.Item.Factories;
-using Core.Level;
-using Core.Models;
-using Core.SceneService;
-using Core.Pool;
+using Game.Configs;
+using Core.Scene.Services;
+using Core.Pool.Services;
 using Core.SaveSystem;
+using Game.View.Factories;
+using Game.Level.Models;
+using Game.Level.Services;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
-namespace Core.LifetimeScopes
+namespace Game.LifetimeScopes
 {
     public class AppLifetimeScope : LifetimeScope
     {

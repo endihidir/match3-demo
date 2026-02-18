@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Core.Configs
+namespace Game.Configs
 {
     public abstract class BaseGridObjectDataSO : ScriptableObject
     {

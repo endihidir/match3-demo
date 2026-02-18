@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Core.Item.Factories
+namespace Game.Grid.Item.Factories
 {
     public interface IGridObjectFactory
     {

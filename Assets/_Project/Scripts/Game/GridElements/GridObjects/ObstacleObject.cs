@@ -1,8 +1,8 @@
-using Core.Configs;
+using Game.Configs;
 using NaughtyAttributes;
 using UnityEngine;
 
-namespace Core.Item
+namespace Game.Grid.Item
 {
     public class ObstacleObject : BaseGridObject, IDamageableGridObject
     {

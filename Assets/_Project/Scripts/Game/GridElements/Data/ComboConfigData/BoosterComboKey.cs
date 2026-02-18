@@ -1,9 +1,9 @@
 using System;
-using Core.Extensions;
-using Core.Item;
+using Game.Extensions;
+using Game.Grid.Item;
 using UnityEngine;
 
-namespace Core.Configs
+namespace Game.Configs
 {
     [Serializable]
     public struct BoosterComboKey : IEquatable<BoosterComboKey>

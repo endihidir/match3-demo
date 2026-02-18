@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Core.Utils;
+using Game.Utils;
 using UnityEngine;
 using GridLayout = Core.Grid.GridLayout;
 
-namespace Core.Extensions
+namespace Game.Extensions
 {
     public static class GridMeshExtensions
     { 

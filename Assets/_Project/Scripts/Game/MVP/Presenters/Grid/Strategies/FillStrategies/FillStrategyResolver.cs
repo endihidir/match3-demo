@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Core.Models;
+using Game.Models;
 
-namespace Core.Handlers
+namespace Game.Grid.Strategies
 {
     public sealed class FillStrategyResolver : IFillStrategyResolver
     {

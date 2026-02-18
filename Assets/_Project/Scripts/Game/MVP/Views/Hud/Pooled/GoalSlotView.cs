@@ -1,12 +1,12 @@
-using Core.Configs;
-using Core.Item;
+using Game.Configs;
+using Game.Grid.Item;
 using Core.Modules;
 using NaughtyAttributes;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Core.UI
+namespace Game.Views
 {
     public class GoalSlotView : BaseSlotView
     {

@@ -1,8 +1,10 @@
+using Game.Grid.Contexts;
 using Core.StateMachineCore;
 using Core.Utils;
 using Cysharp.Threading.Tasks;
+using Game.Grid.Strategies;
 
-namespace Core.Handlers
+namespace Game.Grid.States
 {
     public sealed class FillResolveState : StateBase<GridStateContext>
     {

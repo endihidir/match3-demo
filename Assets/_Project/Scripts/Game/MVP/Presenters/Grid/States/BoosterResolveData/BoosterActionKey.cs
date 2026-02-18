@@ -1,8 +1,8 @@
 using System;
-using Core.Configs;
+using Game.Configs;
 using UnityEngine;
 
-namespace Core.Handlers
+namespace Game.Grid.States.Data
 {
     public readonly struct BoosterActionKey : IEquatable<BoosterActionKey>
     {

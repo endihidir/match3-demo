@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Core.Item;
+using Game.Grid.Item;
 
-namespace Core.Level
+namespace Game.Level.Data
 {
     [Serializable]
     public class LevelContent

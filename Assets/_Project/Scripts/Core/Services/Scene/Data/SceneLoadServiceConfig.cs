@@ -5,7 +5,7 @@ using Core.Utils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Core.Configs
+namespace Game.Configs
 {
     //[CreateAssetMenu(fileName = "SceneLoadServiceConfig", menuName = "Match3/Services/SceneLoadServiceConfig", order = 0)]
     public class SceneLoadServiceConfig : ScriptableObject
@@ -35,7 +35,7 @@ namespace Core.Configs
             return sceneReferences;
         }
         
-        public bool TryGetActiveSceneBy(string sceneGroupId, out Scene scene)
+        public bool TryGetActiveSceneBy(string sceneGroupId, out UnityEngine.SceneManagement.Scene scene)
         {
             scene = default;
             

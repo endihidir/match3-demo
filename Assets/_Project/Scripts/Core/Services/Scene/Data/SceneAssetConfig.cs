@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-namespace Core.Configs
+namespace Game.Configs
 {
     [CreateAssetMenu(menuName = "Match3/SceneConfigs/SceneAssetConfig")]
     public class SceneAssetConfig : ScriptableObject

@@ -1,7 +1,7 @@
 using System;
 using System.Buffers;
 
-namespace Core.Pool
+namespace Core.Pool.Services
 {
     public readonly struct PooledArray<T> : IDisposable
     {

@@ -1,9 +1,9 @@
 using System;
-using Core.Item;
+using Game.Grid.Item;
 using NaughtyAttributes;
 using UnityEngine;
 
-namespace Core.Configs
+namespace Game.Configs
 {
     [CreateAssetMenu(fileName = "ObstacleData", menuName = "Match3/ItemConfigs/Data/ObstacleData", order = -1)]
     public class ObstacleDataSO : BaseGridObjectDataSO

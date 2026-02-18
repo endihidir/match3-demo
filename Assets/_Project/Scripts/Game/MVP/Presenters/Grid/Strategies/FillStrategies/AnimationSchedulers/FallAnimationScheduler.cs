@@ -1,8 +1,9 @@
-using Core.Views;
 using Cysharp.Threading.Tasks;
+using Game.Grid.Strategies.Data;
+using Game.Views;
 using UnityEngine;
 
-namespace Core.Handlers
+namespace Game.Grid.Strategies.Schedulers
 {
     public sealed class FallAnimationScheduler : IFallAnimationScheduler
     {

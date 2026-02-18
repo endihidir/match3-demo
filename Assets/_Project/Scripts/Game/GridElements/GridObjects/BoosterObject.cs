@@ -1,9 +1,9 @@
-using Core.Configs;
-using Core.Handlers;
+using Game.Configs;
+using Game.Grid.Contexts;
 using NaughtyAttributes;
 using UnityEngine;
 
-namespace Core.Item
+namespace Game.Grid.Item
 {
     public class BoosterObject : BaseGridObject, IBoosterActionSource
     {

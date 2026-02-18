@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Core.Item;
-using Core.Level;
+using Game.Grid.Item;
+using Game.Level.Data;
 using UnityEngine;
 
-namespace Core.Models
+namespace Game.Level.Models
 {
     public interface ILevelObjectiveModel
     {

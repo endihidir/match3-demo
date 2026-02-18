@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Core.Handlers
+namespace Game.Grid.States.Data
 {
     public class ImpactTimeline
     {

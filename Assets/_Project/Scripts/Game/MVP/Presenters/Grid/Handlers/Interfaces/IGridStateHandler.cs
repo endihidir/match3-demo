@@ -1,7 +1,8 @@
 using Core.StateMachineCore;
+using Game.Grid.Contexts;
 using UnityEngine;
 
-namespace Core.Handlers
+namespace Game.Grid.Handlers
 {
     public interface IGridStateHandler
     {

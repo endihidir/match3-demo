@@ -1,9 +1,9 @@
-using Core.Configs;
-using Core.Pool;
+using Game.Configs;
+using Core.Pool.Services;
 using NaughtyAttributes;
 using UnityEngine;
 
-namespace Core.Item
+namespace Game.Grid.Item
 {
     public abstract class BaseGridObject : PooledObject
     {

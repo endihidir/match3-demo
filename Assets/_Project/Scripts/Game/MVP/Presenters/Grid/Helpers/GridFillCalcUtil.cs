@@ -1,9 +1,9 @@
-using Core.Handlers;
-using Core.Item;
-using Core.Models;
+using Game.Grid.Item;
+using Game.Grid.Strategies.Data;
+using Game.Models;
 using UnityEngine;
 
-namespace Core.Utils
+namespace Game.Grid.Utils
 {
     public static class GridFillCalcUtil
     {

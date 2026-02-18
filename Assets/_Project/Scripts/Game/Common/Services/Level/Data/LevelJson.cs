@@ -1,6 +1,6 @@
 using System;
 
-namespace Core.Level
+namespace Game.Level.Data
 {
     [Serializable]
     public class LevelJson

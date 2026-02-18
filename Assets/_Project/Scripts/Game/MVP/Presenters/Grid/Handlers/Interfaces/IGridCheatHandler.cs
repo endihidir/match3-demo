@@ -1,6 +1,6 @@
-using Core.Item;
+using Game.Grid.Item;
 
-namespace Core.Handlers
+namespace Game.Grid.Handlers
 {
     public interface IGridCheatHandler
     {

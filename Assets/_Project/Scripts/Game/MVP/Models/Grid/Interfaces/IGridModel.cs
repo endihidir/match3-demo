@@ -1,7 +1,8 @@
-using Core.Item;
+using Core.Models;
+using Game.Grid.Item;
 using UnityEngine;
 
-namespace Core.Models
+namespace Game.Models
 {
     public interface IGridModel : IBaseGridModel<BaseGridObject>
     {

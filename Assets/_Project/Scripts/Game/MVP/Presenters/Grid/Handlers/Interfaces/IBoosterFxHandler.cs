@@ -1,9 +1,9 @@
-using System;
-using Core.Models;
-using Core.Views;
 using Cysharp.Threading.Tasks;
+using Game.Grid.Contexts;
+using Game.Models;
+using Game.Views;
 
-namespace Core.Handlers
+namespace Game.Grid.Handlers
 {
     public interface IBoosterFxHandler
     {

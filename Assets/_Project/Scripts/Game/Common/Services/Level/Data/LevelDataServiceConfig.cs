@@ -1,7 +1,7 @@
 using NaughtyAttributes;
 using UnityEngine;
 
-namespace Core.Configs
+namespace Game.Configs
 {
     //[CreateAssetMenu(fileName = "LevelDataConfig", menuName = "Match3/LevelDataConfig")]
     public class LevelDataServiceConfig : ScriptableObject

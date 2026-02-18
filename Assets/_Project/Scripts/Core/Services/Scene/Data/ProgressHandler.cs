@@ -1,6 +1,6 @@
 using System;
 
-namespace Core.SceneService
+namespace Core.Scene.Services
 {
     public class ProgressHandler : IProgress<float>
     {

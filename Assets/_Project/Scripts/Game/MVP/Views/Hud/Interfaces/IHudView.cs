@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Core.UI
+namespace Game.Views
 {
     public interface IHudView
     {

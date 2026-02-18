@@ -3,7 +3,7 @@ using Core.Modules;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace Core.UI
+namespace Game.Views
 {
     public abstract class BlastFxView : BaseFxView
     {

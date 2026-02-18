@@ -1,8 +1,8 @@
-using Core.Pool;
-using Core.UI;
+using Core.Pool.Services;
+using Game.Views;
 using UnityEngine;
 
-namespace Core.Item.Factories
+namespace Game.View.Factories
 {
     public sealed class FXViewFactory : IFXViewFactory
     {

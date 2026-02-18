@@ -1,6 +1,6 @@
 using System;
 using Core.Models;
-using Core.SceneService;
+using Core.Scene.Services;
 using Core.Views;
 using Cysharp.Threading.Tasks;
 using UnityEngine;

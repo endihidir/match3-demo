@@ -4,7 +4,7 @@ using DG.Tweening;
 using NaughtyAttributes;
 using UnityEngine;
 
-namespace Core.UI
+namespace Game.Views
 {
     public abstract class RocketFxView : BoosterFxView
     {

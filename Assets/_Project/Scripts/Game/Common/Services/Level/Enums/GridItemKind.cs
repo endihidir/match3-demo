@@ -1,4 +1,4 @@
-namespace Core.Item
+namespace Game.Grid.Item
 {
     public enum GridItemKind
     {

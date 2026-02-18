@@ -3,7 +3,7 @@ using AYellowpaper.SerializedCollections;
 using Core.Extensions;
 using UnityEngine;
 
-namespace Core.Configs
+namespace Game.Configs
 {
     [Serializable]
     public class EnumConfigMap<TEnum, TData> where TEnum : Enum

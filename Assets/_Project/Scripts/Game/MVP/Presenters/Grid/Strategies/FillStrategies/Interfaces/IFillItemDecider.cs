@@ -1,8 +1,8 @@
-using Core.Item;
-using Core.Models;
+using Game.Grid.Item;
+using Game.Models;
 using UnityEngine;
 
-namespace Core.Handlers
+namespace Game.Grid.Strategies
 {
     public interface IFillItemDecider
     {

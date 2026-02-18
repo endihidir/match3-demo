@@ -1,5 +1,5 @@
 using System;
-using Core.Level;
+using Game.Level.Data;
 
 namespace Core.Utils
 {

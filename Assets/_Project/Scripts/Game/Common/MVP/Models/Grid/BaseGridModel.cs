@@ -1,5 +1,5 @@
 using System;
-using Core.Utils;
+using Game.Utils;
 using UnityEngine;
 
 namespace Core.Models

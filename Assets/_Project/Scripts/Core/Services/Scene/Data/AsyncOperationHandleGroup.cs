@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceProviders;
 
-namespace Core.SceneService
+namespace Core.Scene.Services
 {
     public readonly struct AsyncOperationHandleGroup 
     {

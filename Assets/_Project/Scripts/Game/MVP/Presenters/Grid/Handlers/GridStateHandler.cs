@@ -1,14 +1,17 @@
-using Core.Configs;
-using Core.Item;
-using Core.Item.Factories;
-using Core.Models;
+using Game.Configs;
+using Game.Grid.Contexts;
+using Game.Grid.Item;
 using Core.StateMachineCore;
-using Core.Views;
+using Game.Grid.States;
+using Game.Grid.Handlers.Data;
+using Game.Grid.Strategies;
+using Game.Level.Models;
+using Game.Models;
+using Game.Views;
 using UnityEngine;
 using VContainer.Unity;
-using StateMachine = Core.StateMachineCore.StateMachine;
 
-namespace Core.Handlers
+namespace Game.Grid.Handlers
 {
     public sealed class GridStateHandler : IGridStateHandler, ITickable, IFixedTickable, ILateTickable
     {

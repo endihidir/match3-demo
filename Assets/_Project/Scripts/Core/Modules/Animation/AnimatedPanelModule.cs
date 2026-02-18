@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
 
-namespace Core.UI
+namespace Game.Views
 {
     public class AnimatedPanelModule : MonoBehaviour
     {
