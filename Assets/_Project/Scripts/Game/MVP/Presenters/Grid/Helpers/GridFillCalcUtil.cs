@@ -143,8 +143,7 @@ namespace Core.Utils
             {
                 var coord = new Vector2Int(x, y);
 
-                if (!model.IsCellActive(coord))
-                    continue;
+                if (!model.IsCellActive(coord)) continue;
 
                 cellCoord = coord;
                 return true;
