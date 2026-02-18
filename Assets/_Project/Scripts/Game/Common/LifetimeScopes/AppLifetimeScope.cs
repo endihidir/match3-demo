@@ -1,4 +1,4 @@
-using Core.Bootstrappers;
+using Game.Bootstrappers;
 using Game.Configs;
 using Core.Scene.Services;
 using Core.Pool.Services;
@@ -10,7 +10,7 @@ using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
-namespace Game.LifetimeScopes
+namespace Game.DI
 {
     public class AppLifetimeScope : LifetimeScope
     {

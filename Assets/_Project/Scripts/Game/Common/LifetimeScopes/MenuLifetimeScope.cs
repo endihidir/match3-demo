@@ -3,7 +3,7 @@ using Game.Presenters;
 using VContainer;
 using VContainer.Unity;
 
-namespace Game.LifetimeScopes
+namespace Game.DI
 {
     public class MenuLifetimeScope : LifetimeScope
     {

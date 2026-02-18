@@ -1,4 +1,4 @@
-using Core.Bootstrappers;
+using Game.Bootstrappers;
 using Game.Configs;
 using Game.Grid.Item.Factories;
 using Game.Grid.Strategies;
@@ -15,7 +15,7 @@ using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
-namespace Game.LifetimeScopes
+namespace Game.DI
 {
     public class GameLifetimeScope : LifetimeScope
     {

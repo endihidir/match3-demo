@@ -8,7 +8,7 @@ using Game.Level.Services;
 using VContainer;
 using VContainer.Unity;
 
-namespace Core.Bootstrappers
+namespace Game.Bootstrappers
 {
     public class AppBootstrapper : IInitializable
     {
