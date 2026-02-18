@@ -17,12 +17,12 @@ MonoBehaviour:
   isStationary: 0
   <AnimationSpeed>k__BackingField: 90
   <BoosterAction>k__BackingField:
-    rid: 1071696575912476679
+    rid: 1071696598056042498
   references:
     version: 2
     RefIds:
-    - rid: 1071696575912476679
-      type: {class: RocketVerticalAction, ns: Core.Configs, asm: Foundation}
+    - rid: 1071696598056042498
+      type: {class: RocketVerticalAction, ns: Core.Configs, asm: Game}
       data:
         <DamageAmount>k__BackingField: 1
         <LineCount>k__BackingField: 1

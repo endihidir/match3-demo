@@ -17,12 +17,12 @@ MonoBehaviour:
   isStationary: 0
   <AnimationSpeed>k__BackingField: 1
   <BoosterAction>k__BackingField:
-    rid: 1071696575912476677
+    rid: 1071696598056042496
   references:
     version: 2
     RefIds:
-    - rid: 1071696575912476677
-      type: {class: BombAction, ns: Core.Configs, asm: Foundation}
+    - rid: 1071696598056042496
+      type: {class: BombAction, ns: Core.Configs, asm: Game}
       data:
         <DamageAmount>k__BackingField: 1
         <Radius>k__BackingField: 2
