@@ -12,6 +12,9 @@ namespace Core.Bootstrappers
 {
     public class AppBootstrapper : IInitializable
     {
+        private const int TweenCapacity = 2000;
+        private const int SequenceCapacity = 500;
+        
         [Inject] private readonly IObjectResolver _objectResolver;
         [Inject] private readonly ISceneLoadService _sceneLoadService;
         [Inject] private readonly IObjectPoolService _objectPoolService;
@@ -37,7 +40,7 @@ namespace Core.Bootstrappers
             
             _objectPoolService.Initialize();
             
-            DOTween.SetTweensCapacity(2000, 500);
+            DOTween.SetTweensCapacity(TweenCapacity, SequenceCapacity);
             
             await _sceneLoadService.LoadSceneGroupAsync(SceneGroupType.MenuScene);
         }
