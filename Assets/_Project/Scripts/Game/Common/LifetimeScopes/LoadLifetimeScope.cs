@@ -4,7 +4,7 @@ using Core.Views;
 using VContainer;
 using VContainer.Unity;
 
-namespace Game.LifetimeScopes
+namespace Game.DI
 {
     public class LoadLifetimeScope : LifetimeScope
     {
