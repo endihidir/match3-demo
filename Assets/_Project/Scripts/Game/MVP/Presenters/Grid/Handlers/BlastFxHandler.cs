@@ -12,10 +12,10 @@ namespace Core.Handlers
         private readonly IFXViewFactory _fxViewFactory;
         private readonly GridConfigContainerSO _gridConfigContainer;
         
-        public BlastFxHandler(IFXViewFactory fxViewFactory, GameplayConfigContainer gameplayConfigContainer)
+        public BlastFxHandler(IFXViewFactory fxViewFactory, GridConfigContainerSO gridConfigContainer)
         {
             _fxViewFactory = fxViewFactory;
-            _gridConfigContainer = gameplayConfigContainer.GridConfigContainer;
+            _gridConfigContainer = gridConfigContainer;
         }
 
         public void PlayBlastParticle(BaseGridObject obj, Vector3 pos, Transform parent)

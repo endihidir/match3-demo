@@ -45,9 +45,9 @@ namespace Core.SceneService
 
         public bool IsInBootScene => ActiveSceneName.Equals(_firstSceneName);
 
-        public SceneLoadService(AppConfigContainer appConfigContainer)
+        public SceneLoadService(SceneLoadServiceConfig sceneLoadServiceConfig)
         {
-            _sceneLoadConfig = appConfigContainer.sceneLoadServiceConfig;
+            _sceneLoadConfig = sceneLoadServiceConfig;
             _handleGroup = new AsyncOperationHandleGroup(10);
             _operationGroup = new AsyncOperationGroup(10);
             _firstSceneName = BuildSettingsUtils.GetFirstBuildSceneName();

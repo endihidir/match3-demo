@@ -16,10 +16,10 @@ namespace Core.Handlers
         private float _lastFxTime;
         public event Action<ObstacleType> OnGoalFxComplete;
 
-        public GoalFxHandler(IFXViewFactory fxFactory, GameplayConfigContainer gameplayConfigContainer)
+        public GoalFxHandler(IFXViewFactory fxFactory, GridConfigContainerSO gridConfigContainer)
         {
             _fxFactory = fxFactory;
-            _obstacleConfigContainer = gameplayConfigContainer.GridConfigContainer.GetConfig<ObstacleConfigContainerSO>();
+            _obstacleConfigContainer = gridConfigContainer.GetConfig<ObstacleConfigContainerSO>();
         }
 
         public void PlayFX(GoalSlotView targetSlotView, Vector3 startWorldPos, Vector2 rectSize, Transform fxHolder)

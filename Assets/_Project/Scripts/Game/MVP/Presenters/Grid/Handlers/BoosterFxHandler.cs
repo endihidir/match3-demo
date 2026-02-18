@@ -15,10 +15,10 @@ namespace Core.Handlers
         private readonly IFXViewFactory _fxViewFactory;
         private readonly BoosterConfigContainerSO _boosterConfigContainer;
 
-        public BoosterFxHandler(IFXViewFactory fxViewFactory, GameplayConfigContainer gameplayConfigContainer)
+        public BoosterFxHandler(IFXViewFactory fxViewFactory, GridConfigContainerSO gridConfigContainer)
         {
             _fxViewFactory = fxViewFactory;
-            _boosterConfigContainer = gameplayConfigContainer.GridConfigContainer.GetConfig<BoosterConfigContainerSO>();
+            _boosterConfigContainer = gridConfigContainer.GetConfig<BoosterConfigContainerSO>();
         }
 
         public UniTask PlayBoosterFxAsync(BoosterActionContext action, IGridModel model, IGridView view, out float animSpeed)

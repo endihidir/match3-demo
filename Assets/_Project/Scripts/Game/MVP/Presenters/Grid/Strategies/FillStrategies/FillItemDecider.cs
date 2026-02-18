@@ -26,9 +26,9 @@ namespace Core.Handlers
         private System.Random _rng;
         public float SafetyBoost { get; private set; }
         
-        public FillItemDecider(GameplayConfigContainer gameplayConfigContainer)
+        public FillItemDecider(GridConfigContainerSO gridConfigContainer)
         {
-            _decisionSettings = gameplayConfigContainer.GridConfigContainer.FillItemDecisionSettings;
+            _decisionSettings = gridConfigContainer.FillItemDecisionSettings;
             _rng = null;
         }
         

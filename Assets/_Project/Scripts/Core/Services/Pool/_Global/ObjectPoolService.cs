@@ -17,7 +17,7 @@ namespace Core.Pool
         private readonly IDictionary<Type, ObjectPool> _typePools = new Dictionary<Type, ObjectPool>();
         
         private Transform _pooledObjectsRoot;
-        public ObjectPoolService(AppConfigContainer appConfigContainer) => _poolServiceConfig = appConfigContainer.poolServiceConfig;
+        public ObjectPoolService(PoolServiceConfig poolServiceConfig) => _poolServiceConfig = poolServiceConfig;
 
         public void Initialize()
         {

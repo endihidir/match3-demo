@@ -7,9 +7,5 @@ namespace Core.Configs
     public class GameplayConfigContainer : ScriptableObject
     { 
         [field: SerializeField, Required] public GridConfigContainerSO GridConfigContainer { get; private set; }
-        public void Initialize()
-        {
-            
-        }
     }
 }
