@@ -6,7 +6,7 @@ using VContainer.Unity;
 
 namespace Game.DI
 {
-    public class LoadLifetimeScope : LifetimeScope
+    public class LoadingLifetimeScope : LifetimeScope
     {
         protected override void Configure(IContainerBuilder builder)
         {

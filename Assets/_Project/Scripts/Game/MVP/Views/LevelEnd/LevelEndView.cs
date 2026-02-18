@@ -6,8 +6,8 @@ namespace Game.Views
 {
     public class LevelEndView : MonoBehaviour, ILevelEndView
     {
-        [field: SerializeField] private AnimatedPanelModule SuccessMenuModule { get; set; }
-        [field: SerializeField] private AnimatedPanelModule FailMenuModule { get; set; }
+        [field: SerializeField] private AnimatedPanelModule SuccessPanel { get; set; }
+        [field: SerializeField] private AnimatedPanelModule FailPanel { get; set; }
         
         [field: SerializeField] private Button NextButton { get; set; }
         [field: SerializeField] private Button TryAgainButton { get; set; }
@@ -21,9 +21,9 @@ namespace Game.Views
             CloseSuccessMenu();
         }
 
-        public async UniTask OpenSuccessMenuViewAsync() => await SuccessMenuModule.ShowAsync(.5f);
-        public async UniTask OpenFailMenuViewAsync() => await FailMenuModule.ShowAsync(.5f);
-        public void CloseSuccessMenu() => SuccessMenuModule.Hide();
-        public void CloseFailMenu() => FailMenuModule.Hide();
+        public async UniTask OpenSuccessMenuViewAsync() => await SuccessPanel.ShowAsync(.5f);
+        public async UniTask OpenFailMenuViewAsync() => await FailPanel.ShowAsync(.5f);
+        public void CloseSuccessMenu() => SuccessPanel.Hide();
+        public void CloseFailMenu() => FailPanel.Hide();
     }
 }

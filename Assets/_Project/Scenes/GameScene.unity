@@ -263,8 +263,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 238b41e4409c4288b78ecb8c6794828f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <SuccessMenuModule>k__BackingField: {fileID: 468821373}
-  <FailMenuModule>k__BackingField: {fileID: 1341706358}
+  <SuccessPanel>k__BackingField: {fileID: 468821373}
+  <FailPanel>k__BackingField: {fileID: 1341706358}
   <NextButton>k__BackingField: {fileID: 1716512039}
   <TryAgainButton>k__BackingField: {fileID: 1607387664}
 --- !u!1 &195934559
@@ -377,7 +377,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   parentReference:
-    TypeName: Core.LifetimeScopes.AppLifetimeScope
+    TypeName: 
   autoRun: 1
   autoInjectGameObjects: []
   <GameplayConfigContainer>k__BackingField: {fileID: 11400000, guid: f503e54070851b94ebd161bb6103e266,
@@ -621,7 +621,7 @@ GameObject:
   - component: {fileID: 468821374}
   - component: {fileID: 468821373}
   m_Layer: 5
-  m_Name: SuccessMenuView
+  m_Name: SuccessPanelView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1784,7 +1784,7 @@ GameObject:
   - component: {fileID: 1341706359}
   - component: {fileID: 1341706358}
   m_Layer: 5
-  m_Name: FailMenuView
+  m_Name: FailPanelView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2785,6 +2785,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1870484136
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1870484137}
+  m_Layer: 0
+  m_Name: PooledObjectsHolder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1870484137
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1870484136}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -2797,3 +2828,4 @@ SceneRoots:
   - {fileID: 495241985}
   - {fileID: 886767913}
   - {fileID: 195934560}
+  - {fileID: 1870484137}

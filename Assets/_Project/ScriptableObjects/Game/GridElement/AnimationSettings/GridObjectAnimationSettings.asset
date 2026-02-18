@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4b83a5e34fa142daba3f92b23839eeb8, type: 3}
-  m_Name: ItemAnimationSettings
+  m_Name: GridObjectAnimationSettings
   m_EditorClassIdentifier: 
   <UseUnscaledTime>k__BackingField: 0
-  <BaseShiftDuration>k__BackingField: 0.18
+  <BaseShiftDuration>k__BackingField: 0.15
   <BaseShiftDelay>k__BackingField: 0.1
   <ShiftDistanceMultiplier>k__BackingField: 0.05
   <ShiftDelay>k__BackingField: 0.03
-  <BaseSlideDuration>k__BackingField: 0.06
+  <BaseSlideDuration>k__BackingField: 0.05
   <BaseSlideDelay>k__BackingField: 0.1
   <SlideDistanceMultiplier>k__BackingField: 0.05
-  <SlideDelay>k__BackingField: 0.075
+  <SlideDelay>k__BackingField: 0.03
   <BaseMoveDuration>k__BackingField: 0.15
   <BasePingPongDuration>k__BackingField: 0.15
   <ShakeDuration>k__BackingField: 0.25
