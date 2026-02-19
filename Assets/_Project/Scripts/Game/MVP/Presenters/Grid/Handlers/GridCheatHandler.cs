@@ -1,5 +1,8 @@
+using Core.Generated;
+using Core.Scene.Services;
 using Game.Grid.Item;
 using Core.Utils;
+using Cysharp.Threading.Tasks;
 using Game.Grid.Contexts;
 using Game.Grid.States;
 #if UNITY_EDITOR
@@ -13,7 +16,12 @@ namespace Game.Grid.Handlers
     public sealed class GridCheatHandler : IGridCheatHandler, ITickable
     {
         private readonly IGridStateHandler _gridStateHandler;
-        public GridCheatHandler(IGridStateHandler gridStateHandler) => _gridStateHandler = gridStateHandler;
+        private readonly ISceneLoadService _sceneLoadService;
+        public GridCheatHandler(IGridStateHandler gridStateHandler, ISceneLoadService sceneLoadService)
+        {
+            _gridStateHandler = gridStateHandler;
+            _sceneLoadService = sceneLoadService;
+        }
 
         public void Tick()
         {
@@ -33,6 +41,7 @@ namespace Game.Grid.Handlers
             if (Input.GetKeyDown(KeyCode.O)) Cleanup<ObstacleObject>();
             if (Input.GetKeyDown(KeyCode.R)) RemoveAtMousePos();
             if (Input.GetKeyDown(KeyCode.F)) ForceRefill();
+            if (Input.GetKeyDown(KeyCode.Space)) LoadMainMenu();
             
             if (Input.GetKeyDown(KeyCode.D))
             {
@@ -135,5 +144,7 @@ namespace Game.Grid.Handlers
             item.SetSpriteSize(context.GridView.GetCellSize());
             item.SetParent(context.GridView.GridObjectsParent);
         }
+
+        private void LoadMainMenu() => _sceneLoadService.LoadSceneGroupAsync(SceneGroupType.MenuScene, true).Forget();
     }
 }
