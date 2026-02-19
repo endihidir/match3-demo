@@ -158,6 +158,17 @@ _Project/
 ### Object Pooling
 A centralized `ObjectPoolService` with `PolymorphicPool` and `SinglePool` variants, configured via ScriptableObjects. Supports auto-release and is used extensively for grid objects, VFX particles, and UI slots.
 
+### Grid View
+`GridView` is the visual backbone of the gameplay scene, responsible for translating grid data into on-screen representation. On initialization it receives the grid dimensions and an active-cell mask, then performs three key steps: calculating the optimal cell size to fit the screen, computing the grid origin offset so the board is top-aligned, and generating a procedural mesh for the board background.
+
+Key responsibilities:
+
+- **Adaptive Cell Sizing** — Cell size is computed dynamically based on screen dimensions, side padding ratio, and cell spacing, then clamped to a configurable `MaxCellSize` via `GridLayoutConfigSO`
+- **Coordinate Conversion** — Provides `GridToWorld`, `WorldToGrid`, `GridToScreen`, and `ScreenToGridCoordinate` methods for seamless translation between grid coordinates, world space, and screen space
+- **Procedural Mesh Generation** — Builds a two-submesh board mesh at runtime (inner cell quads + pipe-style frame with rounded corners) through `GridMeshExtensions`, supporting holes for inactive cells. Frame thickness, corner smoothness, and mesh quality (Low/Medium/High segments) are configured via `GridMeshConfigSO`
+- **Input Direction Mapping** — Flips vertical input directions to account for the inverted Y-axis between screen space and grid coordinate space
+- **Editor Gizmos** — Optional grid gizmo drawing for visual debugging in the Scene view
+
 ### Grid Fill Strategies
 Two interchangeable fill strategies, resolved at runtime via `FillStrategyResolver`:
 
