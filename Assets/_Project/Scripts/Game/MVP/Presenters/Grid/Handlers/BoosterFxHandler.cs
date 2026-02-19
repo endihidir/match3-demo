@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Core.Utils;
 using Game.Configs;
 using Game.View.Factories;
 using Cysharp.Threading.Tasks;
@@ -24,7 +25,7 @@ namespace Game.Grid.Handlers
         public UniTask PlayBoosterFxAsync(BoosterActionContext action, IGridModel model, IGridView view, out float animSpeed)
         {
             animSpeed = _boosterConfigContainer.GetAnimationSpeed(action);
-
+            
             return action.BoosterAction switch
             {
                 RocketHorizontalAction rha => PlayRocketFxAsync(rha, view, animSpeed, action.OriginCoord, model.GridSize),

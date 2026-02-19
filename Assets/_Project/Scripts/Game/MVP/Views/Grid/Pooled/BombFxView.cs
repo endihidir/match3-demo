@@ -17,8 +17,9 @@ namespace Game.Views
         
         public override async UniTask PlayAsync()
         {
-            ParticleFxModule.Play();
-            await UniTask.WaitUntil(() => !ParticleFxModule.IsAlive);
+            ParticleFxModule.Restart();
+            await UniTask.Yield();
+            await UniTask.WaitUntil(() => !ParticleFxModule.HasAliveParticles);
         }
 
         protected override void OnDeactivate()

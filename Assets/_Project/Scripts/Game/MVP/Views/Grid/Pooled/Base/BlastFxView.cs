@@ -13,7 +13,7 @@ namespace Game.Views
         {
             if (!ParticleFxModule) return;
             ParticleFxModule.Play();
-            await UniTask.WaitUntil(() => !ParticleFxModule.IsAlive);
+            await UniTask.WaitUntil(() => !ParticleFxModule.HasAliveParticles);
         }
 
         public override void Stop()
