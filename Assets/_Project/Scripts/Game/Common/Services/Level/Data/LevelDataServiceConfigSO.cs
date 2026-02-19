@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Game.Configs
 {
     [CreateAssetMenu(fileName = "LevelDataServiceConfig", menuName = "Game/App/Services/LevelDataServiceConfig")]
-    public class LevelDataServiceConfigSO : ScriptableObject
+    public sealed class LevelDataServiceConfigSO : ScriptableObject
     {
         [field: SerializeField] public LevelSourceType SourceType { get; private set; }
         [field: SerializeField, ShowIf(nameof(IsResources))] public string ResourcesFolder { get; private set; }= "Levels";

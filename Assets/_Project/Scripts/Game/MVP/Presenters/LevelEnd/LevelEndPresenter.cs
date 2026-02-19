@@ -13,7 +13,7 @@ using VContainer.Unity;
 
 namespace Game.Presenters
 {
-    public class LevelEndPresenter : IInitializable, IDisposable
+    public sealed class LevelEndPresenter : IInitializable, IDisposable
     {
         private readonly IGridModel _gridModel;
         private readonly ILevelObjectiveModel _objectiveModel;

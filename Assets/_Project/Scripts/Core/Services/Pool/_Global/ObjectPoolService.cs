@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Core.Pool.Services
 {
-    public class ObjectPoolService : IObjectPoolService, IDisposable
+    public sealed class ObjectPoolService : IObjectPoolService, IDisposable
     {
         private const string ROOT_NAME = "PooledObjectsHolder";
         

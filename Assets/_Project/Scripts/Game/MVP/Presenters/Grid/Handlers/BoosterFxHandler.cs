@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Game.Grid.Handlers
 {
-    public class BoosterFxHandler : IBoosterFxHandler
+    public sealed class BoosterFxHandler : IBoosterFxHandler
     {
         private readonly IFXViewFactory _fxViewFactory;
         private readonly BoosterConfigContainerSO _boosterConfigContainer;

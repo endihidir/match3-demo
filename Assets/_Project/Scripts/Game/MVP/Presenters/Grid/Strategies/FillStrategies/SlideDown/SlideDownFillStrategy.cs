@@ -6,7 +6,7 @@ using Game.Models;
 
 namespace Game.Grid.Strategies
 {
-    public partial class SlideDownFillStrategy : IFillStrategy
+    public sealed partial class SlideDownFillStrategy : IFillStrategy
     {
         private readonly IFillItemDecider _itemDecider;
         private readonly IFallAnimationScheduler _fallAnimationScheduler;

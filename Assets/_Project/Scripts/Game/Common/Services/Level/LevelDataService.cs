@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Game.Level.Services
 {
-    public class LevelDataService : ILevelDataService
+    public sealed class LevelDataService : ILevelDataService
     {
         private readonly LevelDataServiceConfigSO _levelDataServiceConfigSo;
         public bool IsInitialized { get; private set; }

@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Game.Grid.Strategies
 {
-    public partial class SlideDownFillStrategy
+    public sealed partial class SlideDownFillStrategy
     {
         // One record per item (array + count)
         private readonly Dictionary<BaseGridObject, int> _recordIndexByItem = new(256);

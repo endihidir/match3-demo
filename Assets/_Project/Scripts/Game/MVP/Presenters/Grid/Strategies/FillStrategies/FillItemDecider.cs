@@ -17,7 +17,7 @@ namespace Game.Grid.Strategies
     /// - Be deterministic when seeded; otherwise use Unity RNG
     /// </summary>
     
-    public class FillItemDecider : IFillItemDecider
+    public sealed class FillItemDecider : IFillItemDecider
     {
         private readonly ItemType[] _allSpawnableTypes = GridSpawnPickerUtil.BuildAllSpawnableTypes();
         

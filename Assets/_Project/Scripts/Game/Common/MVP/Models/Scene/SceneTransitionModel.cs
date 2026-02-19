@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Core.Models
 {
-    public class SceneTransitionModel : ISceneTransitionModel
+    public sealed class SceneTransitionModel : ISceneTransitionModel
     {
         private readonly float _progressSpeed;
         public float FillAmount { get; private set; }

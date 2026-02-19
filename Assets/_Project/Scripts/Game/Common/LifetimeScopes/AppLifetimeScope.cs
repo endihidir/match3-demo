@@ -12,7 +12,7 @@ using VContainer.Unity;
 
 namespace Game.DI
 {
-    public class AppLifetimeScope : LifetimeScope
+    public sealed class AppLifetimeScope : LifetimeScope
     {
         [field: SerializeField] private AppConfigContainerSO AppConfigContainerSo {get; set;}
         
@@ -27,7 +27,6 @@ namespace Game.DI
             RegisterServices(builder);
             RegisterModels(builder);
             RegisterFactories(builder);
-            RegisterProviders(builder);
         }
         
         private static void RegisterServices(IContainerBuilder builder)
@@ -36,6 +35,7 @@ namespace Game.DI
             builder.Register<ObjectPoolService>(Lifetime.Singleton).As<IObjectPoolService>();
             builder.Register<LevelDataService>(Lifetime.Singleton).As<ILevelDataService>();
             builder.Register<JsonSaveService>(Lifetime.Singleton).As<IJsonSaveService>();
+            builder.Register<LevelDefinitionProvider>(Lifetime.Singleton).As<ILevelDefinitionProvider>();
         }
         
         private static void RegisterModels(IContainerBuilder builder)
@@ -47,11 +47,6 @@ namespace Game.DI
         {
             builder.Register<SlotViewFactory>(Lifetime.Singleton).As<ISlotViewFactory>();
             builder.Register<FXViewFactory>(Lifetime.Singleton).As<IFXViewFactory>();
-        }
-        
-        private static void RegisterProviders(IContainerBuilder builder)
-        {
-            builder.Register<LevelDefinitionProvider>(Lifetime.Singleton).As<ILevelDefinitionProvider>();
         }
     }
 }

@@ -11,7 +11,7 @@ using UnityEditor;
 namespace Game.Configs
 {
     [CreateAssetMenu(fileName = "SceneAsset", menuName = "Game/App/Assets/SceneAssetConfig")]
-    public class SceneAssetConfigSO : ScriptableObject
+    public sealed class SceneAssetConfigSO : ScriptableObject
     {
         [field: SerializeField, ShowIf(nameof(HasMultipleSceneData))] 
         private string SceneGroupId { get; set; }

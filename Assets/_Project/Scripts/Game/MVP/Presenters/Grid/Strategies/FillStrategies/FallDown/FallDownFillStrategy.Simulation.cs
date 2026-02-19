@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Game.Grid.Strategies
 {
-    public partial class FallDownFillStrategy
+    public sealed partial class FallDownFillStrategy
     {
         private void ShiftColumnLogic(IGridModel model, int x, int height)
         {

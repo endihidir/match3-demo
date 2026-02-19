@@ -7,7 +7,7 @@ namespace Game.Configs
     /// All tuning is done via this struct.
     /// </summary>
     [CreateAssetMenu(fileName = "FillSpawnDecisionConfig", menuName = "Game/Gameplay/Grid/FillSpawnDecisionConfig", order = 0)]
-    public class FillSpawnDecisionConfigSO : ScriptableObject
+    public sealed class FillSpawnDecisionConfigSO : ScriptableObject
     {
         // 0 = never allow immediate match (if possible)
         // 100 = fully allow immediate match

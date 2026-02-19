@@ -4,7 +4,7 @@ using Game.Grid.Strategies.Data;
 
 namespace Game.Grid.Strategies
 {
-    public partial class FallDownFillStrategy
+    public sealed partial class FallDownFillStrategy
     {
         private FallDownMoveRecord[] _records = Array.Empty<FallDownMoveRecord>();
         private int _recordCount;

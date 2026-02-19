@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Game.Configs
 {
     [CreateAssetMenu(fileName = "GridMeshConfig", menuName = "Game/Gameplay/Grid/View/GridMeshConfig")]
-    public class GridMeshConfigSO : ScriptableObject
+    public sealed class GridMeshConfigSO : ScriptableObject
     {
         [field: SerializeField] public float FrameThickness { get; private set; } = 0.25f;
         [field: SerializeField] public float CornerSmoothness { get; private set; } = 1f;

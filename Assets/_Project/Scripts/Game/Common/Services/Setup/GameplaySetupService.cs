@@ -10,7 +10,7 @@ using VContainer;
 
 namespace Game.Services
 {
-    public class GameplaySetupService : IGameplaySetupService
+    public sealed class GameplaySetupService : IGameplaySetupService
     {
         [Inject] private readonly ISceneLoadState _sceneLoadState;
         [Inject] private readonly ILevelDefinitionProvider _levelDefinitionProvider;

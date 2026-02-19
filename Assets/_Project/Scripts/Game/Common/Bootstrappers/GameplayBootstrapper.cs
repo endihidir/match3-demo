@@ -5,7 +5,7 @@ using VContainer.Unity;
 
 namespace Game.Bootstrappers
 {
-    public class GameplayBootstrapper : IInitializable, IDisposable
+    public sealed class GameplayBootstrapper : IInitializable, IDisposable
     {
         private readonly ISceneLoadState _sceneLoadState;
         private readonly IGameplaySetupService  _gameplaySetupService;

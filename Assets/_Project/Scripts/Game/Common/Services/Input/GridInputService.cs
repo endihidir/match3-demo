@@ -6,7 +6,7 @@ using VContainer.Unity;
 
 namespace Game.Grid.Services
 {
-    public class GridInputService : IGridInputService, ITickable, IDisposable
+    public sealed class GridInputService : IGridInputService, ITickable, IDisposable
     {
         private readonly InputActions _actions = new();
         public event Action<Vector2, Vector2Int> OnInputGet;

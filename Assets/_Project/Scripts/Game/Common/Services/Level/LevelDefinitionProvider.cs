@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Game.Level.Services
 {
-    public class LevelDefinitionProvider : ILevelDefinitionProvider
+    public sealed class LevelDefinitionProvider : ILevelDefinitionProvider
     {
         private readonly ILevelDataService _levelDataService;
         private readonly ILevelProgressionModel _progressionModel;
