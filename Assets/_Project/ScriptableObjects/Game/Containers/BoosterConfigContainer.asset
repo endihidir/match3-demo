@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3523fac44e14a08a2943003d725ee4a, type: 3}
   m_Name: BoosterConfigContainer
   m_EditorClassIdentifier: 
-  <BoosterComboConfigSo>k__BackingField: {fileID: 11400000, guid: cccd3d23ec1b86a4e8534d8e235742cd,
+  <BoosterComboDataSo>k__BackingField: {fileID: 11400000, guid: cccd3d23ec1b86a4e8534d8e235742cd,
     type: 2}
   <Configs>k__BackingField:
     <Map>k__BackingField:
