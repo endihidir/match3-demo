@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Game.Configs
 {
-    [CreateAssetMenu(fileName = "PoolAsset", menuName = "Match3/Pool/PoolAsset")]
+    [CreateAssetMenu(fileName = "PoolAsset", menuName = "Game/App/Assets/PooledAssetConfig")]
     public class PooledAssetConfig : ScriptableObject
     {
         [field: SerializeField] public bool IsLazy { get; private set; } = true;

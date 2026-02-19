@@ -3,8 +3,8 @@ using UnityEngine;
 
 namespace Game.Configs
 {
-    //[CreateAssetMenu(fileName = "BoosterMergeConfig", menuName = "Match3/ItemConfigs/BoosterMergeConfig", order = 0)]
-    public sealed class BoosterComboConfigSO : ScriptableObject
+    [CreateAssetMenu(fileName = "BoosterComboData", menuName = "Game/Gameplay/Grid/Data/BoosterComboData")]
+    public sealed class BoosterComboDataSO : ScriptableObject
     {
         [SerializeField] private ComboRule[] rules;
 

@@ -9,8 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 92bc40bb0ab143a98ad9c1b046f16604, type: 3}
-  m_Name: FillItemDecisionSettings
+  m_Script: {fileID: 11500000, guid: 132b5bcdc5214146bb46d93d32f7b7e1, type: 3}
+  m_Name: GridLayoutConfig
   m_EditorClassIdentifier: 
-  <ImmediateMatchChance>k__BackingField: 0
-  <NearMatchAvoidance>k__BackingField: 100
+  <MaxCellSize>k__BackingField: 3.25
+  <ScreenSidePaddingRatio>k__BackingField: 2
+  <CellSpacingRatio>k__BackingField: 0

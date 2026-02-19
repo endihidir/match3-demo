@@ -10,23 +10,23 @@ namespace Game.Level.Services
 {
     public class LevelDataService : ILevelDataService
     {
-        private readonly LevelDataServiceConfig _levelDataServiceConfig;
+        private readonly LevelDataServiceConfigSO _levelDataServiceConfigSo;
         public bool IsInitialized { get; private set; }
         public int LevelSize => LevelDefinitions?.Length ?? 0;
         public LevelDefinition[] LevelDefinitions { get; private set; }
         
-        private bool PreventInitialMatches => _levelDataServiceConfig.preventInitialMatches;
-        private bool UseSeededPattern => _levelDataServiceConfig.useSeededPattern;
-        private int SeedOverride => _levelDataServiceConfig.seedOverride;
+        private bool PreventInitialMatches => _levelDataServiceConfigSo.PreventInitialMatches;
+        private bool UseSeededPattern => _levelDataServiceConfigSo.UseSeededPattern;
+        private int SeedOverride => _levelDataServiceConfigSo.SeedOverride;
 
-        public LevelDataService(LevelDataServiceConfig levelDataServiceConfig)
+        public LevelDataService(LevelDataServiceConfigSO levelDataServiceConfigSo)
         {
-            _levelDataServiceConfig = levelDataServiceConfig;
+            _levelDataServiceConfigSo = levelDataServiceConfigSo;
         }
 
         public async UniTask<bool> InitializeAsync()
         {
-            switch (_levelDataServiceConfig.sourceType)
+            switch (_levelDataServiceConfigSo.SourceType)
             {
                 case LevelSourceType.Resources:
                     InitializeFromResources();
@@ -45,7 +45,7 @@ namespace Game.Level.Services
         
         private void InitializeFromResources()
         {
-            var assets = Resources.LoadAll<TextAsset>(_levelDataServiceConfig.resourcesFolder);
+            var assets = Resources.LoadAll<TextAsset>(_levelDataServiceConfigSo.ResourcesFolder);
             var list = new List<LevelDefinition>(assets.Length);
 
             foreach (var asset in assets)
@@ -67,7 +67,7 @@ namespace Game.Level.Services
 
         private async UniTask<TextAsset> LoadTextAssetAsync(int level)
         {
-            var path = _levelDataServiceConfig.GetResourcePath(level);
+            var path = _levelDataServiceConfigSo.GetResourcePath(level);
             var request = Resources.LoadAsync<TextAsset>(path);
             await request.ToUniTask();
             return request.asset as TextAsset;

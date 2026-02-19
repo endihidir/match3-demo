@@ -3,10 +3,10 @@ using UnityEngine;
 
 namespace Game.Configs
 {
-    //[CreateAssetMenu(fileName = "GridConfigContainer", menuName = "Match3/GridConfigContainer", order = 0)]
+    [CreateAssetMenu(fileName = "GridConfigContainer", menuName = "Game/Gameplay/Containers/GridConfigContainer")]
     public class GridConfigContainerSO : ScriptableObject
     { 
-        [field: SerializeField] public FillItemDecisionSettingsSO FillItemDecisionSettings { get; private set; }
+        [field: SerializeField] public FillSpawnDecisionConfigSO FillSpawnDecisionConfig { get; private set; }
         [field: SerializeField] private BaseGridObjectConfigContinerSO[] GridItemConfigContainers { get; set; }
         
         public BaseGridObjectDataSO GetConfigData(GridObjectType objectType) => objectType.ItemKind switch

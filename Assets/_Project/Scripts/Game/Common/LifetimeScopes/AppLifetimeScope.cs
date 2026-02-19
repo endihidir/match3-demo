@@ -14,13 +14,13 @@ namespace Game.DI
 {
     public class AppLifetimeScope : LifetimeScope
     {
-        [field: SerializeField] private AppConfigContainer AppConfigContainer {get; set;}
+        [field: SerializeField] private AppConfigContainerSO AppConfigContainerSo {get; set;}
         
         protected override void Configure(IContainerBuilder builder)
         {
-            builder.RegisterInstance(AppConfigContainer.LevelDataServiceConfig);
-            builder.RegisterInstance(AppConfigContainer.PoolServiceConfig);
-            builder.RegisterInstance(AppConfigContainer.SceneLoadServiceConfig);
+            builder.RegisterInstance(AppConfigContainerSo.LevelDataServiceConfig);
+            builder.RegisterInstance(AppConfigContainerSo.PoolServiceConfig);
+            builder.RegisterInstance(AppConfigContainerSo.SceneLoadServiceConfig);
             
             builder.RegisterEntryPoint<AppBootstrapper>();
 

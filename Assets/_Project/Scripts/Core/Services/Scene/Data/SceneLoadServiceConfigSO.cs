@@ -3,19 +3,18 @@ using System.Linq;
 using Eflatun.SceneReference;
 using Core.Utils;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Game.Configs
 {
-    //[CreateAssetMenu(fileName = "SceneLoadServiceConfig", menuName = "Match3/Services/SceneLoadServiceConfig", order = 0)]
-    public class SceneLoadServiceConfig : ScriptableObject
+    [CreateAssetMenu(fileName = "SceneLoadServiceConfig", menuName = "Game/App/Services/SceneLoadServiceConfig")]
+    public class SceneLoadServiceConfigSO : ScriptableObject
     {
-        [SerializeField] private List<SceneAssetConfig> sceneAssetConfigs;
+        [field: SerializeField] private List<SceneAssetConfigSO> SceneAssetConfigs { get; set; }
         [field: SerializeField] public float ProgressSpeed { get; private set; } = 4f;
         
         public List<SceneReference> GetSceneGroupData(string sceneGroupId)
         {
-            var sceneConfig = sceneAssetConfigs.FirstOrDefault(x => x.GetSceneGroupId() == sceneGroupId);
+            var sceneConfig = SceneAssetConfigs.FirstOrDefault(x => x.GetSceneGroupId() == sceneGroupId);
 
             var sceneReferences = new List<SceneReference>();
 
@@ -39,7 +38,7 @@ namespace Game.Configs
         {
             scene = default;
             
-            var sceneConfig = sceneAssetConfigs.FirstOrDefault(x => x.GetSceneGroupId() == sceneGroupId);
+            var sceneConfig = SceneAssetConfigs.FirstOrDefault(x => x.GetSceneGroupId() == sceneGroupId);
 
             if (!sceneConfig)
             {

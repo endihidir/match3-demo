@@ -18,8 +18,8 @@ namespace Game.Views
         [field: SerializeField] public Transform GridObjectsParent { get; private set; }
         [field: SerializeField] public Transform FXParent { get; private set; }
         [field: SerializeField] public MeshFilter GridMeshFilter { get; private set; }
-        [field: SerializeField] public GridMeshSettingsSO MeshSettings { get; private set; }
-        [field: SerializeField] public GridLayoutSettingsSO LayoutSettings { get; private set; }
+        [field: SerializeField] public GridMeshConfigSO MeshConfig { get; private set; }
+        [field: SerializeField] public GridLayoutConfigSO LayoutConfig { get; private set; }
         [field: SerializeField] public bool DrawGridGizmos { get; private set; }
         [field: SerializeField, ShowIf(nameof(DrawGridGizmos))] public Color GizmosColor { get; private set; } = Color.yellow;
         public event Action OnViewInitialized;
@@ -44,14 +44,14 @@ namespace Game.Views
         {
             var layout = new GridLayout
             {
-                screenSidePaddingRatio = LayoutSettings.ScreenSidePaddingRatio,
-                cellSpacingRatio = LayoutSettings.CellSpacingRatio,
+                screenSidePaddingRatio = LayoutConfig.ScreenSidePaddingRatio,
+                cellSpacingRatio = LayoutConfig.CellSpacingRatio,
                 originOffset = Vector3.zero,
                 cellSize = 0f
             };
             
             var cellSize = layout.CalculateCellSize(_gridSize, Cam);
-            layout.cellSize = Mathf.Clamp(cellSize, 0f, LayoutSettings.MaxCellSize);
+            layout.cellSize = Mathf.Clamp(cellSize, 0f, LayoutConfig.MaxCellSize);
             Layout = layout;
         }
         
@@ -74,7 +74,7 @@ namespace Game.Views
 
         private void GenerateMesh()
         {
-            var ms = MeshSettings;
+            var ms = MeshConfig;
             Layout.BuildGridMesh(_gridSize, GridMeshFilter, ms.FrameThickness, ms.CornerSmoothness, ms.GetCornerSegments(), IsCellActive);
         }
         public Vector3 GridToWorld(Vector2Int itemCoordinate) => Layout.GridToWorld(_gridSize, itemCoordinate, Cam);

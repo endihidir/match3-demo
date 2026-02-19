@@ -9,7 +9,7 @@ namespace Game.Editors
 {
     public class LevelEditorWindow : EditorWindow
     {
-        private LevelDataServiceConfig _config;
+        private LevelDataServiceConfigSO _configSo;
 
         private int _levelNumber = 1;
         private int _gridWidth = 10;
@@ -58,18 +58,18 @@ namespace Game.Editors
 
         private void DrawConfigField()
         {
-            _config = (LevelDataServiceConfig)EditorGUILayout.ObjectField(
+            _configSo = (LevelDataServiceConfigSO)EditorGUILayout.ObjectField(
                 "Level Data Config",
-                _config,
-                typeof(LevelDataServiceConfig),
+                _configSo,
+                typeof(LevelDataServiceConfigSO),
                 false
             );
 
-            if (!_config)
+            if (!_configSo)
             {
                 EditorGUILayout.HelpBox("LevelDataServiceConfig is not assigned. I will use LevelsRoot asset location (if it exists) to save JSON files.", MessageType.Info);
             }
-            else if (_config.sourceType != LevelSourceType.Resources)
+            else if (_configSo.SourceType != LevelSourceType.Resources)
             {
                 EditorGUILayout.HelpBox("Currently only LevelSourceType.Resources is supported. (We can add Addressables support later.)", MessageType.Info);
             }
@@ -140,7 +140,7 @@ namespace Game.Editors
 
         private void DrawCreateOrOverrideButton()
         {
-            if (_config != null && _config.sourceType != LevelSourceType.Resources)
+            if (_configSo != null && _configSo.SourceType != LevelSourceType.Resources)
             {
                 EditorGUILayout.HelpBox("Currently only LevelSourceType.Resources is supported. (We can add Addressables support later.)", MessageType.Info);
                 return;
@@ -186,7 +186,7 @@ namespace Game.Editors
 
         private void InitializeGrid()
         {
-            _config = Resources.Load<LevelDataServiceConfig>("Configs/LevelDataServiceConfig");
+            _configSo = Resources.Load<LevelDataServiceConfigSO>("Configs/LevelDataServiceConfig");
 
             _gridObjects = new JsonGridObjectType[_gridHeight, _gridWidth];
 
@@ -303,9 +303,9 @@ namespace Game.Editors
 
         private string ResolveLevelFileName(int levelNumber)
         {
-            var fileNameFormat = (!_config || string.IsNullOrEmpty(_config.fileNameFormat))
+            var fileNameFormat = (!_configSo || string.IsNullOrEmpty(_configSo.FileNameFormat))
                 ? "level_{0:00}"
-                : _config.fileNameFormat;
+                : _configSo.FileNameFormat;
 
             return string.Format(fileNameFormat, levelNumber);
         }
@@ -318,9 +318,9 @@ namespace Game.Editors
                 return levelsRootPath;
             }
             
-            if (_config && !string.IsNullOrEmpty(_config.resourcesFolder))
+            if (_configSo && !string.IsNullOrEmpty(_configSo.ResourcesFolder))
             {
-                var p = _config.resourcesFolder.Replace("\\", "/");
+                var p = _configSo.ResourcesFolder.Replace("\\", "/");
                 
                 if (!p.StartsWith("Assets/"))
                 {

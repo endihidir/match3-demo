@@ -1,8 +1,8 @@
 using UnityEngine;
 
-namespace Game.Configs.Core.Level
+namespace Game.Configs
 {
-    [CreateAssetMenu(fileName = "LevelsRoot", menuName = "Game/Levels Root", order = 0)]
+    [CreateAssetMenu(fileName = "LevelsRoot", menuName = "Game/Editor/Levels Root")]
     public class LevelsRootSO : ScriptableObject
     {
     }

@@ -19,11 +19,11 @@ namespace Game.DI
 {
     public class GameplayLifetimeScope : LifetimeScope
     {
-        [field: SerializeField] private GameplayConfigContainer GameplayConfigContainer { get; set; }
+        [field: SerializeField] private GameplayConfigContainerSO GameplayConfigContainerSo { get; set; }
 
         protected override void Configure(IContainerBuilder builder)
         {
-            builder.RegisterInstance(GameplayConfigContainer.GridConfigContainer);
+            builder.RegisterInstance(GameplayConfigContainerSo.GridConfigContainer);
             builder.RegisterEntryPoint<GameplayBootstrapper>();
     
             // SERVICE

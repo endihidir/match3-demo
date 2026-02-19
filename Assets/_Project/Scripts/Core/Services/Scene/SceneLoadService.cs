@@ -14,7 +14,7 @@ namespace Core.Scene.Services
 {
     public class SceneLoadService : ISceneLoadService, ISceneLoadState
     {
-        private readonly SceneLoadServiceConfig _sceneLoadConfig;
+        private readonly SceneLoadServiceConfigSO _sceneLoadConfigSo;
         private readonly AsyncOperationHandleGroup _handleGroup;
         private readonly AsyncOperationGroup _operationGroup;
         private readonly string _firstSceneName;
@@ -44,15 +44,15 @@ namespace Core.Scene.Services
 
         public bool IsInBootScene => ActiveSceneName.Equals(_firstSceneName);
 
-        public SceneLoadService(SceneLoadServiceConfig sceneLoadServiceConfig)
+        public SceneLoadService(SceneLoadServiceConfigSO sceneLoadServiceConfigSo)
         {
-            _sceneLoadConfig = sceneLoadServiceConfig;
+            _sceneLoadConfigSo = sceneLoadServiceConfigSo;
             _handleGroup = new AsyncOperationHandleGroup(10);
             _operationGroup = new AsyncOperationGroup(10);
             _firstSceneName = BuildSettingsUtils.GetFirstBuildSceneName();
             
             Progress = new ProgressHandler();
-            ProgressSpeed = _sceneLoadConfig.ProgressSpeed;
+            ProgressSpeed = _sceneLoadConfigSo.ProgressSpeed;
         }
 
         public async UniTask InitBootSceneAsync()
@@ -85,7 +85,7 @@ namespace Core.Scene.Services
             
             var sceneId = SceneIdLookup.GetSceneGroupId(groupType);
             
-            var sceneGroup = _sceneLoadConfig.GetSceneGroupData(sceneId);
+            var sceneGroup = _sceneLoadConfigSo.GetSceneGroupData(sceneId);
             
             foreach (var sceneReference in sceneGroup)
             {
@@ -114,7 +114,7 @@ namespace Core.Scene.Services
             
             OnScenesLoad?.Invoke();
             
-            if (_sceneLoadConfig.TryGetActiveSceneBy(sceneId, out var activeScene) && activeScene.IsValid())
+            if (_sceneLoadConfigSo.TryGetActiveSceneBy(sceneId, out var activeScene) && activeScene.IsValid())
             {
                 SceneManager.SetActiveScene(activeScene);
             }

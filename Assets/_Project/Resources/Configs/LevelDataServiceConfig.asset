@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c13b6591a961458e89eeecb5672cff7c, type: 3}
   m_Name: LevelDataServiceConfig
   m_EditorClassIdentifier: 
-  sourceType: 0
-  resourcesFolder: Levels
-  fileNameFormat: level_{0}
-  addressablesLabel: 
-  preventInitialMatches: 1
-  useSeededPattern: 1
-  seedOverride: 0
+  <SourceType>k__BackingField: 0
+  <ResourcesFolder>k__BackingField: Levels
+  <FileNameFormat>k__BackingField: level_{0}
+  <AddressableLabel>k__BackingField: 
+  <PreventInitialMatches>k__BackingField: 1
+  <UseSeededPattern>k__BackingField: 1
+  <SeedOverride>k__BackingField: 0

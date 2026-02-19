@@ -6,9 +6,9 @@ using UnityEngine;
 
 namespace Core.Utils
 {
-    public static class GridFillPickerUtil
+    public static class GridSpawnPickerUtil
     {
-        public static ItemType PickBest(IGridModel model, Vector2Int cell, Span<ItemType> types, int count, FillItemDecisionSettingsSO settings, Func<float> rnd01)
+        public static ItemType PickBest(IGridModel model, Vector2Int cell, Span<ItemType> types, int count, FillSpawnDecisionConfigSO config, Func<float> rnd01)
         {
             var best = types[0];
             var bestScore = float.MaxValue;
@@ -20,9 +20,9 @@ namespace Core.Utils
                 var score = 0f;
 
                 // Penalize near-match setups (adjacency / 2-in-a-row potential)
-                if (settings.NearMatchAvoidance > 0f)
+                if (config.NearMatchAvoidance > 0f)
                 {
-                    var nearAvoid01 = settings.NearMatchAvoidance / 100f;
+                    var nearAvoid01 = config.NearMatchAvoidance / 100f;
                     score += nearAvoid01 * NearMatchScore(model, cell, type);
                 }
 

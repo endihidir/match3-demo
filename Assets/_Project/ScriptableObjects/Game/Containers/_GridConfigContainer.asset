@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 803ffae681c248541bf8e86e4b94f80f, type: 3}
   m_Name: _GridConfigContainer
   m_EditorClassIdentifier: 
-  <FillItemDecisionSettings>k__BackingField: {fileID: 11400000, guid: becfe7e5b59c2dd4c9fc46fc0f2cdda3,
+  <FillSpawnDecisionConfig>k__BackingField: {fileID: 11400000, guid: becfe7e5b59c2dd4c9fc46fc0f2cdda3,
     type: 2}
   <GridItemConfigContainers>k__BackingField:
   - {fileID: 11400000, guid: 742832dd9da827243926bb27794c6008, type: 2}
