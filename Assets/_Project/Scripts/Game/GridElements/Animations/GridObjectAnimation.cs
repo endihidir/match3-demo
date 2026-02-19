@@ -6,7 +6,7 @@ namespace Game.Grid.Item
 {
     public class GridObjectAnimation : MonoBehaviour
     {
-        [field: SerializeField] private GridObjectAnimationSettingsSO Settings { get; set; }
+        [field: SerializeField] private GridObjectAnimationConfigSO Config { get; set; }
         [field: SerializeField] private Transform ItemHolder { get; set; }
         
         public bool IsFallInProgress => (_shiftTween != null && _shiftTween.IsActive() && !_shiftTween.IsComplete()) ||
@@ -28,7 +28,7 @@ namespace Game.Grid.Item
 
         private void CacheShakeTween()
         {
-            var duration = Settings.ShakeDuration / 3f;
+            var duration = Config.ShakeDuration / 3f;
 
             if(_shakeTween != null) return;
             
@@ -36,12 +36,12 @@ namespace Game.Grid.Item
             
             _shakeTween = DOTween.Sequence()
                 .SetAutoKill(false)
-                .Append(ItemHolder.transform.DOLocalRotate(Vector3.forward * Settings.ShakeRotAngle, duration))
-                .Append(ItemHolder.transform.DOLocalRotate(Vector3.back * Settings.ShakeRotAngle, duration))
+                .Append(ItemHolder.transform.DOLocalRotate(Vector3.forward * Config.ShakeRotAngle, duration))
+                .Append(ItemHolder.transform.DOLocalRotate(Vector3.back * Config.ShakeRotAngle, duration))
                 .Append(ItemHolder.transform.DOLocalRotate(Vector3.zero, duration))
                 .OnComplete(() => ItemHolder.transform.localRotation = Quaternion.identity)
                 .Pause()
-                .SetUpdate(Settings.UseUnscaledTime);
+                .SetUpdate(Config.UseUnscaledTime);
         }
 
         private void CacheSpringTween()
@@ -52,12 +52,12 @@ namespace Game.Grid.Item
             
             _springTween = DOTween.Sequence()
                 .SetAutoKill(false)
-                .Append(ItemHolder.transform.DOScale(Settings.SpringScale, Settings.SpringDuration).SetEase(Ease.OutQuad))
-                .Join(ItemHolder.transform.DOLocalMoveY(_itemHolderDefaultPos.y - Settings.SpringYMove, Settings.SpringDuration).SetEase(Ease.OutQuad))
-                .Append(ItemHolder.transform.DOScale(Vector3.one, Settings.SpringDuration).SetEase(Ease.InQuad))
-                .Join(ItemHolder.transform.DOLocalMoveY(_itemHolderDefaultPos.y, Settings.SpringDuration).SetEase(Ease.InQuad))
+                .Append(ItemHolder.transform.DOScale(Config.SpringScale, Config.SpringDuration).SetEase(Ease.OutQuad))
+                .Join(ItemHolder.transform.DOLocalMoveY(_itemHolderDefaultPos.y - Config.SpringYMove, Config.SpringDuration).SetEase(Ease.OutQuad))
+                .Append(ItemHolder.transform.DOScale(Vector3.one, Config.SpringDuration).SetEase(Ease.InQuad))
+                .Join(ItemHolder.transform.DOLocalMoveY(_itemHolderDefaultPos.y, Config.SpringDuration).SetEase(Ease.InQuad))
                 .Pause()
-                .SetUpdate(Settings.UseUnscaledTime);
+                .SetUpdate(Config.UseUnscaledTime);
         }
 
         public void Shake() => _shakeTween?.Restart();
@@ -69,19 +69,19 @@ namespace Game.Grid.Item
             
             _shiftTween?.Kill();
 
-            var distanceMultiplier = Settings.ShiftDistanceMultiplier;
-            var duration = Settings.BaseShiftDuration + (cellDistance * distanceMultiplier);
+            var distanceMultiplier = Config.ShiftDistanceMultiplier;
+            var duration = Config.BaseShiftDuration + (cellDistance * distanceMultiplier);
 
             _shiftTween = transform.DOMove(worldPos, duration)
                 .SetEase(Ease.InQuad)
-                .SetDelay(Settings.BaseShiftDelay + delay)
+                .SetDelay(Config.BaseShiftDelay + delay)
                 .OnComplete(Spring)
-                .SetUpdate(Settings.UseUnscaledTime);
+                .SetUpdate(Config.UseUnscaledTime);
 
             return _shiftTween;
         }
         
-        public float GetShiftDelay() => Settings.ShiftDelay;
+        public float GetShiftDelay() => Config.ShiftDelay;
 
         public Tween SlideAlongPath(Vector3[] points, int length, float[] cellDistances, float delay = 0f)
         {
@@ -90,27 +90,27 @@ namespace Game.Grid.Item
             _slideTween?.Kill();
 
             var seq = DOTween.Sequence()
-                .SetDelay(Settings.BaseSlideDelay + delay)
-                .SetUpdate(Settings.UseUnscaledTime);
+                .SetDelay(Config.BaseSlideDelay + delay)
+                .SetUpdate(Config.UseUnscaledTime);
 
-            var distanceMultiplier = Settings.SlideDistanceMultiplier;
+            var distanceMultiplier = Config.SlideDistanceMultiplier;
             for (int i = 0; i < length; i++)
-                seq.Append(transform.DOMove(points[i], Settings.BaseSlideDuration + (cellDistances[i] * distanceMultiplier)).SetEase(Ease.InQuad));
+                seq.Append(transform.DOMove(points[i], Config.BaseSlideDuration + (cellDistances[i] * distanceMultiplier)).SetEase(Ease.InQuad));
 
             _slideTween = seq.OnComplete(Spring);
             return _slideTween;
         }
         
-        public float GetSlideDelay() => Settings.SlideDelay;
+        public float GetSlideDelay() => Config.SlideDelay;
 
         public Tween PingPongMove(Vector3 defaultPos, Vector3 targetPos)
         {
             _pingPongTween?.Kill(true);
 
             _pingPongTween = DOTween.Sequence()
-                                .Append(transform.DOMove(targetPos, Settings.BasePingPongDuration).SetEase(Ease.Linear))
-                                .Append(transform.DOMove(defaultPos, Settings.BasePingPongDuration).SetEase(Ease.Linear))
-                                .SetUpdate(Settings.UseUnscaledTime);
+                                .Append(transform.DOMove(targetPos, Config.BasePingPongDuration).SetEase(Ease.Linear))
+                                .Append(transform.DOMove(defaultPos, Config.BasePingPongDuration).SetEase(Ease.Linear))
+                                .SetUpdate(Config.UseUnscaledTime);
             
             return _pingPongTween;
         }
@@ -119,9 +119,9 @@ namespace Game.Grid.Item
         {
             _moveTween?.Kill(true);
             
-            _moveTween = transform.DOMove(worldPos, Settings.BaseMoveDuration * durationMultiplier)
+            _moveTween = transform.DOMove(worldPos, Config.BaseMoveDuration * durationMultiplier)
                                   .SetEase(ease)
-                                  .SetUpdate(Settings.UseUnscaledTime);
+                                  .SetUpdate(Config.UseUnscaledTime);
 
             return _moveTween;
         }

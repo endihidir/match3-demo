@@ -67,28 +67,28 @@ namespace Core.Editors
             }
         }
 
-        private static SceneLoadServiceConfig FindFirstConfig()
+        private static SceneLoadServiceConfigSO FindFirstConfig()
         {
             var guids = AssetDatabase.FindAssets("t:SceneLoadServiceConfig");
             foreach (var guid in guids)
             {
                 var path = AssetDatabase.GUIDToAssetPath(guid);
-                var asset = AssetDatabase.LoadAssetAtPath<SceneLoadServiceConfig>(path);
+                var asset = AssetDatabase.LoadAssetAtPath<SceneLoadServiceConfigSO>(path);
                 if (asset) return asset;
             }
             return null;
         }
         
-        private static IEnumerable<string> ExtractSceneNames(SceneLoadServiceConfig config)
+        private static IEnumerable<string> ExtractSceneNames(SceneLoadServiceConfigSO configSo)
         {
-            var so = new SerializedObject(config);
+            var so = new SerializedObject(configSo);
             var listProp = so.FindProperty("sceneAssetConfigs");
             if (listProp == null || !listProp.isArray) yield break;
 
             for (int i = 0; i < listProp.arraySize; i++)
             {
                 var elem = listProp.GetArrayElementAtIndex(i);
-                var sceneAssetConfig = elem.objectReferenceValue as SceneAssetConfig;
+                var sceneAssetConfig = elem.objectReferenceValue as SceneAssetConfigSO;
                 if (sceneAssetConfig == null) continue;
                 
                 var groupId = sceneAssetConfig.GetSceneGroupId();

@@ -6,8 +6,8 @@ namespace Game.Configs
     /// External configuration for spawn behavior.
     /// All tuning is done via this struct.
     /// </summary>
-    [CreateAssetMenu(fileName = "FillItemDecisionSettings", menuName = "Match3/ItemConfigs/FillItemDecisionSettings", order = 0)]
-    public class FillItemDecisionSettingsSO : ScriptableObject
+    [CreateAssetMenu(fileName = "FillSpawnDecisionConfig", menuName = "Game/Gameplay/Grid/FillSpawnDecisionConfig", order = 0)]
+    public class FillSpawnDecisionConfigSO : ScriptableObject
     {
         // 0 = never allow immediate match (if possible)
         // 100 = fully allow immediate match

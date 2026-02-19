@@ -326,9 +326,9 @@ MonoBehaviour:
   <GridObjectsParent>k__BackingField: {fileID: 1824729426}
   <FXParent>k__BackingField: {fileID: 710867839}
   <GridMeshFilter>k__BackingField: {fileID: 875223620}
-  <MeshSettings>k__BackingField: {fileID: 11400000, guid: 2c79f37a5e38df54e9289139439a6618,
+  <MeshConfig>k__BackingField: {fileID: 11400000, guid: 2c79f37a5e38df54e9289139439a6618,
     type: 2}
-  <LayoutSettings>k__BackingField: {fileID: 11400000, guid: 6bb3c66aeb7bfce42a2513a510161df5,
+  <LayoutConfig>k__BackingField: {fileID: 11400000, guid: 6bb3c66aeb7bfce42a2513a510161df5,
     type: 2}
   <DrawGridGizmos>k__BackingField: 0
   <GizmosColor>k__BackingField: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
@@ -380,7 +380,7 @@ MonoBehaviour:
     TypeName: 
   autoRun: 1
   autoInjectGameObjects: []
-  <GameplayConfigContainer>k__BackingField: {fileID: 11400000, guid: f503e54070851b94ebd161bb6103e266,
+  <GameplayConfigContainerSo>k__BackingField: {fileID: 11400000, guid: f503e54070851b94ebd161bb6103e266,
     type: 2}
 --- !u!1 &302234687
 GameObject:

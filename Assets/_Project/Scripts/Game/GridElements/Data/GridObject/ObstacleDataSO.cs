@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Game.Configs
 {
-    [CreateAssetMenu(fileName = "ObstacleData", menuName = "Match3/ItemConfigs/Data/ObstacleData", order = -1)]
+    [CreateAssetMenu(fileName = "ObstacleData", menuName = "Game/Gameplay/Grid/Data/ObstacleData")]
     public class ObstacleDataSO : BaseGridObjectDataSO
     {
         [field: SerializeField, HideIf(nameof(HasCrackedSprites))] private int Life { get; set; }

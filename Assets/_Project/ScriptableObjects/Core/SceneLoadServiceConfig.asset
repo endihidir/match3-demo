@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b407e75d047481fbfa9b60fd0b562fa, type: 3}
   m_Name: SceneLoadServiceConfig
   m_EditorClassIdentifier: 
-  sceneAssetConfigs:
+  <SceneAssetConfigs>k__BackingField:
   - {fileID: 11400000, guid: 19a51d13761b2354fa6241b6f7c0f5dc, type: 2}
   - {fileID: 11400000, guid: db9c0b26870358f45911076fa81ba0dd, type: 2}
   <ProgressSpeed>k__BackingField: 10

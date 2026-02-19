@@ -48,5 +48,5 @@ MonoBehaviour:
     TypeName: 
   autoRun: 1
   autoInjectGameObjects: []
-  <AppConfigContainer>k__BackingField: {fileID: 11400000, guid: e5334ab3d076c72428bef2f9e76d2b2d,
+  <AppConfigContainerSo>k__BackingField: {fileID: 11400000, guid: e5334ab3d076c72428bef2f9e76d2b2d,
     type: 2}

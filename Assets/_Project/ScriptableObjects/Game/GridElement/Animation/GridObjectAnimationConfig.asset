@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4b83a5e34fa142daba3f92b23839eeb8, type: 3}
-  m_Name: GridObjectAnimationSettings
+  m_Name: GridObjectAnimationConfig
   m_EditorClassIdentifier: 
   <UseUnscaledTime>k__BackingField: 0
   <BaseShiftDuration>k__BackingField: 0.15

@@ -188,7 +188,7 @@ namespace Game.Grid.States
 
         private void AddComboAction(Vector2Int origin, BoosterType sourceBoosterType, BoosterType targetBoosterType)
         {
-            var boosterComboConfig = Context.GridConfigs.GetConfig<BoosterConfigContainerSO>().BoosterComboConfigSo;
+            var boosterComboConfig = Context.GridConfigs.GetConfig<BoosterConfigContainerSO>().BoosterComboDataSo;
 
             if (boosterComboConfig && boosterComboConfig.TryGetRule(sourceBoosterType, targetBoosterType, out var rule) && rule.Actions != null)
             {

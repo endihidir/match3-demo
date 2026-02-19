@@ -12,12 +12,12 @@ namespace Core.Pool.Services
     {
         private const string ROOT_NAME = "PooledObjectsHolder";
         
-        private readonly PoolServiceConfig _poolServiceConfig;
+        private readonly PoolServiceConfigSO _poolServiceConfigSo;
         private readonly IDictionary<int, ObjectPool> _idPools = new Dictionary<int, ObjectPool>();
         private readonly IDictionary<Type, ObjectPool> _typePools = new Dictionary<Type, ObjectPool>();
         
         private Transform _pooledObjectsRoot;
-        public ObjectPoolService(PoolServiceConfig poolServiceConfig) => _poolServiceConfig = poolServiceConfig;
+        public ObjectPoolService(PoolServiceConfigSO poolServiceConfigSo) => _poolServiceConfigSo = poolServiceConfigSo;
 
         public void Initialize()
         {
@@ -183,7 +183,7 @@ namespace Core.Pool.Services
 
         private ObjectPool CreateNewPool<T>() where T : Component, IPooledObject
         {
-            var poolData = _poolServiceConfig.poolDataConfigs;
+            var poolData = _poolServiceConfigSo.PooledAssets;
             var pooledAssetConfig = poolData.FirstOrDefault(x => x.PoolObject.GetComponent<T>());
 
             if (!pooledAssetConfig)

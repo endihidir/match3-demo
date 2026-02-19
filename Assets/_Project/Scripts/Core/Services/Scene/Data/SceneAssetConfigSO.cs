@@ -10,8 +10,8 @@ using UnityEditor;
 
 namespace Game.Configs
 {
-    [CreateAssetMenu(menuName = "Match3/SceneConfigs/SceneAssetConfig")]
-    public class SceneAssetConfig : ScriptableObject
+    [CreateAssetMenu(fileName = "SceneAsset", menuName = "Game/App/Assets/SceneAssetConfig")]
+    public class SceneAssetConfigSO : ScriptableObject
     {
         [field: SerializeField, ShowIf(nameof(HasMultipleSceneData))] 
         private string SceneGroupId { get; set; }

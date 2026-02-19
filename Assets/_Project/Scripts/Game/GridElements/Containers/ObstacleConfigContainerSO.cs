@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Game.Configs
 {
-    [CreateAssetMenu(fileName = "ObstacleConfigContainer", menuName = "Match3/ItemConfigs/ObstacleConfigContainer", order = -1)]
+    [CreateAssetMenu(fileName = "ObstacleConfigContainer", menuName = "Game/Gameplay/Grid/Containers/ObstacleConfigContainer")]
     public class ObstacleConfigContainerSO : BaseGridObjectConfigContinerSO
     {
         [field: SerializeField] 

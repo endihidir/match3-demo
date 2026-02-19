@@ -19,16 +19,16 @@ namespace Game.Grid.Strategies
     
     public class FillItemDecider : IFillItemDecider
     {
-        private readonly ItemType[] _allSpawnableTypes = GridFillPickerUtil.BuildAllSpawnableTypes();
+        private readonly ItemType[] _allSpawnableTypes = GridSpawnPickerUtil.BuildAllSpawnableTypes();
         
-        private readonly FillItemDecisionSettingsSO _decisionSettings;
+        private readonly FillSpawnDecisionConfigSO _decisionConfig;
         
         private System.Random _rng;
         public float SafetyBoost { get; private set; }
         
         public FillItemDecider(GridConfigContainerSO gridConfigContainer)
         {
-            _decisionSettings = gridConfigContainer.FillItemDecisionSettings;
+            _decisionConfig = gridConfigContainer.FillSpawnDecisionConfig;
             _rng = null;
         }
         
@@ -40,7 +40,6 @@ namespace Game.Grid.Strategies
         private float Next01() => _rng != null ? (float)_rng.NextDouble() : UnityEngine.Random.value;
 
         /// <summary>
-        /// Main entry point.
         /// Decides which item type should be spawned at the given cell.
         /// External safety bias (long refill chains etc.)
         /// </summary>
@@ -60,11 +59,11 @@ namespace Game.Grid.Strategies
                 var type = types[i];
 
                 // Avoid vertical stacks regardless of fill order (above OR below)
-                if (GridFillPickerUtil.IsSame(model, targetCoord.x, targetCoord.y + 1, type) ||
-                    GridFillPickerUtil.IsSame(model, targetCoord.x, targetCoord.y - 1, type))
+                if (GridSpawnPickerUtil.IsSame(model, targetCoord.x, targetCoord.y + 1, type) ||
+                    GridSpawnPickerUtil.IsSame(model, targetCoord.x, targetCoord.y - 1, type))
                     continue;
 
-                if (GridFillPickerUtil.CreatesImmediateMatch(model, targetCoord, type))
+                if (GridSpawnPickerUtil.CreatesImmediateMatch(model, targetCoord, type))
                     match[matchCount++] = type;
                 else
                     safe[safeCount++] = type;
@@ -74,7 +73,7 @@ namespace Game.Grid.Strategies
             if (safeCount == 0 && matchCount == 0)
                 return types[NextInt(0, types.Length)];
 
-            var immediateChance01 = Mathf.Clamp01((_decisionSettings.ImmediateMatchChance - SafetyBoost) / 100f);
+            var immediateChance01 = Mathf.Clamp01((_decisionConfig.ImmediateMatchChance - SafetyBoost) / 100f);
 
             var pickMatch = false;
 
@@ -84,8 +83,8 @@ namespace Game.Grid.Strategies
                 pickMatch = true;
 
             return pickMatch
-                ? GridFillPickerUtil.PickBest(model, targetCoord, match, matchCount, _decisionSettings, Next01)
-                : GridFillPickerUtil.PickBest(model, targetCoord, safe, safeCount, _decisionSettings, Next01);
+                ? GridSpawnPickerUtil.PickBest(model, targetCoord, match, matchCount, _decisionConfig, Next01)
+                : GridSpawnPickerUtil.PickBest(model, targetCoord, safe, safeCount, _decisionConfig, Next01);
         }
     }
 }
