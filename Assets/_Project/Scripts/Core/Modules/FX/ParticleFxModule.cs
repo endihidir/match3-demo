@@ -9,7 +9,8 @@ namespace Core.Modules
         
         public void Emit(int count) => ParticleSystem.Emit(count);
         public bool IsPlaying => ParticleSystem&& ParticleSystem.isPlaying;
-        public bool IsAlive => ParticleSystem && GetTotalParticleCount() > 0;
+        public bool IsAlive => ParticleSystem && ParticleSystem.IsAlive(true);
+        public bool HasAliveParticles => ParticleSystem && GetTotalParticleCount() > 0;
         public int ParticleCount => ParticleSystem.particleCount;
         
         public void Play() => ParticleSystem.Play();

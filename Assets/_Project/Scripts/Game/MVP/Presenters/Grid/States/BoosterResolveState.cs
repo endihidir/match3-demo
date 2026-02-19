@@ -57,7 +57,7 @@ namespace Game.Grid.States
         {
             var model = Context.GridModel;
             var view = Context.GridView;
-
+            
             var fxTask = _boosterFxHandler.PlayBoosterFxAsync(action, model, view, out var animSpeed);
             var timeline = BoosterTimelineBuilder.BuildTimeline(action, model, view, animSpeed);
             var timelineTask = ProcessTimelineAsync(timeline, action.BoosterAction.DamageAmount);
