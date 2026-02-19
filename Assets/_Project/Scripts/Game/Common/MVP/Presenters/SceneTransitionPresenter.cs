@@ -8,7 +8,7 @@ using VContainer.Unity;
 
 namespace Core.Presenters
 {
-    public class SceneTransitionPresenter : IInitializable, ITickable, IDisposable
+    public sealed class SceneTransitionPresenter : IInitializable, ITickable, IDisposable
     {
         private readonly ISceneLoadState _loadState;
         private readonly ISceneTransitionModel _transitionModel;

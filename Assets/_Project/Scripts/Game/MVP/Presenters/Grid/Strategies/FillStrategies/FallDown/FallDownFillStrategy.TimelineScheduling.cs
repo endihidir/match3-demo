@@ -6,7 +6,7 @@ using Game.Views;
 
 namespace Game.Grid.Strategies
 {
-    public partial class FallDownFillStrategy
+    public sealed partial class FallDownFillStrategy
     {
         private UniTask PlayAnimations(GridStateContext context)
         {

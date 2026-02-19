@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Game.Configs
 {
     [CreateAssetMenu(fileName = "GridConfigContainer", menuName = "Game/Gameplay/Containers/GridConfigContainer")]
-    public class GridConfigContainerSO : ScriptableObject
+    public sealed class GridConfigContainerSO : ScriptableObject
     { 
         [field: SerializeField] public FillSpawnDecisionConfigSO FillSpawnDecisionConfig { get; private set; }
         [field: SerializeField] private BaseGridObjectConfigContinerSO[] GridItemConfigContainers { get; set; }

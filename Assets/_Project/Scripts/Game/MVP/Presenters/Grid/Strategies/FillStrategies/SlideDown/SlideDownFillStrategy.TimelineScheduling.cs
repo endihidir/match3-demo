@@ -6,7 +6,7 @@ using Game.Views;
 
 namespace Game.Grid.Strategies
 {
-    public partial class SlideDownFillStrategy
+    public sealed partial class SlideDownFillStrategy
     {
         // =========================================================
         // Animation emit (column timeline scheduling)

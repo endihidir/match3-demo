@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Game.Grid.Item.Factories
 {
-    public class GridObjectFactory : IGridObjectFactory
+    public sealed class GridObjectFactory : IGridObjectFactory
     {
         private readonly IObjectPoolService _objectPoolService;
         public GridObjectFactory(IObjectPoolService objectPoolService) => _objectPoolService = objectPoolService;

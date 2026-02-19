@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Game.Configs
 {
     [CreateAssetMenu(fileName = "SceneLoadServiceConfig", menuName = "Game/App/Services/SceneLoadServiceConfig")]
-    public class SceneLoadServiceConfigSO : ScriptableObject
+    public sealed class SceneLoadServiceConfigSO : ScriptableObject
     {
         [field: SerializeField] private List<SceneAssetConfigSO> SceneAssetConfigs { get; set; }
         [field: SerializeField] public float ProgressSpeed { get; private set; } = 4f;

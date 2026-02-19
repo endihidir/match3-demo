@@ -10,7 +10,7 @@ using Game.Level.Data;
 
 namespace Game.HUD.Handlers
 {
-    public class GoalSlotHandler : IGoalSlotHandler
+    public sealed class GoalSlotHandler : IGoalSlotHandler
     {
         private readonly ISlotViewFactory _slotViewFactory;
         private readonly ObstacleConfigContainerSO _obstacleConfigContainer;

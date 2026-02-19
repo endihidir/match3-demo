@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Game.Models
 {
-    public class GridModel : BaseGridModel<BaseGridObject>, IGridModel
+    public sealed class GridModel : BaseGridModel<BaseGridObject>, IGridModel
     {
         private GridObjectType[,] _typeGrid;
         private GridObjectType[] _typeGridArray;

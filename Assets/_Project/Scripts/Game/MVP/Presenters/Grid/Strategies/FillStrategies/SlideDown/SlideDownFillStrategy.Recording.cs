@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Game.Grid.Strategies
 {
-    public partial class SlideDownFillStrategy
+    public sealed partial class SlideDownFillStrategy
     {
         // Records & path nodes
         // =========================================================

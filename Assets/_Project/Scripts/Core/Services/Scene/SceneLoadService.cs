@@ -12,7 +12,7 @@ using UnityEngine.SceneManagement;
 
 namespace Core.Scene.Services
 {
-    public class SceneLoadService : ISceneLoadService, ISceneLoadState
+    public sealed class SceneLoadService : ISceneLoadService, ISceneLoadState
     {
         private readonly SceneLoadServiceConfigSO _sceneLoadConfigSo;
         private readonly AsyncOperationHandleGroup _handleGroup;
