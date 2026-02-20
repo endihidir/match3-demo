@@ -36,8 +36,7 @@ namespace Game.Grid.Strategies
             EnsureBuffers(_gridModel.Width, _gridModel.Height);
 
             var movedAny = true;
-
-            // Keep looping while we can apply any movement (vertical fall, diagonal slide, spawn)
+            
             while (movedAny)
             {
                 movedAny = TryApplyAnyMove();
