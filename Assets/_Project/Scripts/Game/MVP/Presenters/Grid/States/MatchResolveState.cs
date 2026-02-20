@@ -6,6 +6,7 @@ using Game.Grid.Item;
 using Core.StateMachineCore;
 using Core.Utils;
 using Cysharp.Threading.Tasks;
+using Game.Grid.Handlers;
 using Game.Models;
 using Game.Utils;
 using UnityEngine;
@@ -15,12 +16,20 @@ namespace Game.Grid.States
     public sealed class MatchResolveState : StateBase<GridStateContext>
     {
         public override bool NeedsExitPermission => true;
+        private readonly IGridObjectSpawnHandler _objectSpawnHandler;
+        private readonly IGridObjectDestroyHandler _objectDestroyHandler;
+        private readonly ILevelGoalProgressHandler _goalProgressHandler;
 
         private UniTask[] _animationTasks = Array.Empty<UniTask>();
         private Vector2Int[] _coordBuffer = Array.Empty<Vector2Int>();
         private int _lastTaskCount;
 
-        public MatchResolveState(GridStateContext context) : base(context) { }
+        public MatchResolveState(GridStateContext context, IGridObjectSpawnHandler objectSpawnHandler, IGridObjectDestroyHandler objectDestroyHandler, ILevelGoalProgressHandler goalProgressHandler) : base(context)
+        {
+            _objectSpawnHandler = objectSpawnHandler;
+            _objectDestroyHandler = objectDestroyHandler;
+            _goalProgressHandler = goalProgressHandler;
+        }
 
         protected override void OnEnter()
         {
@@ -181,7 +190,7 @@ namespace Game.Grid.States
 
             if (centerObj)
             {
-                Context.GridObjectHandler.ReleaseItem(centerObj);
+               _objectDestroyHandler.ReleaseObject(centerObj);
             }
             
             SpawnBooster(centerCoord, boosterValue);
@@ -214,7 +223,7 @@ namespace Game.Grid.States
             {
                 if (!obj) continue;
 
-                Context.GridObjectHandler.ReleaseItem(obj);
+                _objectDestroyHandler.ReleaseObject(obj);
             }
         }
 
@@ -228,7 +237,7 @@ namespace Game.Grid.States
 
                 ApplyNeighbourDamage(model, coord);
                 
-                Context.ReleaseAndSetNull(obj, coord);
+                _objectDestroyHandler.DestroyGridObject(obj, coord);
             }
         }
 
@@ -248,9 +257,9 @@ namespace Game.Grid.States
 
                 if (result == GridDamageResult.Destroyed)
                 {
-                    Context.ProgressGoal(damageableItem, obj.Coord, obj.SpriteRenderer.size);
+                    _goalProgressHandler.ProgressGoal(damageableItem, obj.Coord, obj.SpriteRenderer.size);
                     
-                    Context.ReleaseAndSetNull(obj, obj.Coord);
+                    _objectDestroyHandler.DestroyGridObject(obj, obj.Coord);
                 }
             }
         }
@@ -281,7 +290,7 @@ namespace Game.Grid.States
 
         private void SpawnBooster(Vector2Int pos, BoosterType boosterType)
         {
-            var booster = Context.GridObjectHandler.GetBoosterItem(boosterType);
+            var booster = _objectSpawnHandler.GetBoosterItem(boosterType);
             Context.GridModel.SetGridObject(pos, booster);
             booster.SetPosition(Context.GridView.GridToWorld(pos));
             booster.SetSpriteSize(Context.GridView.GetCellSize());

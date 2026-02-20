@@ -7,6 +7,7 @@ namespace Core.Models
     {
         int Width { get; }
         int Height { get; }
+        int GridLenght { get; }
         Vector2Int GridSize { get; }
 
         bool[,] ActiveCells { get; }

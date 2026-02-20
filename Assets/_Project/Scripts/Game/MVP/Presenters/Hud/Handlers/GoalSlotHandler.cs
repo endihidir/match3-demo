@@ -41,8 +41,6 @@ namespace Game.HUD.Handlers
             SlotByType = new SerializedDictionary<ObstacleType, GoalSlotView>(GoalSlotViews.ToDictionary(x => x.ObstacleType));
         }
         
-        public void ReleaseAllGoalSlots() => _slotViewFactory.ReleaseSlotsByType<GoalSlotView>();
-        
         public bool TryGetGoalSlotView(ObstacleType obstacleType, out GoalSlotView goalSlotView)
         {
             if (SlotByType.TryGetValue(obstacleType, out goalSlotView)) return true;

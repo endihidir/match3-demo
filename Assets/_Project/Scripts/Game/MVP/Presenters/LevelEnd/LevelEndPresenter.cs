@@ -16,7 +16,7 @@ namespace Game.Presenters
     public sealed class LevelEndPresenter : IInitializable, IDisposable
     {
         private readonly IGridModel _gridModel;
-        private readonly ILevelObjectiveModel _objectiveModel;
+        private readonly ILevelGoalModel _goalModel;
         private readonly ILevelProgressionModel _progressionModel;
         private readonly ILevelEndView _levelEndView;
         private readonly IGridStateHandler _stateHandler;
@@ -24,11 +24,11 @@ namespace Game.Presenters
         private readonly IGameplaySetupService _gameplaySetupService;
         private bool _isLevelFailed = false;
 
-        public LevelEndPresenter(IGridModel model, ILevelObjectiveModel objectiveModel, ILevelProgressionModel progressionModel, ILevelEndView levelEndView, 
+        public LevelEndPresenter(IGridModel model, ILevelGoalModel goalModel, ILevelProgressionModel progressionModel, ILevelEndView levelEndView, 
             IGridStateHandler stateHandler, ISceneLoadService sceneLoadService, IGameplaySetupService gameplaySetupService)
         {
             _gridModel = model;
-            _objectiveModel = objectiveModel;
+            _goalModel = goalModel;
             _progressionModel = progressionModel;
             _levelEndView = levelEndView;
             _stateHandler = stateHandler;
@@ -38,8 +38,8 @@ namespace Game.Presenters
 
         public void Initialize()
         {
-            _objectiveModel.OnGoalsComplete += OnLevelCompleted;
-            _stateHandler.Context.OnDestructionStateComplete += OnDestructionStateComplete;
+            _goalModel.OnGoalsComplete += OnLevelCompleted;
+            _stateHandler.OnDestructionStateComplete += OnDestructionStateComplete;
             _levelEndView.OnClickNextButton.AddListener(OnClickNextButton);
             _levelEndView.OnClickTryAgainButton.AddListener(OnClickTryAgainButton);
         }
@@ -60,7 +60,7 @@ namespace Game.Presenters
 
         private void OnDestructionStateComplete()
         {
-            if(!_objectiveModel.IsAllMovesFinished) return;
+            if(!_goalModel.IsAllMovesFinished) return;
             
             if(_isLevelFailed) return;
             
@@ -77,8 +77,8 @@ namespace Game.Presenters
         {
             _levelEndView.OnClickTryAgainButton.RemoveListener(OnClickTryAgainButton);
             _levelEndView.OnClickNextButton.RemoveListener(OnClickNextButton);
-            _objectiveModel.OnGoalsComplete -= OnLevelCompleted;
-            _stateHandler.Context.OnDestructionStateComplete -= OnDestructionStateComplete;
+            _goalModel.OnGoalsComplete -= OnLevelCompleted;
+            _stateHandler.OnDestructionStateComplete -= OnDestructionStateComplete;
         }
     }
 }

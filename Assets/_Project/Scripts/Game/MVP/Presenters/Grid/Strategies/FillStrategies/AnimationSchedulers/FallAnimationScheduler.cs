@@ -7,7 +7,10 @@ namespace Game.Grid.Strategies.Schedulers
 {
     public sealed class FallAnimationScheduler : IFallAnimationScheduler
     {
-        public bool TrySchedule(IGridView view, in FallDownMoveRecord record, float startTime, out float endTime, out UniTask task)
+        private readonly IGridView _gridView;
+        public FallAnimationScheduler(IGridView gridView) => _gridView = gridView;
+        
+        public bool TrySchedule(in FallDownMoveRecord record, float startTime, out float endTime, out UniTask task)
         {
             task = UniTask.CompletedTask;
             
@@ -17,9 +20,9 @@ namespace Game.Grid.Strategies.Schedulers
 
             var startWorld = record.Item.transform.position;
             
-            var finalWorld = view.GridToWorld(record.FinalCoord);
+            var finalWorld = _gridView.GridToWorld(record.FinalCoord);
             
-            var distCells = Mathf.Abs(finalWorld.y - startWorld.y) / view.GetCellSize();
+            var distCells = Mathf.Abs(finalWorld.y - startWorld.y) / _gridView.GetCellSize();
 
             var animation = record.Item.Animation;
             

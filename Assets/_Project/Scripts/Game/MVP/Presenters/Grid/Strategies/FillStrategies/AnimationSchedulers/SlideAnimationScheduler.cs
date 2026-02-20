@@ -8,7 +8,10 @@ namespace Game.Grid.Strategies.Schedulers
 {
     public sealed class SlideAnimationScheduler : ISlideAnimationScheduler
     {
-        public bool TrySchedule(IGridView view, in SlideDownMoveRecord record, Vector2Int[] pathCoord, int[] pathNext, float startTime, out float endTime, out UniTask task)
+        private readonly IGridView _gridView;
+        public SlideAnimationScheduler(IGridView gridView) => _gridView = gridView;
+
+        public bool TrySchedule(in SlideDownMoveRecord record, Vector2Int[] pathCoord, int[] pathNext, float startTime, out float endTime, out UniTask task)
         {
             task = UniTask.CompletedTask;
             endTime = startTime;
@@ -29,7 +32,7 @@ namespace Game.Grid.Strategies.Schedulers
 
             while (node >= 0)
             {
-                path.Array[filled++] = view.GridToWorld(pathCoord[node]);
+                path.Array[filled++] = _gridView.GridToWorld(pathCoord[node]);
                 node = pathNext[node];
             }
 
@@ -38,7 +41,7 @@ namespace Game.Grid.Strategies.Schedulers
             for (int i = 0; i < length; i++)
             {
                 var next = path.Array[i];
-                seg.Array[i] = Mathf.Abs(next.y - current.y) / view.GetCellSize();
+                seg.Array[i] = Mathf.Abs(next.y - current.y) / _gridView.GetCellSize();
                 current = next;
             }
 

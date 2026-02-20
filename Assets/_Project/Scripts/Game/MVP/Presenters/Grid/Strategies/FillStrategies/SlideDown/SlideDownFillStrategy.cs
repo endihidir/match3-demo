@@ -1,19 +1,27 @@
 using Cysharp.Threading.Tasks;
-using Game.Grid.Contexts;
+using Game.Grid.Handlers;
 using Game.Grid.Strategies.Schedulers;
 using Game.Grid.Utils;
 using Game.Models;
+using Game.Views;
 
 namespace Game.Grid.Strategies
 {
     public sealed partial class SlideDownFillStrategy : IFillStrategy
     {
+        private readonly IGridModel _gridModel;
+        private readonly IGridView _gridView;
+        private readonly IGridObjectSpawnHandler _gridObjectSpawnHandler;
         private readonly IFillItemDecider _itemDecider;
         private readonly IFallAnimationScheduler _fallAnimationScheduler;
         private readonly ISlideAnimationScheduler _slideAnimationScheduler;
         
-        public SlideDownFillStrategy(IFillItemDecider itemDecider, IFallAnimationScheduler fallAnimationScheduler, ISlideAnimationScheduler slideAnimationScheduler)
+        public SlideDownFillStrategy(IGridModel gridModel, IGridView gridView, IGridObjectSpawnHandler gridObjectSpawnHandler, IFillItemDecider itemDecider, 
+            IFallAnimationScheduler fallAnimationScheduler, ISlideAnimationScheduler slideAnimationScheduler)
         {
+            _gridModel = gridModel;
+            _gridView = gridView;
+            _gridObjectSpawnHandler = gridObjectSpawnHandler;
             _itemDecider = itemDecider;
             _fallAnimationScheduler = fallAnimationScheduler;
             _slideAnimationScheduler = slideAnimationScheduler;
@@ -21,23 +29,21 @@ namespace Game.Grid.Strategies
 
         public bool CanHandle(IGridModel model) => GridFillCalcUtil.HasStationaryAndBlocking(model);
 
-        public IFillStrategy Execute(GridStateContext context)
+        public IFillStrategy Execute()
         {
             ResetWorkspace();
 
-            var model = context.GridModel;
-
-            EnsureBuffers(model.Width, model.Height);
+            EnsureBuffers(_gridModel.Width, _gridModel.Height);
 
             var movedAny = true;
 
             // Keep looping while we can apply any movement (vertical fall, diagonal slide, spawn)
             while (movedAny)
             {
-                movedAny = TryApplyAnyMove(context);
+                movedAny = TryApplyAnyMove();
             }
 
-            _runningAnimations = PlayAnimations(context);
+            _runningAnimations = PlayAnimations();
             
             return this;
         }

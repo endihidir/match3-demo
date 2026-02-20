@@ -3,8 +3,9 @@ using Core.Scene.Services;
 using Game.Grid.Item;
 using Core.Utils;
 using Cysharp.Threading.Tasks;
-using Game.Grid.Contexts;
 using Game.Grid.States;
+using Game.Models;
+using Game.Views;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -15,16 +16,28 @@ namespace Game.Grid.Handlers
 {
     public sealed class GridCheatHandler : IGridCheatHandler, ITickable
     {
+        private readonly IGridModel _gridModel;
+        private readonly IGridView _gridView;
         private readonly IGridStateHandler _gridStateHandler;
         private readonly ISceneLoadService _sceneLoadService;
-        public GridCheatHandler(IGridStateHandler gridStateHandler, ISceneLoadService sceneLoadService)
+        private readonly IGridObjectSpawnHandler _gridObjectSpawnHandler;
+        private readonly IGridObjectDestroyHandler _gridObjectDestroyHandler;
+        
+        public GridCheatHandler(IGridModel gridModel, IGridView gridView, IGridStateHandler gridStateHandler, ISceneLoadService sceneLoadService, 
+            IGridObjectSpawnHandler gridObjectSpawnHandler, IGridObjectDestroyHandler gridObjectDestroyHandler)
         {
+            _gridModel = gridModel;
+            _gridView = gridView;
+            _gridObjectSpawnHandler = gridObjectSpawnHandler;
             _gridStateHandler = gridStateHandler;
             _sceneLoadService = sceneLoadService;
+            _gridObjectDestroyHandler = gridObjectDestroyHandler;
         }
 
         public void Tick()
         {
+            if(!_gridView.IsInitialized) return;
+            
             if (Input.GetKeyDown(KeyCode.S)) GenerateItemAtMousePos(ItemType.Blue);
             if (Input.GetKeyDown(KeyCode.L)) GenerateItemAtMousePos(ItemType.Green);
             if (Input.GetKeyDown(KeyCode.A)) GenerateItemAtMousePos(ItemType.Red);
@@ -45,8 +58,7 @@ namespace Game.Grid.Handlers
             
             if (Input.GetKeyDown(KeyCode.D))
             {
-                if (_gridStateHandler != null) 
-                    EditorLogger.LogError(_gridStateHandler.StateMachine.CurrentState.StateID);
+                EditorLogger.LogError(_gridStateHandler.CurrentStateID);
             }
 
 #if UNITY_EDITOR
@@ -57,16 +69,15 @@ namespace Game.Grid.Handlers
 
         public void Cleanup<T>() where T : BaseGridObject
         {
-            if (!TryGetContext(out var context)) return;
-
-            for (int x = 0; x < context.GridModel.Width; x++)
+            for (int x = 0; x < _gridModel.Width; x++)
             {
-                for (int y = 0; y < context.GridModel.Height; y++)
+                for (int y = 0; y < _gridModel.Height; y++)
                 {
                     var coord = new Vector2Int(x, y);
-                    if (context.GridModel.GetGridObject(coord) is T)
+                    
+                    if (_gridModel.GetGridObject(coord) is T)
                     {
-                        ClearCell(context, coord);
+                        ClearCell(coord);
                         ForceRefill();
                     }
                 }
@@ -75,74 +86,60 @@ namespace Game.Grid.Handlers
         
         public void GenerateItemAtMousePos(ItemType type)
         {
-            if (!TryGetContext(out var context)) return;
+            var coord = GetMouseGridCoord();
+            if(!IsCellActive(coord)) return;
+            ClearCell(coord);
 
-            var coord = GetMouseGridCoord(context);
-            if(!IsCellActive(context, coord)) return;
-            ClearCell(context, coord);
-
-            var obstacle = context.GridObjectHandler.GetRegularItem(type);
-            PlaceItem(context, coord, obstacle);
+            var obstacle = _gridObjectSpawnHandler.GetRegularItem(type);
+            PlaceItem(coord, obstacle);
         }
 
         public void GenerateBoosterAtMousePos(BoosterType type)
         {
-            if (!TryGetContext(out var context)) return;
+            var coord = GetMouseGridCoord();
+            if(!IsCellActive(coord)) return;
+            ClearCell(coord);
 
-            var coord = GetMouseGridCoord(context);
-            if(!IsCellActive(context, coord)) return;
-            ClearCell(context, coord);
-
-            var booster = context.GridObjectHandler.GetBoosterItem(type);
-            PlaceItem(context, coord, booster);
+            var booster = _gridObjectSpawnHandler.GetBoosterItem(type);
+            PlaceItem(coord, booster);
         }
 
         public void GenerateObstacleAtMousePos(ObstacleType type)
         {
-            if (!TryGetContext(out var context)) return;
+            var coord = GetMouseGridCoord();
+            if(!IsCellActive(coord)) return;
+            ClearCell(coord);
 
-            var coord = GetMouseGridCoord(context);
-            if(!IsCellActive(context, coord)) return;
-            ClearCell(context, coord);
-
-            var obstacle = context.GridObjectHandler.GetObstacleItem(type);
-            PlaceItem(context, coord, obstacle);
+            var obstacle = _gridObjectSpawnHandler.GetObstacleItem(type);
+            PlaceItem(coord, obstacle);
         }
 
         public void RemoveAtMousePos()
         {
-            if (!TryGetContext(out var context)) return;
-
-            var coord = GetMouseGridCoord(context);
-            if(!IsCellActive(context, coord)) return;
-            ClearCell(context, coord);
+            var coord = GetMouseGridCoord();
+            if(!IsCellActive(coord)) return;
+            ClearCell(coord);
         }
 
-        public void ForceRefill() => _gridStateHandler.StateMachine?.ForceState<FillResolveState>();
+        public void ForceRefill() => _gridStateHandler.ForceState<FillResolveState>();
 
-        private bool TryGetContext(out GridStateContext context)
+        private Vector2Int GetMouseGridCoord() => _gridView.ScreenToGridCoordinate(Input.mousePosition);
+
+        private void ClearCell(Vector2Int coord)
         {
-            context = _gridStateHandler.Context;
-            return context != null && _gridStateHandler.StateMachine != null;
-        }
-
-        private Vector2Int GetMouseGridCoord(GridStateContext context) => context.GridView.ScreenToGridCoordinate(Input.mousePosition);
-
-        private void ClearCell(GridStateContext context, Vector2Int coord)
-        {
-            var obj = context.GridModel.GetGridObject(coord);
+            var obj = _gridModel.GetGridObject(coord);
             if (!obj) return;
-            context.ReleaseAndSetNull(obj, coord);
+            _gridObjectDestroyHandler.DestroyGridObject(obj, coord);
         }
 
-        private bool IsCellActive(GridStateContext context, Vector2Int coord) => context.GridModel.IsCellActive(coord);
+        private bool IsCellActive(Vector2Int coord) => _gridModel.IsCellActive(coord);
 
-        private void PlaceItem(GridStateContext context, Vector2Int coord, BaseGridObject item)
+        private void PlaceItem(Vector2Int coord, BaseGridObject item)
         {
-            context.GridModel.SetGridObject(coord, item);
-            item.SetPosition(context.GridView.GridToWorld(coord));
-            item.SetSpriteSize(context.GridView.GetCellSize());
-            item.SetParent(context.GridView.GridObjectsParent);
+            _gridModel.SetGridObject(coord, item);
+            item.SetPosition(_gridView.GridToWorld(coord));
+            item.SetSpriteSize(_gridView.GetCellSize());
+            item.SetParent(_gridView.GridObjectsParent);
         }
 
         private void LoadMainMenu() => _sceneLoadService.LoadSceneGroupAsync(SceneGroupType.MenuScene, true).Forget();

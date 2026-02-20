@@ -137,9 +137,9 @@ namespace Game.Grid.Utils
             return !model.GetGridObject(coord);
         }
 
-        public static bool TryGetSpawnCellCoord(IGridModel model, int x, int height, out Vector2Int cellCoord)
+        public static bool TryGetSpawnCellCoord(IGridModel model, int x, out Vector2Int cellCoord)
         {
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < model.Height; y++)
             {
                 var coord = new Vector2Int(x, y);
 
