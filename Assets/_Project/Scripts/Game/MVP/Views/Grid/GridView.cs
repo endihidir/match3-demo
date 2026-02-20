@@ -71,6 +71,8 @@ namespace Game.Views
             Layout.BuildGridMesh(_gridSize, GridMeshFilter, ms.FrameThickness, ms.CornerSmoothness, ms.GetCornerSegments(), IsCellActive);
         }
         
+        public Vector2Int ToGridDirection(Vector2Int direction) => new(direction.x, -direction.y);
+        
         public Vector2Int ScreenToGrid(Vector2 screenPos)
         {
             var worldPosition = Cam.ScreenToWorldPoint(screenPos);
@@ -86,13 +88,6 @@ namespace Game.Views
         public Vector3 GridToWorld(Vector2Int coord) => Layout.GridToWorld(_gridSize, coord, Cam);
         public Vector2Int WorldToGrid(Vector3 worldPos) => Layout.WorldToGrid(_gridSize, worldPos, Cam);
         public Vector2 SpriteToRectSize(Vector2 spriteSize) => UIWorldSpaceUtils.WorldSizeToUISize(spriteSize, Cam, Canvas);
-
-        public Vector2Int InputToGridDirection(Vector2Int inputDirection)
-        {
-            if (inputDirection == Vector2Int.up) return Vector2Int.down;
-            if (inputDirection == Vector2Int.down) return Vector2Int.up;
-            return inputDirection;
-        }
         public float GetCellSize() => Layout.cellSize;
 
 #if UNITY_EDITOR
