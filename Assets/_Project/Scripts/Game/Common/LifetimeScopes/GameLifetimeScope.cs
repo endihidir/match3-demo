@@ -44,9 +44,7 @@ namespace Game.DI
     
             // GRID
             builder.Register<GridObjectFactory>(Lifetime.Scoped).As<IGridObjectFactory>();
-            
-            builder.Register<GridObjectHandler>(Lifetime.Scoped).As<IGridObjectHandler>();
-            builder.Register<GridObjectSpawnHandler>(Lifetime.Scoped).As<IGridObjectSpawnHandler>();
+            builder.Register<GridObjectCreateHandler>(Lifetime.Scoped).As<IGridObjectCreateHandler>();
             builder.Register<GridObjectDestroyHandler>(Lifetime.Scoped).As<IGridObjectDestroyHandler>();
             
             builder.Register<LevelGoalProgressHandler>(Lifetime.Scoped).As<ILevelGoalProgressHandler>();

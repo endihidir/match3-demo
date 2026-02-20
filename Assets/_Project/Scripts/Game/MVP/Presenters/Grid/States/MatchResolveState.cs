@@ -16,7 +16,7 @@ namespace Game.Grid.States
     public sealed class MatchResolveState : StateBase<GridStateContext>
     {
         public override bool NeedsExitPermission => true;
-        private readonly IGridObjectSpawnHandler _objectSpawnHandler;
+        private readonly IGridObjectCreateHandler _objectCreateHandler;
         private readonly IGridObjectDestroyHandler _objectDestroyHandler;
         private readonly ILevelGoalProgressHandler _goalProgressHandler;
 
@@ -24,9 +24,9 @@ namespace Game.Grid.States
         private Vector2Int[] _coordBuffer = Array.Empty<Vector2Int>();
         private int _lastTaskCount;
 
-        public MatchResolveState(GridStateContext context, IGridObjectSpawnHandler objectSpawnHandler, IGridObjectDestroyHandler objectDestroyHandler, ILevelGoalProgressHandler goalProgressHandler) : base(context)
+        public MatchResolveState(GridStateContext context, IGridObjectCreateHandler objectCreateHandler, IGridObjectDestroyHandler objectDestroyHandler, ILevelGoalProgressHandler goalProgressHandler) : base(context)
         {
-            _objectSpawnHandler = objectSpawnHandler;
+            _objectCreateHandler = objectCreateHandler;
             _objectDestroyHandler = objectDestroyHandler;
             _goalProgressHandler = goalProgressHandler;
         }
@@ -290,7 +290,7 @@ namespace Game.Grid.States
 
         private void SpawnBooster(Vector2Int pos, BoosterType boosterType)
         {
-            var booster = _objectSpawnHandler.GetBoosterItem(boosterType);
+            var booster = _objectCreateHandler.CreateBooster(boosterType);
             Context.GridModel.SetGridObject(pos, booster);
             booster.SetPosition(Context.GridView.GridToWorld(pos));
             booster.SetSpriteSize(Context.GridView.GetCellSize());

@@ -45,7 +45,7 @@ namespace Game.Grid.Strategies
                 if(GridFillCalcUtil.HasStationaryAboveInSameSegment(_gridModel, coord, false)) continue;
 
                 var itemType = _itemDecider.Decide(coord);
-                var item = _gridObjectSpawnHandler.GetRegularItem(itemType);
+                var item = _objectCreateHandler.CreateItem(itemType);
 
                 item.SetParent(_gridView.GridObjectsParent);
                 item.SetSpriteSize(cellSize);
