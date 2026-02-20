@@ -27,8 +27,6 @@ namespace Game.Grid.States
 
         private async UniTask FillGridAsync()
         {
-            IsInProgress = true;
-            
             var strategy = _strategyResolver.ResolveStrategy();
         
             if (strategy == null)
@@ -36,6 +34,8 @@ namespace Game.Grid.States
                 EditorLogger.LogError("Fill strategy not found!");
                 return;
             }
+            
+            IsInProgress = true;
         
             await strategy.Execute().WaitAnimationsAsync();
             
