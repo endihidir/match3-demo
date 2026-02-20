@@ -38,7 +38,6 @@ namespace Game.Presenters
         private void OnViewInitialized()
         {
             PlaceGridItems();
-            
             _inputService.Enable();
         }
         
@@ -57,11 +56,11 @@ namespace Game.Presenters
             }
         }
 
-        private void OnInputGet(Vector2 sourcePos, Vector2Int inputDir)
+        private void OnInputGet(Vector2 mousePos, Vector2Int direction)
         {
-            var gridDir = _gridView.ToGridDirection(inputDir);
-            var sourceCoord = _gridView.ScreenToGrid(sourcePos);
-            _stateHandler.TryEnqueueInput(sourceCoord, gridDir);
+            var gridDirection = _gridView.ToGridDirection(direction);
+            var coord = _gridView.ScreenToGrid(mousePos);
+            _stateHandler.TryEnqueueInput(coord, gridDirection);
         }
         
         private void GoalsComplete() => _inputService.Disable();
@@ -69,7 +68,6 @@ namespace Game.Presenters
         private void OnMoveCountUpdate()
         {
             if (!_goalModel.IsAllMovesFinished) return;
-            
             _inputService.Disable();
         }
         

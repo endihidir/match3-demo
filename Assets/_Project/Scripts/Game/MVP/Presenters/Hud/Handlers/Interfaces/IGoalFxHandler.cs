@@ -8,6 +8,6 @@ namespace Game.HUD.Handlers
     public interface IGoalFxHandler
     {
         event Action<ObstacleType> OnGoalFxComplete;
-        void PlayFX(GoalSlotView targetSlotView, Vector3 startWorldPos, Vector2 rectSize, Transform fxHolder);
+        void PlayFX(GoalSlotView targetSlotView, Vector3 worldPos, Vector2 rectSize, Transform fxHolder);
     }
 }

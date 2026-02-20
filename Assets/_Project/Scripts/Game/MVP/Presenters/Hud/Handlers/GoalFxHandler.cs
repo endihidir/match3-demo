@@ -22,11 +22,11 @@ namespace Game.HUD.Handlers
             _obstacleConfigContainer = gridConfigContainer.GetConfig<ObstacleConfigContainerSO>();
         }
 
-        public void PlayFX(GoalSlotView targetSlotView, Vector3 startWorldPos, Vector2 rectSize, Transform fxHolder)
+        public void PlayFX(GoalSlotView targetSlotView, Vector3 worldPos, Vector2 rectSize, Transform fxHolder)
         {
             if (!_obstacleConfigContainer.Configs.TryGet(targetSlotView.ObstacleType, out var config)) return;
             
-            var goalFxView = PrepareFxView(fxHolder, startWorldPos, rectSize, config);
+            var goalFxView = PrepareFxView(fxHolder, worldPos, rectSize, config);
             var targetPos = targetSlotView.transform.position;
             var targetSize = targetSlotView.GetIconSize();
             
@@ -36,12 +36,12 @@ namespace Game.HUD.Handlers
                                     .OnComplete(() => OnFxComplete(goalFxView, targetSlotView.ObstacleType));
         }
 
-        private GoalFxView PrepareFxView(Transform fxHolder, Vector3 startWorldPos, Vector2 rectSize, ObstacleDataSO config)
+        private GoalFxView PrepareFxView(Transform fxHolder, Vector3 worldPos, Vector2 rectSize, ObstacleDataSO config)
         {
             var goalFxView = _fxFactory.GetFX<GoalFxView>();
             var sprite = config.CrackedSprites.Length > 0 ? config.CrackedSprites[0] : config.icon;
             goalFxView.transform.SetParent(fxHolder, false);
-            goalFxView.transform.position = startWorldPos;
+            goalFxView.transform.position = worldPos;
             goalFxView.ImageFxModule.SetSprite(sprite);
             goalFxView.ImageFxModule.SetRectSize(rectSize);
             return goalFxView;
