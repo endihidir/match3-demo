@@ -8,7 +8,7 @@ namespace Game.Grid.Handlers
     {
         string CurrentStateID { get; }
         event Action OnDestructionStateComplete;
-        bool TryEnqueueInput(Vector2Int sourceCoord, Vector2Int direction);
+        bool TryEnqueueInput(Vector2Int coord, Vector2Int direction);
         void ForceState<T>() where T : class, IState;
     }
 }

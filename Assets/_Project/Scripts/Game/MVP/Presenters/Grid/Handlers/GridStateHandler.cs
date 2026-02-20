@@ -65,15 +65,15 @@ namespace Game.Grid.Handlers
             _stateMachine.SetInitialState(idleState);
         }
 
-        public bool TryEnqueueInput(Vector2Int sourceCoord, Vector2Int direction)
+        public bool TryEnqueueInput(Vector2Int coord, Vector2Int direction)
         {
             if (_stateMachine.TryGet<ShuffleState>(out var shuffleState) && shuffleState.IsInProgress) return false;
             
             if (direction == Vector2Int.zero)
-                return TryEnqueueTap(sourceCoord);
+                return TryEnqueueTap(coord);
 
-            var targetCoord = sourceCoord + direction;
-            return TryEnqueueSwap(sourceCoord, targetCoord);
+            var targetCoord = coord + direction;
+            return TryEnqueueSwap(coord, targetCoord);
         }
 
         private bool TryEnqueueTap(Vector2Int sourceCoord)

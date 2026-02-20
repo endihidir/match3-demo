@@ -42,13 +42,13 @@ namespace Game.Presenters
         }
         private void OnMoveCountUpdate() => _hudView.SetMoveCount(_levelGoalModel.MoveCount);
 
-        private void OnGoalProgressUpdate(IDamageableGridObject damageableObj, Vector3 startWorldPos, Vector2 cellSize)
+        private void OnGoalProgressUpdate(IDamageableGridObject damageableObj, Vector3 worldPos, Vector2 cellSize)
         {
             if (damageableObj.IsCollectible)
             {
                 if (!_goalSlotHandler.TryGetGoalSlotView(damageableObj.ObstacleType, out var targetSlotView)) return;
 
-                _goalFxHandler.PlayFX(targetSlotView, startWorldPos, cellSize, _hudView.GoalFxHolder);
+                _goalFxHandler.PlayFX(targetSlotView, worldPos, cellSize, _hudView.GoalFxHolder);
             }
             else
             {
