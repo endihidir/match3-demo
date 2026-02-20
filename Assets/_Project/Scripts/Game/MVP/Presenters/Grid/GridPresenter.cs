@@ -60,7 +60,7 @@ namespace Game.Presenters
         private void OnInputGet(Vector2 sourcePos, Vector2Int inputDir)
         {
             var gridDir = _gridView.InputToGridDirection(inputDir);
-            var sourceCoord = _gridView.ScreenToGridCoordinate(sourcePos);
+            var sourceCoord = _gridView.ScreenToGrid(sourcePos);
             _stateHandler.TryEnqueueInput(sourceCoord, gridDir);
         }
         

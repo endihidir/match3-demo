@@ -164,7 +164,7 @@ A centralized `ObjectPoolService` with `PolymorphicPool` and `SinglePool` varian
 Key responsibilities:
 
 - **Adaptive Cell Sizing** — Cell size is computed dynamically based on screen dimensions, side padding ratio, and cell spacing, then clamped to a configurable `MaxCellSize` via `GridLayoutConfigSO`
-- **Coordinate Conversion** — Provides `GridToWorld`, `WorldToGrid`, `GridToScreen`, and `ScreenToGridCoordinate` methods for seamless translation between grid coordinates, world space, and screen space
+- **Coordinate Conversion** — Provides `GridToWorld`, `WorldToGrid`, `GridToScreen`, and `ScreenToGrid` methods for seamless translation between grid coordinates, world space, and screen space
 - **Procedural Mesh Generation** — Builds a two-submesh board mesh at runtime (inner cell quads + pipe-style frame with rounded corners) through `GridMeshExtensions`, supporting holes for inactive cells. Frame thickness, corner smoothness, and mesh quality (Low/Medium/High segments) are configured via `GridMeshConfigSO`
 - **Input Direction Mapping** — Flips vertical input directions to account for the inverted Y-axis between screen space and grid coordinate space
 - **Editor Gizmos** — Optional grid gizmo drawing for visual debugging in the Scene view
