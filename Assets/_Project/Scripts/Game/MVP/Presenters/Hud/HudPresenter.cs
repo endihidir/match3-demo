@@ -10,14 +10,14 @@ namespace Game.Presenters
 {
      public sealed class HudPresenter : IInitializable, IDisposable
     {
-        private readonly ILevelObjectiveModel _levelObjectiveModel;
+        private readonly ILevelGoalModel _levelGoalModel;
         private readonly IHudView _hudView;
         private readonly IGoalFxHandler _goalFxHandler;
         private readonly IGoalSlotHandler _goalSlotHandler;
 
-        public HudPresenter(ILevelObjectiveModel levelObjectiveModel, IHudView hudView, IGoalSlotHandler goalSlotHandler, IGoalFxHandler goalFxHandler)
+        public HudPresenter(ILevelGoalModel levelGoalModel, IHudView hudView, IGoalSlotHandler goalSlotHandler, IGoalFxHandler goalFxHandler)
         {
-            _levelObjectiveModel = levelObjectiveModel;
+            _levelGoalModel = levelGoalModel;
             _hudView = hudView;
             _goalSlotHandler = goalSlotHandler;
             _goalFxHandler = goalFxHandler;
@@ -26,8 +26,8 @@ namespace Game.Presenters
         public void Initialize()
         {
             _hudView.OnInitialize += OnHudViewInitialized;
-            _levelObjectiveModel.OnMoveCountUpdate += OnMoveCountUpdate;
-            _levelObjectiveModel.OnGoalProgressUpdate += OnGoalProgressUpdate;
+            _levelGoalModel.OnMoveCountUpdate += OnMoveCountUpdate;
+            _levelGoalModel.OnGoalProgressUpdate += OnGoalProgressUpdate;
             _goalFxHandler.OnGoalFxComplete += UpdateGoalSlotView;
         }
 
@@ -40,7 +40,7 @@ namespace Game.Presenters
                 goalSlotView.transform.SetParent(_hudView.GoalsHolder, false);
             }
         }
-        private void OnMoveCountUpdate() => _hudView.SetMoveCount(_levelObjectiveModel.MoveCount);
+        private void OnMoveCountUpdate() => _hudView.SetMoveCount(_levelGoalModel.MoveCount);
 
         private void OnGoalProgressUpdate(IDamageableGridObject damageableObj, Vector3 startWorldPos, Vector2 cellSize)
         {
@@ -66,8 +66,8 @@ namespace Game.Presenters
         public void Dispose()
         {
             _hudView.OnInitialize -= OnHudViewInitialized;
-            _levelObjectiveModel.OnMoveCountUpdate -= OnMoveCountUpdate;
-            _levelObjectiveModel.OnGoalProgressUpdate -= OnGoalProgressUpdate;
+            _levelGoalModel.OnMoveCountUpdate -= OnMoveCountUpdate;
+            _levelGoalModel.OnGoalProgressUpdate -= OnGoalProgressUpdate;
             _goalFxHandler.OnGoalFxComplete -= UpdateGoalSlotView;
         }
     }

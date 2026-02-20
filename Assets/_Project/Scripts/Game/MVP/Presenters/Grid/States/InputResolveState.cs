@@ -5,6 +5,7 @@ using Game.Grid.Item;
 using Core.StateMachineCore;
 using Core.Utils;
 using Cysharp.Threading.Tasks;
+using Game.Grid.Handlers;
 using Game.Grid.Handlers.Data;
 using UnityEngine;
 
@@ -13,7 +14,17 @@ namespace Game.Grid.States
     public sealed class InputResolveState : StateBase<GridStateContext>
     { 
         public override bool NeedsExitPermission => true;
-        public InputResolveState(GridStateContext context) : base(context) { }
+        private readonly BoosterComboDataSO _boosterComboData;
+        private readonly IGridObjectDestroyHandler _objectDestroyHandler;
+        private readonly ILevelGoalProgressHandler _levelGoalProgressHandler;
+
+        public InputResolveState(GridStateContext context, BoosterComboDataSO boosterComboData, IGridObjectDestroyHandler objectDestroyHandler, 
+            ILevelGoalProgressHandler levelGoalProgressHandler) : base(context)
+        {
+            _boosterComboData = boosterComboData;
+            _levelGoalProgressHandler = levelGoalProgressHandler;
+            _objectDestroyHandler = objectDestroyHandler;
+        }
 
         protected override void OnEnter()
         {
@@ -34,7 +45,7 @@ namespace Game.Grid.States
             
             if (hasInputGet)
             {
-                Context.LevelObjectiveModel.ConsumeMove();
+                _levelGoalProgressHandler.ProgressMove();
             }
             else
             {
@@ -62,7 +73,7 @@ namespace Game.Grid.States
             }
 
             AddBoosterAction(sourceCoord, booster);
-            Context.ReleaseAndSetNull(sourceObj, sourceCoord);
+            _objectDestroyHandler.DestroyGridObject(sourceObj, sourceCoord);
             onComplete?.Invoke();
             return true;
         }
@@ -158,22 +169,22 @@ namespace Game.Grid.States
             if (sourceObj is BoosterObject sourceBooster && targetObj is BoosterObject targetBooster)
             {
                 AddComboAction(sourceCoord, sourceBooster.BoosterType, targetBooster.BoosterType);
-                Context.ReleaseAndSetNull(sourceObj, sourceCoord);
-                Context.ReleaseAndSetNull(targetObj, targetCoord);
+                _objectDestroyHandler.DestroyGridObject(sourceObj, sourceCoord);
+                _objectDestroyHandler.DestroyGridObject(targetObj, targetCoord);
                 return;
             }
 
             if (targetObj is BoosterObject movedBoosterToB)
             {
                 AddBoosterAction(targetCoord, movedBoosterToB);
-                Context.ReleaseAndSetNull(targetObj, targetCoord);
+                _objectDestroyHandler.DestroyGridObject(targetObj, targetCoord);
                 return;
             }
 
             if (sourceObj is BoosterObject movedBoosterToA)
             {
                 AddBoosterAction(sourceCoord, movedBoosterToA);
-                Context.ReleaseAndSetNull(sourceObj, sourceCoord);
+                _objectDestroyHandler.DestroyGridObject(sourceObj, sourceCoord);
             }
         }
 
@@ -188,9 +199,7 @@ namespace Game.Grid.States
 
         private void AddComboAction(Vector2Int origin, BoosterType sourceBoosterType, BoosterType targetBoosterType)
         {
-            var boosterComboConfig = Context.GridConfigs.GetConfig<BoosterConfigContainerSO>().BoosterComboDataSo;
-
-            if (boosterComboConfig && boosterComboConfig.TryGetRule(sourceBoosterType, targetBoosterType, out var rule) && rule.Actions != null)
+            if (_boosterComboData.TryGetRule(sourceBoosterType, targetBoosterType, out var rule) && rule.Actions != null)
             {
                 foreach (var boosterAction in rule.Actions)
                 {

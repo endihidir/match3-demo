@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Core.Utils;
 using Game.Configs;
 using Game.View.Factories;
 using Cysharp.Threading.Tasks;
@@ -13,32 +12,38 @@ namespace Game.Grid.Handlers
 {
     public sealed class BoosterFxHandler : IBoosterFxHandler
     {
+        private readonly IGridModel _gridModel;
+        private readonly IGridView _gridView;
         private readonly IFXViewFactory _fxViewFactory;
         private readonly BoosterConfigContainerSO _boosterConfigContainer;
 
-        public BoosterFxHandler(IFXViewFactory fxViewFactory, GridConfigContainerSO gridConfigContainer)
+        public BoosterFxHandler(IGridModel gridModel, IGridView gridView, IFXViewFactory fxViewFactory, GridConfigContainerSO gridConfigContainer)
         {
+            _gridModel = gridModel;
+            _gridView = gridView;
             _fxViewFactory = fxViewFactory;
             _boosterConfigContainer = gridConfigContainer.GetConfig<BoosterConfigContainerSO>();
         }
 
-        public UniTask PlayBoosterFxAsync(BoosterActionContext action, IGridModel model, IGridView view, out float animSpeed)
+        public UniTask PlayBoosterFxAsync(BoosterActionContext action, out float animSpeed)
         {
             animSpeed = _boosterConfigContainer.GetAnimationSpeed(action);
             
             return action.BoosterAction switch
             {
-                RocketHorizontalAction rha => PlayRocketFxAsync(rha, view, animSpeed, action.OriginCoord, model.GridSize),
-                RocketVerticalAction rva => PlayRocketFxAsync(rva, view, animSpeed, action.OriginCoord, model.GridSize),
-                BombAction bmb => PlayBombFxAsync(bmb, view, animSpeed, action.OriginCoord),
+                RocketHorizontalAction rha => PlayRocketFxAsync(rha, animSpeed, action.OriginCoord),
+                RocketVerticalAction rva => PlayRocketFxAsync(rva, animSpeed, action.OriginCoord),
+                BombAction bmb => PlayBombFxAsync(bmb, animSpeed, action.OriginCoord),
                 _ => UniTask.CompletedTask
             };
         }
 
-        private async UniTask PlayRocketFxAsync(RocketActionBase action, IGridView view, float animSpeed, Vector2Int originCoord, Vector2Int gridSize)
+        private async UniTask PlayRocketFxAsync(RocketActionBase action, float animSpeed, Vector2Int originCoord)
         {
             var offsets = BoosterTimelineBuilder.BuildLineOffsets(action.LineCount);
-            var cellSize = view.GetCellSize();
+            
+            var cellSize = _gridView.GetCellSize();
+            var gridSize = _gridModel.GridSize;
             var isHorizontal = action is RocketHorizontalAction;
 
             List<UniTask> tasks = null;
@@ -52,16 +57,16 @@ namespace Game.Grid.Handlers
 
                 var rocketOrigin = isHorizontal ? new Vector2Int(originCoord.x, lineIndex) : new Vector2Int(lineIndex, originCoord.y);
 
-                var pos = view.GridToWorld(rocketOrigin);
+                var pos = _gridView.GridToWorld(rocketOrigin);
 
                 RocketFxView fx = isHorizontal ? _fxViewFactory.GetFX<HorizontalRocketFxView>() : _fxViewFactory.GetFX<VerticalRocketFxView>();
 
                 fx.ApplyData(animSpeed);
                 fx.UpdateRocketVisuals(cellSize);
-                fx.UpdateTargetPositions(view.Cam, pos);
+                fx.UpdateTargetPositions(_gridView.Cam, pos);
 
                 tasks ??= new List<UniTask>(offsets.Length);
-                tasks.Add(PlayAndReleaseAsync(fx, pos, view.FXParent));
+                tasks.Add(PlayAndReleaseAsync(fx, pos, _gridView.FXParent));
             }
 
             if (tasks == null) return;
@@ -69,12 +74,12 @@ namespace Game.Grid.Handlers
             await UniTask.WhenAll(tasks);
         }
 
-        private async UniTask PlayBombFxAsync(BombAction bombAction, IGridView view, float animSpeed, Vector2Int originCoord)
+        private async UniTask PlayBombFxAsync(BombAction bombAction, float animSpeed, Vector2Int originCoord)
         {
-            var pos = view.GridToWorld(originCoord);
+            var pos = _gridView.GridToWorld(originCoord);
             var fx = _fxViewFactory.GetFX<BombFxView>();
-            fx.ApplyData(bombAction.Radius, view.GetCellSize(), animSpeed);
-            await PlayAndReleaseAsync(fx, pos, view.FXParent);
+            fx.ApplyData(bombAction.Radius, _gridView.GetCellSize(), animSpeed);
+            await PlayAndReleaseAsync(fx, pos, _gridView.FXParent);
         }
 
         private async UniTask PlayAndReleaseAsync(BoosterFxView fx, Vector3 pos, Transform parent)

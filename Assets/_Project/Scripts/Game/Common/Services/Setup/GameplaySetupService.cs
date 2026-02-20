@@ -1,6 +1,8 @@
 using Core.Scene.Services;
 using Game.View.Factories;
 using Game.Grid.Handlers;
+using Game.Grid.Item;
+using Game.Grid.Item.Factories;
 using Game.HUD.Handlers;
 using Game.Level.Models;
 using Game.Level.Services;
@@ -20,10 +22,13 @@ namespace Game.Services
         [Inject] private readonly IGridView _gridView;
         
         [Inject] private readonly IGoalSlotHandler _goalSlotHandler;
-        [Inject] private readonly ILevelObjectiveModel _levelObjectiveModel;
+        [Inject] private readonly ILevelGoalModel _levelGoalModel;
         [Inject] private readonly IHudView _hudView;
         
         [Inject] private readonly ILevelEndView _levelEndView;
+        
+        [Inject] private readonly IGridObjectFactory _gridObjectFactory;
+        [Inject] private readonly ISlotViewFactory _slotViewFactory;
         [Inject] private readonly IFXViewFactory _fxViewFactory;
         
         public void SetupGameplay()
@@ -41,8 +46,8 @@ namespace Game.Services
         
         public void ReleaseFactories()
         {
-            _gridObjectHandler.ReleaseAllGridItems();
-            _goalSlotHandler.ReleaseAllGoalSlots();
+            _gridObjectFactory.ReleaseObjectsByType<BaseGridObject>();
+            _slotViewFactory.ReleaseSlotsByType<BaseSlotView>();
             _fxViewFactory.ReleaseFXesByType<BaseFxView>();
         }
         
@@ -51,7 +56,7 @@ namespace Game.Services
             var gridObjectTypes = _levelDefinitionProvider.GetGridObjectTypes();
             var width = gridObjectTypes.GetLength(0);
             var height = gridObjectTypes.GetLength(1);
-            _gridObjectHandler.PopulateGridItems(gridObjectTypes, width, height, out var gridItemObjects);
+            _gridObjectHandler.PopulateGridObjects(gridObjectTypes, width, height, out var gridItemObjects);
             _gridModel.Initialize(gridItemObjects, width, height, out var activeCells);
             _gridView.Initialize(width, height, activeCells);
         }
@@ -63,7 +68,7 @@ namespace Game.Services
             var levelGoals = _levelDefinitionProvider.GetLevelGoals();
             var levelMoveCount = _levelDefinitionProvider.GetMoveCount();
             _goalSlotHandler.PopulateSlotViews(levelGoals);
-            _levelObjectiveModel.Initialize(levelGoals, levelMoveCount);
+            _levelGoalModel.Initialize(levelGoals, levelMoveCount);
             _hudView.Initialize(levelGoals.Count, levelMoveCount);
         }
     }

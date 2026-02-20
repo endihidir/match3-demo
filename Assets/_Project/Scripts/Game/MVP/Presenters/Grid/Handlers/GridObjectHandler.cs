@@ -16,7 +16,7 @@ namespace Game.Grid.Handlers
             _gridConfigContainer = gridConfigContainer;
         }
         
-        public bool TryGetItem<T>(GridObjectType typeData, out T gridObject) where T : BaseGridObject
+        public bool TryGetObject<T>(GridObjectType typeData, out T gridObject) where T : BaseGridObject
         {
             gridObject = null;
             
@@ -25,6 +25,8 @@ namespace Game.Grid.Handlers
             if (!data) return false;
 
             gridObject = _gridObjectFactory.GetObject<T>();
+
+            if (!gridObject) return false;
             
             gridObject.Initialize(typeData)
                       .ApplyData(data);
@@ -32,7 +34,7 @@ namespace Game.Grid.Handlers
             return true;
         }
         
-        public void PopulateGridItems(GridObjectType[,] gridObjectTypes, int width, int height, out BaseGridObject[,] itemObjects)
+        public void PopulateGridObjects(GridObjectType[,] gridObjectTypes, int width, int height, out BaseGridObject[,] itemObjects)
         {
             itemObjects = new BaseGridObject[width, height];
 
@@ -45,65 +47,19 @@ namespace Game.Grid.Handlers
                 var typeData = gridObjectTypes[x, y];
                 if (typeData is { TypeId: -1 }) continue;
                 
-                itemObjects[x, y] = GetItem(typeData);
+                itemObjects[x, y] = GetObject(typeData);
             }
         }
 
-        public BaseGridObject GetItem(GridObjectType typeData)
+        public BaseGridObject GetObject(GridObjectType typeData)
         {
             return typeData.ItemKind switch
             {
-                GridItemKind.Regular => TryGetItem<ItemObject>(typeData, out var item) ? item : null,
-                GridItemKind.Booster => TryGetItem<BoosterObject>(typeData, out var boosterObject) ? boosterObject : null,
-                GridItemKind.Obstacle => TryGetItem<ObstacleObject>(typeData, out var obstacleObject) ? obstacleObject : null,
+                GridItemKind.Regular => TryGetObject<ItemObject>(typeData, out var item) ? item : null,
+                GridItemKind.Booster => TryGetObject<BoosterObject>(typeData, out var boosterObject) ? boosterObject : null,
+                GridItemKind.Obstacle => TryGetObject<ObstacleObject>(typeData, out var obstacleObject) ? obstacleObject : null,
                 _ => null
             };
-        }
-
-        public void ReleaseItem(BaseGridObject gridObject) => _gridObjectFactory.ReleaseObject(gridObject);
-        public void ReleaseAllGridItems() => _gridObjectFactory.ReleaseObjectsByType<BaseGridObject>();
-
-        // ---------- Typed creators ----------
-
-        public ItemObject GetRegularItem(ItemType itemType)
-        {
-            var typeData = new GridObjectType(GridItemKind.Regular, (int)itemType);
-            return TryGetItem<ItemObject>(typeData, out var item) ? item : null;
-        }
-
-        public ObstacleObject GetObstacleItem(ObstacleType obstacleType)
-        {
-            var typeData = new GridObjectType(GridItemKind.Obstacle, (int)obstacleType);
-            return TryGetItem<ObstacleObject>(typeData, out var obstacleObject) ? obstacleObject : null;
-        }
-        
-        public BoosterObject GetBoosterItem(BoosterType boosterType)
-        {
-            var typeData = new GridObjectType(GridItemKind.Booster, (int)boosterType);
-            return TryGetItem<BoosterObject>(typeData, out var boosterObject) ? boosterObject : null;
-        }
-        
-        // ---------- Random helpers ----------
-
-        public ItemObject GetRandomItem()
-        {
-            var randomType = LevelGridRandomUtil.GetRandomEnumValue<ItemType>(1);
-            var typeData = new GridObjectType(GridItemKind.Regular, (int)randomType);
-            return TryGetItem<ItemObject>(typeData, out var item) ? item : null;
-        }
-
-        public ObstacleObject GetRandomObstacle()
-        {
-            var randomType = LevelGridRandomUtil.GetRandomEnumValue<ObstacleType>(1);
-            var typeData = new GridObjectType(GridItemKind.Obstacle, (int)randomType);
-            return TryGetItem<ObstacleObject>(typeData, out var obstacleObject) ? obstacleObject : null;
-        }
-
-        public BoosterObject GetRandomBooster()
-        {
-            var randomType = LevelGridRandomUtil.GetRandomEnumValue<BoosterType>(1);
-            var typeData = new GridObjectType(GridItemKind.Booster, (int)randomType);
-            return TryGetItem<BoosterObject>(typeData, out var boosterObject) ? boosterObject : null;;
         }
     }
 }

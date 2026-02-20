@@ -1,7 +1,4 @@
-using Game.Grid.Contexts;
 using Game.Grid.Utils;
-using Game.Models;
-using Game.Views;
 using UnityEngine;
 
 namespace Game.Grid.Strategies
@@ -11,11 +8,9 @@ namespace Game.Grid.Strategies
         // Spawn
         // =========================================================
 
-        private bool SpawnTopOpenSegment(GridStateContext context, int x, int height)
+        private bool SpawnTopOpenSegment(int x, int height)
         {
-            var model = context.GridModel;
-            var view = context.GridView;
-            var cellSize = view.GetCellSize();
+            var cellSize = _gridView.GetCellSize();
 
             var spawnedAny = false;
             var segmentStartY = -1;
@@ -29,7 +24,7 @@ namespace Game.Grid.Strategies
             {
                 var c = new Vector2Int(x, y);
 
-                if (!model.IsCellActive(c))
+                if (!_gridModel.IsCellActive(c))
                 {
                     if (seenAnyActive)
                         canSpawn = false;
@@ -44,14 +39,14 @@ namespace Game.Grid.Strategies
                 if (segmentStartY < 0)
                 {
                     segmentStartY = y;
-                    segmentTopWorldY = view.GridToWorld(new Vector2Int(x, y)).y + cellSize;
+                    segmentTopWorldY = _gridView.GridToWorld(new Vector2Int(x, y)).y + cellSize;
                     blockedInSegment = false;
                 }
 
                 if (!canSpawn)
                     continue;
 
-                var obj = model.GetGridObject(c);
+                var obj = _gridModel.GetGridObject(c);
 
                 if (obj)
                 {
@@ -62,11 +57,11 @@ namespace Game.Grid.Strategies
                 if (blockedInSegment)
                     continue;
 
-                var spawnCount = GridFillCalcUtil.CountEmptiesDown(model, x, y, height);
+                var spawnCount = GridFillCalcUtil.CountEmptiesDown(_gridModel, x, y, height);
                 if (spawnCount <= 0)
                     continue;
 
-                SpawnInto(model, context, view, x, y, spawnCount, segmentTopWorldY, cellSize);
+                SpawnInto(x, y, spawnCount, segmentTopWorldY, cellSize);
 
                 spawnedAny = true;
                 y += spawnCount - 1;
@@ -75,7 +70,7 @@ namespace Game.Grid.Strategies
             return spawnedAny;
         }
         
-        private void SpawnInto(IGridModel model, GridStateContext context, IGridView view, int x, int startY, int spawnCount, float segmentTopWorldY, float cellSize)
+        private void SpawnInto(int x, int startY, int spawnCount, float segmentTopWorldY, float cellSize)
         {
             var baseStack = _spawnStackByX[x];
 
@@ -83,20 +78,20 @@ namespace Game.Grid.Strategies
             {
                 var target = new Vector2Int(x, startY + i);
 
-                var type = _itemDecider.Decide(model, target);
-                var item = context.GridObjectHandler.GetRegularItem(type);
+                var type = _itemDecider.Decide(target);
+                var item = _gridObjectSpawnHandler.GetRegularItem(type);
 
-                item.SetParent(view.GridObjectsParent);
+                item.SetParent(_gridView.GridObjectsParent);
                 item.SetSpriteSize(cellSize);
 
-                var w = view.GridToWorld(target);
+                var w = _gridView.GridToWorld(target);
 
                 var reverseIndex = (spawnCount - 1) - i;
                 var spawnY = segmentTopWorldY + (baseStack + reverseIndex) * cellSize;
 
                 item.SetPosition(new Vector3(w.x, spawnY, w.z));
 
-                model.SetGridObject(target, item);
+                _gridModel.SetGridObject(target, item);
                 AddStep(item, target, true);
             }
 

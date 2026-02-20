@@ -13,15 +13,15 @@ namespace Game.Presenters
     public sealed class GridPresenter : IInitializable, IDisposable
     {
         private readonly IGridModel _gridModel;
-        private readonly ILevelObjectiveModel _objectiveModel;
+        private readonly ILevelGoalModel _goalModel;
         private readonly IGridView _gridView;
         private readonly IGridInputService _inputService;
         private readonly IGridStateHandler _stateHandler;
 
-        public GridPresenter(IGridModel model, ILevelObjectiveModel objectiveModel, IGridView gridView, IGridInputService inputService, IGridStateHandler stateHandler)
+        public GridPresenter(IGridModel model, ILevelGoalModel goalModel, IGridView gridView, IGridInputService inputService, IGridStateHandler stateHandler)
         {
             _gridModel = model;
-            _objectiveModel = objectiveModel;
+            _goalModel = goalModel;
             _gridView = gridView;
             _inputService = inputService;
             _stateHandler = stateHandler;
@@ -31,8 +31,8 @@ namespace Game.Presenters
         {
             _gridView.OnViewInitialized += OnViewInitialized;
             _inputService.OnInputGet += OnInputGet;
-            _objectiveModel.OnGoalsComplete += OnObjectivesComplete;
-            _objectiveModel.OnMoveCountUpdate += OnMoveCountUpdate;
+            _goalModel.OnGoalsComplete += GoalsComplete;
+            _goalModel.OnMoveCountUpdate += OnMoveCountUpdate;
         }
         
         private void OnViewInitialized()
@@ -64,11 +64,11 @@ namespace Game.Presenters
             _stateHandler.TryEnqueueInput(sourceCoord, gridDir);
         }
         
-        private void OnObjectivesComplete() => _inputService.Disable();
+        private void GoalsComplete() => _inputService.Disable();
         
         private void OnMoveCountUpdate()
         {
-            if (!_objectiveModel.IsAllMovesFinished) return;
+            if (!_goalModel.IsAllMovesFinished) return;
             
             _inputService.Disable();
         }
@@ -77,8 +77,8 @@ namespace Game.Presenters
         {
             _inputService.OnInputGet -= OnInputGet;
             _gridView.OnViewInitialized -= OnViewInitialized;
-            _objectiveModel.OnGoalsComplete -= OnObjectivesComplete;
-            _objectiveModel.OnMoveCountUpdate -= OnMoveCountUpdate;
+            _goalModel.OnGoalsComplete -= GoalsComplete;
+            _goalModel.OnMoveCountUpdate -= OnMoveCountUpdate;
         }
     }
 }

@@ -37,7 +37,7 @@ namespace Game.Grid.States
                 return;
             }
         
-            await strategy.Execute(Context).WaitAnimationsAsync();
+            await strategy.Execute().WaitAnimationsAsync();
             
             Context.MatchResolveRequested = GridMatchCalcUtil.HasAnyRegularMatchOnBoard(Context.GridModel);
             

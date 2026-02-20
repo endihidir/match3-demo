@@ -1,10 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Game.Configs;
-using Game.Grid.Item;
-using Game.Grid.Handlers;
 using Game.Grid.Handlers.Data;
-using Game.Level.Models;
 using Game.Models;
 using Game.Views;
 using UnityEngine;
@@ -17,10 +13,6 @@ namespace Game.Grid.Contexts
         
         public IGridModel GridModel { get; }
         public IGridView GridView { get; }
-        public IGridObjectHandler GridObjectHandler { get; }
-        public ILevelObjectiveModel LevelObjectiveModel { get; }
-        public GridConfigContainerSO GridConfigs { get; }
-        public IBlastFxHandler BlastFxHandler { get; }
         
         public bool MatchResolveRequested { get; set; }
         
@@ -32,29 +24,10 @@ namespace Game.Grid.Contexts
         
         public event Action OnDestructionStateComplete;
 
-        public GridStateContext(IGridModel gridModel, IGridView gridView, IGridObjectHandler gridObjectHandler, ILevelObjectiveModel levelObjectiveModel, 
-            GridConfigContainerSO gridConfigs, IBlastFxHandler blastFxHandler)
+        public GridStateContext(IGridModel gridModel, IGridView gridView)
         {
             GridModel = gridModel;
             GridView = gridView;
-            GridObjectHandler = gridObjectHandler;
-            LevelObjectiveModel = levelObjectiveModel;
-            GridConfigs = gridConfigs;
-            BlastFxHandler = blastFxHandler;
-        }
-        
-        public void ReleaseAndSetNull(BaseGridObject obj, Vector2Int coord)
-        {
-            BlastFxHandler.PlayBlastParticle(obj, GridView.GridToWorld(coord), GridView.FXParent);
-            GridObjectHandler.ReleaseItem(obj);
-            GridModel.SetGridObject(coord, null);
-        }
-
-        public void ProgressGoal(IDamageableGridObject damageableGridObject, Vector2Int coord, Vector2 spriteSize)
-        {
-            var worldPos = GridView.GridToWorld(coord);
-            var rectSize = GridView.SpriteToRectSize(spriteSize);
-            LevelObjectiveModel.ProgressGoal(damageableGridObject, worldPos, rectSize);
         }
         
         public void RaiseDestructionStateComplete() => OnDestructionStateComplete?.Invoke();

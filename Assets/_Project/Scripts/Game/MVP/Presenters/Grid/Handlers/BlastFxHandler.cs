@@ -56,9 +56,7 @@ namespace Game.Grid.Handlers
             blastFxView.transform.SetParent(parent, false);
             blastFxView.transform.position = pos;
             await blastFxView.PlayAsync();
-            OnBlastFxComplete(blastFxView);
+            _fxViewFactory.ReleaseFX(blastFxView);
         }
-
-        private void OnBlastFxComplete(BlastFxView blastFxView) => _fxViewFactory.ReleaseFX(blastFxView);
     }
 }

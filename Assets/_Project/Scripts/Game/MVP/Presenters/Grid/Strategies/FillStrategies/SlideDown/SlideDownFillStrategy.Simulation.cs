@@ -1,5 +1,4 @@
 using System;
-using Game.Grid.Contexts;
 using Game.Grid.Utils;
 using Game.Models;
 using UnityEngine;
@@ -12,26 +11,26 @@ namespace Game.Grid.Strategies
         // Simulation loop
         // =========================================================
 
-        private bool TryApplyAnyMove(GridStateContext context)
+        private bool TryApplyAnyMove()
         {
-            var height = context.GridModel.Height;
-            var width = context.GridModel.Width;
+            var height = _gridModel.Height;
+            var width = _gridModel.Width;
             
             var movedAny = false;
             var movedByGravity = false;
             
-            movedByGravity |= ApplyVerticalFalls(context.GridModel, width, height);
-            movedByGravity |= ApplyDiagonalSlides(context.GridModel, width, height);
+            movedByGravity |= ApplyVerticalFalls(width, height);
+            movedByGravity |= ApplyDiagonalSlides(width, height);
             
             movedAny |= movedByGravity;
             
             if (!movedByGravity)
-                movedAny |= ApplySpawns(context, width, height);
+                movedAny |= ApplySpawns(width, height);
 
             return movedAny;
         }
 
-        private bool ApplyVerticalFalls(IGridModel model, int width, int height)
+        private bool ApplyVerticalFalls(int width, int height)
         {
             var movedAny = false;
 
@@ -41,16 +40,16 @@ namespace Game.Grid.Strategies
                 {
                     var dst = new Vector2Int(x, y);
 
-                    if (!GridFillCalcUtil.IsEmptyActiveCell(model, dst)) continue;
-                    if (!GridFillCalcUtil.CanFallVertically(model, x, y, out var src)) continue;
+                    if (!GridFillCalcUtil.IsEmptyActiveCell(_gridModel, dst)) continue;
+                    if (!GridFillCalcUtil.CanFallVertically(_gridModel, x, y, out var src)) continue;
 
-                    var item = model.GetGridObject(src);
+                    var item = _gridModel.GetGridObject(src);
                     if (!item || item.IsStationary) continue;
 
                     AddStep(item, src, false);
                     
-                    model.SetGridObject(src, null);
-                    model.SetGridObject(dst, item);
+                    _gridModel.SetGridObject(src, null);
+                    _gridModel.SetGridObject(dst, item);
 
                     AddStep(item, dst, false);
                     movedAny = true;
@@ -60,7 +59,7 @@ namespace Game.Grid.Strategies
             return movedAny;
         }
 
-        private bool ApplyDiagonalSlides(IGridModel model, int width, int height)
+        private bool ApplyDiagonalSlides(int width, int height)
         {
             var movedAny = false;
             BumpStamps();
@@ -71,15 +70,15 @@ namespace Game.Grid.Strategies
                 {
                     var targetCoord = new Vector2Int(x, y);
 
-                    if (!GridFillCalcUtil.IsEmptyActiveCell(model, targetCoord)) continue;
-                    if (GridFillCalcUtil.CanFallVertically(model, x, y, out _)) continue;
+                    if (!GridFillCalcUtil.IsEmptyActiveCell(_gridModel, targetCoord)) continue;
+                    if (GridFillCalcUtil.CanFallVertically(_gridModel, x, y, out _)) continue;
 
                     // Alternate side preference deterministically
                     var firstDir = ((x ^ y ^ _usedTargetStampId) & 1) == 0 ? -1 : 1;
                     var secondDir = -firstDir;
 
-                    if (TryApplySlideCandidate(model, width, targetCoord, firstDir) || 
-                        TryApplySlideCandidate(model, width, targetCoord, secondDir))
+                    if (TryApplySlideCandidate(_gridModel, width, targetCoord, firstDir) || 
+                        TryApplySlideCandidate(_gridModel, width, targetCoord, secondDir))
                     {
                         //AddStep(movedItem, target, false);
                         movedAny = true;
@@ -90,13 +89,13 @@ namespace Game.Grid.Strategies
             return movedAny;
         }
 
-        private bool ApplySpawns(GridStateContext context, int width, int height)
+        private bool ApplySpawns(int width, int height)
         {
             var movedAny = false;
 
             for (int x = 0; x < width; x++)
             {
-                if (SpawnTopOpenSegment(context, x, height))
+                if (SpawnTopOpenSegment(x, height)) 
                     movedAny = true;
             }
 

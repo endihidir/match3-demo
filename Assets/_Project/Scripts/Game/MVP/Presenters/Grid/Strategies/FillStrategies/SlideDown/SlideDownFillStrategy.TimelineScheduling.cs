@@ -12,7 +12,7 @@ namespace Game.Grid.Strategies
         // Animation emit (column timeline scheduling)
         // =========================================================
 
-        private UniTask PlayAnimations(GridStateContext context)
+        private UniTask PlayAnimations()
         {
             if (_recordCount == 0)
                 return UniTask.CompletedTask;
@@ -37,15 +37,14 @@ namespace Game.Grid.Strategies
                 Array.Resize(ref _animTasks, _recordCount);
 
             // Reset timelines.
-            var width = context.GridModel.Width;
+            var width = _gridModel.Width;
             for (int x = 0; x < width; x++)
                 _timelineByX[x] = 0f;
 
             var taskCount = 0;
-
-            var view = context.GridView;
-            ScheduleByTimeline(view, width, passIsSpawn: false, ref taskCount);
-            ScheduleByTimeline(view, width, passIsSpawn: true, ref taskCount);
+            
+            ScheduleByTimeline(width, passIsSpawn: false, ref taskCount);
+            ScheduleByTimeline(width, passIsSpawn: true, ref taskCount);
 
             if (taskCount == 0)
                 return UniTask.CompletedTask;
@@ -78,7 +77,7 @@ namespace Game.Grid.Strategies
                 Array.Resize(ref _order, need);
         }
 
-        private void ScheduleByTimeline(IGridView view, int width, bool passIsSpawn, ref int taskCount)
+        private void ScheduleByTimeline(int width, bool passIsSpawn, ref int taskCount)
         {
             for (int i = 0; i < _recordCount; i++)
             {
@@ -95,7 +94,7 @@ namespace Game.Grid.Strategies
                 {
                     var fallRecord = new FallDownMoveRecord(record.Item, record.FinalCoord, record.IsSpawn);
 
-                    if (_fallAnimationScheduler.TrySchedule(view, fallRecord, startTime, out var endTime, out var task))
+                    if (_fallAnimationScheduler.TrySchedule(fallRecord, startTime, out var endTime, out var task))
                     {
                         UpdateTimeline(usedCount, endTime);
                         _animTasks[taskCount++] = task;
@@ -103,7 +102,7 @@ namespace Game.Grid.Strategies
                 }
                 else
                 {
-                    if (_slideAnimationScheduler.TrySchedule(view, record, _pathCoord, _pathNext, startTime, out var endTime, out var task))
+                    if (_slideAnimationScheduler.TrySchedule(record, _pathCoord, _pathNext, startTime, out var endTime, out var task))
                     {
                         UpdateTimeline(usedCount, endTime);
                         _animTasks[taskCount++] = task;

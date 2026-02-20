@@ -10,6 +10,5 @@ namespace Game.HUD.Handlers
         GoalSlotView[] GoalSlotViews { get; }
         void PopulateSlotViews(List<LevelGoal> levelGoals);
         bool TryGetGoalSlotView(ObstacleType obstacleType, out GoalSlotView goalSlotView);
-        void ReleaseAllGoalSlots();
     }
 }

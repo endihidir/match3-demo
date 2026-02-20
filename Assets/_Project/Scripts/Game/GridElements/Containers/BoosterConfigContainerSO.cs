@@ -8,7 +8,7 @@ namespace Game.Configs
     [CreateAssetMenu(fileName = "BoosterConfigContainer", menuName = "Game/Gameplay/Grid/Containers/BoosterConfigContainer")]
     public class BoosterConfigContainerSO : BaseGridObjectConfigContinerSO
     {
-        [field: SerializeField] public BoosterComboDataSO BoosterComboDataSo { get; private set; }
+        [field: SerializeField] public BoosterComboDataSO BoosterComboData { get; private set; }
         [field: SerializeField] public EnumConfigMap<BoosterType, BoosterDataSO> Configs { get; private set; }
         
         public float GetAnimationSpeed(BoosterActionContext action) => action.BoosterAction switch

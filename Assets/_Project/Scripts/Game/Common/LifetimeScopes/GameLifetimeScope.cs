@@ -31,7 +31,7 @@ namespace Game.DI
             builder.Register<GridInputService>(Lifetime.Scoped).As<IGridInputService, ITickable>();
     
             // LEVEL
-            builder.Register<LevelObjectiveModel>(Lifetime.Scoped).As<ILevelObjectiveModel>();
+            builder.Register<LevelGoalModel>(Lifetime.Scoped).As<ILevelGoalModel>();
             builder.RegisterComponentInHierarchy<LevelEndView>().As<ILevelEndView>();
             builder.RegisterEntryPoint<LevelEndPresenter>();
     
@@ -46,6 +46,10 @@ namespace Game.DI
             builder.Register<GridObjectFactory>(Lifetime.Scoped).As<IGridObjectFactory>();
             
             builder.Register<GridObjectHandler>(Lifetime.Scoped).As<IGridObjectHandler>();
+            builder.Register<GridObjectSpawnHandler>(Lifetime.Scoped).As<IGridObjectSpawnHandler>();
+            builder.Register<GridObjectDestroyHandler>(Lifetime.Scoped).As<IGridObjectDestroyHandler>();
+            
+            builder.Register<LevelGoalProgressHandler>(Lifetime.Scoped).As<ILevelGoalProgressHandler>();
             builder.Register<BlastFxHandler>(Lifetime.Scoped).As<IBlastFxHandler>();
             builder.Register<BoosterFxHandler>(Lifetime.Scoped).As<IBoosterFxHandler>();
             builder.Register<GridCheatHandler>(Lifetime.Scoped).As<IGridCheatHandler, ITickable>();

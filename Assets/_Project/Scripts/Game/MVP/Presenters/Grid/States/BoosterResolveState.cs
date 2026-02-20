@@ -14,6 +14,8 @@ namespace Game.Grid.States
     public sealed class BoosterResolveState : StateBase<GridStateContext>
     {
         public override bool NeedsExitPermission => true;
+        private readonly IGridObjectDestroyHandler _gridObjectDestroyHandler;
+        private readonly ILevelGoalProgressHandler _levelGoalProgressHandler;
 
         private readonly IBoosterFxHandler _boosterFxHandler;
         private readonly HashSet<Vector2Int> _impactedCells = new();
@@ -21,7 +23,12 @@ namespace Game.Grid.States
         private readonly HashSet<Vector2Int> _unmarkProtectedCells = new();
         private readonly List<UniTask> _activeTasks = new();
 
-        public BoosterResolveState(GridStateContext context, IBoosterFxHandler boosterFxHandler) : base(context) => _boosterFxHandler = boosterFxHandler;
+        public BoosterResolveState(GridStateContext context, IBoosterFxHandler boosterFxHandler, IGridObjectDestroyHandler objectDestroyHandler, ILevelGoalProgressHandler goalProgressHandler) : base(context)
+        {
+            _boosterFxHandler = boosterFxHandler;
+            _gridObjectDestroyHandler = objectDestroyHandler;
+            _levelGoalProgressHandler = goalProgressHandler;
+        }
 
         protected override void OnEnter()
         {
@@ -58,7 +65,7 @@ namespace Game.Grid.States
             var model = Context.GridModel;
             var view = Context.GridView;
             
-            var fxTask = _boosterFxHandler.PlayBoosterFxAsync(action, model, view, out var animSpeed);
+            var fxTask = _boosterFxHandler.PlayBoosterFxAsync(action, out var animSpeed);
             var timeline = BoosterTimelineBuilder.BuildTimeline(action, model, view, animSpeed);
             var timelineTask = ProcessTimelineAsync(timeline, action.BoosterAction.DamageAmount);
             await UniTask.WhenAll(timelineTask, fxTask);
@@ -93,7 +100,7 @@ namespace Game.Grid.States
             if (obj is IBoosterActionSource source && source.TryBuildAction(coord, out var newAction))
             {
                 Context.PendingBoosterActions.Add(newAction);
-                Context.ReleaseAndSetNull(obj, coord);
+                _gridObjectDestroyHandler.DestroyGridObject(obj, coord);
                 return;
             }
 
@@ -103,13 +110,13 @@ namespace Game.Grid.States
 
                 if (result == GridDamageResult.Destroyed)
                 {
-                    Context.ProgressGoal(damageable, coord, obj.SpriteRenderer.size);
-                    Context.ReleaseAndSetNull(obj, coord);
+                    _levelGoalProgressHandler.ProgressGoal(damageable, coord, obj.SpriteRenderer.size);
+                    _gridObjectDestroyHandler.DestroyGridObject(obj, coord);
                 }
             }
             else
             {
-                Context.ReleaseAndSetNull(obj, coord);
+                _gridObjectDestroyHandler.DestroyGridObject(obj, coord);
             }
         }
         
