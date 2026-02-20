@@ -20,15 +20,15 @@ namespace Game.Grid.Handlers
         private readonly IGridView _gridView;
         private readonly IGridStateHandler _gridStateHandler;
         private readonly ISceneLoadService _sceneLoadService;
-        private readonly IGridObjectSpawnHandler _gridObjectSpawnHandler;
+        private readonly IGridObjectCreateHandler _objectCreateHandler;
         private readonly IGridObjectDestroyHandler _gridObjectDestroyHandler;
         
         public GridCheatHandler(IGridModel gridModel, IGridView gridView, IGridStateHandler gridStateHandler, ISceneLoadService sceneLoadService, 
-            IGridObjectSpawnHandler gridObjectSpawnHandler, IGridObjectDestroyHandler gridObjectDestroyHandler)
+            IGridObjectCreateHandler objectCreateHandler, IGridObjectDestroyHandler gridObjectDestroyHandler)
         {
             _gridModel = gridModel;
             _gridView = gridView;
-            _gridObjectSpawnHandler = gridObjectSpawnHandler;
+            _objectCreateHandler = objectCreateHandler;
             _gridStateHandler = gridStateHandler;
             _sceneLoadService = sceneLoadService;
             _gridObjectDestroyHandler = gridObjectDestroyHandler;
@@ -90,7 +90,7 @@ namespace Game.Grid.Handlers
             if(!IsCellActive(coord)) return;
             ClearCell(coord);
 
-            var obstacle = _gridObjectSpawnHandler.GetRegularItem(type);
+            var obstacle = _objectCreateHandler.CreateItem(type);
             PlaceItem(coord, obstacle);
         }
 
@@ -100,7 +100,7 @@ namespace Game.Grid.Handlers
             if(!IsCellActive(coord)) return;
             ClearCell(coord);
 
-            var booster = _gridObjectSpawnHandler.GetBoosterItem(type);
+            var booster = _objectCreateHandler.CreateBooster(type);
             PlaceItem(coord, booster);
         }
 
@@ -110,7 +110,7 @@ namespace Game.Grid.Handlers
             if(!IsCellActive(coord)) return;
             ClearCell(coord);
 
-            var obstacle = _gridObjectSpawnHandler.GetObstacleItem(type);
+            var obstacle = _objectCreateHandler.CreateObstacle(type);
             PlaceItem(coord, obstacle);
         }
 

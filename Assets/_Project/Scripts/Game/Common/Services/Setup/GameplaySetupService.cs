@@ -17,7 +17,7 @@ namespace Game.Services
         [Inject] private readonly ISceneLoadState _sceneLoadState;
         [Inject] private readonly ILevelDefinitionProvider _levelDefinitionProvider;
         
-        [Inject] private readonly IGridObjectHandler _gridObjectHandler;
+        [Inject] private readonly IGridObjectCreateHandler _gridObjectCreateHandler;
         [Inject] private readonly IGridModel _gridModel;
         [Inject] private readonly IGridView _gridView;
         
@@ -56,7 +56,7 @@ namespace Game.Services
             var gridObjectTypes = _levelDefinitionProvider.GetGridObjectTypes();
             var width = gridObjectTypes.GetLength(0);
             var height = gridObjectTypes.GetLength(1);
-            _gridObjectHandler.PopulateGridObjects(gridObjectTypes, width, height, out var gridItemObjects);
+            _gridObjectCreateHandler.PopulateGrid(gridObjectTypes, width, height, out var gridItemObjects);
             _gridModel.Initialize(gridItemObjects, width, height, out var activeCells);
             _gridView.Initialize(width, height, activeCells);
         }

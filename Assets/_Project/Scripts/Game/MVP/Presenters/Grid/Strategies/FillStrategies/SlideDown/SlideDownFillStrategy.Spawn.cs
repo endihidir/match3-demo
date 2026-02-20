@@ -79,7 +79,7 @@ namespace Game.Grid.Strategies
                 var target = new Vector2Int(x, startY + i);
 
                 var type = _itemDecider.Decide(target);
-                var item = _gridObjectSpawnHandler.GetRegularItem(type);
+                var item = _objectCreateHandler.CreateItem(type);
 
                 item.SetParent(_gridView.GridObjectsParent);
                 item.SetSpriteSize(cellSize);

@@ -11,17 +11,17 @@ namespace Game.Grid.Strategies
     {
         private readonly IGridModel _gridModel;
         private readonly IGridView _gridView;
-        private readonly IGridObjectSpawnHandler _gridObjectSpawnHandler;
+        private readonly IGridObjectCreateHandler _objectCreateHandler;
         private readonly IFillItemDecider _itemDecider;
         private readonly IFallAnimationScheduler _fallAnimationScheduler;
         private readonly ISlideAnimationScheduler _slideAnimationScheduler;
         
-        public SlideDownFillStrategy(IGridModel gridModel, IGridView gridView, IGridObjectSpawnHandler gridObjectSpawnHandler, IFillItemDecider itemDecider, 
+        public SlideDownFillStrategy(IGridModel gridModel, IGridView gridView, IGridObjectCreateHandler objectCreateHandler, IFillItemDecider itemDecider, 
             IFallAnimationScheduler fallAnimationScheduler, ISlideAnimationScheduler slideAnimationScheduler)
         {
             _gridModel = gridModel;
             _gridView = gridView;
-            _gridObjectSpawnHandler = gridObjectSpawnHandler;
+            _objectCreateHandler = objectCreateHandler;
             _itemDecider = itemDecider;
             _fallAnimationScheduler = fallAnimationScheduler;
             _slideAnimationScheduler = slideAnimationScheduler;
