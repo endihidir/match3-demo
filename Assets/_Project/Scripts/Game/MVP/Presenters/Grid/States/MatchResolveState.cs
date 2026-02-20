@@ -24,7 +24,8 @@ namespace Game.Grid.States
         private Vector2Int[] _coordBuffer = Array.Empty<Vector2Int>();
         private int _lastTaskCount;
 
-        public MatchResolveState(GridStateContext context, IGridObjectCreateHandler objectCreateHandler, IGridObjectDestroyHandler objectDestroyHandler, ILevelGoalProgressHandler goalProgressHandler) : base(context)
+        public MatchResolveState(GridStateContext context, IGridObjectCreateHandler objectCreateHandler, IGridObjectDestroyHandler objectDestroyHandler, 
+            ILevelGoalProgressHandler goalProgressHandler) : base(context)
         {
             _objectCreateHandler = objectCreateHandler;
             _objectDestroyHandler = objectDestroyHandler;
