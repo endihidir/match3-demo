@@ -6,7 +6,7 @@ namespace Game.Grid.Strategies
 {
     public interface IFillStrategy
     {
-        bool CanHandle(IGridModel model);
+        bool CanHandle();
         IFillStrategy Execute();
         UniTask WaitAnimationsAsync();
     }

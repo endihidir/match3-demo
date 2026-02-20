@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Game.Models;
 
 namespace Game.Grid.Strategies
 {
@@ -11,11 +10,11 @@ namespace Game.Grid.Strategies
             _fillStrategies = fillStrategies;
         }
 
-        public IFillStrategy ResolveStrategy(IGridModel model)
+        public IFillStrategy ResolveStrategy()
         {
             foreach (var fillStrategy in _fillStrategies)
             {
-                if (fillStrategy.CanHandle(model))
+                if (fillStrategy.CanHandle())
                 {
                     return fillStrategy;
                 }

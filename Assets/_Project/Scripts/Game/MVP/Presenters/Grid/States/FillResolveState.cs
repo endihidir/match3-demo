@@ -29,7 +29,7 @@ namespace Game.Grid.States
         {
             IsInProgress = true;
             
-            var strategy = _strategyResolver.ResolveStrategy(Context.GridModel);
+            var strategy = _strategyResolver.ResolveStrategy();
         
             if (strategy == null)
             {   
