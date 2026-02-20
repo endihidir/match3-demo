@@ -7,10 +7,6 @@ namespace Game.Grid.Strategies
 {
     public sealed partial class SlideDownFillStrategy
     {
-        // =========================================================
-        // Simulation loop
-        // =========================================================
-
         private bool TryApplyAnyMove()
         {
             var height = _gridModel.Height;
@@ -80,7 +76,6 @@ namespace Game.Grid.Strategies
                     if (TryApplySlideCandidate(_gridModel, width, targetCoord, firstDir) || 
                         TryApplySlideCandidate(_gridModel, width, targetCoord, secondDir))
                     {
-                        //AddStep(movedItem, target, false);
                         movedAny = true;
                     }
                 }
@@ -119,8 +114,7 @@ namespace Game.Grid.Strategies
 
         private bool TryApplySlideCandidate(IGridModel model, int width, Vector2Int targetCoord, int dirX)
         {
-            if (!GridFillCalcUtil.TryCollectDiagonalSide(model, targetCoord, dirX, out var candidate))
-                return false;
+            if (!GridFillCalcUtil.TryCollectDiagonalSide(model, targetCoord, dirX, out var candidate)) return false;
 
             if (model.GetGridObject(candidate.From) != candidate.Item) return false;
             if (model.GetGridObject(candidate.To)) return false;
