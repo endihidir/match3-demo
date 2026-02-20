@@ -9,4 +9,3 @@ namespace Game.Grid.Handlers
         void ProgressGoal(IDamageableGridObject damageableGridObject, Vector2Int coord, Vector2 spriteSize);
     }
 }
-
