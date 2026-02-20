@@ -29,9 +29,9 @@ namespace Game.Grid.Handlers
         private bool HasPendingBoosterActions => _context.HasPendingBoosterActions;
         private bool MatchResolveRequested => _context.MatchResolveRequested;
 
-        public GridStateHandler(IGridModel model, IGridView view, GridConfigContainerSO gridConfigContainer, IFillStrategyResolver fillStrategyResolver, 
+        public GridStateHandler(IGridModel model, IGridView view, GridConfigContainerSO gridConfigContainer, 
             IBoosterFxHandler boosterFxHandler, IGridObjectCreateHandler objectCreateHandler, IGridObjectDestroyHandler destroyHandler, 
-            ILevelGoalProgressHandler progressHandler)
+            ILevelGoalProgressHandler progressHandler, IFillStrategyResolver fillStrategyResolver)
         {
             var boosterComboData = gridConfigContainer.GetConfig<BoosterConfigContainerSO>().BoosterComboData;
             

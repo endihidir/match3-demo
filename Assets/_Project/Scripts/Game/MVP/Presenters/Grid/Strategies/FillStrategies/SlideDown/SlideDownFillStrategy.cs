@@ -27,7 +27,7 @@ namespace Game.Grid.Strategies
             _slideAnimationScheduler = slideAnimationScheduler;
         }
 
-        public bool CanHandle(IGridModel model) => GridFillCalcUtil.HasStationaryAndBlocking(model);
+        public bool CanHandle() => GridFillCalcUtil.HasStationaryAndBlocking(_gridModel);
 
         public IFillStrategy Execute()
         {
