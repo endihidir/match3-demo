@@ -25,7 +25,7 @@ namespace Game.Grid.Strategies
             _fallAnimationScheduler = fallAnimationScheduler;
         }
         
-        public bool CanHandle() => !GridFillCalcUtil.HasStationaryAndBlocking(_gridModel);
+        public bool CanHandle() => !GridFillCalcUtil.HasStationaryWithMovableSpaceBelow(_gridModel);
 
         public IFillStrategy Execute()
         {

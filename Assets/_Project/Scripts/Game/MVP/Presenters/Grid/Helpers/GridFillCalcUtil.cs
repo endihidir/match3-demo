@@ -7,7 +7,7 @@ namespace Game.Grid.Utils
 {
     public static class GridFillCalcUtil
     {
-        public static bool HasStationaryAndBlocking(IGridModel model)
+        public static bool HasStationaryWithMovableSpaceBelow(IGridModel model)
         {
             for (int y = 0; y < model.Height; y++)
             {
@@ -15,14 +15,14 @@ namespace Game.Grid.Utils
                 {
                     if (!TryGetActiveObject(model, x, y, out var obj)) continue;
                     if (!obj.IsStationary) continue;
-                    if (CanPassUnderStationary(model, x, y)) return true;
+                    if (HasMovableSpaceBelow(model, x, y)) return true;
                 }
             }
 
             return false;
         }
 
-        private static bool CanPassUnderStationary(IGridModel model, int x, int stationaryY)
+        private static bool HasMovableSpaceBelow(IGridModel model, int x, int stationaryY)
         {
             // Scan downwards in the same column.
             for (int y = stationaryY + 1; y < model.Height; y++)
