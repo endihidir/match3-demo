@@ -264,7 +264,7 @@ Async scene loading via `SceneLoadService` with `ProgressHandler` for loading ba
 5. Press Play — the app bootstrapper initializes services and transitions to the menu
 
 ### Level Editor
-A custom **Level Editor Window** (`Game/Editor/LevelEditorWindow.cs`) is available for designing and editing levels directly within the Unity Editor.
+A custom **Level Editor Window** (`Game/Editor/LevelEditorWindow.cs`) is available for designing and editing levels directly within the Unity Editor. The window can be opened via Tools → Level Editor.
 
 ---
 
