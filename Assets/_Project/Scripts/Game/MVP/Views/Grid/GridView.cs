@@ -64,26 +64,27 @@ namespace Game.Views
             layout.originOffset = new Vector3(0f, originOffsetY, 0f);
             Layout = layout;
         }
-
-        public Vector2Int ScreenToGridCoordinate(Vector2 mousePosition)
-        {
-            var worldPosition = Cam.ScreenToWorldPoint(mousePosition);
-            var pos = WorldToGrid(worldPosition);
-            return pos;
-        }
-
+        
         private void GenerateMesh()
         {
             var ms = MeshConfig;
             Layout.BuildGridMesh(_gridSize, GridMeshFilter, ms.FrameThickness, ms.CornerSmoothness, ms.GetCornerSegments(), IsCellActive);
         }
-        public Vector3 GridToWorld(Vector2Int itemCoordinate) => Layout.GridToWorld(_gridSize, itemCoordinate, Cam);
-        public Vector2Int WorldToGrid(Vector3 worldPosition) => Layout.WorldToGrid(_gridSize, worldPosition, Cam);
-        public Vector3 GridToScreen(Vector2Int itemCoordinate)
+        
+        public Vector2Int ScreenToGrid(Vector2 screenPos)
         {
-            var worldPos = Layout.GridToWorld(_gridSize, itemCoordinate, Cam);
+            var worldPosition = Cam.ScreenToWorldPoint(screenPos);
+            return WorldToGrid(worldPosition);
+        }
+        
+        public Vector3 GridToScreen(Vector2Int coord)
+        {
+            var worldPos = GridToWorld(coord);
             return Cam.WorldToScreenPoint(worldPos);
         }
+        
+        public Vector3 GridToWorld(Vector2Int coord) => Layout.GridToWorld(_gridSize, coord, Cam);
+        public Vector2Int WorldToGrid(Vector3 worldPos) => Layout.WorldToGrid(_gridSize, worldPos, Cam);
         public Vector2 SpriteToRectSize(Vector2 spriteSize) => UIWorldSpaceUtils.WorldSizeToUISize(spriteSize, Cam, Canvas);
 
         public Vector2Int InputToGridDirection(Vector2Int inputDirection)

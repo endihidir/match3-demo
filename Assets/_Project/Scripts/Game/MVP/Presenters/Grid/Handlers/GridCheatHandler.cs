@@ -123,7 +123,7 @@ namespace Game.Grid.Handlers
 
         public void ForceRefill() => _gridStateHandler.ForceState<FillResolveState>();
 
-        private Vector2Int GetMouseGridCoord() => _gridView.ScreenToGridCoordinate(Input.mousePosition);
+        private Vector2Int GetMouseGridCoord() => _gridView.ScreenToGrid(Input.mousePosition);
 
         private void ClearCell(Vector2Int coord)
         {
