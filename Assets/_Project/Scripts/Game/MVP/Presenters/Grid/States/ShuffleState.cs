@@ -143,8 +143,7 @@ namespace Game.Grid.States
             
             return HasAnyMove(model, grid);
         }
-
-
+        
         private bool HasAnyMove(IGridModel model, GridObjectType[,] grid)
         {
             if (GridShuffleCalcUtil.HasBoosterMove(model, grid)) return true;
