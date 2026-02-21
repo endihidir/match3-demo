@@ -6,6 +6,20 @@ namespace Core.Utils
 {
     public static class GridShuffleCalcUtil
     {
+        public static bool HasBoosterMove(IGridModel model, GridObjectType[,] grid)
+        {
+            for (int y = 0; y < model.Height; y++)
+            {
+                for (int x = 0; x < model.Width; x++)
+                {
+                    var type = grid[x, y];
+                    if (type.ItemKind == GridItemKind.Booster) return true;
+                }
+            }
+
+            return false;
+        }
+        
         public static bool HasAnyPotentialMatchGeometry(IGridModel model)
         {
             for (int y = 0; y < model.Height; y++)
