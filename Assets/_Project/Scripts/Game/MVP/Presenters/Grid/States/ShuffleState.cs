@@ -138,12 +138,17 @@ namespace Game.Grid.States
         public bool HasAnyMove()
         {
             var model = Context.GridModel;
+            
             var grid = model.BuildGridTypeData();
+            
             return HasAnyMove(model, grid);
         }
 
+
         private bool HasAnyMove(IGridModel model, GridObjectType[,] grid)
         {
+            if (GridShuffleCalcUtil.HasBoosterMove(model, grid)) return true;
+            
             if (!GridShuffleCalcUtil.HasAnyPotentialMatchGeometry(model)) return true;
             
             if (!CanEverFormAnyMatch(model)) return true;
