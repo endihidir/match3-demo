@@ -24,7 +24,7 @@ namespace Game.Grid.States
         private Vector2Int[] _coordBuffer = Array.Empty<Vector2Int>();
         private int _lastTaskCount;
 
-        public MatchResolveState(GridStateContext context, IGridObjectCreateHandler objectCreateHandler, IGridObjectDestroyHandler objectDestroyHandler, 
+        public MatchResolveState(GridStateContext context, IGridObjectCreateHandler objectCreateHandler, IGridObjectDestroyHandler objectDestroyHandler,
             ILevelGoalProgressHandler goalProgressHandler) : base(context)
         {
             _objectCreateHandler = objectCreateHandler;
@@ -44,7 +44,7 @@ namespace Game.Grid.States
             {
                 await ResolveMaskAsync(matchMask);
             }
-            
+
             Context.RaiseDestructionStateComplete();
             RequestExit();
         }
@@ -68,12 +68,30 @@ namespace Game.Grid.States
             var grid = model.BuildGridTypeData();
 
             var taskCount = 0;
-            
+
+            // 1) Forced center pass (priority)
+            // If forced coord is not in the current mask, pick any coord from mask as a fallback.
             if (Context.MergeCenterCoord.HasValue)
             {
                 var forcedCenter = Context.MergeCenterCoord.Value;
-                // 1) Forced center pass
-                ScanRect(forcedCenter.x, forcedCenter.y, forcedCenter.x + 1, forcedCenter.y + 1, 3, 999);
+
+                if (!matchMask[forcedCenter.x, forcedCenter.y])
+                {
+                    if (TryPickAnyCoordFromMask(matchMask, model, out var fallback))
+                    {
+                        forcedCenter = fallback;
+                        Context.MergeCenterCoord = fallback;
+                    }
+                    else
+                    {
+                        Context.MergeCenterCoord = null;
+                    }
+                }
+
+                if (Context.MergeCenterCoord.HasValue)
+                {
+                    ScanRect(forcedCenter.x, forcedCenter.y, forcedCenter.x + 1, forcedCenter.y + 1, 3, 999);
+                }
             }
 
             // 2) Booster (4+ or T/L/5 vs) pass
@@ -130,6 +148,22 @@ namespace Game.Grid.States
             }
         }
 
+        private static bool TryPickAnyCoordFromMask(bool[,] matchMask, IGridModel model, out Vector2Int coord)
+        {
+            for (int y = 0; y < model.Height; y++)
+            {
+                for (int x = 0; x < model.Width; x++)
+                {
+                    if (!matchMask[x, y]) continue;
+                    coord = new Vector2Int(x, y);
+                    return true;
+                }
+            }
+
+            coord = default;
+            return false;
+        }
+
         private UniTask WhenAllTasks(int taskCount)
         {
             if (taskCount == 0) return UniTask.CompletedTask;
@@ -151,7 +185,7 @@ namespace Game.Grid.States
             var isAnyGroupObjectFall = GridMatchCalcUtil.IsAnyGroupObjectFall(model, group);
 
             if (isAnyGroupObjectFall) return UniTask.CompletedTask;
-            
+
             var boosterType = GridBoosterDecisionUtil.DecideBoosterTypeFromGroup(model, matchMask, group, typeID);
 
             if (!boosterType.HasValue)
@@ -169,18 +203,18 @@ namespace Game.Grid.States
             var boosterValue = boosterType.Value;
 
             var centerObj = model.GetGridObject(centerCoord);
-            
+
             SetNullMergedObjectCoords(model, group);
-            
+
             return PlayMergeAnimationAsync(mergeObjs, centerCoord).ContinueWith(() => OnMergeComplete(mergeObjs, centerObj, centerCoord, boosterValue));
         }
-        
+
         private void SetNullMergedObjectCoords(IGridModel model, List<Vector2Int> group)
         {
             foreach (var coord in group)
             {
                 ApplyNeighbourDamage(model, coord);
-                
+
                 model.SetGridObject(coord, null);
             }
         }
@@ -191,30 +225,28 @@ namespace Game.Grid.States
 
             if (centerObj)
             {
-               _objectDestroyHandler.ReleaseObject(centerObj);
+                _objectDestroyHandler.ReleaseObject(centerObj);
             }
-            
+
             SpawnBooster(centerCoord, boosterValue);
         }
 
         private bool TryConsumeForcedCenterCoord(List<Vector2Int> group, out Vector2Int forcedCoord)
         {
-            if (!Context.MergeCenterCoord.HasValue)
-            {
-                forcedCoord = default;
-                return false;
-            }
+            forcedCoord = default;
 
+            if (!Context.MergeCenterCoord.HasValue) return false;
+            
             var coord = Context.MergeCenterCoord.Value;
+            
+            Context.MergeCenterCoord = null;
 
             if (group.Any(t => t == coord))
             {
-                Context.MergeCenterCoord = null;
                 forcedCoord = coord;
                 return true;
             }
 
-            forcedCoord = default;
             return false;
         }
 
@@ -237,7 +269,7 @@ namespace Game.Grid.States
                 if (!obj) continue;
 
                 ApplyNeighbourDamage(model, coord);
-                
+
                 _objectDestroyHandler.DestroyGridObject(obj, coord);
             }
         }
@@ -259,7 +291,7 @@ namespace Game.Grid.States
                 if (result == GridDamageResult.Destroyed)
                 {
                     _goalProgressHandler.ProgressGoal(damageableItem, obj.Coord, obj.SpriteRenderer.size);
-                    
+
                     _objectDestroyHandler.DestroyGridObject(obj, obj.Coord);
                 }
             }
