@@ -9,6 +9,7 @@ namespace Game.Grid.Item
         protected override void OnInitialize()
         {
             ItemType = (ItemType)TypeId;
+            UpdateIdentity();
         }
         protected override void OnDeactivate()
         {

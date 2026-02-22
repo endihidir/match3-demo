@@ -12,12 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a14d24e252ea441187343188b27dd937, type: 3}
   m_Name: Vase
   m_EditorClassIdentifier: 
-  icon: {fileID: 1852594712, guid: f1284f1fe9eb2a545b2ef886c61ba241, type: 3}
-  spriteSizeMultiplier: {x: 0.75, y: 0.95}
-  isStationary: 1
+  <Icon>k__BackingField: {fileID: 1852594712, guid: f1284f1fe9eb2a545b2ef886c61ba241,
+    type: 3}
+  <SpriteSizeMultiplier>k__BackingField: {x: 0.75, y: 0.95}
+  <IsStationary>k__BackingField: 1
+  <IsCollectible>k__BackingField: 0
   <Life>k__BackingField: 1
   <GridDamageSource>k__BackingField: -1
-  <IsCollectible>k__BackingField: 0
   <CrackedSprites>k__BackingField: []
   <ShatteredSprites>k__BackingField:
   - {fileID: -1727595645, guid: df04b2c840e79f84e9153373ea077690, type: 3}
