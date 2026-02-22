@@ -39,7 +39,7 @@ namespace Game.HUD.Handlers
         private GoalFxView PrepareFxView(Transform fxHolder, Vector3 worldPos, Vector2 rectSize, ObstacleDataSO config)
         {
             var goalFxView = _fxFactory.GetFX<GoalFxView>();
-            var sprite = config.CrackedSprites.Length > 0 ? config.CrackedSprites[0] : config.icon;
+            var sprite = config.CrackedSprites.Length > 0 ? config.CrackedSprites[0] : config.Icon;
             goalFxView.transform.SetParent(fxHolder, false);
             goalFxView.transform.position = worldPos;
             goalFxView.ImageFxModule.SetSprite(sprite);

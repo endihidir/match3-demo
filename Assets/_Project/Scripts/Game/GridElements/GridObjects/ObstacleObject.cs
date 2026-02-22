@@ -15,6 +15,15 @@ namespace Game.Grid.Item
         protected override void OnInitialize()
         {
             ObstacleType = (ObstacleType)TypeId;
+            UpdateIdentity();
+        }
+        
+        protected override void OnDeactivate()
+        {
+            base.OnDeactivate();
+            ObstacleType = (ObstacleType)TypeId;
+            Life = 0;
+            UpdateIdentity();
         }
 
         public override void ApplyData(BaseGridObjectDataSO baseGridObjectDataSo)
@@ -23,6 +32,7 @@ namespace Game.Grid.Item
 
             if (baseGridObjectDataSo is ObstacleDataSO obstacleConfigData)
             {
+                IsStationary = obstacleConfigData.IsStationary;
                 Life = obstacleConfigData.GetLife();
                 IsCollectible = obstacleConfigData.IsCollectible;
                 AllowedDamageSources = obstacleConfigData.GridDamageSource;
@@ -39,13 +49,6 @@ namespace Game.Grid.Item
             return Life <= 0 ? GridDamageResult.Destroyed : GridDamageResult.Damaged;
         }
 
-        protected override void OnDeactivate()
-        {
-            base.OnDeactivate();
-            ObstacleType = (ObstacleType)TypeId;
-            Life = 0;
-            UpdateIdentity();
-        }
 
         private void SetBrokenSprite(int remainingLife)
         {

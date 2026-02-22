@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e5b01ff4db34aa8adb65f74e6f84fc2, type: 3}
   m_Name: Red
   m_EditorClassIdentifier: 
-  icon: {fileID: 21300000, guid: 714434f083d633140a41e8101ec09313, type: 3}
-  spriteSizeMultiplier: {x: 0.8, y: 0.8}
-  isStationary: 0
+  <Icon>k__BackingField: {fileID: 21300000, guid: 714434f083d633140a41e8101ec09313,
+    type: 3}
+  <SpriteSizeMultiplier>k__BackingField: {x: 0.8, y: 0.8}
   <BlastColor>k__BackingField: {r: 0.96470594, g: 0.21568629, b: 0.121568635, a: 1}

@@ -13,6 +13,7 @@ namespace Game.Grid.Item
         protected override void OnInitialize()
         {
             BoosterType = (BoosterType)TypeId;
+            UpdateIdentity();
         }
 
         protected override void OnDeactivate()

@@ -9,48 +9,28 @@ namespace Game.Grid.Item
     {
         [field: SerializeField] public GridObjectAnimation Animation { get; private set; }
         [field: SerializeField] public SpriteRenderer SpriteRenderer { get; private set; }
-        [field: SerializeField, ReadOnly] public bool IsStationary { get; private set; }
         [field: SerializeField, ReadOnly] public Vector2Int Coord { get; private set; }
         public GridObjectType ObjectType { get; private set; }
         public GridItemKind ItemKind => ObjectType.ItemKind;
         public int TypeId => ObjectType.TypeId;
-        public bool IsNone
-        {
-            get => _isNone;
-            private set
-            {
-                _isNone = value;
-                SpriteRenderer.enabled = !_isNone;
-                if (_isNone) IsStationary = false;
-            }
-        }
+        public bool IsStationary { get; protected set; } = false;
         
         public bool IsFallInProgress => Animation.IsFallInProgress;
         private Vector2 SpriteSizeMultiplier { get; set; }
-        private bool _isNone;
         
         public BaseGridObject Initialize(GridObjectType objectType)
         {
             ObjectType = objectType;
             OnInitialize();
-            UpdateIdentity();
             return this;
         }
         
         protected abstract void OnInitialize();
-        protected void UpdateIdentity()
-        {
-#if UNITY_EDITOR
-            name = ToString();
-#endif
-            IsNone = TypeId == 0;
-        }
         
         public virtual void ApplyData(BaseGridObjectDataSO baseGridObjectDataSo)
         {
-            SpriteRenderer.sprite = baseGridObjectDataSo.icon;
-            SpriteSizeMultiplier = baseGridObjectDataSo.spriteSizeMultiplier;
-            IsStationary = baseGridObjectDataSo.isStationary;
+            SpriteRenderer.sprite = baseGridObjectDataSo.Icon;
+            SpriteSizeMultiplier = baseGridObjectDataSo.SpriteSizeMultiplier;
         }
 
         public void SetFrontOf(BaseGridObject targetObj) => SpriteRenderer.sortingOrder = targetObj.SpriteRenderer.sortingOrder + 1;
@@ -60,6 +40,13 @@ namespace Game.Grid.Item
         public void SetParent(Transform parent) => transform.SetParent(parent);
         protected override void OnActivate() => Animation.CacheAnimations();
         protected override void OnDeactivate() => ResetItem();
+        
+        protected void UpdateIdentity()
+        {
+#if UNITY_EDITOR
+            name = ToString();
+#endif
+        }
         
         public void ResetItem()
         {

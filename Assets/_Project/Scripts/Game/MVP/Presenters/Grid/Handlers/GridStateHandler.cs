@@ -123,12 +123,7 @@ namespace Game.Grid.Handlers
             return true;
         }
         
-        private static bool IsInteractable(BaseGridObject obj)
-        {
-            if (obj.IsNone) return false;
-            return !obj.IsFallInProgress;
-        }
-        
+        private static bool IsInteractable(BaseGridObject obj) => !obj.IsFallInProgress;
         private static bool IsSwapCandidate(BaseGridObject obj) => !obj.IsStationary;
         public void ForceState<T>() where T : class, IState => _stateMachine.ForceState<T>();
         public void Tick() => _stateMachine.Update(Time.deltaTime);

@@ -16,7 +16,7 @@ namespace Game.Views
         [field: SerializeField] private BounceAnimationModule BounceAnimationModule { get; set; }
 
         public void Initialize(ObstacleType obstacleType) => ObstacleType = obstacleType;
-        public void ApplyData(ObstacleDataSO obstacleData) => GoalIcon.sprite = obstacleData.icon;
+        public void ApplyData(ObstacleDataSO obstacleData) => GoalIcon.sprite = obstacleData.Icon;
         public Vector2 GetIconSize() => GoalIcon.rectTransform.rect.size;
         public void SetGoalCount(int goalCount) => GoalCountTxt.SetText(goalCount.ToString());
         public void DecrementGoalCount(int amount = 1, bool useBounceAnim = true)

@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbdd761b1f184841bddfa71be62601a0, type: 3}
   m_Name: Bomb
   m_EditorClassIdentifier: 
-  icon: {fileID: 21300000, guid: 6a4eb1c8bed10e54bb8efee845ef3fc3, type: 3}
-  spriteSizeMultiplier: {x: 0.95, y: 0.95}
-  isStationary: 0
+  <Icon>k__BackingField: {fileID: 21300000, guid: 6a4eb1c8bed10e54bb8efee845ef3fc3,
+    type: 3}
+  <SpriteSizeMultiplier>k__BackingField: {x: 0.95, y: 0.95}
   <AnimationSpeed>k__BackingField: 1
   <BoosterAction>k__BackingField:
     rid: 1071696598056042506
