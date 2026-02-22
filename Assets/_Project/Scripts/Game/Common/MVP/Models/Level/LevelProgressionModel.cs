@@ -29,7 +29,7 @@ namespace Game.Level.Models
                 levelCompletionCount = 0
             };
             
-            _levelProgressionData = _saveService.LoadFromTextFile(SaveKey, defaultState);
+            _levelProgressionData = _saveService.LoadFromPrefs(SaveKey, defaultState);
             _levelProgressionData.currentLevelIndex = Mathf.Clamp(_levelProgressionData.currentLevelIndex, 0, MaxLevelCount - 1);
         }
 
@@ -70,7 +70,7 @@ namespace Game.Level.Models
 
         private void RaiseChanged()
         {
-            _saveService.SaveToTextFile(SaveKey, _levelProgressionData);
+            _saveService.SaveToPrefs(SaveKey, _levelProgressionData);
             OnLevelChanged?.Invoke();
         }
     }
