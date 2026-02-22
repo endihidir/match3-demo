@@ -86,6 +86,8 @@ namespace Core.SaveSystem
 
         public static void ClearJsonData()
         {
+            if (!Directory.Exists(DirectoryPath)) return;
+            
             var files = Directory.GetFiles(DirectoryPath).Select(Path.GetFileName).ToArray();
 
             foreach (string key in files)
