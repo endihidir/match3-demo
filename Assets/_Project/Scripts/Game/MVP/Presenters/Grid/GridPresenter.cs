@@ -38,6 +38,7 @@ namespace Game.Presenters
         private void OnViewInitialized()
         {
             PlaceGridItems();
+            _stateHandler.Initialize();
             _inputService.Enable();
         }
         
