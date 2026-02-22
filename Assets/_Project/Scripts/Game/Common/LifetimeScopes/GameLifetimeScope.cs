@@ -48,7 +48,11 @@ namespace Game.DI
             builder.Register<GridObjectDestroyHandler>(Lifetime.Scoped).As<IGridObjectDestroyHandler>();
             
             builder.Register<LevelGoalProgressHandler>(Lifetime.Scoped).As<ILevelGoalProgressHandler>();
+            
             builder.Register<BlastFxHandler>(Lifetime.Scoped).As<IBlastFxHandler>();
+            builder.Register<MatchDestructionHandler>(Lifetime.Scoped).As<IMatchDestructionHandler>();
+            builder.Register<MatchMergeHandler>(Lifetime.Scoped).As<IMatchMergeHandler>();
+            
             builder.Register<BoosterFxHandler>(Lifetime.Scoped).As<IBoosterFxHandler>();
             builder.Register<GridCheatHandler>(Lifetime.Scoped).As<IGridCheatHandler, ITickable>();
             builder.Register<GridStateHandler>(Lifetime.Scoped).As<IGridStateHandler, ITickable, IFixedTickable, ILateTickable>();
