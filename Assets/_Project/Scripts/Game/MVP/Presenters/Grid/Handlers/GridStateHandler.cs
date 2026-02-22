@@ -15,8 +15,16 @@ namespace Game.Grid.Handlers
 {
     public sealed class GridStateHandler : IGridStateHandler, ITickable, IFixedTickable, ILateTickable
     {
-        private readonly IStateMachine _stateMachine;
         private readonly GridStateContext _context;
+        
+        private readonly IdleState _idleState;
+        private readonly InputResolveState _inputState;
+        private readonly BoosterResolveState _boosterState;
+        private readonly ShuffleState _shuffleState;
+        private readonly MatchResolveState _matchState;
+        private readonly FillResolveState _fillState;
+        
+        private IStateMachine _stateMachine;
         
         public string CurrentStateID => _stateMachine.CurrentState.StateID;
         public event Action OnDestructionStateComplete
@@ -37,32 +45,34 @@ namespace Game.Grid.Handlers
             
             _context = new GridStateContext(model, view);
 
-            var idleState = new IdleState(_context);
-            var inputState = new InputResolveState(_context, boosterComboData, destroyHandler, progressHandler);
-            var boosterState = new BoosterResolveState(_context, boosterFxHandler, destroyHandler, progressHandler);
-            var matchState = new MatchResolveState(_context, matchDestructionHandler, matchMergeHandler);
-            var shuffleState = new ShuffleState(_context);
-            var fillState = new FillResolveState(_context, fillStrategyResolver);
+            _idleState = new IdleState(_context);
+            _inputState = new InputResolveState(_context, boosterComboData, destroyHandler, progressHandler);
+            _boosterState = new BoosterResolveState(_context, boosterFxHandler, destroyHandler, progressHandler);
+            _matchState = new MatchResolveState(_context, matchDestructionHandler, matchMergeHandler);
+            _shuffleState = new ShuffleState(_context);
+            _fillState = new FillResolveState(_context, fillStrategyResolver);
+        }
 
-            var states = new StateBase<GridStateContext>[] { idleState, inputState, boosterState, matchState, fillState, shuffleState };
+        public void Initialize()
+        {
+            var states = new StateBase<GridStateContext>[] { _idleState, _inputState, _boosterState, _matchState, _fillState, _shuffleState };
 
-            _stateMachine = new StateMachine().Register(states);
+            _stateMachine = new StateMachine().Register(states)
+                                              .SetInitialState(_idleState);
 
-            _stateMachine.AddTransition(idleState, inputState, () => HasAnyInput)
-                        .AddTransition(idleState, matchState, () => MatchResolveRequested)
-                        .AddTransition(idleState, shuffleState, () => !MatchResolveRequested && !fillState.IsInProgress && !shuffleState.HasAnyMove())
-                        .AddTransition(shuffleState, idleState, () => shuffleState.IsExitReady)
+            _stateMachine.AddTransition(_idleState, _inputState, () => HasAnyInput)
+                .AddTransition(_idleState, _matchState, () => MatchResolveRequested)
+                .AddTransition(_idleState, _shuffleState, () => !MatchResolveRequested && !_fillState.IsInProgress && !_shuffleState.HasAnyMove())
+                .AddTransition(_shuffleState, _idleState, () => _shuffleState.IsExitReady)
                          
-                        .AddTransition(inputState, boosterState, () => inputState.IsExitReady && HasPendingBoosterActions)
-                        .AddTransition(inputState, matchState, () => inputState.IsExitReady && MatchResolveRequested && !HasPendingBoosterActions)
-                        .AddTransition(inputState, idleState, () => inputState.IsExitReady && !MatchResolveRequested && !HasPendingBoosterActions)
+                .AddTransition(_inputState, _boosterState, () => _inputState.IsExitReady && HasPendingBoosterActions)
+                .AddTransition(_inputState, _matchState, () => _inputState.IsExitReady && MatchResolveRequested && !HasPendingBoosterActions)
+                .AddTransition(_inputState, _idleState, () => _inputState.IsExitReady && !MatchResolveRequested && !HasPendingBoosterActions)
                         
-                        .AddTransition(boosterState, matchState, () => boosterState.IsExitReady && MatchResolveRequested)
-                        .AddTransition(boosterState, fillState, () => boosterState.IsExitReady && !MatchResolveRequested)
-                        .AddTransition(matchState, fillState, () => matchState.IsExitReady)
-                        .AddTransition(fillState, idleState, () => fillState.IsExitReady);
-
-            _stateMachine.SetInitialState(idleState);
+                .AddTransition(_boosterState, _matchState, () => _boosterState.IsExitReady && MatchResolveRequested)
+                .AddTransition(_boosterState, _fillState, () => _boosterState.IsExitReady && !MatchResolveRequested)
+                .AddTransition(_matchState, _fillState, () => _matchState.IsExitReady)
+                .AddTransition(_fillState, _idleState, () => _fillState.IsExitReady);
         }
 
         public bool TryEnqueueInput(Vector2Int coord, Vector2Int direction)
@@ -126,8 +136,8 @@ namespace Game.Grid.Handlers
         private static bool IsInteractable(BaseGridObject obj) => !obj.IsFallInProgress;
         private static bool IsSwapCandidate(BaseGridObject obj) => !obj.IsStationary;
         public void ForceState<T>() where T : class, IState => _stateMachine.ForceState<T>();
-        public void Tick() => _stateMachine.Update(Time.deltaTime);
-        public void FixedTick() => _stateMachine.FixedUpdate(Time.fixedDeltaTime);
-        public void LateTick() => _stateMachine.LateUpdate(Time.deltaTime);
+        public void Tick() => _stateMachine?.Update(Time.deltaTime);
+        public void FixedTick() => _stateMachine?.FixedUpdate(Time.fixedDeltaTime);
+        public void LateTick() => _stateMachine?.LateUpdate(Time.deltaTime);
     }
 }
