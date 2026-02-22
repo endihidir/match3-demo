@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: GridObjectAnimationConfig
   m_EditorClassIdentifier: 
   <UseUnscaledTime>k__BackingField: 0
-  <BaseShiftDuration>k__BackingField: 0.15
+  <BaseShiftDuration>k__BackingField: 0.18
   <BaseShiftDelay>k__BackingField: 0.1
   <ShiftDistanceMultiplier>k__BackingField: 0.05
   <ShiftDelay>k__BackingField: 0.03
-  <BaseSlideDuration>k__BackingField: 0.05
+  <BaseSlideDuration>k__BackingField: 0.03
   <BaseSlideDelay>k__BackingField: 0.1
   <SlideDistanceMultiplier>k__BackingField: 0.05
   <SlideDelay>k__BackingField: 0.03

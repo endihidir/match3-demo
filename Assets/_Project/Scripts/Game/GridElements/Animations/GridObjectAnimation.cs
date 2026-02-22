@@ -53,7 +53,7 @@ namespace Game.Grid.Item
             _springTween = DOTween.Sequence()
                 .SetAutoKill(false)
                 .Append(ItemHolder.transform.DOScale(Config.SpringScale, Config.SpringDuration).SetEase(Ease.OutQuad))
-                .Join(ItemHolder.transform.DOLocalMoveY(_itemHolderDefaultPos.y - Config.SpringYMove, Config.SpringDuration).SetEase(Ease.OutQuad))
+                .Join(ItemHolder.transform.DOLocalMoveY(_itemHolderDefaultPos.y - Config.SpringYMoveOffset, Config.SpringDuration).SetEase(Ease.OutQuad))
                 .Append(ItemHolder.transform.DOScale(Vector3.one, Config.SpringDuration).SetEase(Ease.InQuad))
                 .Join(ItemHolder.transform.DOLocalMoveY(_itemHolderDefaultPos.y, Config.SpringDuration).SetEase(Ease.InQuad))
                 .Pause()
@@ -70,11 +70,11 @@ namespace Game.Grid.Item
             _shiftTween?.Kill();
 
             var distanceMultiplier = Config.ShiftDistanceMultiplier;
-            var duration = Config.BaseShiftDuration + (cellDistance * distanceMultiplier);
+            var duration = Config.ShiftDuration + (cellDistance * distanceMultiplier);
 
             _shiftTween = transform.DOMove(worldPos, duration)
                 .SetEase(Ease.InQuad)
-                .SetDelay(Config.BaseShiftDelay + delay)
+                .SetDelay(Config.StartShiftDelay + delay)
                 .OnComplete(Spring)
                 .SetUpdate(Config.UseUnscaledTime);
 
@@ -90,12 +90,12 @@ namespace Game.Grid.Item
             _slideTween?.Kill();
 
             var seq = DOTween.Sequence()
-                .SetDelay(Config.BaseSlideDelay + delay)
+                .SetDelay(Config.StartSlideDelay + delay)
                 .SetUpdate(Config.UseUnscaledTime);
 
             var distanceMultiplier = Config.SlideDistanceMultiplier;
             for (int i = 0; i < length; i++)
-                seq.Append(transform.DOMove(points[i], Config.BaseSlideDuration + (cellDistances[i] * distanceMultiplier)).SetEase(Ease.InQuad));
+                seq.Append(transform.DOMove(points[i], Config.SlideDuration + (cellDistances[i] * distanceMultiplier)).SetEase(Ease.InQuad));
 
             _slideTween = seq.OnComplete(Spring);
             return _slideTween;
@@ -108,8 +108,8 @@ namespace Game.Grid.Item
             _pingPongTween?.Kill(true);
 
             _pingPongTween = DOTween.Sequence()
-                                .Append(transform.DOMove(targetPos, Config.BasePingPongDuration).SetEase(Ease.Linear))
-                                .Append(transform.DOMove(defaultPos, Config.BasePingPongDuration).SetEase(Ease.Linear))
+                                .Append(transform.DOMove(targetPos, Config.PingPongDuration).SetEase(Ease.Linear))
+                                .Append(transform.DOMove(defaultPos, Config.PingPongDuration).SetEase(Ease.Linear))
                                 .SetUpdate(Config.UseUnscaledTime);
             
             return _pingPongTween;
@@ -119,7 +119,7 @@ namespace Game.Grid.Item
         {
             _moveTween?.Kill(true);
             
-            _moveTween = transform.DOMove(worldPos, Config.BaseMoveDuration * durationMultiplier)
+            _moveTween = transform.DOMove(worldPos, Config.MoveDuration * durationMultiplier)
                                   .SetEase(ease)
                                   .SetUpdate(Config.UseUnscaledTime);
 
