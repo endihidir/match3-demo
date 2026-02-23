@@ -187,52 +187,6 @@ namespace Core.Utils
                 buffer[count++] = new Vector2Int(ax, ay);
             }
         }
-        
-        public static bool TryBuildMatchGroupMaskAt(IGridModel model, Vector2Int targetCoord, bool[,] matchMask, out bool[,] resultMask, bool shouldBoosterResult = false)
-        {
-            var width = model.Width;
-            var height = model.Height;
-
-            resultMask = new bool[width, height];
-
-            if (!model.IsInRange(targetCoord.x, targetCoord.y)) return false;
-            if (matchMask == null) return false;
-            if (!matchMask[targetCoord.x, targetCoord.y]) return false;
-
-            var grid = model.BuildGridTypeData();
-            var data = grid[targetCoord.x, targetCoord.y];
-
-            if (!IsRegularItem(data)) return false;
-
-            var typeId = data.TypeId;
-            if (typeId <= 0) return false;
-
-            var visited = new bool[width, height];
-            var buffer = new Vector2Int[width * height];
-
-            var count = CollectMatchShapeFromCenter(model, grid, targetCoord.x, targetCoord.y, typeId, visited, buffer);
-            if (count <= 0) return false;
-
-            if (shouldBoosterResult)
-            {
-                var group = new List<Vector2Int>(count);
-                
-                for (int i = 0; i < count; i++)
-                    group.Add(buffer[i]);
-
-                var boosterType = GridBoosterDecisionUtil.DecideBoosterTypeFromGroup(model, matchMask, group, typeId);
-                
-                if (!boosterType.HasValue) return false;
-            }
-
-            for (int i = 0; i < count; i++)
-            {
-                var c = buffer[i];
-                resultMask[c.x, c.y] = true;
-            }
-
-            return true;
-        }
 
         private static int CountSame(IGridModel gridModel, GridObjectType[,] grid, int x, int y, int id, int dx, int dy)
         {
