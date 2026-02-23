@@ -123,24 +123,23 @@ namespace Game.Grid.States
         private void BuildUnmarkProtectedCells()
         {
             if (!Context.ProtectedCoord.HasValue) return;
-            
+
             var protectedCoord = Context.ProtectedCoord.Value;
-            
             Context.ProtectedCoord = null;
-            
+
             var model = Context.GridModel;
+            var grid = model.BuildGridTypeData();
+            var data = grid[protectedCoord.x, protectedCoord.y];
 
-            if (!GridMatchMaskBuilder.TryBuildMatchMask(model, out var matchMask)) return;
-            if (!GridMatchCalcUtil.TryBuildMatchGroupMaskAt(model, protectedCoord, matchMask, out var groupMask)) return;
+            if (!GridMatchCalcUtil.IsRegularItem(data)) return;
 
-            for (int x = 0; x < model.Width; x++)
-            {
-                for (int y = 0; y < model.Height; y++)
-                {
-                    if (!groupMask[x, y]) continue;
-                    _unmarkProtectedCells.Add(new Vector2Int(x, y));
-                }
-            }
+            var visited = new bool[model.Width, model.Height];
+            var buffer = new Vector2Int[model.Width * model.Height];
+
+            var count = GridMatchCalcUtil.CollectMatchShapeFromCenter(model, grid, protectedCoord.x, protectedCoord.y, data.TypeId, visited, buffer);
+
+            for (int i = 0; i < count; i++)
+                _unmarkProtectedCells.Add(buffer[i]);
         }
         
         private void ClearBuffers()
