@@ -124,14 +124,14 @@ namespace Game.Grid.States
         {
             if (!Context.ProtectedCoord.HasValue) return;
             
-            var unmarkRemoveCoord = Context.ProtectedCoord.Value;
+            var protectedCoord = Context.ProtectedCoord.Value;
             
             Context.ProtectedCoord = null;
             
             var model = Context.GridModel;
 
             if (!GridMatchMaskBuilder.TryBuildMatchMask(model, out var matchMask)) return;
-            if (!GridMatchCalcUtil.TryBuildMatchGroupMaskAt(model, unmarkRemoveCoord, matchMask, out var groupMask)) return;
+            if (!GridMatchCalcUtil.TryBuildMatchGroupMaskAt(model, protectedCoord, matchMask, out var groupMask)) return;
 
             for (int x = 0; x < model.Width; x++)
             {
