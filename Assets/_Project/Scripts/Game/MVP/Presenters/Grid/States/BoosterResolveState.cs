@@ -18,7 +18,6 @@ namespace Game.Grid.States
         private readonly ILevelGoalProgressHandler _levelGoalProgressHandler;
 
         private readonly IBoosterFxHandler _boosterFxHandler;
-        private readonly HashSet<Vector2Int> _impactedCells = new();
         private readonly HashSet<BoosterActionKey> _processedBoosters = new();
         private readonly HashSet<Vector2Int> _unmarkProtectedCells = new();
         private readonly List<UniTask> _activeTasks = new();
@@ -91,7 +90,6 @@ namespace Game.Grid.States
         private void ApplyImpact(Vector2Int coord, int damageAmount)
         {
             if (_unmarkProtectedCells.Contains(coord)) return;
-            if (!_impactedCells.Add(coord)) return;
 
             var model = Context.GridModel;
             var obj = model.GetGridObject(coord);
@@ -144,7 +142,6 @@ namespace Game.Grid.States
         
         private void ClearBuffers()
         {
-            _impactedCells.Clear();
             _processedBoosters.Clear();
             _activeTasks.Clear();
             _unmarkProtectedCells.Clear();
