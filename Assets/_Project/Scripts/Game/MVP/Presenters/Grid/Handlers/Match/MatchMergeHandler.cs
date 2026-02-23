@@ -40,7 +40,7 @@ namespace Game.Grid.Handlers
 
             await UniTask.WhenAll(tasks);
         }
-
+        
         public void SpawnBooster(Vector2Int pos, BoosterType boosterType)
         {
             var booster = _createHandler.CreateBooster(boosterType);

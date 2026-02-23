@@ -1,5 +1,4 @@
 using System;
-using Game.Configs;
 using Game.Grid.Contexts;
 using Game.Grid.Item;
 using Core.StateMachineCore;
@@ -12,18 +11,16 @@ using UnityEngine;
 namespace Game.Grid.States
 {
     public sealed class InputResolveState : StateBase<GridStateContext>
-    { 
+    {
         public override bool NeedsExitPermission => true;
-        private readonly BoosterComboDataSO _boosterComboData;
-        private readonly IGridObjectDestroyHandler _objectDestroyHandler;
+
+        private readonly IBoosterActionBuildHandler _boosterActionBuilder;
         private readonly ILevelGoalProgressHandler _levelGoalProgressHandler;
 
-        public InputResolveState(GridStateContext context, BoosterComboDataSO boosterComboData, IGridObjectDestroyHandler objectDestroyHandler, 
-            ILevelGoalProgressHandler levelGoalProgressHandler) : base(context)
+        public InputResolveState(GridStateContext context, IBoosterActionBuildHandler boosterActionBuilder, ILevelGoalProgressHandler levelGoalProgressHandler) : base(context)
         {
-            _boosterComboData = boosterComboData;
+            _boosterActionBuilder = boosterActionBuilder;
             _levelGoalProgressHandler = levelGoalProgressHandler;
-            _objectDestroyHandler = objectDestroyHandler;
         }
 
         protected override void OnEnter()
@@ -42,7 +39,7 @@ namespace Game.Grid.States
                 GridInputType.Swap => HandleSwap(inputSource, RequestExit),
                 _ => false
             };
-            
+
             if (hasInputGet)
             {
                 _levelGoalProgressHandler.ProgressMove();
@@ -56,9 +53,8 @@ namespace Game.Grid.States
         private bool HandleTap(in GridInputSource move, Action onComplete)
         {
             var sourceCoord = move.SourceCoord;
-            
             var sourceObj = Context.GridModel.GetGridObject(sourceCoord);
-            
+
             if (!sourceObj)
             {
                 onComplete?.Invoke();
@@ -72,8 +68,7 @@ namespace Game.Grid.States
                 return false;
             }
 
-            AddBoosterAction(sourceCoord, booster);
-            _objectDestroyHandler.DestroyGridObject(sourceObj, sourceCoord);
+            _boosterActionBuilder.Build(sourceCoord, booster, Context.PendingBoosterActions);
             onComplete?.Invoke();
             return true;
         }
@@ -86,7 +81,7 @@ namespace Game.Grid.States
 
             var sourceObj = model.GetGridObject(sourceCoord);
             var targetObj = model.GetGridObject(targetCoord);
-         
+
             if (!sourceObj || !targetObj)
             {
                 onComplete?.Invoke();
@@ -100,14 +95,14 @@ namespace Game.Grid.States
             }
 
             var typeData = model.BuildGridTypeData();
-            
-            if (!GridMatchCalcUtil.IsCellsRegular(sourceObj, targetObj) || 
+
+            if (!GridMatchCalcUtil.IsCellsRegular(sourceObj, targetObj) ||
                 !GridMatchCalcUtil.WouldSwapCreateMatch(model, typeData, sourceCoord, targetCoord, sourceObj.TypeId, targetObj.TypeId))
             {
                 PlaySwapAndBack(sourceObj, targetObj, sourceCoord, targetCoord, onComplete).Forget();
                 return false;
             }
-            
+
             PlaySwapAndCommit(sourceObj, targetObj, onComplete).Forget();
             return true;
         }
@@ -116,10 +111,10 @@ namespace Game.Grid.States
         {
             var sourcePos = Context.GridView.GridToWorld(sourceCoord);
             var targetPos = Context.GridView.GridToWorld(targetCoord);
-            
+
             _ = sourceObj.Animation.PingPongMove(sourcePos, targetPos);
             await targetObj.Animation.PingPongMove(targetPos, sourcePos);
-           
+
             onComplete?.Invoke();
         }
 
@@ -127,13 +122,13 @@ namespace Game.Grid.States
         {
             var sourceCoord = sourceObj.Coord;
             var targetCoord = targetObj.Coord;
-            
+
             var sourcePos = Context.GridView.GridToWorld(sourceCoord);
             var targetPos = Context.GridView.GridToWorld(targetCoord);
-            
+
             sourceObj.SetFrontOf(targetObj);
-            
-            if(sourceObj.ItemKind == GridItemKind.Regular || targetObj.ItemKind == GridItemKind.Regular)
+
+            if (sourceObj.ItemKind == GridItemKind.Regular || targetObj.ItemKind == GridItemKind.Regular)
             {
                 _ = targetObj.Animation.MoveTo(sourcePos);
             }
@@ -141,78 +136,44 @@ namespace Game.Grid.States
             await sourceObj.Animation.MoveTo(targetPos);
 
             Context.GridModel.Swap(sourceCoord, targetCoord);
-            
-            SetInputFlags(sourceObj, targetObj, sourceCoord, targetCoord);
-            CreateBoosterActions(sourceObj, targetObj);
-            
+
+            SetInputFlags(sourceObj, targetObj);
+            BuildBoosterActions(sourceObj, targetObj);
+
             Context.MatchResolveRequested = true;
             onComplete?.Invoke();
         }
-        
-         
-        private void SetInputFlags(BaseGridObject sourceObj, BaseGridObject targetObj, Vector2Int sourceCoord, Vector2Int targetCoord)
+
+        private void SetInputFlags(BaseGridObject sourceObj, BaseGridObject targetObj)
         {
             var sourceIsBooster = sourceObj.ItemKind == GridItemKind.Booster;
             var targetIsBooster = targetObj.ItemKind == GridItemKind.Booster;
 
             if (sourceIsBooster && targetIsBooster) return;
-
-            Context.MergeCenterCoord = targetCoord;
-            Context.UnmarkRemoveCoord = sourceIsBooster ? sourceCoord : targetIsBooster ? targetCoord : null;
-        }
-
-        private void CreateBoosterActions(BaseGridObject sourceObj, BaseGridObject targetObj)
-        {
-            var sourceCoord = sourceObj.Coord;
-            var targetCoord = targetObj.Coord;
             
-            if (sourceObj is BoosterObject sourceBooster && targetObj is BoosterObject targetBooster)
+            Context.MergeCenterCoord = sourceObj.Coord;
+            Context.ProtectedCoord = sourceIsBooster ? targetObj.Coord : targetIsBooster ? sourceObj.Coord : null;
+        }
+
+        private void BuildBoosterActions(BaseGridObject sourceObj, BaseGridObject targetObj)
+        {
+            var actions = Context.PendingBoosterActions;
+
+            if (sourceObj is BoosterObject source && targetObj is BoosterObject target)
             {
-                AddComboAction(sourceCoord, sourceBooster.BoosterType, targetBooster.BoosterType);
-                _objectDestroyHandler.DestroyGridObject(sourceObj, sourceCoord);
-                _objectDestroyHandler.DestroyGridObject(targetObj, targetCoord);
+                _boosterActionBuilder.BuildCombo(sourceObj.Coord, source, target, actions);
                 return;
             }
 
-            if (targetObj is BoosterObject movedBoosterToB)
+            if (targetObj is BoosterObject boosterB)
             {
-                AddBoosterAction(targetCoord, movedBoosterToB);
-                _objectDestroyHandler.DestroyGridObject(targetObj, targetCoord);
+                _boosterActionBuilder.Build(targetObj.Coord, boosterB, actions);
                 return;
             }
 
-            if (sourceObj is BoosterObject movedBoosterToA)
+            if (sourceObj is BoosterObject boosterA)
             {
-                AddBoosterAction(sourceCoord, movedBoosterToA);
-                _objectDestroyHandler.DestroyGridObject(sourceObj, sourceCoord);
-            }
-        }
-
-        private void AddBoosterAction(Vector2Int originCoord, BoosterObject booster)
-        {
-            if (!booster || booster.BoosterAction == null) return;
-
-            var boosterActionContext = new BoosterActionContext(originCoord, booster.BoosterAction);
-
-            Context.PendingBoosterActions.Add(boosterActionContext);
-        }
-
-        private void AddComboAction(Vector2Int origin, BoosterType sourceBoosterType, BoosterType targetBoosterType)
-        {
-            if (_boosterComboData.TryGetRule(sourceBoosterType, targetBoosterType, out var rule) && rule.Actions != null)
-            {
-                foreach (var boosterAction in rule.Actions)
-                {
-                    if (boosterAction == null) continue;
-
-                    var boosterActionContext = new BoosterActionContext(origin, boosterAction);
-
-                    Context.PendingBoosterActions.Add(boosterActionContext);
-                }
-            }
-            else
-            {
-                EditorLogger.LogError($"{sourceBoosterType} - {targetBoosterType} merge rule does not exist!");
+                _boosterActionBuilder.Build(sourceObj.Coord, boosterA, actions);
             }
         }
     }

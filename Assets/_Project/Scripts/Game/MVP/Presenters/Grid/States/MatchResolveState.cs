@@ -23,8 +23,7 @@ namespace Game.Grid.States
         private Vector2Int[] _coordBuffer = Array.Empty<Vector2Int>();
         private int _lastTaskCount;
 
-        public MatchResolveState(GridStateContext context, IMatchDestructionHandler destructionHandler, IMatchMergeHandler mergeHandler)
-            : base(context)
+        public MatchResolveState(GridStateContext context, IMatchDestructionHandler destructionHandler, IMatchMergeHandler mergeHandler) : base(context)
         {
             _destructionHandler = destructionHandler;
             _mergeHandler = mergeHandler;
@@ -71,24 +70,8 @@ namespace Game.Grid.States
             if (Context.MergeCenterCoord.HasValue)
             {
                 var forcedCenter = Context.MergeCenterCoord.Value;
-
-                if (!matchMask[forcedCenter.x, forcedCenter.y])
-                {
-                    if (TryPickAnyCoordFromMask(matchMask, model, out var fallback))
-                    {
-                        forcedCenter = fallback;
-                        Context.MergeCenterCoord = fallback;
-                    }
-                    else
-                    {
-                        Context.MergeCenterCoord = null;
-                    }
-                }
-
-                if (Context.MergeCenterCoord.HasValue)
-                {
-                    ScanRect(forcedCenter.x, forcedCenter.y, forcedCenter.x + 1, forcedCenter.y + 1, 3, 999);
-                }
+                // 1) Forced center pass
+                ScanRect(forcedCenter.x, forcedCenter.y, forcedCenter.x + 1, forcedCenter.y + 1, 3, 999);
             }
 
             // 2) Booster (4+ or T/L/5 vs) pass
@@ -145,22 +128,6 @@ namespace Game.Grid.States
             }
         }
 
-        private static bool TryPickAnyCoordFromMask(bool[,] matchMask, IGridModel model, out Vector2Int coord)
-        {
-            for (int y = 0; y < model.Height; y++)
-            {
-                for (int x = 0; x < model.Width; x++)
-                {
-                    if (!matchMask[x, y]) continue;
-                    coord = new Vector2Int(x, y);
-                    return true;
-                }
-            }
-
-            coord = default;
-            return false;
-        }
-
         private UniTask WhenAllTasks(int taskCount)
         {
             if (taskCount == 0) return UniTask.CompletedTask;
@@ -193,38 +160,40 @@ namespace Game.Grid.States
             var centerCoord = anyForced ? forcedCoord : GridBoosterDecisionUtil.SelectMergeCenter(group);
 
             var mergeObjs = GridMatchCalcUtil.GetMergedGroupObject(group, model, centerCoord);
-            var boosterValue = boosterType.Value;
+            var type = boosterType.Value;
             var centerObj = model.GetGridObject(centerCoord);
-
+            
             _destructionHandler.ClearGroupForMerge(group);
 
             return _mergeHandler.PlayMergeAnimationAsync(mergeObjs, centerCoord)
-                                .ContinueWith(() => OnCompleteAnimation(mergeObjs, centerObj, centerCoord, boosterValue));
+                                .ContinueWith(() => OnCompleteAnimation(mergeObjs, centerObj, centerCoord, type));
         }
 
-        private void OnCompleteAnimation(BaseGridObject[] mergeObjs, BaseGridObject centerObj, Vector2Int centerCoord, BoosterType boosterValue)
+        private void OnCompleteAnimation(BaseGridObject[] mergeObjs, BaseGridObject centerObj, Vector2Int centerCoord, BoosterType boosterType)
         {
             _destructionHandler.ReleaseObjects(mergeObjs);
             _destructionHandler.ReleaseObject(centerObj);
-            _mergeHandler.SpawnBooster(centerCoord, boosterValue);
+            _mergeHandler.SpawnBooster(centerCoord, boosterType);
         }
 
         private bool TryConsumeForcedCenterCoord(List<Vector2Int> group, out Vector2Int forcedCoord)
         {
-            forcedCoord = default;
-
-            if (!Context.MergeCenterCoord.HasValue) return false;
+            if (!Context.MergeCenterCoord.HasValue)
+            {
+                forcedCoord = default;
+                return false;
+            }
 
             var coord = Context.MergeCenterCoord.Value;
 
-            Context.MergeCenterCoord = null;
-
             if (group.Any(t => t == coord))
             {
+                Context.MergeCenterCoord = null;
                 forcedCoord = coord;
                 return true;
             }
 
+            forcedCoord = default;
             return false;
         }
     }

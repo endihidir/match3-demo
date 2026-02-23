@@ -20,7 +20,7 @@ namespace Game.Grid.Contexts
         public List<BoosterActionContext> PendingBoosterActions { get; } = new();
         
         public Vector2Int? MergeCenterCoord { get; set; }
-        public Vector2Int? UnmarkRemoveCoord { get; set; }
+        public Vector2Int? ProtectedCoord { get; set; }
         
         public event Action OnDestructionStateComplete;
 

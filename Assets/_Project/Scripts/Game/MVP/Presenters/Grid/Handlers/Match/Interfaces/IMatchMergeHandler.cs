@@ -1,7 +1,5 @@
 using Cysharp.Threading.Tasks;
 using Game.Grid.Item;
-using Game.Models;
-using Game.Views;
 using UnityEngine;
 
 namespace Game.Grid.Handlers
