@@ -37,16 +37,14 @@ namespace Game.Grid.Handlers
         private bool HasPendingBoosterActions => _context.HasPendingBoosterActions;
         private bool MatchResolveRequested => _context.MatchResolveRequested;
 
-        public GridStateHandler(IGridModel model, IGridView view, GridConfigContainerSO gridConfigContainer, IBoosterFxHandler boosterFxHandler, 
+        public GridStateHandler(IGridModel model, IGridView view, IBoosterFxHandler boosterFxHandler, IBoosterActionBuildHandler boosterActionBuilder,
             IGridObjectDestroyHandler destroyHandler, ILevelGoalProgressHandler progressHandler, IFillStrategyResolver fillStrategyResolver,
             IMatchDestructionHandler matchDestructionHandler, IMatchMergeHandler matchMergeHandler)
         {
-            var boosterComboData = gridConfigContainer.GetConfig<BoosterConfigContainerSO>().BoosterComboData;
-            
             _context = new GridStateContext(model, view);
 
             _idleState = new IdleState(_context);
-            _inputState = new InputResolveState(_context, boosterComboData, destroyHandler, progressHandler);
+            _inputState = new InputResolveState(_context, boosterActionBuilder, progressHandler);
             _boosterState = new BoosterResolveState(_context, boosterFxHandler, destroyHandler, progressHandler);
             _matchState = new MatchResolveState(_context, matchDestructionHandler, matchMergeHandler);
             _shuffleState = new ShuffleState(_context);

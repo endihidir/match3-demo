@@ -8,9 +8,9 @@ namespace Game.Grid.Item.Factories
         private readonly IObjectPoolService _objectPoolService;
         public GridObjectFactory(IObjectPoolService objectPoolService) => _objectPoolService = objectPoolService;
 
-        public T GetObject<T>() where T : BaseGridObject
+        public T GetObject<T>(bool activate = true) where T : BaseGridObject
         {
-            var itemObject = _objectPoolService.GetObject<T>();
+            var itemObject = _objectPoolService.GetObject<T>(activate);
             itemObject.ResetItem();
             return itemObject;
         }

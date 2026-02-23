@@ -54,6 +54,8 @@ namespace Game.DI
             builder.Register<MatchMergeHandler>(Lifetime.Scoped).As<IMatchMergeHandler>();
             
             builder.Register<BoosterFxHandler>(Lifetime.Scoped).As<IBoosterFxHandler>();
+            builder.Register<BoosterActionBuildHandler>(Lifetime.Scoped).As<IBoosterActionBuildHandler>();
+            
             builder.Register<GridCheatHandler>(Lifetime.Scoped).As<IGridCheatHandler, ITickable>();
             builder.Register<GridStateHandler>(Lifetime.Scoped).As<IGridStateHandler, ITickable, IFixedTickable, ILateTickable>();
             

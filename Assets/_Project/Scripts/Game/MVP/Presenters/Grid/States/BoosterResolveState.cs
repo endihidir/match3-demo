@@ -65,10 +65,10 @@ namespace Game.Grid.States
             var model = Context.GridModel;
             var view = Context.GridView;
             
-            var fxTask = _boosterFxHandler.PlayBoosterFxAsync(action, out var animSpeed);
+            _boosterFxHandler.PlayBoosterFxAsync(action, out var animSpeed).Forget();
             var timeline = BoosterTimelineBuilder.BuildTimeline(action, model, view, animSpeed);
             var timelineTask = ProcessTimelineAsync(timeline, action.BoosterAction.DamageAmount);
-            await UniTask.WhenAll(timelineTask, fxTask);
+            await UniTask.WhenAll(timelineTask);
         }
 
         private async UniTask ProcessTimelineAsync(ImpactTimeline timeline, int damageAmount)
@@ -122,12 +122,12 @@ namespace Game.Grid.States
         
         private void BuildUnmarkProtectedCells()
         {
-            if (!Context.UnmarkRemoveCoord.HasValue) return;
+            if (!Context.ProtectedCoord.HasValue) return;
             
-            var unmarkRemoveCoord = Context.UnmarkRemoveCoord.Value;
+            var unmarkRemoveCoord = Context.ProtectedCoord.Value;
             
-            Context.UnmarkRemoveCoord = null;
-
+            Context.ProtectedCoord = null;
+            
             var model = Context.GridModel;
 
             if (!GridMatchMaskBuilder.TryBuildMatchMask(model, out var matchMask)) return;

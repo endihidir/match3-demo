@@ -235,7 +235,7 @@ namespace Core.Utils
             return true;
         }
 
-        private static List<Vector2Int> CollectGroupFromMask(IGridModel model, bool[,] matchMask, bool[,] visited, Vector2Int start)
+        public static List<Vector2Int> CollectGroupFromMask(IGridModel model, bool[,] matchMask, bool[,] visited, Vector2Int start)
         {
             var result = new List<Vector2Int>();
             var stack = new Stack<Vector2Int>();

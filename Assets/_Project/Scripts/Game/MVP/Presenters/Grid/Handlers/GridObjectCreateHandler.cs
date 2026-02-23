@@ -44,7 +44,7 @@ namespace Game.Grid.Handlers
             };
         }
         
-        public bool TryCreateObject<T>(GridObjectType typeData, out T gridObject) where T : BaseGridObject
+        public bool TryCreateObject<T>(GridObjectType typeData, out T gridObject, bool activate = true) where T : BaseGridObject
         {
             gridObject = null;
             
@@ -52,7 +52,7 @@ namespace Game.Grid.Handlers
 
             if (!data) return false;
 
-            gridObject = _gridObjectFactory.GetObject<T>();
+            gridObject = _gridObjectFactory.GetObject<T>(activate);
 
             if (!gridObject) return false;
             
@@ -62,40 +62,40 @@ namespace Game.Grid.Handlers
             return true;
         }
         
-        public ItemObject CreateItem(ItemType itemType)
+        public ItemObject CreateItem(ItemType itemType, bool activate = true)
         {
             var typeData = new GridObjectType(GridItemKind.Regular, (int)itemType);
-            return TryCreateObject<ItemObject>(typeData, out var item) ? item : null;
+            return TryCreateObject<ItemObject>(typeData, out var item, activate) ? item : null;
         }
 
-        public ObstacleObject CreateObstacle(ObstacleType obstacleType)
+        public ObstacleObject CreateObstacle(ObstacleType obstacleType, bool activate = true)
         {
             var typeData = new GridObjectType(GridItemKind.Obstacle, (int)obstacleType);
-            return TryCreateObject<ObstacleObject>(typeData, out var obstacleObject) ? obstacleObject : null;
+            return TryCreateObject<ObstacleObject>(typeData, out var obstacleObject, activate) ? obstacleObject : null;
         }
         
-        public BoosterObject CreateBooster(BoosterType boosterType)
+        public BoosterObject CreateBooster(BoosterType boosterType, bool activate = true)
         {
             var typeData = new GridObjectType(GridItemKind.Booster, (int)boosterType);
-            return TryCreateObject<BoosterObject>(typeData, out var boosterObject) ? boosterObject : null;
+            return TryCreateObject<BoosterObject>(typeData, out var boosterObject, activate) ? boosterObject : null;
         }
 
-        public ItemObject CreateRandomItem()
+        public ItemObject CreateRandomItem(bool activate = true)
         {
             var randomType = LevelGridRandomUtil.GetRandomEnumValue<ItemType>(1);
-            return CreateItem(randomType);
+            return CreateItem(randomType, activate);
         }
 
-        public ObstacleObject CreateRandomObstacle()
+        public ObstacleObject CreateRandomObstacle(bool activate = true)
         {
             var randomType = LevelGridRandomUtil.GetRandomEnumValue<ObstacleType>(1);
-            return CreateObstacle(randomType);
+            return CreateObstacle(randomType, activate);
         }
 
-        public BoosterObject CreateRandomBooster()
+        public BoosterObject CreateRandomBooster(bool activate = true)
         {
             var randomType = LevelGridRandomUtil.GetRandomEnumValue<BoosterType>(1);
-            return CreateBooster(randomType);
+            return CreateBooster(randomType, activate);
         }
     }
 }
