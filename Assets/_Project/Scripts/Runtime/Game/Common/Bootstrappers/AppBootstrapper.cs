@@ -5,6 +5,7 @@ using Core.Pool.Services;
 using DG.Tweening;
 using Game.Level.Models;
 using Game.Level.Services;
+using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
@@ -12,6 +13,7 @@ namespace Game.Bootstrappers
 {
     public class AppBootstrapper : IInitializable
     {
+        private const int TargetFrameRate = 60;
         private const int TweenCapacity = 2000;
         private const int SequenceCapacity = 500;
         
@@ -35,6 +37,8 @@ namespace Game.Bootstrappers
             var isInitialized = await _levelDataService.InitializeAsync();
             
             if (!isInitialized) return;
+            
+            Application.targetFrameRate = TargetFrameRate;
             
             _levelProgressionModel.Initialize(_levelDataService.LevelSize);
             
