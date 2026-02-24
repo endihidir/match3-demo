@@ -102,6 +102,7 @@ namespace Core.SaveSystem
 #endif
         }
         
+#if UNITY_EDITOR
         [MenuItem("Edit/Clear All Json Data")]
         public static void ClearJson() => ClearJsonData();
         
@@ -111,6 +112,7 @@ namespace Core.SaveSystem
             ClearJsonData();
             PlayerPrefs.DeleteAll();
         }
+#endif
 
         private string GetFilePath(string key) => Path.Combine(DirectoryPath, $"{key}.json");
     }

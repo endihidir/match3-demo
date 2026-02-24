@@ -1,6 +1,6 @@
+using Core.Extensions;
 using Core.Modules;
 using Cysharp.Threading.Tasks;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Game.Views
@@ -27,7 +27,7 @@ namespace Game.Views
 
         public void Hide()
         {
-            BgFadeAnimation.Graphic.color = BgFadeAnimation.Graphic.color.WithAlpha(0f);
+            BgFadeAnimation.Graphic.color = BgFadeAnimation.Graphic.color.SetAlpha(0f);
             BgFadeAnimation.gameObject.SetActive(false);
             TitleBounceAnimation.gameObject.SetActive(false);
             ButtonBounceAnimation.gameObject.SetActive(false);
