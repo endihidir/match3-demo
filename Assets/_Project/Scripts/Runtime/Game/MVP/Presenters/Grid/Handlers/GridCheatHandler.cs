@@ -10,6 +10,7 @@ using Game.Views;
 using UnityEditor;
 #endif
 using UnityEngine;
+using UnityEngine.InputSystem;
 using VContainer.Unity;
 
 namespace Game.Grid.Handlers
@@ -36,34 +37,36 @@ namespace Game.Grid.Handlers
 
         public void Tick()
         {
-            if(!_gridView.IsInitialized) return;
-            
-            if (Input.GetKeyDown(KeyCode.S)) GenerateItemAtMousePos(ItemType.Blue);
-            if (Input.GetKeyDown(KeyCode.L)) GenerateItemAtMousePos(ItemType.Green);
-            if (Input.GetKeyDown(KeyCode.A)) GenerateItemAtMousePos(ItemType.Red);
-            if (Input.GetKeyDown(KeyCode.X)) GenerateItemAtMousePos(ItemType.Yellow);
-            
-            if (Input.GetKeyDown(KeyCode.B)) GenerateObstacleAtMousePos(ObstacleType.Box);
-            if (Input.GetKeyDown(KeyCode.N)) GenerateObstacleAtMousePos(ObstacleType.Vase);
-            
-            if (Input.GetKeyDown(KeyCode.T)) GenerateBoosterAtMousePos(BoosterType.Bomb);
-            if (Input.GetKeyDown(KeyCode.H)) GenerateBoosterAtMousePos(BoosterType.RocketHorizontal);
-            if (Input.GetKeyDown(KeyCode.V)) GenerateBoosterAtMousePos(BoosterType.RocketVertical);
-            
-            if (Input.GetKeyDown(KeyCode.C)) Cleanup<BoosterObject>();
-            if (Input.GetKeyDown(KeyCode.O)) Cleanup<ObstacleObject>();
-            if (Input.GetKeyDown(KeyCode.R)) RemoveAtMousePos();
-            if (Input.GetKeyDown(KeyCode.F)) ForceRefill();
-            if (Input.GetKeyDown(KeyCode.Space)) LoadMainMenu();
-            
-            if (Input.GetKeyDown(KeyCode.D))
+            if (!_gridView.IsInitialized) return;
+
+            var kb = Keyboard.current;
+            if (kb == null) return;
+
+            if (kb.sKey.wasPressedThisFrame) GenerateItemAtMousePos(ItemType.Blue);
+            if (kb.lKey.wasPressedThisFrame) GenerateItemAtMousePos(ItemType.Green);
+            if (kb.aKey.wasPressedThisFrame) GenerateItemAtMousePos(ItemType.Red);
+            if (kb.xKey.wasPressedThisFrame) GenerateItemAtMousePos(ItemType.Yellow);
+
+            if (kb.bKey.wasPressedThisFrame) GenerateObstacleAtMousePos(ObstacleType.Box);
+            if (kb.nKey.wasPressedThisFrame) GenerateObstacleAtMousePos(ObstacleType.Vase);
+
+            if (kb.tKey.wasPressedThisFrame) GenerateBoosterAtMousePos(BoosterType.Bomb);
+            if (kb.hKey.wasPressedThisFrame) GenerateBoosterAtMousePos(BoosterType.RocketHorizontal);
+            if (kb.vKey.wasPressedThisFrame) GenerateBoosterAtMousePos(BoosterType.RocketVertical);
+
+            if (kb.cKey.wasPressedThisFrame) Cleanup<BoosterObject>();
+            if (kb.oKey.wasPressedThisFrame) Cleanup<ObstacleObject>();
+            if (kb.rKey.wasPressedThisFrame) RemoveAtMousePos();
+            if (kb.fKey.wasPressedThisFrame) ForceRefill();
+            if (kb.spaceKey.wasPressedThisFrame) LoadMainMenu();
+
+            if (kb.dKey.wasPressedThisFrame)
             {
                 EditorLogger.LogError(_gridStateHandler.CurrentStateID);
             }
 
 #if UNITY_EDITOR
-            
-            if (Input.GetKeyDown(KeyCode.P)) EditorApplication.isPaused = !EditorApplication.isPaused;
+            if (kb.pKey.wasPressedThisFrame) EditorApplication.isPaused = !EditorApplication.isPaused;
 #endif
         }
 
@@ -87,7 +90,7 @@ namespace Game.Grid.Handlers
         public void GenerateItemAtMousePos(ItemType type)
         {
             var coord = GetMouseGridCoord();
-            if(!IsCellActive(coord)) return;
+            if (!IsCellActive(coord)) return;
             ClearCell(coord);
 
             var obstacle = _objectCreateHandler.CreateItem(type);
@@ -97,7 +100,7 @@ namespace Game.Grid.Handlers
         public void GenerateBoosterAtMousePos(BoosterType type)
         {
             var coord = GetMouseGridCoord();
-            if(!IsCellActive(coord)) return;
+            if (!IsCellActive(coord)) return;
             ClearCell(coord);
 
             var booster = _objectCreateHandler.CreateBooster(type);
@@ -107,7 +110,7 @@ namespace Game.Grid.Handlers
         public void GenerateObstacleAtMousePos(ObstacleType type)
         {
             var coord = GetMouseGridCoord();
-            if(!IsCellActive(coord)) return;
+            if (!IsCellActive(coord)) return;
             ClearCell(coord);
 
             var obstacle = _objectCreateHandler.CreateObstacle(type);
@@ -117,13 +120,17 @@ namespace Game.Grid.Handlers
         public void RemoveAtMousePos()
         {
             var coord = GetMouseGridCoord();
-            if(!IsCellActive(coord)) return;
+            if (!IsCellActive(coord)) return;
             ClearCell(coord);
         }
 
         public void ForceRefill() => _gridStateHandler.ForceState<FillResolveState>();
 
-        private Vector2Int GetMouseGridCoord() => _gridView.ScreenToGrid(Input.mousePosition);
+        private Vector2Int GetMouseGridCoord()
+        {
+            var mousePos = Mouse.current?.position.ReadValue() ?? Vector2.zero;
+            return _gridView.ScreenToGrid(mousePos);
+        }
 
         private void ClearCell(Vector2Int coord)
         {
