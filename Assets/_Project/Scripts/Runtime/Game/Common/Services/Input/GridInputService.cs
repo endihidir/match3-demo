@@ -15,6 +15,7 @@ namespace Game.Grid.Services
         private Vector2 _lastPos;
 
         private bool _isPointerOverUI;
+        private bool _capturingStart;
 
         public GridInputService()
         {
@@ -32,17 +33,26 @@ namespace Game.Grid.Services
         private void OnPositionPerformed(InputAction.CallbackContext ctx)
         {
             _lastPos = ctx.ReadValue<Vector2>();
+
+            if (!_capturingStart) return;
+
+            _startPos = _lastPos;
+            _capturingStart = false;
         }
 
         private void OnPressStarted(InputAction.CallbackContext ctx)
         {
-            _startPos = _actions.Board.Position.ReadValue<Vector2>();
-            _lastPos = _startPos;
+            var pos = Pointer.current?.position.ReadValue() ?? Vector2.zero;
+            _startPos = pos;
+            _lastPos = pos;
+            _capturingStart = false;
         }
 
         private void OnPressCanceled(InputAction.CallbackContext ctx)
         {
-            if(_isPointerOverUI) return;
+            _capturingStart = false;
+
+            if (_isPointerOverUI) return;
 
             var endPos = _actions.Board.Position.ReadValue<Vector2>();
 
