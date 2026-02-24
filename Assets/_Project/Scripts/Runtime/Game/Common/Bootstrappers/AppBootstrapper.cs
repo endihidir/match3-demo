@@ -30,6 +30,8 @@ namespace Game.Bootstrappers
 
         private async UniTask InitGame()
         {
+            Application.targetFrameRate = TargetFrameRate;
+            
             if(!_sceneLoadService.IsInAnyGameScene) return;
 
             await _sceneLoadService.InitBootSceneAsync();
@@ -37,8 +39,6 @@ namespace Game.Bootstrappers
             var isInitialized = await _levelDataService.InitializeAsync();
             
             if (!isInitialized) return;
-            
-            Application.targetFrameRate = TargetFrameRate;
             
             _levelProgressionModel.Initialize(_levelDataService.LevelSize);
             
