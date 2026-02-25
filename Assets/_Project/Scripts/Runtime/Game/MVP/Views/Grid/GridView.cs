@@ -68,7 +68,7 @@ namespace Game.Views
         private void GenerateMesh()
         {
             var ms = MeshConfig;
-            Layout.BuildGridMesh(_gridSize, GridMeshFilter, ms.FrameThickness, ms.CornerSmoothness, ms.GetCornerSegments(), IsCellActive);
+            Layout.BuildGridMesh(_gridSize, GridMeshFilter, ms.FrameThickness, ms.FrameOffset, ms.CornerSmoothness, ms.GetCornerSegments(), IsCellActive);
         }
         
         public Vector2Int ToGridDirection(Vector2Int direction) => new(direction.x, -direction.y);
