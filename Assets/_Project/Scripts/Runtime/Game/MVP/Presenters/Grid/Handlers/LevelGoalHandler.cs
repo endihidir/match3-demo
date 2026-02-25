@@ -29,8 +29,8 @@ namespace Game.Level.Handlers
             var type = gridObject.ObjectType;
             _levelGoalModel.ProgressGoal(type);
             
-            if (!TryBuildGoalCollectedData(type, gridObject.Coord, gridObject.SpriteRenderer.size, out var data)) return;
-            OnGoalCollected?.Invoke(data);
+            if (!TryBuildGoalCollectedData(type, gridObject.Coord, gridObject.SpriteRenderer.size, out var collectedData)) return;
+            OnGoalCollected?.Invoke(collectedData);
         }
 
         private bool TryBuildGoalCollectedData(GridObjectType gridObjectType, Vector2Int coord, Vector2 spriteSize, out GoalCollectedData data)
