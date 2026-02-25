@@ -9,7 +9,6 @@ namespace Game.Grid.Item
         [field: SerializeField, ReadOnly] public ObstacleType ObstacleType { get; private set; }
         [field: SerializeField, ReadOnly] public int Life { get; private set; }
         [field: SerializeField, ReadOnly] public GridDamageSource AllowedDamageSources { get; private set; }
-        [field: SerializeField, ReadOnly] public bool IsCollectible { get; private set; }
         [field: SerializeField, ReadOnly] public Sprite[] BrokenSprites { get; private set; }
 
         protected override void OnInitialize()
@@ -26,15 +25,13 @@ namespace Game.Grid.Item
             UpdateIdentity();
         }
 
-        public override void ApplyData(BaseGridObjectDataSO baseGridObjectDataSo)
+        public override void ApplyData(BaseGridObjectDataSO baseGridObjectData)
         {
-            base.ApplyData(baseGridObjectDataSo);
+            base.ApplyData(baseGridObjectData);
 
-            if (baseGridObjectDataSo is ObstacleDataSO obstacleConfigData)
+            if (baseGridObjectData is ObstacleDataSO obstacleConfigData)
             {
-                IsStationary = obstacleConfigData.IsStationary;
                 Life = obstacleConfigData.GetLife();
-                IsCollectible = obstacleConfigData.IsCollectible;
                 AllowedDamageSources = obstacleConfigData.GridDamageSource;
                 BrokenSprites = obstacleConfigData.CrackedSprites;
             }

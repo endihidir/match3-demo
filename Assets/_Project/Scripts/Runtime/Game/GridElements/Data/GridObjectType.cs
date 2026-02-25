@@ -18,5 +18,13 @@ namespace Game.Grid.Item
             ItemKind = itemKind;
             TypeId = typeId;
         }
+        
+        public bool Equals(GridObjectType other) => ItemKind == other.ItemKind && TypeId == other.TypeId;
+        public override bool Equals(object obj) => obj is GridObjectType other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(ItemKind, TypeId);
+        public static bool operator ==(GridObjectType a, GridObjectType b) => a.Equals(b);
+        public static bool operator !=(GridObjectType a, GridObjectType b) => !a.Equals(b);
+
+        public override string ToString() => $"{ItemKind}_{TypeId}";
     }
 }

@@ -23,11 +23,11 @@ namespace Game.Grid.Item
             UpdateIdentity();
         }
 
-        public override void ApplyData(BaseGridObjectDataSO baseGridObjectDataSo)
+        public override void ApplyData(BaseGridObjectDataSO baseGridObjectData)
         {
-            base.ApplyData(baseGridObjectDataSo);
+            base.ApplyData(baseGridObjectData);
 
-            if (baseGridObjectDataSo is BoosterDataSO boosterConfigData)
+            if (baseGridObjectData is BoosterDataSO boosterConfigData)
             {
                 BoosterAction = boosterConfigData.BoosterAction;
             }

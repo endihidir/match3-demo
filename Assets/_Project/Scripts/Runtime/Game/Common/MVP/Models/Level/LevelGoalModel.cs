@@ -13,44 +13,29 @@ namespace Game.Level.Models
         private int _totalGoalCount;
         public int MoveCount { get; private set; }
         public bool IsAllMovesFinished => MoveCount <= 0;
-        public bool IsAllGoalsComplete => _totalGoalCount <= 0;
-        public event Action OnGoalsComplete;
+        public bool IsAllGoalsComplete => _goals.All(x=> x.Count <= 0);
+        public event Action OnGoalCountUpdate;
         public event Action OnMoveCountUpdate;
-        public event Action<IDamageableGridObject, Vector3, Vector2> OnGoalProgressUpdate;
         
         public void Initialize(List<LevelGoal> goals, int moveCount)
         {
             _goals = goals.Select(g => g.Clone()).ToList();
-            _totalGoalCount = _goals.Sum(x => x.Count);
-            MoveCount = moveCount;
+            OnGoalCountUpdate?.Invoke();
             
-            if (IsAllGoalsComplete) 
-                OnGoalsComplete?.Invoke();
+            MoveCount = moveCount;
+            OnMoveCountUpdate?.Invoke();
         }
 
-        public void ProgressGoal(IDamageableGridObject damagableObj, Vector3 worldPos, Vector2 rectSize)
+        public void ProgressGoal(GridObjectType gridObjectType)
         {
             if (IsAllGoalsComplete) return;
-            
-            foreach (var levelGoal in _goals)
+
+            if (TryGetGoal(gridObjectType, out var goal))
             {
-                if (levelGoal.ObstacleType != damagableObj.ObstacleType) continue;
-                if (levelGoal.Count == 0) continue;
-
-                var before = levelGoal.Count;
-                var removed = Mathf.Min(before, 1);
-
-                levelGoal.Count = before - removed;
-                _totalGoalCount -= removed;
-
-                OnGoalProgressUpdate?.Invoke(damagableObj, worldPos, rectSize);
-                break;
+                goal.Count = Mathf.Max(0, goal.Count - 1);
             }
 
-            if (IsAllGoalsComplete)
-            {
-                OnGoalsComplete?.Invoke();
-            }
+            OnGoalCountUpdate?.Invoke();
         }
 
         public void ConsumeMove()
@@ -62,9 +47,9 @@ namespace Game.Level.Models
             OnMoveCountUpdate?.Invoke();
         }
         
-        public bool TryGetGoal(ObstacleType obstacleType, out LevelGoal levelGoal)
+        public bool TryGetGoal(GridObjectType gridObjectType, out LevelGoal levelGoal)
         {
-            var goal = _goals.FirstOrDefault(x => x.ObstacleType.Equals(obstacleType));
+            var goal = _goals.FirstOrDefault(x => x.GridObjectType.Equals(gridObjectType));
 
             if (goal != null)
             {

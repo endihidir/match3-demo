@@ -6,6 +6,7 @@ using Game.Grid.Strategies.Schedulers;
 using Game.Grid.Handlers;
 using Game.Grid.Services;
 using Game.HUD.Handlers;
+using Game.Level.Handlers;
 using Game.Level.Models;
 using Game.Models;
 using Game.Presenters;
@@ -47,7 +48,8 @@ namespace Game.DI
             builder.Register<GridObjectCreateHandler>(Lifetime.Scoped).As<IGridObjectCreateHandler>();
             builder.Register<GridObjectDestroyHandler>(Lifetime.Scoped).As<IGridObjectDestroyHandler>();
             
-            builder.Register<LevelGoalProgressHandler>(Lifetime.Scoped).As<ILevelGoalProgressHandler>();
+            builder.Register<LevelGoalHandler>(Lifetime.Scoped).As<ILevelGoalHandler>();
+            builder.Register<LevelResultHandler>(Lifetime.Scoped).As<ILevelResultHandler>();
             
             builder.Register<BlastFxHandler>(Lifetime.Scoped).As<IBlastFxHandler>();
             builder.Register<MatchDestructionHandler>(Lifetime.Scoped).As<IMatchDestructionHandler>();

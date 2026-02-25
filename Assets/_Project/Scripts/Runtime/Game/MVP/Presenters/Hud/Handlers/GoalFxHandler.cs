@@ -1,9 +1,9 @@
 using System;
-using Game.Configs;
 using Game.Grid.Item;
 using Game.Views;
 using Game.View.Factories;
 using DG.Tweening;
+using Game.HUD.Handlers.Data;
 using UnityEngine;
 
 namespace Game.HUD.Handlers
@@ -12,47 +12,38 @@ namespace Game.HUD.Handlers
     {
         private const float FX_INTERVAL = 0.05f;
         private readonly IFXViewFactory _fxFactory;
-        private readonly ObstacleConfigContainerSO _obstacleConfigContainer;
         private float _lastFxTime;
-        public event Action<ObstacleType> OnGoalFxComplete;
+        public event Action<GridObjectType> OnGoalFxComplete;
+        public GoalFxHandler(IFXViewFactory fxFactory) => _fxFactory = fxFactory;
 
-        public GoalFxHandler(IFXViewFactory fxFactory, GridConfigContainerSO gridConfigContainer)
+        public void PlayFX(GoalSlotView targetSlotView, GoalCollectedData goalCollectedData, Transform fxHolder)
         {
-            _fxFactory = fxFactory;
-            _obstacleConfigContainer = gridConfigContainer.GetConfig<ObstacleConfigContainerSO>();
-        }
-
-        public void PlayFX(GoalSlotView targetSlotView, Vector3 worldPos, Vector2 rectSize, Transform fxHolder)
-        {
-            if (!_obstacleConfigContainer.Configs.TryGet(targetSlotView.ObstacleType, out var config)) return;
-            
-            var goalFxView = PrepareFxView(fxHolder, worldPos, rectSize, config);
+            var goalFxView = PrepareFxView(fxHolder, goalCollectedData);
             var targetPos = targetSlotView.transform.position;
             var targetSize = targetSlotView.GetIconSize();
             
             var delay = CalculateDelay();
             goalFxView.SizeAnimation.SetRectSize(targetSize, 0.75f, delay);
             goalFxView.MoveAnimation.MoveTo(targetPos, 0.75f, delay, Ease.InBack)
-                                    .OnComplete(() => OnFxComplete(goalFxView, targetSlotView.ObstacleType));
+                                    .OnComplete(() => OnFxComplete(goalFxView, targetSlotView.GridObjectType));
         }
 
-        private GoalFxView PrepareFxView(Transform fxHolder, Vector3 worldPos, Vector2 rectSize, ObstacleDataSO config)
+        private GoalFxView PrepareFxView(Transform fxHolder, GoalCollectedData goalCollectedData)
         {
             var goalFxView = _fxFactory.GetFX<GoalFxView>();
-            var sprite = config.CrackedSprites.Length > 0 ? config.CrackedSprites[0] : config.Icon;
             goalFxView.transform.SetParent(fxHolder, false);
-            goalFxView.transform.position = worldPos;
-            goalFxView.ImageFxModule.SetSprite(sprite);
-            goalFxView.ImageFxModule.SetRectSize(rectSize);
+            goalFxView.transform.position = goalCollectedData.WorldPos;
+            goalFxView.ImageFxModule.SetRectSize(goalCollectedData.RectSize);
+            goalFxView.ImageFxModule.SetSprite(goalCollectedData.GridObjectData.GetCollectibleSprite());
             return goalFxView;
         }
 
-        private void OnFxComplete(GoalFxView fxView, ObstacleType obstacleType)
+        private void OnFxComplete(GoalFxView fxView, GridObjectType gridObjectType)
         {
             _fxFactory.ReleaseFX(fxView);
-            OnGoalFxComplete?.Invoke(obstacleType);
+            OnGoalFxComplete?.Invoke(gridObjectType);
         }
-        
+
         private float CalculateDelay()
         {
             var currentTime = Time.time;

@@ -1,11 +1,11 @@
 using System;
-using Game.Configs;
 using Game.Grid.Contexts;
 using Game.Grid.Item;
 using Core.StateMachineCore;
 using Game.Grid.States;
 using Game.Grid.Handlers.Data;
 using Game.Grid.Strategies;
+using Game.Level.Handlers;
 using Game.Models;
 using Game.Views;
 using UnityEngine;
@@ -38,14 +38,14 @@ namespace Game.Grid.Handlers
         private bool MatchResolveRequested => _context.MatchResolveRequested;
 
         public GridStateHandler(IGridModel model, IGridView view, IBoosterFxHandler boosterFxHandler, IBoosterActionBuildHandler boosterActionBuilder,
-            IGridObjectDestroyHandler destroyHandler, ILevelGoalProgressHandler progressHandler, IFillStrategyResolver fillStrategyResolver,
+            IGridObjectDestroyHandler destroyHandler, ILevelGoalHandler handler, IFillStrategyResolver fillStrategyResolver,
             IMatchDestructionHandler matchDestructionHandler, IMatchMergeHandler matchMergeHandler)
         {
             _context = new GridStateContext(model, view);
 
             _idleState = new IdleState(_context);
-            _inputState = new InputResolveState(_context, boosterActionBuilder, progressHandler);
-            _boosterState = new BoosterResolveState(_context, boosterFxHandler, destroyHandler, progressHandler);
+            _inputState = new InputResolveState(_context, boosterActionBuilder, handler);
+            _boosterState = new BoosterResolveState(_context, boosterFxHandler, destroyHandler, handler);
             _matchState = new MatchResolveState(_context, matchDestructionHandler, matchMergeHandler);
             _shuffleState = new ShuffleState(_context);
             _fillState = new FillResolveState(_context, fillStrategyResolver);

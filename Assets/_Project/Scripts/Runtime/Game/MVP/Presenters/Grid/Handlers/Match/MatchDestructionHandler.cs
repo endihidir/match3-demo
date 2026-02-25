@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Game.Grid.Item;
+using Game.Level.Handlers;
 using Game.Models;
 using Game.Utils;
 using UnityEngine;
@@ -10,13 +11,13 @@ namespace Game.Grid.Handlers
     {
         private readonly IGridModel _gridModel;
         private readonly IGridObjectDestroyHandler _destroyHandler;
-        private readonly ILevelGoalProgressHandler _goalProgressHandler;
+        private readonly ILevelGoalHandler _goalHandler;
 
-        public MatchDestructionHandler(IGridModel gridModel, IGridObjectDestroyHandler destroyHandler, ILevelGoalProgressHandler goalProgressHandler)
+        public MatchDestructionHandler(IGridModel gridModel, IGridObjectDestroyHandler destroyHandler, ILevelGoalHandler goalHandler)
         {
             _gridModel = gridModel;
             _destroyHandler = destroyHandler;
-            _goalProgressHandler = goalProgressHandler;
+            _goalHandler = goalHandler;
         }
 
         public void DestroyGroup(List<Vector2Int> group)
@@ -27,7 +28,7 @@ namespace Game.Grid.Handlers
                 if (!obj) continue;
 
                 ApplyNeighbourDamage(coord);
-                _destroyHandler.DestroyGridObject(obj, coord);
+                _destroyHandler.DestroyGridObject(obj);
             }
         }
 
@@ -70,8 +71,8 @@ namespace Game.Grid.Handlers
 
                 if (result == GridDamageResult.Destroyed)
                 {
-                    _goalProgressHandler.ProgressGoal(damageable, obj.Coord, obj.SpriteRenderer.size);
-                    _destroyHandler.DestroyGridObject(obj, obj.Coord);
+                    _goalHandler.ProgressGoal(obj);
+                    _destroyHandler.DestroyGridObject(obj);
                 }
             }
         }
