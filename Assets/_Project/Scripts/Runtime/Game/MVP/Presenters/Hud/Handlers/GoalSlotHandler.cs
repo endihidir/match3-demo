@@ -13,14 +13,14 @@ namespace Game.HUD.Handlers
     public sealed class GoalSlotHandler : IGoalSlotHandler
     {
         private readonly ISlotViewFactory _slotViewFactory;
-        private readonly ObstacleConfigContainerSO _obstacleConfigContainer;
+        private readonly GridConfigContainerSO _gridConfigContainer;
         public GoalSlotView[] GoalSlotViews { get; private set; }
-        private SerializedDictionary<ObstacleType, GoalSlotView> SlotByType { get; set; }
+        private SerializedDictionary<GridObjectType, GoalSlotView> SlotByType { get; set; }
 
         public GoalSlotHandler(ISlotViewFactory slotViewFactory, GridConfigContainerSO gridConfigContainer)
         {
             _slotViewFactory = slotViewFactory;
-            _obstacleConfigContainer = gridConfigContainer.GetConfig<ObstacleConfigContainerSO>();
+            _gridConfigContainer = gridConfigContainer;
         }
         
         public void PopulateSlotViews(List<LevelGoal> levelGoals)
@@ -31,36 +31,38 @@ namespace Game.HUD.Handlers
             {
                 var levelGoal = levelGoals[i];
                 
-                if(!TryCreateSlot(levelGoal.ObstacleType, out var slotView)) continue;
+                if(!TryCreateSlot(levelGoal.GridObjectType, out var slotView)) continue;
                 
                 slotView.SetGoalCount(levelGoal.Count);
                 
                 GoalSlotViews[i] = slotView;
             }
             
-            SlotByType = new SerializedDictionary<ObstacleType, GoalSlotView>(GoalSlotViews.ToDictionary(x => x.ObstacleType));
+            SlotByType = new SerializedDictionary<GridObjectType, GoalSlotView>(GoalSlotViews.ToDictionary(x => x.GridObjectType));
         }
         
-        public bool TryGetGoalSlotView(ObstacleType obstacleType, out GoalSlotView goalSlotView)
+        public bool TryGetGoalSlotView(GridObjectType gridObjectType, out GoalSlotView goalSlotView)
         {
-            if (SlotByType.TryGetValue(obstacleType, out goalSlotView)) return true;
+            if (SlotByType.TryGetValue(gridObjectType, out goalSlotView)) return true;
             
-            EditorLogger.LogError($"{obstacleType} slot view not found!");
+            EditorLogger.LogError($"{gridObjectType} slot view not found!");
             
             return false;
         }
         
-        private bool TryCreateSlot(ObstacleType obstacleType, out GoalSlotView goalSlotView)
+        private bool TryCreateSlot(GridObjectType gridObjectType, out GoalSlotView goalSlotView)
         {
             goalSlotView = null;
+
+            var data = _gridConfigContainer.GetConfigData(gridObjectType);
             
-            if (!_obstacleConfigContainer.Configs.TryGet(obstacleType, out var obstacleConfig)) return false;
+            if (!data) return false;
             
             goalSlotView = _slotViewFactory.GetSlot<GoalSlotView>();
             
-            goalSlotView.Initialize(obstacleType);
+            goalSlotView.Initialize(gridObjectType);
             
-            goalSlotView.ApplyData(obstacleConfig);
+            goalSlotView.ApplyData(data);
 
             return true;
         }

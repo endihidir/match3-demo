@@ -18,22 +18,28 @@ namespace Game.Grid.Handlers
             _destroyHandler = destroyHandler;
         }
 
-        public void Build(Vector2Int coord, BoosterObject booster, List<BoosterActionContext> output)
+        public void Build(BoosterObject booster, List<BoosterActionContext> output)
         {
             if (!booster || booster.BoosterAction == null) return;
 
-            output.Add(new BoosterActionContext(coord, booster.BoosterAction));
-            _destroyHandler.DestroyGridObject(booster, coord);
+            var actionContext = new BoosterActionContext(booster.Coord, booster.BoosterAction);
+            
+            output.Add(actionContext);
+            
+            _destroyHandler.DestroyGridObject(booster);
         }
 
-        public void BuildCombo(Vector2Int coord, BoosterObject source, BoosterObject target, List<BoosterActionContext> output)
+        public void BuildCombo(BoosterObject source, BoosterObject target, List<BoosterActionContext> output)
         {
             if (_comboData.TryGetRule(source.BoosterType, target.BoosterType, out var rule) && rule.Actions != null)
             {
                 foreach (var action in rule.Actions)
                 {
                     if (action == null) continue;
-                    output.Add(new BoosterActionContext(coord, action));
+                    
+                    var actionContext = new BoosterActionContext(source.Coord, action);
+                    
+                    output.Add(actionContext);
                 }
             }
             else
@@ -41,8 +47,8 @@ namespace Game.Grid.Handlers
                 EditorLogger.LogError($"{source.BoosterType} - {target.BoosterType} merge rule does not exist!");
             }
 
-            _destroyHandler.DestroyGridObject(source, source.Coord);
-            _destroyHandler.DestroyGridObject(target, target.Coord);
+            _destroyHandler.DestroyGridObject(source);
+            _destroyHandler.DestroyGridObject(target);
         }
     }
 }

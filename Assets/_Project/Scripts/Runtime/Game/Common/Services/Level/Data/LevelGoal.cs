@@ -8,12 +8,12 @@ namespace Game.Level.Data
     public class LevelGoal
     {
         [field: SerializeField] public int Count { get; set; }
-        [field: SerializeField] public ObstacleType ObstacleType { get; set; }
+        [field: SerializeField] public GridObjectType GridObjectType { get; set; }
         public LevelGoal Clone()
         {
             return new LevelGoal
             {
-                ObstacleType = ObstacleType,
+                GridObjectType = GridObjectType,
                 Count = Count
             };
         }

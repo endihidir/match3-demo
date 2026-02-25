@@ -1,45 +1,37 @@
 using System;
-using System.Linq;
 using Core.Scene.Services;
 using Core.Generated;
 using Game.Views;
-using Game.Grid.Item;
-using Game.Grid.Handlers;
 using Game.Level.Models;
-using Game.Models;
 using Game.Services;
 using Cysharp.Threading.Tasks;
+using Game.Level.Handlers;
 using VContainer.Unity;
 
 namespace Game.Presenters
 {
     public sealed class LevelEndPresenter : IInitializable, IDisposable
     {
-        private readonly IGridModel _gridModel;
-        private readonly ILevelGoalModel _goalModel;
+        private readonly ILevelResultHandler _levelResultHandler;
         private readonly ILevelProgressionModel _progressionModel;
         private readonly ILevelEndView _levelEndView;
-        private readonly IGridStateHandler _stateHandler;
         private readonly ISceneLoadService _sceneLoadService;
         private readonly IGameplaySetupService _gameplaySetupService;
-        private bool _isLevelFailed = false;
 
-        public LevelEndPresenter(IGridModel model, ILevelGoalModel goalModel, ILevelProgressionModel progressionModel, ILevelEndView levelEndView, 
-            IGridStateHandler stateHandler, ISceneLoadService sceneLoadService, IGameplaySetupService gameplaySetupService)
+        public LevelEndPresenter(ILevelProgressionModel progressionModel, ILevelEndView levelEndView, ILevelResultHandler levelResultHandler,
+            ISceneLoadService sceneLoadService, IGameplaySetupService gameplaySetupService)
         {
-            _gridModel = model;
-            _goalModel = goalModel;
+            _levelResultHandler = levelResultHandler;
             _progressionModel = progressionModel;
             _levelEndView = levelEndView;
-            _stateHandler = stateHandler;
             _sceneLoadService = sceneLoadService;
             _gameplaySetupService = gameplaySetupService;
         }
 
         public void Initialize()
         {
-            _goalModel.OnGoalsComplete += OnLevelCompleted;
-            _stateHandler.OnDestructionStateComplete += OnDestructionStateComplete;
+            _levelResultHandler.OnLevelSuccess += OnLevelSuccess;
+            _levelResultHandler.OnLevelFail += OnLevelFail;
             _levelEndView.OnClickNextButton.AddListener(OnClickNextButton);
             _levelEndView.OnClickTryAgainButton.AddListener(OnClickTryAgainButton);
         }
@@ -47,38 +39,24 @@ namespace Game.Presenters
         private void OnClickNextButton() => _sceneLoadService.LoadSceneGroupAsync(SceneGroupType.MenuScene, true).Forget();
         private void OnClickTryAgainButton()
         {
-            _isLevelFailed = false;
             _levelEndView.CloseFailMenu();
             _gameplaySetupService.ResetGameplay();
         }
 
-        private void OnLevelCompleted()
+        private void OnLevelSuccess()
         {
             _levelEndView.OpenSuccessMenuViewAsync().Forget();
             _progressionModel.AdvanceLevel();
         }
 
-        private void OnDestructionStateComplete()
-        {
-            if(!_goalModel.IsAllMovesFinished) return;
-            
-            if(_isLevelFailed) return;
-            
-            var itemTypes = _gridModel.BuildGridTypeDataArray();
+        private void OnLevelFail() => _levelEndView.OpenFailMenuViewAsync().Forget();
 
-            if (itemTypes.Count(x => x.ItemKind == GridItemKind.Obstacle) <= 0) return;
-            
-            _isLevelFailed = true;
-                
-            _levelEndView.OpenFailMenuViewAsync().Forget();
-        }
-        
         public void Dispose()
         {
             _levelEndView.OnClickTryAgainButton.RemoveListener(OnClickTryAgainButton);
             _levelEndView.OnClickNextButton.RemoveListener(OnClickNextButton);
-            _goalModel.OnGoalsComplete -= OnLevelCompleted;
-            _stateHandler.OnDestructionStateComplete -= OnDestructionStateComplete;
+            _levelResultHandler.OnLevelSuccess -= OnLevelSuccess;
+            _levelResultHandler.OnLevelFail -= OnLevelFail;
         }
     }
 }

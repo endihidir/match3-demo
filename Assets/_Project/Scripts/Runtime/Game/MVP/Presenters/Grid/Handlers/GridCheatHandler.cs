@@ -4,6 +4,7 @@ using Game.Grid.Item;
 using Core.Utils;
 using Cysharp.Threading.Tasks;
 using Game.Grid.States;
+using Game.Level.Handlers;
 using Game.Models;
 using Game.Views;
 #if UNITY_EDITOR
@@ -23,9 +24,10 @@ namespace Game.Grid.Handlers
         private readonly ISceneLoadService _sceneLoadService;
         private readonly IGridObjectCreateHandler _objectCreateHandler;
         private readonly IGridObjectDestroyHandler _gridObjectDestroyHandler;
+        private readonly ILevelGoalHandler _levelGoalHandler;
         
         public GridCheatHandler(IGridModel gridModel, IGridView gridView, IGridStateHandler gridStateHandler, ISceneLoadService sceneLoadService, 
-            IGridObjectCreateHandler objectCreateHandler, IGridObjectDestroyHandler gridObjectDestroyHandler)
+            IGridObjectCreateHandler objectCreateHandler, IGridObjectDestroyHandler gridObjectDestroyHandler, ILevelGoalHandler levelGoalHandler)
         {
             _gridModel = gridModel;
             _gridView = gridView;
@@ -33,6 +35,7 @@ namespace Game.Grid.Handlers
             _gridStateHandler = gridStateHandler;
             _sceneLoadService = sceneLoadService;
             _gridObjectDestroyHandler = gridObjectDestroyHandler;
+            _levelGoalHandler = levelGoalHandler;
         }
 
         public void Tick()
@@ -59,6 +62,7 @@ namespace Game.Grid.Handlers
             if (kb.rKey.wasPressedThisFrame) RemoveAtMousePos();
             if (kb.fKey.wasPressedThisFrame) ForceRefill();
             if (kb.spaceKey.wasPressedThisFrame) LoadMainMenu();
+            if (kb.deleteKey.wasPressedThisFrame) LoadMainMenu();
 
             if (kb.dKey.wasPressedThisFrame)
             {
@@ -78,8 +82,15 @@ namespace Game.Grid.Handlers
                 {
                     var coord = new Vector2Int(x, y);
                     
-                    if (_gridModel.GetGridObject(coord) is T)
+                    var obj = _gridModel.GetGridObject(coord);
+                    
+                    if (obj is T)
                     {
+                        if (obj.ItemKind == GridItemKind.Obstacle)
+                        {
+                            _levelGoalHandler.ProgressGoal(obj);
+                        }
+                        
                         ClearCell(coord);
                         ForceRefill();
                     }
@@ -136,7 +147,7 @@ namespace Game.Grid.Handlers
         {
             var obj = _gridModel.GetGridObject(coord);
             if (!obj) return;
-            _gridObjectDestroyHandler.DestroyGridObject(obj, coord);
+            _gridObjectDestroyHandler.DestroyGridObject(obj);
         }
 
         private bool IsCellActive(Vector2Int coord) => _gridModel.IsCellActive(coord);

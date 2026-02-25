@@ -2,7 +2,6 @@ using Game.Grid.Item;
 using Game.Grid.Item.Factories;
 using Game.Models;
 using Game.Views;
-using UnityEngine;
 
 namespace Game.Grid.Handlers
 {
@@ -22,11 +21,12 @@ namespace Game.Grid.Handlers
             _blastFxHandler = blastFxHandler;
         }
 
-        public void DestroyGridObject(BaseGridObject obj, Vector2Int coord)
+        public void DestroyGridObject(BaseGridObject obj)
         {
-            _blastFxHandler.PlayBlastParticle(obj, _gridView.GridToWorld(coord), _gridView.FXParent);
+            var pos = _gridView.GridToWorld(obj.Coord);
+            _blastFxHandler.PlayBlastParticle(obj, pos, _gridView.FXParent);
+            _gridModel.SetGridObject(obj.Coord, null);
             ReleaseObject(obj);
-            _gridModel.SetGridObject(coord, null);
         }
         
         public void ReleaseObject(BaseGridObject obj) => _gridObjectFactory.ReleaseObject(obj);

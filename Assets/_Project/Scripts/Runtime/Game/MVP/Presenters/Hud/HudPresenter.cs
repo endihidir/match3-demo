@@ -2,23 +2,26 @@ using System;
 using Game.Grid.Item;
 using Game.Views;
 using Game.HUD.Handlers;
+using Game.HUD.Handlers.Data;
+using Game.Level.Handlers;
 using Game.Level.Models;
-using UnityEngine;
 using VContainer.Unity;
 
 namespace Game.Presenters
 {
      public sealed class HudPresenter : IInitializable, IDisposable
     {
+        private readonly ILevelGoalHandler _levelGoalHandler;
         private readonly ILevelGoalModel _levelGoalModel;
         private readonly IHudView _hudView;
         private readonly IGoalFxHandler _goalFxHandler;
         private readonly IGoalSlotHandler _goalSlotHandler;
 
-        public HudPresenter(ILevelGoalModel levelGoalModel, IHudView hudView, IGoalSlotHandler goalSlotHandler, IGoalFxHandler goalFxHandler)
+        public HudPresenter(ILevelGoalModel levelGoalModel, IHudView hudView, ILevelGoalHandler levelGoalHandler, IGoalSlotHandler goalSlotHandler, IGoalFxHandler goalFxHandler)
         {
             _levelGoalModel = levelGoalModel;
             _hudView = hudView;
+            _levelGoalHandler = levelGoalHandler;
             _goalSlotHandler = goalSlotHandler;
             _goalFxHandler = goalFxHandler;
         }
@@ -27,7 +30,7 @@ namespace Game.Presenters
         {
             _hudView.OnInitialize += OnHudViewInitialized;
             _levelGoalModel.OnMoveCountUpdate += OnMoveCountUpdate;
-            _levelGoalModel.OnGoalProgressUpdate += OnGoalProgressUpdate;
+            _levelGoalHandler.OnGoalCollected += OnGoalCollected;
             _goalFxHandler.OnGoalFxComplete += UpdateGoalSlotView;
         }
 
@@ -42,23 +45,25 @@ namespace Game.Presenters
         }
         private void OnMoveCountUpdate() => _hudView.SetMoveCount(_levelGoalModel.MoveCount);
 
-        private void OnGoalProgressUpdate(IDamageableGridObject damageableObj, Vector3 worldPos, Vector2 cellSize)
+        private void OnGoalCollected(GoalCollectedData data)
         {
-            if (damageableObj.IsCollectible)
+            var objectType = data.GridObjectType;
+            
+            if (data.GridObjectData.IsCollectible)
             {
-                if (!_goalSlotHandler.TryGetGoalSlotView(damageableObj.ObstacleType, out var targetSlotView)) return;
-
-                _goalFxHandler.PlayFX(targetSlotView, worldPos, cellSize, _hudView.GoalFxHolder);
+                if (!_goalSlotHandler.TryGetGoalSlotView(objectType, out var targetSlotView)) return;
+                
+                _goalFxHandler.PlayFX(targetSlotView, data, _hudView.GoalFxHolder);
             }
             else
             {
-                UpdateGoalSlotView(damageableObj.ObstacleType);
+                UpdateGoalSlotView(objectType);
             }
         }
 
-        private void UpdateGoalSlotView(ObstacleType obstacleType)
+        private void UpdateGoalSlotView(GridObjectType gridObjectType)
         {
-            if(!_goalSlotHandler.TryGetGoalSlotView(obstacleType, out var targetSlotView)) return;
+            if(!_goalSlotHandler.TryGetGoalSlotView(gridObjectType, out var targetSlotView)) return;
             
             targetSlotView.DecrementGoalCount();
         }
@@ -67,7 +72,7 @@ namespace Game.Presenters
         {
             _hudView.OnInitialize -= OnHudViewInitialized;
             _levelGoalModel.OnMoveCountUpdate -= OnMoveCountUpdate;
-            _levelGoalModel.OnGoalProgressUpdate -= OnGoalProgressUpdate;
+            _levelGoalHandler.OnGoalCollected -= OnGoalCollected;
             _goalFxHandler.OnGoalFxComplete -= UpdateGoalSlotView;
         }
     }

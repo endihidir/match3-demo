@@ -31,7 +31,7 @@ namespace Game.Presenters
         {
             _gridView.OnViewInitialized += OnViewInitialized;
             _inputService.OnInputGet += OnInputGet;
-            _goalModel.OnGoalsComplete += GoalsComplete;
+            _goalModel.OnGoalCountUpdate += OnGoalCountUpdate;
             _goalModel.OnMoveCountUpdate += OnMoveCountUpdate;
         }
         
@@ -64,8 +64,12 @@ namespace Game.Presenters
             _stateHandler.TryEnqueueInput(coord, gridDirection);
         }
         
-        private void GoalsComplete() => _inputService.Disable();
-        
+        private void OnGoalCountUpdate()
+        {
+            if (!_goalModel.IsAllGoalsComplete) return;
+            _inputService.Disable();
+        }
+
         private void OnMoveCountUpdate()
         {
             if (!_goalModel.IsAllMovesFinished) return;
@@ -76,7 +80,7 @@ namespace Game.Presenters
         {
             _inputService.OnInputGet -= OnInputGet;
             _gridView.OnViewInitialized -= OnViewInitialized;
-            _goalModel.OnGoalsComplete -= GoalsComplete;
+            _goalModel.OnGoalCountUpdate -= OnGoalCountUpdate;
             _goalModel.OnMoveCountUpdate -= OnMoveCountUpdate;
         }
     }

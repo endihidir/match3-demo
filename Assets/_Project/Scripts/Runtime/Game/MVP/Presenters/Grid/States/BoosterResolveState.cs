@@ -8,6 +8,7 @@ using Game.Grid.Handlers;
 using UnityEngine;
 using Game.Grid.States.Data;
 using Game.Grid.Utils;
+using Game.Level.Handlers;
 
 namespace Game.Grid.States
 {
@@ -15,18 +16,18 @@ namespace Game.Grid.States
     {
         public override bool NeedsExitPermission => true;
         private readonly IGridObjectDestroyHandler _gridObjectDestroyHandler;
-        private readonly ILevelGoalProgressHandler _levelGoalProgressHandler;
+        private readonly ILevelGoalHandler _levelGoalHandler;
 
         private readonly IBoosterFxHandler _boosterFxHandler;
         private readonly HashSet<BoosterActionKey> _processedBoosters = new();
         private readonly HashSet<Vector2Int> _unmarkProtectedCells = new();
         private readonly List<UniTask> _activeTasks = new();
 
-        public BoosterResolveState(GridStateContext context, IBoosterFxHandler boosterFxHandler, IGridObjectDestroyHandler objectDestroyHandler, ILevelGoalProgressHandler goalProgressHandler) : base(context)
+        public BoosterResolveState(GridStateContext context, IBoosterFxHandler boosterFxHandler, IGridObjectDestroyHandler objectDestroyHandler, ILevelGoalHandler goalHandler) : base(context)
         {
             _boosterFxHandler = boosterFxHandler;
             _gridObjectDestroyHandler = objectDestroyHandler;
-            _levelGoalProgressHandler = goalProgressHandler;
+            _levelGoalHandler = goalHandler;
         }
 
         protected override void OnEnter()
@@ -98,7 +99,7 @@ namespace Game.Grid.States
             if (obj is IBoosterActionSource source && source.TryBuildAction(coord, out var newAction))
             {
                 Context.PendingBoosterActions.Add(newAction);
-                _gridObjectDestroyHandler.DestroyGridObject(obj, coord);
+                _gridObjectDestroyHandler.DestroyGridObject(obj);
                 return;
             }
 
@@ -108,13 +109,13 @@ namespace Game.Grid.States
 
                 if (result == GridDamageResult.Destroyed)
                 {
-                    _levelGoalProgressHandler.ProgressGoal(damageable, coord, obj.SpriteRenderer.size);
-                    _gridObjectDestroyHandler.DestroyGridObject(obj, coord);
+                    _levelGoalHandler.ProgressGoal(obj);
+                    _gridObjectDestroyHandler.DestroyGridObject(obj);
                 }
             }
             else
             {
-                _gridObjectDestroyHandler.DestroyGridObject(obj, coord);
+                _gridObjectDestroyHandler.DestroyGridObject(obj);
             }
         }
         

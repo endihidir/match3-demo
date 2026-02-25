@@ -6,6 +6,7 @@ using Core.Utils;
 using Cysharp.Threading.Tasks;
 using Game.Grid.Handlers;
 using Game.Grid.Handlers.Data;
+using Game.Level.Handlers;
 using UnityEngine;
 
 namespace Game.Grid.States
@@ -15,12 +16,12 @@ namespace Game.Grid.States
         public override bool NeedsExitPermission => true;
 
         private readonly IBoosterActionBuildHandler _boosterActionBuilder;
-        private readonly ILevelGoalProgressHandler _levelGoalProgressHandler;
+        private readonly ILevelGoalHandler _levelGoalHandler;
 
-        public InputResolveState(GridStateContext context, IBoosterActionBuildHandler boosterActionBuilder, ILevelGoalProgressHandler levelGoalProgressHandler) : base(context)
+        public InputResolveState(GridStateContext context, IBoosterActionBuildHandler boosterActionBuilder, ILevelGoalHandler levelGoalHandler) : base(context)
         {
             _boosterActionBuilder = boosterActionBuilder;
-            _levelGoalProgressHandler = levelGoalProgressHandler;
+            _levelGoalHandler = levelGoalHandler;
         }
 
         protected override void OnEnter()
@@ -42,7 +43,7 @@ namespace Game.Grid.States
 
             if (hasInputGet)
             {
-                _levelGoalProgressHandler.ProgressMove();
+                _levelGoalHandler.ProgressMove();
             }
             else
             {
@@ -68,7 +69,7 @@ namespace Game.Grid.States
                 return false;
             }
 
-            _boosterActionBuilder.Build(sourceCoord, booster, Context.PendingBoosterActions);
+            _boosterActionBuilder.Build(booster, Context.PendingBoosterActions);
             onComplete?.Invoke();
             return true;
         }
@@ -161,19 +162,19 @@ namespace Game.Grid.States
 
             if (sourceObj is BoosterObject source && targetObj is BoosterObject target)
             {
-                _boosterActionBuilder.BuildCombo(sourceObj.Coord, source, target, actions);
+                _boosterActionBuilder.BuildCombo(source, target, actions);
                 return;
             }
 
             if (targetObj is BoosterObject boosterB)
             {
-                _boosterActionBuilder.Build(targetObj.Coord, boosterB, actions);
+                _boosterActionBuilder.Build(boosterB, actions);
                 return;
             }
 
             if (sourceObj is BoosterObject boosterA)
             {
-                _boosterActionBuilder.Build(sourceObj.Coord, boosterA, actions);
+                _boosterActionBuilder.Build(boosterA, actions);
             }
         }
     }

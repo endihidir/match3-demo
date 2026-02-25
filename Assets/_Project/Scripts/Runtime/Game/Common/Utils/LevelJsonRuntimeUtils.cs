@@ -162,7 +162,7 @@ namespace Game.Utils
             {
                 goals.Add(new LevelGoal
                 {
-                    ObstacleType = ObstacleType.Box,
+                    GridObjectType = new GridObjectType(GridItemKind.Obstacle, (int)ObstacleType.Box),
                     Count = counts.Boxes
                 });
             }
@@ -171,7 +171,7 @@ namespace Game.Utils
             {
                 goals.Add(new LevelGoal
                 {
-                    ObstacleType = ObstacleType.Stone,
+                    GridObjectType = new GridObjectType(GridItemKind.Obstacle, (int)ObstacleType.Stone),
                     Count = counts.Stones
                 });
             }
@@ -180,7 +180,7 @@ namespace Game.Utils
             {
                 goals.Add(new LevelGoal
                 {
-                    ObstacleType = ObstacleType.Vase,
+                    GridObjectType = new GridObjectType(GridItemKind.Obstacle, (int)ObstacleType.Vase),
                     Count = counts.Vases
                 });
             }
