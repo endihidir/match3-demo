@@ -113,8 +113,8 @@ namespace Game.Grid.States
             var sourcePos = Context.GridView.GridToWorld(sourceCoord);
             var targetPos = Context.GridView.GridToWorld(targetCoord);
 
-            _ = sourceObj.Animation.PingPongMove(sourcePos, targetPos);
-            await targetObj.Animation.PingPongMove(targetPos, sourcePos);
+            _ = targetObj.Animation.PingPongMove(targetPos, sourcePos);
+            await sourceObj.Animation.PingPongMove(sourcePos, targetPos);
 
             onComplete?.Invoke();
         }

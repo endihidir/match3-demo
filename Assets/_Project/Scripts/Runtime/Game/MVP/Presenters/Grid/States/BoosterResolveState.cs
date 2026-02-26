@@ -33,7 +33,7 @@ namespace Game.Grid.States
         protected override void OnEnter()
         {
             ClearBuffers();
-            BuildUnmarkProtectedCells();
+            CollectProtectedMatchGroup();
             ProcessBoostersAsync().Forget();
         }
 
@@ -119,7 +119,7 @@ namespace Game.Grid.States
             }
         }
         
-        private void BuildUnmarkProtectedCells()
+        private void CollectProtectedMatchGroup()
         {
             if (!Context.ProtectedCoord.HasValue) return;
 

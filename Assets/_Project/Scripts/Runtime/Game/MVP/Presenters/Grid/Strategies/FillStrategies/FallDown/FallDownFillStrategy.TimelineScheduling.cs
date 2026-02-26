@@ -6,55 +6,68 @@ namespace Game.Grid.Strategies
 {
     public sealed partial class FallDownFillStrategy
     {
-        private UniTask PlayAnimations()
+        /// <summary>
+        /// Converts all recorded fall moves into DOTween animations, ordered by
+        /// column timeline.
+        ///
+        /// Pass 1 — existing items that fell (non-spawn).
+        /// Pass 2 — newly spawned items.
+        /// </summary>
+        private UniTask ScheduleAnimations()
         {
-            var width = _gridModel.Width;
+            if (_recordCount == 0)
+                return UniTask.CompletedTask;
 
-            if (_animTasks.Length < _recordCount)
-                Array.Resize(ref _animTasks, _recordCount);
-
-            for (int x = 0; x < width; x++)
-                _timelineByX[x] = 0f;
-
-            EnsureBuffers(width);
-
+            // Build sort order.
             for (int i = 0; i < _recordCount; i++)
                 _order[i] = i;
 
             Array.Sort(_order, 0, _recordCount, new FallMoveOrderComparer(_records));
 
+            // Pre-size task buffer (only grows, never shrinks → no GC per run).
+            if (_animTasks.Length < _recordCount)
+                Array.Resize(ref _animTasks, _recordCount * 2);
+
             var taskCount = 0;
 
-            ScheduleShiftByTimeline(passIsSpawn: false, ref taskCount);
-            ScheduleShiftByTimeline(passIsSpawn: true, ref taskCount);
+            SchedulePass(passSpawn: false, ref taskCount);
+            SchedulePass(passSpawn: true, ref taskCount);
 
-            if (taskCount == 0) 
+            if (taskCount == 0)
                 return UniTask.CompletedTask;
-            
-            if (_animTasks.Length != taskCount)
-                Array.Resize(ref _animTasks, taskCount);
 
-            return UniTask.WhenAll(_animTasks);
+            // Slice exactly taskCount tasks for WhenAll.
+            var tasks = new UniTask[taskCount];
+            Array.Copy(_animTasks, tasks, taskCount);
+            return UniTask.WhenAll(tasks);
         }
 
-        private void ScheduleShiftByTimeline(bool passIsSpawn, ref int taskCount)
+        private void SchedulePass(bool passSpawn, ref int taskCount)
         {
+            var width = _gridModel.Width;
+
             for (int i = 0; i < _recordCount; i++)
             {
-                var recordIndex = _order[i];
-                ref readonly var fallRecord = ref _records[recordIndex];
+                var idx = _order[i];
+                ref readonly var record = ref _records[idx];
 
-                if (!fallRecord.Item) continue;
-                if (fallRecord.IsSpawn != passIsSpawn) continue;
+                if (!record.Item) continue;
+                if (record.IsSpawn != passSpawn) continue;
 
-                var x = fallRecord.FinalCoord.x;
+                var x= record.FinalCoord.x;
+                if (x >= width) continue;
+
                 var startTime = _timelineByX[x];
 
-                if (_fallAnimationScheduler.TrySchedule(fallRecord, startTime, out var endTime, out var task))
-                {
-                    _timelineByX[x] = endTime;
-                    _animTasks[taskCount++] = task;
-                }
+                if (!_fallAnimationScheduler.TrySchedule(record, startTime, out var endTime, out var task))
+                    continue;
+
+                _timelineByX[x] = endTime;
+
+                if (taskCount == _animTasks.Length)
+                    Array.Resize(ref _animTasks, _animTasks.Length * 2);
+
+                _animTasks[taskCount++] = task;
             }
         }
     }

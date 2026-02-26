@@ -5,20 +5,18 @@ namespace Game.Grid.Strategies
 {
     public sealed partial class SlideDownFillStrategy
     {
-        // Spawn
-        // =========================================================
-
-        private bool SpawnTopOpenSegment(int x, int height)
+        /// <summary>
+        /// Fills all contiguous top-open empty cells in column <paramref name="x"/>
+        /// with newly created items.  Returns true if at least one item was spawned.
+        /// </summary>
+        private bool SpawnColumn(int x, int height)
         {
             var cellSize = _gridView.GetCellSize();
-
             var spawnedAny = false;
-            var segmentStartY = -1;
-            var blockedInSegment = false;
+            var segmentOpen = false;
+            var segmentBlocked = false;
             var segmentTopWorldY = 0f;
-
-            var canSpawn = true;
-            var seenAnyActive = false;
+            var seenActiveBefore = false;
 
             for (int y = 0; y < height; y++)
             {
@@ -26,77 +24,56 @@ namespace Game.Grid.Strategies
 
                 if (!_gridModel.IsCellActive(c))
                 {
-                    if (seenAnyActive)
-                        canSpawn = false;
-
-                    segmentStartY = -1;
-                    blockedInSegment = false;
+                    if (seenActiveBefore) return spawnedAny;
                     continue;
                 }
 
-                seenAnyActive = true;
-
-                if (segmentStartY < 0)
+                if (!segmentOpen)
                 {
-                    segmentStartY = y;
-                    segmentTopWorldY = _gridView.GridToWorld(new Vector2Int(x, y)).y + cellSize;
-                    blockedInSegment = false;
+                    segmentOpen = true;
+                    seenActiveBefore = true;
+                    segmentTopWorldY = _gridView.GridToWorld(c).y + cellSize;
                 }
-
-                if (!canSpawn)
-                    continue;
 
                 var obj = _gridModel.GetGridObject(c);
+                if (obj) { segmentBlocked = true; continue; }
+                if (segmentBlocked) continue;
 
-                if (obj)
-                {
-                    blockedInSegment = true;
-                    continue;
-                }
+                var runLength = GridFillCalcUtil.CountEmptiesDown(_gridModel, x, y, height);
+                if (runLength <= 0) continue;
 
-                if (blockedInSegment)
-                    continue;
-
-                var spawnCount = GridFillCalcUtil.CountEmptiesDown(_gridModel, x, y, height);
-                if (spawnCount <= 0)
-                    continue;
-
-                SpawnInto(x, y, spawnCount, segmentTopWorldY, cellSize);
-
+                SpawnRun(x, y, runLength, segmentTopWorldY, cellSize);
                 spawnedAny = true;
-                y += spawnCount - 1;
+                y += runLength - 1;
             }
 
             return spawnedAny;
         }
-        
-        private void SpawnInto(int x, int startY, int spawnCount, float segmentTopWorldY, float cellSize)
+
+        private void SpawnRun(int x, int startY, int count, float segmentTopWorldY, float cellSize)
         {
             var baseStack = _spawnStackByX[x];
 
-            for (int i = 0; i < spawnCount; i++)
+            for (int i = 0; i < count; i++)
             {
                 var target = new Vector2Int(x, startY + i);
-
                 var type = _itemDecider.Decide(target);
-                var item = _objectCreateHandler.CreateItem(type);
+                var item= _objectCreateHandler.CreateItem(type);
 
                 item.SetParent(_gridView.GridObjectsParent);
                 item.SetSpriteSize(cellSize);
 
-                var w = _gridView.GridToWorld(target);
+                var worldTarget  = _gridView.GridToWorld(target);
+                var reverseIndex = (count - 1) - i;
+                var spawnWorldY= segmentTopWorldY + (baseStack + reverseIndex) * cellSize;
 
-                var reverseIndex = (spawnCount - 1) - i;
-                var spawnY = segmentTopWorldY + (baseStack + reverseIndex) * cellSize;
-
-                item.SetPosition(new Vector3(w.x, spawnY, w.z));
+                item.SetPosition(new Vector3(worldTarget.x, spawnWorldY, worldTarget.z));
 
                 _gridModel.SetGridObject(target, item);
-                AddStep(item, target, true);
+                AddStep(item, target, isSpawn: true);
             }
 
-            _spawnStackByX[x] = baseStack + spawnCount;
+            _spawnStackByX[x] = baseStack + count;
         }
-
     }
 }
