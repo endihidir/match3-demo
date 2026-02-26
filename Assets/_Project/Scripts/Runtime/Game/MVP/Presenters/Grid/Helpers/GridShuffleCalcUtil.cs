@@ -13,7 +13,7 @@ namespace Core.Utils
                 for (int x = 0; x < model.Width; x++)
                 {
                     var type = grid[x, y];
-                    if (type.ItemKind == GridItemKind.Booster) return true;
+                    if (type.ObjectKind == GridObjectKind.Booster) return true;
                 }
             }
 
@@ -155,7 +155,7 @@ namespace Core.Utils
         {
             if (!obj) return false;
             if (obj.IsStationary) return false;
-            return obj.ItemKind != GridItemKind.Booster;
+            return obj.ObjectKind != GridObjectKind.Booster;
         }
     }
 }

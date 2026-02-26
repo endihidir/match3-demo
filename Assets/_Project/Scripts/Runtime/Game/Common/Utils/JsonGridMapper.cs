@@ -11,7 +11,7 @@ namespace Game.Utils
         
         public static Enum Decode(int code) => code switch
         {
-            -1 => GridItemKind.None,
+            -1 => GridObjectKind.None,
             0 => ItemType.None,
             < BoosterOffset => (ItemType)code,
             < ObstacleOffset => (BoosterType)(code - BoosterOffset),
@@ -20,7 +20,7 @@ namespace Game.Utils
 
         public static int Encode(Enum value) => value switch
         {
-            GridItemKind.None => -1,
+            GridObjectKind.None => -1,
             ItemType itemType => (int)itemType,
             BoosterType boosterType => BoosterOffset + (int)boosterType,
             ObstacleType obstacleType => ObstacleOffset + (int)obstacleType,
@@ -41,7 +41,7 @@ namespace Game.Utils
             JsonGridObjectType.t     => Encode(BoosterType.Bomb),
             JsonGridObjectType.ro_h  => Encode(BoosterType.RocketHorizontal),
             JsonGridObjectType.ro_v  => Encode(BoosterType.RocketVertical),
-            JsonGridObjectType.empty => Encode(GridItemKind.None),
+            JsonGridObjectType.empty => Encode(GridObjectKind.None),
             _ => 0
         };
         

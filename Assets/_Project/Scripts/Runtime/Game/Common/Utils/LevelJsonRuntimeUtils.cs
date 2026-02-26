@@ -103,7 +103,7 @@ namespace Game.Utils
             if (encoded == 0 && jsonType == JsonGridObjectType.rand)
             {
                 var id = LevelGridRandomUtil.GetRandomItemTypeId(rng);
-                return new GridObjectType(GridItemKind.Regular, id);
+                return new GridObjectType(GridObjectKind.Regular, id);
             }
 
             var decodedEnum = JsonGridMapper.Decode(encoded);
@@ -115,17 +115,17 @@ namespace Game.Utils
             switch (decodedEnum)
             {
                 case ItemType itemType:
-                    return new GridObjectType(GridItemKind.Regular, (int)itemType);
+                    return new GridObjectType(GridObjectKind.Regular, (int)itemType);
 
                 case BoosterType boosterType:
-                    return new GridObjectType(GridItemKind.Booster, (int)boosterType);
+                    return new GridObjectType(GridObjectKind.Booster, (int)boosterType);
 
                 case ObstacleType obstacleType:
                     IncrementObstacleCount(obstacleType, ref counts);
-                    return new GridObjectType(GridItemKind.Obstacle, (int)obstacleType);
+                    return new GridObjectType(GridObjectKind.Obstacle, (int)obstacleType);
 
-                case GridItemKind.None:
-                    return new GridObjectType(GridItemKind.None, -1);
+                case GridObjectKind.None:
+                    return new GridObjectType(GridObjectKind.None, -1);
 
                 default:
                     return CreateRandomItemCell(rng);
@@ -151,7 +151,7 @@ namespace Game.Utils
         private static GridObjectType CreateRandomItemCell(Random rng)
         {
             var id = LevelGridRandomUtil.GetRandomItemTypeId(rng);
-            return new GridObjectType(GridItemKind.Regular, id);
+            return new GridObjectType(GridObjectKind.Regular, id);
         }
 
         private static List<LevelGoal> CreateLevelGoals(ObstacleCounts counts)
@@ -162,7 +162,7 @@ namespace Game.Utils
             {
                 goals.Add(new LevelGoal
                 {
-                    GridObjectType = new GridObjectType(GridItemKind.Obstacle, (int)ObstacleType.Box),
+                    GridObjectType = new GridObjectType(GridObjectKind.Obstacle, (int)ObstacleType.Box),
                     Count = counts.Boxes
                 });
             }
@@ -171,7 +171,7 @@ namespace Game.Utils
             {
                 goals.Add(new LevelGoal
                 {
-                    GridObjectType = new GridObjectType(GridItemKind.Obstacle, (int)ObstacleType.Stone),
+                    GridObjectType = new GridObjectType(GridObjectKind.Obstacle, (int)ObstacleType.Stone),
                     Count = counts.Stones
                 });
             }
@@ -180,7 +180,7 @@ namespace Game.Utils
             {
                 goals.Add(new LevelGoal
                 {
-                    GridObjectType = new GridObjectType(GridItemKind.Obstacle, (int)ObstacleType.Vase),
+                    GridObjectType = new GridObjectType(GridObjectKind.Obstacle, (int)ObstacleType.Vase),
                     Count = counts.Vases
                 });
             }

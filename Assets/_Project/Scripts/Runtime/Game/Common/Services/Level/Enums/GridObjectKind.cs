@@ -1,6 +1,6 @@
 namespace Game.Grid.Item
 {
-    public enum GridItemKind
+    public enum GridObjectKind
     {
         None = 0,
         Regular = 1,

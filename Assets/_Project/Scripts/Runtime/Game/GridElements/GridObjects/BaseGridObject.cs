@@ -11,9 +11,8 @@ namespace Game.Grid.Item
         [field: SerializeField] public SpriteRenderer SpriteRenderer { get; private set; }
         [field: SerializeField, ReadOnly] public Vector2Int Coord { get; private set; }
         [field: SerializeField, ReadOnly] public bool IsStationary { get; private set; }
-        [field: SerializeField, ReadOnly] public bool IsCollectible { get; private set; }
         public GridObjectType ObjectType { get; private set; }
-        public GridItemKind ItemKind => ObjectType.ItemKind;
+        public GridObjectKind ObjectKind => ObjectType.ObjectKind;
         public int TypeId => ObjectType.TypeId;
         
         public bool IsFallInProgress => Animation.IsFallInProgress;
@@ -31,7 +30,6 @@ namespace Game.Grid.Item
         public virtual void ApplyData(BaseGridObjectDataSO baseGridObjectData)
         {
             IsStationary = baseGridObjectData.IsStationary;
-            IsCollectible = baseGridObjectData.IsCollectible;
             SpriteRenderer.sprite = baseGridObjectData.Icon;
             SpriteSizeMultiplier = baseGridObjectData.SpriteSizeMultiplier;
         }
@@ -54,7 +52,6 @@ namespace Game.Grid.Item
         public void ResetItem()
         {
             IsStationary = false;
-            IsCollectible = false;
             Coord = new Vector2Int(-1, -1);
             ObjectType = default;
             SetPosition(Vector3.zero);

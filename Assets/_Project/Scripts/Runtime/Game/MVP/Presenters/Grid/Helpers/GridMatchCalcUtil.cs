@@ -29,8 +29,8 @@ namespace Core.Utils
             var cellA = grid[coordA.x, coordA.y];
             var cellB = grid[coordB.x, coordB.y];
 
-            grid[coordA.x, coordA.y] = new GridObjectType(cellA.ItemKind, typeB);
-            grid[coordB.x, coordB.y] = new GridObjectType(cellB.ItemKind, typeA);
+            grid[coordA.x, coordA.y] = new GridObjectType(cellA.ObjectKind, typeB);
+            grid[coordB.x, coordB.y] = new GridObjectType(cellB.ObjectKind, typeA);
 
             var creates = IsCellMatched(model, grid, coordA.x, coordA.y, typeB) ||
                           IsCellMatched(model, grid, coordB.x, coordB.y, typeA);
@@ -252,6 +252,6 @@ namespace Core.Utils
             return isSourceRegular && isTargetRegular;
         }
 
-        public static bool IsRegularItem(GridObjectType data) => data is { ItemKind: GridItemKind.Regular, TypeId: > 0 };
+        public static bool IsRegularItem(GridObjectType data) => data is { ObjectKind: GridObjectKind.Regular, TypeId: > 0 };
     }
 }

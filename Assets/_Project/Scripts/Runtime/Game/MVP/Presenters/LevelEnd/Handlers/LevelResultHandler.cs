@@ -39,7 +39,7 @@ namespace Game.Level.Handlers
         {
             if (!_goalModel.IsAllMovesFinished) return;
 
-            var hasObstacles = _gridModel.BuildGridTypeDataArray().Any(x => x.ItemKind == GridItemKind.Obstacle);
+            var hasObstacles = _gridModel.BuildGridTypeDataArray().Any(x => x.ObjectKind == GridObjectKind.Obstacle);
             
             if (!hasObstacles) return;
             

@@ -53,7 +53,7 @@ namespace Game.Utils
             if (candidateCount > 0)
             {
                 var pick = LevelGridRandomUtil.NextIndex(rng, candidateCount);
-                return new GridObjectType(GridItemKind.Regular, candidates[pick]);
+                return new GridObjectType(GridObjectKind.Regular, candidates[pick]);
             }
             
             var attempts = 0;
@@ -63,12 +63,12 @@ namespace Game.Utils
                 var id = ids[LevelGridRandomUtil.NextIndex(rng, ids.Length)];
 
                 if (!GridMatchDetectUtil.WouldCreateBlastGroup(grid, x, y, width, height, id, assumeCenterIsId: true))
-                    return new GridObjectType(GridItemKind.Regular, id);
+                    return new GridObjectType(GridObjectKind.Regular, id);
 
                 attempts++;
 
                 if (attempts > 64)
-                    return new GridObjectType(GridItemKind.Regular, id);
+                    return new GridObjectType(GridObjectKind.Regular, id);
             }
         }
     }
