@@ -1,176 +1,184 @@
 using System;
 using Cysharp.Threading.Tasks;
-using Game.Grid.Contexts;
 using Game.Grid.Strategies.Data;
-using Game.Views;
 
 namespace Game.Grid.Strategies
 {
     public sealed partial class SlideDownFillStrategy
     {
-        // =========================================================
-        // Animation emit (column timeline scheduling)
-        // =========================================================
-
-        private UniTask PlayAnimations()
+        /// <summary>
+        /// Converts all recorded move paths into DOTween animations, ordered by
+        /// column timeline so items in the same column cascade naturally.
+        ///
+        /// Pass 1 — non-spawn records (existing items that fell / slid).
+        /// Pass 2 — spawn records   (newly created items falling in).
+        ///
+        /// Separating spawns from non-spawns ensures that newly created items
+        /// never start their fall before the column has settled.
+        /// </summary>
+        private UniTask ScheduleAnimations()
         {
             if (_recordCount == 0)
                 return UniTask.CompletedTask;
 
-            EnsureOrderCapacity(_recordCount);
+            var width = _gridModel.Width;
 
-            // Update per-record flags (IsSlide) and build sort order.
-            for (int i = 0; i < _recordCount; i++)
-                _order[i] = i;
-
+            // ---- classify records (fall vs slide) ----
             for (int i = 0; i < _recordCount; i++)
             {
-                ref var record = ref _records[i];
-                if (!record.Item || record.PathCount == 0) continue;
-                
-                record.IsSlide = HasAnyXChangeInPath(in record);
+                ref var r = ref _records[i];
+                if (!r.Item || r.PathCount == 0) continue;
+                r.IsSlide = PathHasXChange(in r);
             }
 
-            Array.Sort(_order, 0, _recordCount, new SlideMoveOrderComparer(_records));
+            // ---- build sort order ----
+            EnsureSize(ref _sortOrder, _recordCount);
+            
+            for (int i = 0; i < _recordCount; i++)
+                _sortOrder[i] = i;
 
+            Array.Sort(_sortOrder, 0, _recordCount, new SlideMoveOrderComparer(_records));
+
+            // ---- reset per-column timelines ----
+            // (array was already cleared in PrepareForRun — but cleared again
+            //  here defensively, since two passes share the same timeline)
+            Array.Clear(_timelineByX, 0, width);
+
+            // Pre-size task buffer (grown if needed, never shrunk to avoid GC).
             if (_animTasks.Length < _recordCount)
-                Array.Resize(ref _animTasks, _recordCount);
-
-            // Reset timelines.
-            var width = _gridModel.Width;
-            for (int x = 0; x < width; x++)
-                _timelineByX[x] = 0f;
+                Array.Resize(ref _animTasks, _recordCount * 2);
 
             var taskCount = 0;
-            
-            ScheduleByTimeline(width, passIsSpawn: false, ref taskCount);
-            ScheduleByTimeline(width, passIsSpawn: true, ref taskCount);
+
+            SchedulePass(width, passSpawn: false, ref taskCount);
+            SchedulePass(width, passSpawn: true,  ref taskCount);
 
             if (taskCount == 0)
                 return UniTask.CompletedTask;
 
-            if (_animTasks.Length != taskCount)
-                Array.Resize(ref _animTasks, taskCount);
-
-            return UniTask.WhenAll(_animTasks);
+            // Slice exactly taskCount tasks.
+            var tasks = new UniTask[taskCount];
+            Array.Copy(_animTasks, tasks, taskCount);
+            return UniTask.WhenAll(tasks);
         }
-        
-        private bool HasAnyXChangeInPath(in SlideDownMoveRecord record)
+
+        // -----------------------------------------------------------------------
+
+        private void SchedulePass(int width, bool passSpawn, ref int taskCount)
         {
-            if (record.HeadNode < 0) return false;
-    
-            var firstX = _pathCoord[record.HeadNode].x;
-            var node = _pathNext[record.HeadNode];
-    
-            while (node >= 0)
+            for (int si = 0; si < _recordCount; si++)
             {
-                if (_pathCoord[node].x != firstX) return true;
-                node = _pathNext[node];
-            }
-    
-            return false;
-        }
-
-        private void EnsureOrderCapacity(int need)
-        {
-            if (_order.Length < need)
-                Array.Resize(ref _order, need);
-        }
-
-        private void ScheduleByTimeline(int width, bool passIsSpawn, ref int taskCount)
-        {
-            for (int i = 0; i < _recordCount; i++)
-            {
-                var recordIndex = _order[i];
-                ref readonly var record = ref _records[recordIndex];
+                var idx = _sortOrder[si];
+                ref readonly var record = ref _records[idx];
 
                 if (!record.Item || record.PathCount == 0) continue;
-                if (record.IsSpawn != passIsSpawn) continue;
+                if (record.IsSpawn != passSpawn) continue;
 
-                var usedCount = CollectUsedColumns(width, in record);
-                var startTime = GetStartTime(usedCount);
+                var colCount = CollectUsedColumns(width, in record);
+                var startTime = MaxTimelineOf(colCount);
+
+                UniTask task;
+                float endTime;
 
                 if (!record.IsSlide)
                 {
                     var fallRecord = new FallDownMoveRecord(record.Item, record.FinalCoord, record.IsSpawn);
-
-                    if (_fallAnimationScheduler.TrySchedule(fallRecord, startTime, out var endTime, out var task))
-                    {
-                        UpdateTimeline(usedCount, endTime);
-                        _animTasks[taskCount++] = task;
-                    }
+                    
+                    if (!_fallAnimationScheduler.TrySchedule(fallRecord, startTime, out endTime, out task)) continue;
                 }
                 else
                 {
-                    if (_slideAnimationScheduler.TrySchedule(record, _pathCoord, _pathNext, startTime, out var endTime, out var task))
-                    {
-                        UpdateTimeline(usedCount, endTime);
-                        _animTasks[taskCount++] = task;
-                    }
+                    if (!_slideAnimationScheduler.TrySchedule(record, _pathCoord, _pathNext, startTime, out endTime, out task)) continue;
                 }
+
+                SetTimeline(colCount, endTime);
+
+                if (taskCount == _animTasks.Length)
+                    Array.Resize(ref _animTasks,_animTasks.Length * 2);
+
+                _animTasks[taskCount++] = task;
             }
         }
 
+        /// <summary>
+        /// Fills <see cref="_usedCols"/> with the distinct X values touched by
+        /// <paramref name="record"/>'s path (plus FinalCoord.x).
+        /// Returns the number of distinct columns collected.
+        /// </summary>
         private int CollectUsedColumns(int width, in SlideDownMoveRecord record)
         {
-            // Reuse _usedColumnsByRecord as a dense list of used X values.
-            if (_usedColumnsByRecord.Length < width)
-                Array.Resize(ref _usedColumnsByRecord, width);
+            EnsureSize(ref _usedCols, width);
+            EnsureSize(ref _usedColStamp, width);
 
-            _usedColumnStampId++;
+            _usedColStampId++;
             
-            if (_usedColumnStampId == int.MaxValue)
+            if (_usedColStampId == int.MaxValue)
             {
-                Array.Clear(_usedColumnStamp, 0, _usedColumnStamp.Length);
-                _usedColumnStampId = 1;
+                Array.Clear(_usedColStamp, 0, _usedColStamp.Length);
+                _usedColStampId = 1;
             }
 
             var count = 0;
 
-            MarkX(record.FinalCoord.x);
+            MarkColumn(record.FinalCoord.x);
 
             if (record.IsSlide)
             {
                 var node = record.HeadNode;
+                
                 while (node >= 0)
                 {
-                    MarkX(_pathCoord[node].x);
+                    MarkColumn(_pathCoord[node].x);
                     node = _pathNext[node];
                 }
             }
 
             return count;
 
-            void MarkX(int x)
+            // Local function — captures count and width by ref/value.
+            void MarkColumn(int x)
             {
-                if ((uint)x >= (uint)width) return;
-                if (_usedColumnStamp[x] == _usedColumnStampId) return;
-                _usedColumnStamp[x] = _usedColumnStampId;
-                _usedColumnsByRecord[count++] = x;
+                if (x >= width) return;
+                if (_usedColStamp[x] == _usedColStampId) return;
+                _usedColStamp[x] = _usedColStampId;
+                _usedCols[count++] = x;
             }
         }
 
-        private float GetStartTime(int usedCount)
+        private float MaxTimelineOf(int colCount)
         {
-            var start = 0f;
-            for (int i = 0; i < usedCount; i++)
+            var max = 0f;
+            
+            for (int i = 0; i < colCount; i++)
             {
-                var x = _usedColumnsByRecord[i];
-                var t = _timelineByX[x];
-                if (t > start) start = t;
+                var t = _timelineByX[_usedCols[i]];
+                if (t > max) max = t;
             }
-
-            return start;
+            
+            return max;
         }
 
-        private void UpdateTimeline(int usedCount, float endTime)
+        private void SetTimeline(int colCount, float endTime)
         {
-            for (int i = 0; i < usedCount; i++)
-            {
-                var x = _usedColumnsByRecord[i];
-                _timelineByX[x] = endTime;
-            }
+            for (int i = 0; i < colCount; i++)
+                _timelineByX[_usedCols[i]] = endTime;
         }
 
+        /// <summary>Returns true if any node in the path has a different X than the head.</summary>
+        private bool PathHasXChange(in SlideDownMoveRecord record)
+        {
+            if (record.HeadNode < 0) return false;
+
+            var headX = _pathCoord[record.HeadNode].x;
+            var node = _pathNext[record.HeadNode];
+
+            while (node >= 0)
+            {
+                if (_pathCoord[node].x != headX) return true;
+                node = _pathNext[node];
+            }
+
+            return false;
+        }
     }
 }

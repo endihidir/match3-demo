@@ -220,10 +220,7 @@ namespace Core.Utils
             {
                 var coord = group[i];
                 var obj = model.GetGridObject(coord);
-                if (obj && obj.IsActive && obj.IsFallInProgress)
-                {
-                    return true;
-                }
+                if (obj && obj.IsActive && obj.IsFallInProgress) return true;
             }
 
             return false;

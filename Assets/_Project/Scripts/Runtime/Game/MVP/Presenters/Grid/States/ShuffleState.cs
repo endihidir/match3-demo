@@ -201,7 +201,7 @@ namespace Game.Grid.States
                     if (!GridShuffleCalcUtil.IsSwapCandidate(obj)) continue;
 
                     var typeId = obj.TypeId;
-                    if ((uint)typeId >= (uint)required) continue;
+                    if (typeId >= required) continue;
 
                     _typeCounts[typeId]++;
                 }

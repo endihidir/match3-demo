@@ -103,13 +103,13 @@ namespace Game.Grid.Item
         
         public float GetSlideDelay() => Config.SlideDelay;
 
-        public Tween PingPongMove(Vector3 defaultPos, Vector3 targetPos)
+        public Tween PingPongMove(Vector3 startPos, Vector3 targetPos)
         {
             _pingPongTween?.Kill(true);
 
             _pingPongTween = DOTween.Sequence()
                                 .Append(transform.DOMove(targetPos, Config.PingPongDuration).SetEase(Ease.Linear))
-                                .Append(transform.DOMove(defaultPos, Config.PingPongDuration).SetEase(Ease.Linear))
+                                .Append(transform.DOMove(startPos, Config.PingPongDuration).SetEase(Ease.Linear))
                                 .SetUpdate(Config.UseUnscaledTime);
             
             return _pingPongTween;

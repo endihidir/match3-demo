@@ -7,6 +7,17 @@ using Game.Views;
 
 namespace Game.Grid.Strategies
 {
+    /// <summary>
+    /// Fill strategy that simulates gravity with diagonal-slide fallback and
+    /// top-of-column spawning. Designed to be called any number of times in
+    /// sequence without state bleed between runs.
+    ///
+    /// Execution flow per call:
+    /// 1. PrepareForRun  — reset all per-run counters, ensure buffers
+    /// 2. Simulate — repeatedly apply vertical falls → diagonal slides → spawns
+    /// 3. Schedule — convert recorded paths into DOTween tasks ordered by column timeline
+    /// 4. WaitAsync — caller awaits the returned UniTask
+    /// </summary>
     public sealed partial class SlideDownFillStrategy : IFillStrategy
     {
         private readonly IGridModel _gridModel;
@@ -15,9 +26,9 @@ namespace Game.Grid.Strategies
         private readonly IFillItemDecider _itemDecider;
         private readonly IFallAnimationScheduler _fallAnimationScheduler;
         private readonly ISlideAnimationScheduler _slideAnimationScheduler;
-        
-        public SlideDownFillStrategy(IGridModel gridModel, IGridView gridView, IGridObjectCreateHandler objectCreateHandler, IFillItemDecider itemDecider, 
-            IFallAnimationScheduler fallAnimationScheduler, ISlideAnimationScheduler slideAnimationScheduler)
+
+        public SlideDownFillStrategy(IGridModel gridModel, IGridView gridView, IGridObjectCreateHandler objectCreateHandler, IFillItemDecider itemDecider,
+            IFallAnimationScheduler  fallAnimationScheduler, ISlideAnimationScheduler slideAnimationScheduler)
         {
             _gridModel = gridModel;
             _gridView = gridView;
@@ -31,22 +42,12 @@ namespace Game.Grid.Strategies
 
         public IFillStrategy Execute()
         {
-            ResetWorkspace();
-
-            EnsureBuffers(_gridModel.Width, _gridModel.Height);
-
-            var movedAny = true;
-            
-            while (movedAny)
-            {
-                movedAny = TryApplyAnyMove();
-            }
-
-            _runningAnimations = PlayAnimations();
-            
+            PrepareForRun(_gridModel.Width, _gridModel.Height);
+            RunSimulation();
+            _pendingAnimations = ScheduleAnimations();
             return this;
         }
 
-        public UniTask WaitAnimationsAsync() => _runningAnimations;
+        public UniTask WaitAnimationsAsync() => _pendingAnimations;
     }
 }
