@@ -18,10 +18,9 @@ namespace Game.Grid.States
 
         private readonly IMatchDestructionHandler _destructionHandler;
         private readonly IMatchMergeHandler _mergeHandler;
-
-        private UniTask[] _animationTasks = Array.Empty<UniTask>();
+        private readonly List<UniTask> _animationTasks = new(256);
+        
         private Vector2Int[] _coordBuffer = Array.Empty<Vector2Int>();
-        private int _lastTaskCount;
 
         public MatchResolveState(GridStateContext context, IMatchDestructionHandler destructionHandler, IMatchMergeHandler mergeHandler) : base(context)
         {
@@ -55,16 +54,13 @@ namespace Game.Grid.States
             var visited = new bool[width, height];
 
             var capacity = width * height;
-
-            if (_animationTasks.Length < capacity)
-                _animationTasks = new UniTask[capacity];
+            
+            _animationTasks.Clear();
 
             if (_coordBuffer.Length < capacity)
                 _coordBuffer = new Vector2Int[capacity];
 
             var grid = model.BuildGridTypeData();
-
-            var taskCount = 0;
 
             // 1) Forced center pass (priority)
             if (Context.MergeCenterCoord.HasValue)
@@ -80,9 +76,7 @@ namespace Game.Grid.States
             // 3) Regular 3 pass
             ScanRect(0, 0, width, height, 3, 3);
 
-            if (taskCount == 0) return;
-
-            await WhenAllTasks(taskCount);
+            await UniTask.WhenAll(_animationTasks);
 
             return;
 
@@ -115,7 +109,9 @@ namespace Game.Grid.States
                 for (int i = 0; i < count; i++)
                     group.Add(_coordBuffer[i]);
 
-                _animationTasks[taskCount++] = ResolveGroupAsync(model, matchMask, group, typeId);
+                var task = ResolveGroupAsync(model, matchMask, group, typeId);
+                
+                _animationTasks.Add(task);
             }
 
             void CommitVisited(int count)
@@ -126,22 +122,6 @@ namespace Game.Grid.States
                     visited[c.x, c.y] = true;
                 }
             }
-        }
-
-        private UniTask WhenAllTasks(int taskCount)
-        {
-            if (taskCount == 0) return UniTask.CompletedTask;
-
-            var end = _lastTaskCount;
-
-            if (end > _animationTasks.Length) end = _animationTasks.Length;
-
-            for (int i = taskCount; i < end; i++)
-                _animationTasks[i] = UniTask.CompletedTask;
-
-            _lastTaskCount = taskCount;
-
-            return UniTask.WhenAll(_animationTasks);
         }
 
         private UniTask ResolveGroupAsync(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int typeId)

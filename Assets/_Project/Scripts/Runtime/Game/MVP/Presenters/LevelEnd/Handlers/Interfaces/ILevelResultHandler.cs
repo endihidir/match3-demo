@@ -6,5 +6,6 @@ namespace Game.Level.Handlers
     {
         event Action OnLevelSuccess;
         event Action OnLevelFail;
+        void Initialize();
     }
 }
