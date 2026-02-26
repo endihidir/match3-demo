@@ -4,6 +4,7 @@ using Game.Grid.Handlers;
 using Game.Grid.Item;
 using Game.Grid.Item.Factories;
 using Game.HUD.Handlers;
+using Game.Level.Handlers;
 using Game.Level.Models;
 using Game.Level.Services;
 using Game.Models;
@@ -25,6 +26,7 @@ namespace Game.Services
         [Inject] private readonly ILevelGoalModel _levelGoalModel;
         [Inject] private readonly IHudView _hudView;
         
+        [Inject] private readonly ILevelResultHandler _levelResultHandler;
         [Inject] private readonly ILevelEndView _levelEndView;
         
         [Inject] private readonly IGridObjectFactory _gridObjectFactory;
@@ -61,8 +63,12 @@ namespace Game.Services
             _gridView.Initialize(width, height, activeCells);
         }
         
-        private void LevelEndSetup() => _levelEndView.Initialize();
-        
+        private void LevelEndSetup()
+        {
+            _levelResultHandler.Initialize();
+            _levelEndView.Initialize();
+        }
+
         private void HudSetup()
         {
             var levelGoals = _levelDefinitionProvider.GetLevelGoals();
