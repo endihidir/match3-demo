@@ -9,11 +9,11 @@ namespace Game.Configs
         [field: SerializeField] public FillSpawnDecisionConfigSO FillSpawnDecisionConfig { get; private set; }
         [field: SerializeField] private BaseGridObjectConfigContinerSO[] GridItemConfigContainers { get; set; }
         
-        public BaseGridObjectDataSO GetConfigData(GridObjectType objectType) => objectType.ItemKind switch
+        public BaseGridObjectDataSO GetConfigData(GridObjectType objectType) => objectType.ObjectKind switch
         {
-            GridItemKind.Regular => GetConfig<ItemConfigContainerSO>().Configs.Get((ItemType)objectType.TypeId),
-            GridItemKind.Booster => GetConfig<BoosterConfigContainerSO>().Configs.Get((BoosterType)objectType.TypeId),
-            GridItemKind.Obstacle => GetConfig<ObstacleConfigContainerSO>().Configs.Get((ObstacleType)objectType.TypeId),
+            GridObjectKind.Regular => GetConfig<ItemConfigContainerSO>().Configs.Get((ItemType)objectType.TypeId),
+            GridObjectKind.Booster => GetConfig<BoosterConfigContainerSO>().Configs.Get((BoosterType)objectType.TypeId),
+            GridObjectKind.Obstacle => GetConfig<ObstacleConfigContainerSO>().Configs.Get((ObstacleType)objectType.TypeId),
             _ => null
         };
         

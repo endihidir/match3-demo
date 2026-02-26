@@ -62,7 +62,6 @@ namespace Game.Grid.Handlers
             if (kb.rKey.wasPressedThisFrame) RemoveAtMousePos();
             if (kb.fKey.wasPressedThisFrame) ForceRefill();
             if (kb.spaceKey.wasPressedThisFrame) LoadMainMenu();
-            if (kb.deleteKey.wasPressedThisFrame) LoadMainMenu();
 
             if (kb.dKey.wasPressedThisFrame)
             {
@@ -86,7 +85,7 @@ namespace Game.Grid.Handlers
                     
                     if (obj is T)
                     {
-                        if (obj.ItemKind == GridItemKind.Obstacle)
+                        if (obj.ObjectKind == GridObjectKind.Obstacle)
                         {
                             _levelGoalHandler.ProgressGoal(obj);
                         }

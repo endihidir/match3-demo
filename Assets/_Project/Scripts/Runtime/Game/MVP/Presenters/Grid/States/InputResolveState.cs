@@ -89,7 +89,7 @@ namespace Game.Grid.States
                 return false;
             }
 
-            if (sourceObj.ItemKind == GridItemKind.Booster || targetObj.ItemKind == GridItemKind.Booster)
+            if (sourceObj.ObjectKind == GridObjectKind.Booster || targetObj.ObjectKind == GridObjectKind.Booster)
             {
                 PlaySwapAndCommit(sourceObj, targetObj, onComplete).Forget();
                 return true;
@@ -129,7 +129,7 @@ namespace Game.Grid.States
 
             sourceObj.SetFrontOf(targetObj);
 
-            if (sourceObj.ItemKind == GridItemKind.Regular || targetObj.ItemKind == GridItemKind.Regular)
+            if (sourceObj.ObjectKind == GridObjectKind.Regular || targetObj.ObjectKind == GridObjectKind.Regular)
             {
                 _ = targetObj.Animation.MoveTo(sourcePos);
             }
@@ -147,8 +147,8 @@ namespace Game.Grid.States
 
         private void SetInputFlags(BaseGridObject sourceObj, BaseGridObject targetObj)
         {
-            var sourceIsBooster = sourceObj.ItemKind == GridItemKind.Booster;
-            var targetIsBooster = targetObj.ItemKind == GridItemKind.Booster;
+            var sourceIsBooster = sourceObj.ObjectKind == GridObjectKind.Booster;
+            var targetIsBooster = targetObj.ObjectKind == GridObjectKind.Booster;
 
             if (sourceIsBooster && targetIsBooster) return;
             

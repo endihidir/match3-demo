@@ -35,11 +35,11 @@ namespace Game.Grid.Handlers
 
         public BaseGridObject CreateObject(GridObjectType typeData)
         {
-            return typeData.ItemKind switch
+            return typeData.ObjectKind switch
             {
-                GridItemKind.Regular => TryCreateObject<ItemObject>(typeData, out var item) ? item : null,
-                GridItemKind.Booster => TryCreateObject<BoosterObject>(typeData, out var boosterObject) ? boosterObject : null,
-                GridItemKind.Obstacle => TryCreateObject<ObstacleObject>(typeData, out var obstacleObject) ? obstacleObject : null,
+                GridObjectKind.Regular => TryCreateObject<ItemObject>(typeData, out var item) ? item : null,
+                GridObjectKind.Booster => TryCreateObject<BoosterObject>(typeData, out var boosterObject) ? boosterObject : null,
+                GridObjectKind.Obstacle => TryCreateObject<ObstacleObject>(typeData, out var obstacleObject) ? obstacleObject : null,
                 _ => null
             };
         }
@@ -64,19 +64,19 @@ namespace Game.Grid.Handlers
         
         public ItemObject CreateItem(ItemType itemType, bool activate = true)
         {
-            var typeData = new GridObjectType(GridItemKind.Regular, (int)itemType);
+            var typeData = new GridObjectType(GridObjectKind.Regular, (int)itemType);
             return TryCreateObject<ItemObject>(typeData, out var item, activate) ? item : null;
         }
 
         public ObstacleObject CreateObstacle(ObstacleType obstacleType, bool activate = true)
         {
-            var typeData = new GridObjectType(GridItemKind.Obstacle, (int)obstacleType);
+            var typeData = new GridObjectType(GridObjectKind.Obstacle, (int)obstacleType);
             return TryCreateObject<ObstacleObject>(typeData, out var obstacleObject, activate) ? obstacleObject : null;
         }
         
         public BoosterObject CreateBooster(BoosterType boosterType, bool activate = true)
         {
-            var typeData = new GridObjectType(GridItemKind.Booster, (int)boosterType);
+            var typeData = new GridObjectType(GridObjectKind.Booster, (int)boosterType);
             return TryCreateObject<BoosterObject>(typeData, out var boosterObject, activate) ? boosterObject : null;
         }
 
