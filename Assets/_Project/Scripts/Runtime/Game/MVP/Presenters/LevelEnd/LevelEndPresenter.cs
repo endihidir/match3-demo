@@ -39,14 +39,14 @@ namespace Game.Presenters
         private void OnClickNextButton() => _sceneLoadService.LoadSceneGroupAsync(SceneGroupType.MenuScene, true).Forget();
         private void OnClickTryAgainButton()
         {
-            _levelEndView.CloseFailMenu();
             _gameplaySetupService.ResetGameplay();
+            _levelEndView.CloseFailMenu();
         }
 
         private void OnLevelSuccess()
         {
-            _levelEndView.OpenSuccessMenuViewAsync().Forget();
             _progressionModel.AdvanceLevel();
+            _levelEndView.OpenSuccessMenuViewAsync().Forget();
         }
 
         private void OnLevelFail() => _levelEndView.OpenFailMenuViewAsync().Forget();
