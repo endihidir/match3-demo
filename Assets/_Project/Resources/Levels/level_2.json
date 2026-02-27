@@ -1,7 +1,7 @@
 {
  "level_number": 2,
- "grid_width": 10,
+ "grid_width": 9,
  "grid_height": 10,
- "move_count": 10,
- "grid": ["rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "t", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand"]
+ "move_count": 30,
+ "grid": ["rand", "rand", "rand", "bo", "bo", "bo", "rand", "rand", "rand", "rand", "rand", "rand", "bo", "bo", "bo", "rand", "rand", "rand", "rand", "rand", "rand", "bo", "bo", "bo", "rand", "rand", "rand", "rand", "rand", "rand", "bo", "bo", "bo", "rand", "rand", "rand", "rand", "rand", "rand", "bo", "bo", "bo", "rand", "rand", "rand", "rand", "rand", "rand", "bo", "bo", "bo", "rand", "rand", "rand", "rand", "rand", "rand", "bo", "bo", "bo", "rand", "rand", "rand", "rand", "rand", "rand", "bo", "bo", "bo", "rand", "rand", "rand", "rand", "rand", "rand", "bo", "bo", "bo", "rand", "rand", "rand", "rand", "rand", "rand", "bo", "bo", "bo", "rand", "rand", "rand"]
 }

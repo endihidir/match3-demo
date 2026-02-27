@@ -18,7 +18,7 @@ MonoBehaviour:
   <IsStationary>k__BackingField: 1
   <IsCollectible>k__BackingField: 1
   <Life>k__BackingField: 2
-  <GridDamageSource>k__BackingField: 2
+  <GridDamageSource>k__BackingField: -1
   <CrackedSprites>k__BackingField:
   - {fileID: 21300000, guid: b6da6ccd0fb1b024f907893885bcbc25, type: 3}
   <ShatteredSprites>k__BackingField:
