@@ -155,7 +155,7 @@ namespace Core.Utils
         {
             if (!obj) return false;
             if (obj.IsStationary) return false;
-            return obj.ObjectKind != GridObjectKind.Booster;
+            return obj.ObjectKind == GridObjectKind.Regular;
         }
     }
 }
