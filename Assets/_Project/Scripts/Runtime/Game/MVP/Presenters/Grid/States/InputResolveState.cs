@@ -97,8 +97,7 @@ namespace Game.Grid.States
 
             var typeData = model.BuildGridTypeData();
 
-            if (!GridMatchCalcUtil.IsCellsRegular(sourceObj, targetObj) ||
-                !GridMatchCalcUtil.WouldSwapCreateMatch(model, typeData, sourceCoord, targetCoord, sourceObj.TypeId, targetObj.TypeId))
+            if (!GridMatchCalcUtil.WouldSwapCreateMatch(model, typeData, sourceCoord, targetCoord, sourceObj.TypeId, targetObj.TypeId))
             {
                 PlaySwapAndBack(sourceObj, targetObj, sourceCoord, targetCoord, onComplete).Forget();
                 return false;
@@ -128,8 +127,8 @@ namespace Game.Grid.States
             var targetPos = Context.GridView.GridToWorld(targetCoord);
 
             sourceObj.SetFrontOf(targetObj);
-
-            if (sourceObj.ObjectKind == GridObjectKind.Regular || targetObj.ObjectKind == GridObjectKind.Regular)
+            
+            if (!targetObj.IsStationary)
             {
                 _ = targetObj.Animation.MoveTo(sourcePos);
             }

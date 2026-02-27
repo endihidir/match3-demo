@@ -15,7 +15,7 @@ MonoBehaviour:
   <Icon>k__BackingField: {fileID: 1852594712, guid: f1284f1fe9eb2a545b2ef886c61ba241,
     type: 3}
   <SpriteSizeMultiplier>k__BackingField: {x: 0.75, y: 0.95}
-  <IsStationary>k__BackingField: 1
+  <IsStationary>k__BackingField: 0
   <IsCollectible>k__BackingField: 0
   <Life>k__BackingField: 1
   <GridDamageSource>k__BackingField: -1

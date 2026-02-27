@@ -28,9 +28,9 @@ namespace Core.Utils
         {
             var cellA = grid[coordA.x, coordA.y];
             var cellB = grid[coordB.x, coordB.y];
-
-            grid[coordA.x, coordA.y] = new GridObjectType(cellA.ObjectKind, typeB);
-            grid[coordB.x, coordB.y] = new GridObjectType(cellB.ObjectKind, typeA);
+            
+            grid[coordA.x, coordA.y] = new GridObjectType(cellB.ObjectKind, typeB);
+            grid[coordB.x, coordB.y] = new GridObjectType(cellA.ObjectKind, typeA);
 
             var creates = IsCellMatched(model, grid, coordA.x, coordA.y, typeB) ||
                           IsCellMatched(model, grid, coordB.x, coordB.y, typeA);
