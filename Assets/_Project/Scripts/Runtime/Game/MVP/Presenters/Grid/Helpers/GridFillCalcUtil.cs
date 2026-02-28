@@ -28,7 +28,7 @@ namespace Game.Grid.Utils
             {
                 var coord = new Vector2Int(x, y);
 
-                if (!model.IsCellActive(coord)) return false;
+                if (!model.IsCellActive(coord)) continue;
                 if (!TryGetActiveObject(model, x, y, out var obj)) return true;
                 if (!obj.IsStationary) return true;
             }
@@ -48,6 +48,24 @@ namespace Game.Grid.Utils
             }
 
             return -1;
+        }
+        
+        public static bool HasStationaryAboveInSameSegment(IGridModel model, Vector2Int coord, bool stopAtInactiveCell = true)
+        {
+            for (int y = coord.y - 1; y >= 0; y--)
+            {
+                var c = new Vector2Int(coord.x, y);
+
+                if (!model.IsCellActive(c) && stopAtInactiveCell) return false;
+
+                var obj = model.GetGridObject(c);
+
+                if (!obj) continue;
+
+                return obj.IsStationary;
+            }
+
+            return false;
         }
 
         private static bool TryGetActiveObject(IGridModel model, int x, int y, out BaseGridObject obj)
@@ -101,12 +119,6 @@ namespace Game.Grid.Utils
             var item = model.GetGridObject(sourceCoord);
             if (!item || item.IsStationary) return false;
 
-            if (IsBlockerSideSource(model, sourceCoord, dirX))
-            {
-                slide = new SlideDownCandidate(item, sourceCoord, targetCoord);
-                return true;
-            }
-
             if (!HasEmptyBelowInSegment(model, sourceCoord))
             {
                 slide = new SlideDownCandidate(item, sourceCoord, targetCoord);
@@ -154,24 +166,6 @@ namespace Game.Grid.Utils
 
             return count;
         }
-        
-        private static bool IsBlockerSideSource(IGridModel model, Vector2Int src, int dirX)
-        {
-            if (!model.TryGetNeighbourCoord(src, new Vector2Int(-dirX, 0), out var sideOfSource)) return false;
-
-            var sideObj = model.GetGridObject(sideOfSource);
-
-            if (!sideObj || !sideObj.IsStationary) return false;
-
-            if (model.TryGetNeighbourCoord(src, new Vector2Int(dirX, 0), out var slideSide))
-            {
-                var slideSideObj = model.GetGridObject(slideSide);
-
-                if (slideSideObj && slideSideObj.IsStationary) return false;
-            }
-
-            return true;
-        }
 
         private static bool HasEmptyBelowInSegment(IGridModel model, Vector2Int src)
         {
@@ -179,7 +173,7 @@ namespace Game.Grid.Utils
             {
                 var coord = new Vector2Int(src.x, sy);
 
-                if (!model.IsCellActive(coord)) return false;
+                if (!model.IsCellActive(coord)) continue;
 
                 var obj = model.GetGridObject(coord);
 
@@ -197,25 +191,7 @@ namespace Game.Grid.Utils
             {
                 var c = new Vector2Int(targetCoord.x, y);
 
-                if (!model.IsCellActive(c)) return false;
-
-                var obj = model.GetGridObject(c);
-
-                if (!obj) continue;
-
-                return obj.IsStationary;
-            }
-
-            return false;
-        }
-
-        public static bool HasStationaryAboveInSameSegment(IGridModel model, Vector2Int coord, bool stopAtInactiveCell = true)
-        {
-            for (int y = coord.y - 1; y >= 0; y--)
-            {
-                var c = new Vector2Int(coord.x, y);
-
-                if (!model.IsCellActive(c) && stopAtInactiveCell) return false;
+                if (!model.IsCellActive(c)) continue;
 
                 var obj = model.GetGridObject(c);
 
