@@ -20,6 +20,8 @@ namespace Game.Configs
 
         [Tooltip("Optional seed override. Set to 0 to use level-based seed.")]
         [field: SerializeField] public int SeedOverride { get; private set; } = 0;
+        [field: SerializeField] public bool IsOverrideLevelIndex { get; private set; } = false;
+        [field: SerializeField, ShowIf(nameof(IsOverrideLevelIndex))] public int LevelIndexOverride { get; private set; }
         
         public string GetResourcePath(int level) => $"{ResourcesFolder}/{string.Format(FileNameFormat, level)}";
         private bool IsAddressable => SourceType == LevelSourceType.Addressables;
