@@ -9,12 +9,14 @@ namespace Game.Level.Models
     {
         event Action OnGoalCountUpdate;
         event Action OnMoveCountUpdate;
+        List<LevelGoal> Goals { get; }
         public int MoveCount { get; }
         bool IsAllGoalsComplete { get; }
         bool IsAllMovesFinished { get; }
         void Initialize(List<LevelGoal> goals, int moveCount);
         void ProgressGoal(GridObjectType gridObjectType);
         void ConsumeMove();
+        void AddNewGoal(GridObjectType gridObjectType, int count);
         bool TryGetGoal(GridObjectType gridObjectType, out LevelGoal levelGoal);
     }
 }

@@ -25,6 +25,8 @@ namespace Game.HUD.Handlers
         
         public void PopulateSlotViews(List<LevelGoal> levelGoals)
         {
+            ResetSlotViews();
+            
             GoalSlotViews = new GoalSlotView[levelGoals.Count];
 
             for (var i = 0; i < levelGoals.Count; i++)
@@ -39,6 +41,17 @@ namespace Game.HUD.Handlers
             }
             
             SlotByType = new SerializedDictionary<GridObjectType, GoalSlotView>(GoalSlotViews.ToDictionary(x => x.GridObjectType));
+        }
+        
+        private void ResetSlotViews()
+        {
+            if (GoalSlotViews == null) return;
+            
+            foreach (var slot in GoalSlotViews)
+                _slotViewFactory.ReleaseSlot(slot);
+        
+            GoalSlotViews = null;
+            SlotByType = null;
         }
         
         public bool TryGetGoalSlotView(GridObjectType gridObjectType, out GoalSlotView goalSlotView)
