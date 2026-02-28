@@ -11,8 +11,8 @@ namespace Game.Level.Services
         private readonly ILevelDataService _levelDataService;
         private readonly ILevelProgressionModel _progressionModel;
         
-        private int CurrentLevelIndex => !_levelDataService.IsLevelIndexOverridden ? _progressionModel.CurrentLevelIndex : 
-                                                                                   _levelDataService.OverrideLevelIndex;
+        private int CurrentLevelIndex => !_levelDataService.UseTestLevel ? _progressionModel.CurrentLevelIndex : 
+                                                                                   _levelDataService.TestLevelIndex;
 
         public LevelDefinitionProvider(ILevelDataService levelDataService, ILevelProgressionModel progressionModel)
         {
