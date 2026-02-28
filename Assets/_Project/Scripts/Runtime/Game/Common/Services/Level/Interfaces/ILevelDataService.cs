@@ -6,8 +6,8 @@ namespace Game.Level.Services
     public interface ILevelDataService
     {
         bool IsInitialized { get; }
-        bool IsOverrideLevelIndex { get; }
-        int LevelIndexOverride { get; }
+        bool IsLevelIndexOverridden { get; }
+        int OverrideLevelIndex { get; }
         int LevelSize { get; }
         UniTask<bool> InitializeAsync();
         LevelDefinition GetLevelDefinition(int index);
