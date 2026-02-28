@@ -12,8 +12,8 @@ namespace Game.Level.Services
     {
         private readonly LevelDataServiceConfigSO _levelDataServiceConfig;
         public bool IsInitialized { get; private set; }
-        public bool IsOverrideLevelIndex => _levelDataServiceConfig.IsOverrideLevelIndex;
-        public int LevelIndexOverride => Mathf.Min(_levelDataServiceConfig.LevelIndexOverride, LevelSize - 1);
+        public bool IsLevelIndexOverridden => _levelDataServiceConfig.UseTestLevel;
+        public int OverrideLevelIndex => Mathf.Min(_levelDataServiceConfig.TestLevelIndex, LevelSize - 1);
         public int LevelSize => LevelDefinitions?.Length ?? 0;
         public LevelDefinition[] LevelDefinitions { get; private set; }
         

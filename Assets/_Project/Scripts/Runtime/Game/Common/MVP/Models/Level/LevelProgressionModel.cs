@@ -73,5 +73,16 @@ namespace Game.Level.Models
             _saveService.SaveToPrefs(SaveKey, _levelProgressionData);
             OnLevelChanged?.Invoke();
         }
+        
+        public void OverrideSaveData(int levelIndex)
+        {
+            var data = new LevelProgressionData
+            {
+                currentLevelIndex = levelIndex,
+                levelCompletionCount = levelIndex
+            };
+            
+            _saveService.SaveToPrefs(SaveKey, data);
+        }
     }
 }

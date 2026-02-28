@@ -19,5 +19,6 @@ MonoBehaviour:
   <PreventInitialMatches>k__BackingField: 1
   <UseSeededPattern>k__BackingField: 1
   <SeedOverride>k__BackingField: 0
-  <IsOverrideLevelIndex>k__BackingField: 0
-  <LevelIndexOverride>k__BackingField: 0
+  <UseTestLevel>k__BackingField: 0
+  <TestLevelIndex>k__BackingField: 0
+  <TargetLevelIndex>k__BackingField: 0
