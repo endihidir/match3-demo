@@ -10,6 +10,9 @@ namespace Game.Level.Services
     {
         private readonly ILevelDataService _levelDataService;
         private readonly ILevelProgressionModel _progressionModel;
+        
+        private int CurrentLevelIndex => !_levelDataService.IsOverrideLevelIndex ? _progressionModel.CurrentLevelIndex : 
+                                                                                   _levelDataService.LevelIndexOverride;
 
         public LevelDefinitionProvider(ILevelDataService levelDataService, ILevelProgressionModel progressionModel)
         {
@@ -17,12 +20,12 @@ namespace Game.Level.Services
             _progressionModel = progressionModel;
         }
 
-        public int GetMoveCount() => _levelDataService.GetLevelDefinition(_progressionModel.CurrentLevelIndex).MoveCount;
-        public Vector2Int GetGridSize() => _levelDataService.GetLevelDefinition(_progressionModel.CurrentLevelIndex).GridSize;
-        public List<LevelGoal> GetLevelGoals() => _levelDataService.GetLevelDefinition(_progressionModel.CurrentLevelIndex).Goals;
-        public GridObjectType[,] GetGridObjectTypes() => _levelDataService.GetLevelDefinition(_progressionModel.CurrentLevelIndex).GridObjectTypes;
+        public int GetMoveCount() => _levelDataService.GetLevelDefinition(CurrentLevelIndex).MoveCount;
+        public Vector2Int GetGridSize() => _levelDataService.GetLevelDefinition(CurrentLevelIndex).GridSize;
+        public List<LevelGoal> GetLevelGoals() => _levelDataService.GetLevelDefinition(CurrentLevelIndex).Goals;
+        public GridObjectType[,] GetGridObjectTypes() => _levelDataService.GetLevelDefinition(CurrentLevelIndex).GridObjectTypes;
         public int GetLevelNumber(bool useLevelCompletionCount = false) => useLevelCompletionCount 
                                                                   ? _progressionModel.LevelCompletionCount + 1
-                                                                  : _levelDataService.GetLevelDefinition(_progressionModel.CurrentLevelIndex).LevelNumber;
+                                                                  : _levelDataService.GetLevelDefinition(CurrentLevelIndex).LevelNumber;
     }
 }
