@@ -6,6 +6,7 @@ using Cysharp.Threading.Tasks;
 using Game.Grid.States;
 using Game.Level.Handlers;
 using Game.Models;
+using Game.Services;
 using Game.Views;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -25,9 +26,11 @@ namespace Game.Grid.Handlers
         private readonly IGridObjectCreateHandler _objectCreateHandler;
         private readonly IGridObjectDestroyHandler _gridObjectDestroyHandler;
         private readonly ILevelGoalHandler _levelGoalHandler;
+        private readonly IGameplaySetupService _gameplaySetupService;
         
         public GridCheatHandler(IGridModel gridModel, IGridView gridView, IGridStateHandler gridStateHandler, ISceneLoadService sceneLoadService, 
-            IGridObjectCreateHandler objectCreateHandler, IGridObjectDestroyHandler gridObjectDestroyHandler, ILevelGoalHandler levelGoalHandler)
+            IGridObjectCreateHandler objectCreateHandler, IGridObjectDestroyHandler gridObjectDestroyHandler, ILevelGoalHandler levelGoalHandler,
+            IGameplaySetupService gameplaySetupService)
         {
             _gridModel = gridModel;
             _gridView = gridView;
@@ -36,6 +39,7 @@ namespace Game.Grid.Handlers
             _sceneLoadService = sceneLoadService;
             _gridObjectDestroyHandler = gridObjectDestroyHandler;
             _levelGoalHandler = levelGoalHandler;
+            _gameplaySetupService = gameplaySetupService;
         }
 
         public void Tick()
@@ -85,11 +89,6 @@ namespace Game.Grid.Handlers
                     
                     if (obj is T)
                     {
-                        if (obj.ObjectKind == GridObjectKind.Obstacle)
-                        {
-                            _levelGoalHandler.ProgressGoal(obj);
-                        }
-                        
                         ClearCell(coord);
                         ForceRefill();
                     }
@@ -124,6 +123,7 @@ namespace Game.Grid.Handlers
             ClearCell(coord);
 
             var obstacle = _objectCreateHandler.CreateObstacle(type);
+            _gameplaySetupService.AddNewGoal(obstacle.ObjectType, 1);
             PlaceItem(coord, obstacle);
         }
 
@@ -145,7 +145,12 @@ namespace Game.Grid.Handlers
         private void ClearCell(Vector2Int coord)
         {
             var obj = _gridModel.GetGridObject(coord);
+            
             if (!obj) return;
+            
+            if(obj is IDamageableGridObject)
+                _levelGoalHandler.ProgressGoal(obj);
+            
             _gridObjectDestroyHandler.DestroyGridObject(obj);
         }
 
