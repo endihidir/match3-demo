@@ -77,13 +77,5 @@ namespace Game.Services
             _levelGoalModel.Initialize(levelGoals, levelMoveCount);
             _hudView.Initialize(levelGoals.Count, levelMoveCount);
         }
-        
-        public void AddNewGoal(GridObjectType goalType, int count)
-        {
-            _levelGoalModel.AddNewGoal(goalType, count);
-            var goals = _levelGoalModel.Goals;
-            _goalSlotHandler.PopulateSlotViews(goals);
-            _hudView.Initialize(goals.Count, _levelGoalModel.MoveCount);
-        }
     }
 }

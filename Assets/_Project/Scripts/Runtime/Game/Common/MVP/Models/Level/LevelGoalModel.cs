@@ -47,7 +47,7 @@ namespace Game.Level.Models
             OnMoveCountUpdate?.Invoke();
         }
         
-        public void AddNewGoal(GridObjectType gridObjectType, int count)
+        public void AddGoal(GridObjectType gridObjectType, int count)
         {
             if (TryGetGoal(gridObjectType, out var goal))
             {

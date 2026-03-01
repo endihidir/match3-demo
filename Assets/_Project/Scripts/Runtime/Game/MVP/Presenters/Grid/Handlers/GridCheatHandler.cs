@@ -6,7 +6,6 @@ using Cysharp.Threading.Tasks;
 using Game.Grid.States;
 using Game.Level.Handlers;
 using Game.Models;
-using Game.Services;
 using Game.Views;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -26,11 +25,9 @@ namespace Game.Grid.Handlers
         private readonly IGridObjectCreateHandler _objectCreateHandler;
         private readonly IGridObjectDestroyHandler _gridObjectDestroyHandler;
         private readonly ILevelGoalHandler _levelGoalHandler;
-        private readonly IGameplaySetupService _gameplaySetupService;
         
         public GridCheatHandler(IGridModel gridModel, IGridView gridView, IGridStateHandler gridStateHandler, ISceneLoadService sceneLoadService, 
-            IGridObjectCreateHandler objectCreateHandler, IGridObjectDestroyHandler gridObjectDestroyHandler, ILevelGoalHandler levelGoalHandler,
-            IGameplaySetupService gameplaySetupService)
+            IGridObjectCreateHandler objectCreateHandler, IGridObjectDestroyHandler gridObjectDestroyHandler, ILevelGoalHandler levelGoalHandler)
         {
             _gridModel = gridModel;
             _gridView = gridView;
@@ -39,7 +36,6 @@ namespace Game.Grid.Handlers
             _sceneLoadService = sceneLoadService;
             _gridObjectDestroyHandler = gridObjectDestroyHandler;
             _levelGoalHandler = levelGoalHandler;
-            _gameplaySetupService = gameplaySetupService;
         }
 
         public void Tick()
@@ -102,8 +98,8 @@ namespace Game.Grid.Handlers
             if (!IsCellActive(coord)) return;
             ClearCell(coord);
 
-            var obstacle = _objectCreateHandler.CreateItem(type);
-            PlaceItem(coord, obstacle);
+            var item = _objectCreateHandler.CreateItem(type);
+            PlaceItem(coord, item);
         }
 
         public void GenerateBoosterAtMousePos(BoosterType type)
@@ -123,7 +119,7 @@ namespace Game.Grid.Handlers
             ClearCell(coord);
 
             var obstacle = _objectCreateHandler.CreateObstacle(type);
-            _gameplaySetupService.AddNewGoal(obstacle.ObjectType, 1);
+            _levelGoalHandler.RegisterGoal(obstacle.ObjectType, 1);
             PlaceItem(coord, obstacle);
         }
 
