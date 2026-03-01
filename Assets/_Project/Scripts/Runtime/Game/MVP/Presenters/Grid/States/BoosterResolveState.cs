@@ -20,7 +20,7 @@ namespace Game.Grid.States
 
         private readonly IBoosterFxHandler _boosterFxHandler;
         private readonly HashSet<BoosterActionKey> _processedBoosters = new();
-        private readonly HashSet<Vector2Int> _unmarkProtectedCells = new();
+        private readonly HashSet<Vector2Int> _protectedMatchGroups = new();
         private readonly List<UniTask> _activeTasks = new();
 
         public BoosterResolveState(GridStateContext context, IBoosterFxHandler boosterFxHandler, IGridObjectDestroyHandler objectDestroyHandler, ILevelGoalHandler goalHandler) : base(context)
@@ -90,7 +90,7 @@ namespace Game.Grid.States
 
         private void ApplyImpact(Vector2Int coord, int damageAmount)
         {
-            if (_unmarkProtectedCells.Contains(coord)) return;
+            if (_protectedMatchGroups.Contains(coord)) return;
 
             var model = Context.GridModel;
             var obj = model.GetGridObject(coord);
@@ -138,14 +138,14 @@ namespace Game.Grid.States
             var count = GridMatchCalcUtil.CollectMatchShapeFromCenter(model, grid, protectedCoord.x, protectedCoord.y, data.TypeId, visited, buffer);
 
             for (int i = 0; i < count; i++)
-                _unmarkProtectedCells.Add(buffer[i]);
+                _protectedMatchGroups.Add(buffer[i]);
         }
         
         private void ClearBuffers()
         {
             _processedBoosters.Clear();
             _activeTasks.Clear();
-            _unmarkProtectedCells.Clear();
+            _protectedMatchGroups.Clear();
         }
     }
 }

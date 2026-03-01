@@ -226,19 +226,20 @@ namespace Core.Utils
             return false;
         }
         
-        public static BaseGridObject[] GetMergedGroupObject(List<Vector2Int> group, IGridModel model, Vector2Int centerCoord)
+        public static BaseGridObject[] GetMergedGroupObject(List<Vector2Int> group, IGridModel model)
         {
-            var mergeObjs = new BaseGridObject[group.Count - 1];
-            var index = 0;
+            var mergeObjs = new BaseGridObject[group.Count];
 
-            foreach (var coord in group)
+            var count = group.Count;
+            
+            for (int i = 0; i < count; i++)
             {
-                if (coord == centerCoord) continue;
+                var coord = group[i];
                 var obj = model.GetGridObject(coord);
                 if (!obj) continue;
-                mergeObjs[index++] = obj;
+                mergeObjs[i] = obj;
             }
-
+            
             return mergeObjs;
         }
         

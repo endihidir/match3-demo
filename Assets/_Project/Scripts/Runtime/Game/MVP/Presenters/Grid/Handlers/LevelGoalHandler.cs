@@ -32,6 +32,7 @@ namespace Game.Level.Handlers
         public void ProgressGoal(BaseGridObject gridObject)
         {
             var type = gridObject.ObjectType;
+            if(_levelGoalModel.IsGoalComplete(type)) return;
             _levelGoalModel.ProgressGoal(type);
             
             if (!TryBuildGoalCollectedData(type, gridObject.Coord, gridObject.SpriteRenderer.size, out var collectedData)) return;

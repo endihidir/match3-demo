@@ -54,11 +54,12 @@ namespace Game.HUD.Handlers
             SlotByType = null;
         }
         
-        public bool TryGetGoalSlotView(GridObjectType gridObjectType, out GoalSlotView goalSlotView)
+        public bool TryGetGoalSlotView(GridObjectType gridObjectType, out GoalSlotView goalSlotView, bool showLogs = false)
         {
             if (SlotByType.TryGetValue(gridObjectType, out goalSlotView)) return true;
             
-            EditorLogger.LogError($"{gridObjectType} slot view not found!");
+            if(showLogs)
+                EditorLogger.LogError($"{gridObjectType} slot view not found!");
             
             return false;
         }
