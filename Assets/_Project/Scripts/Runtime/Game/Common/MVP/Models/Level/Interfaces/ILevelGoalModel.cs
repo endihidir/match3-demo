@@ -16,7 +16,7 @@ namespace Game.Level.Models
         void Initialize(List<LevelGoal> goals, int moveCount);
         void ProgressGoal(GridObjectType gridObjectType);
         void ConsumeMove();
-        void AddNewGoal(GridObjectType gridObjectType, int count);
+        void AddGoal(GridObjectType gridObjectType, int count);
         bool TryGetGoal(GridObjectType gridObjectType, out LevelGoal levelGoal);
     }
 }

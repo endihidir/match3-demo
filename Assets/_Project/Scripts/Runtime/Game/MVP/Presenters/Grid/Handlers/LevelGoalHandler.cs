@@ -1,6 +1,7 @@
 using System;
 using Game.Configs;
 using Game.Grid.Item;
+using Game.HUD.Handlers;
 using Game.HUD.Handlers.Data;
 using Game.Level.Models;
 using Game.Views;
@@ -11,14 +12,18 @@ namespace Game.Level.Handlers
     public sealed class LevelGoalHandler : ILevelGoalHandler
     {
         private readonly IGridView _gridView;
+        private readonly IHudView _hudView;
         private readonly ILevelGoalModel _levelGoalModel;
+        private readonly IGoalSlotHandler _goalSlotHandler;
         private readonly GridConfigContainerSO _gridConfigContainer;
         public event Action<GoalCollectedData> OnGoalCollected;
 
-        public LevelGoalHandler(IGridView gridView, ILevelGoalModel levelGoalModel, GridConfigContainerSO gridConfigContainer)
+        public LevelGoalHandler(IGridView gridView, IHudView hudView, ILevelGoalModel levelGoalModel, IGoalSlotHandler goalSlotHandler, GridConfigContainerSO gridConfigContainer)
         {
             _gridView = gridView;
+            _hudView = hudView;
             _levelGoalModel = levelGoalModel;
+            _goalSlotHandler = goalSlotHandler;
             _gridConfigContainer = gridConfigContainer;
         }
 
@@ -31,6 +36,14 @@ namespace Game.Level.Handlers
             
             if (!TryBuildGoalCollectedData(type, gridObject.Coord, gridObject.SpriteRenderer.size, out var collectedData)) return;
             OnGoalCollected?.Invoke(collectedData);
+        }
+        
+        public void RegisterGoal(GridObjectType goalType, int count)
+        {
+            _levelGoalModel.AddGoal(goalType, count);
+            var goals = _levelGoalModel.Goals;
+            _goalSlotHandler.PopulateSlotViews(goals);
+            _hudView.Initialize(goals.Count, _levelGoalModel.MoveCount);
         }
 
         private bool TryBuildGoalCollectedData(GridObjectType gridObjectType, Vector2Int coord, Vector2 spriteSize, out GoalCollectedData data)

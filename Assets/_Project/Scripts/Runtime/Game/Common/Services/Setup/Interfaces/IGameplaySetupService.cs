@@ -1,4 +1,3 @@
-using Game.Grid.Item;
 
 namespace Game.Services
 {
@@ -7,6 +6,5 @@ namespace Game.Services
         void SetupGameplay();
         void ResetGameplay();
         void ReleaseFactories();
-        void AddNewGoal(GridObjectType goalType, int count);
     }
 }
