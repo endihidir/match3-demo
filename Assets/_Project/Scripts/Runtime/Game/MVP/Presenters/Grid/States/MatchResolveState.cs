@@ -139,20 +139,18 @@ namespace Game.Grid.States
             var anyForced = TryConsumeForcedCenterCoord(group, out var forcedCoord);
             var centerCoord = anyForced ? forcedCoord : GridBoosterDecisionUtil.SelectMergeCenter(group);
 
-            var mergeObjs = GridMatchCalcUtil.GetMergedGroupObject(group, model, centerCoord);
+            var mergeObjs = GridMatchCalcUtil.GetMergedGroupObject(group, model);
             var type = boosterType.Value;
-            var centerObj = model.GetGridObject(centerCoord);
             
             _destructionHandler.ClearGroupForMerge(group);
 
             return _mergeHandler.PlayMergeAnimationAsync(mergeObjs, centerCoord)
-                                .ContinueWith(() => OnCompleteAnimation(mergeObjs, centerObj, centerCoord, type));
+                                .ContinueWith(() => OnCompleteAnimation(mergeObjs, centerCoord, type));
         }
 
-        private void OnCompleteAnimation(BaseGridObject[] mergeObjs, BaseGridObject centerObj, Vector2Int centerCoord, BoosterType boosterType)
+        private void OnCompleteAnimation(BaseGridObject[] mergeObjs, Vector2Int centerCoord, BoosterType boosterType)
         {
             _destructionHandler.ReleaseObjects(mergeObjs);
-            _destructionHandler.ReleaseObject(centerObj);
             _mergeHandler.SpawnBooster(centerCoord, boosterType);
         }
 

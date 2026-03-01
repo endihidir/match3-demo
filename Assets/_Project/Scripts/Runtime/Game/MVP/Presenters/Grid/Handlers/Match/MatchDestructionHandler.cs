@@ -50,12 +50,6 @@ namespace Game.Grid.Handlers
             }
         }
 
-        public void ReleaseObject(BaseGridObject obj)
-        {
-            if (!obj) return;
-            _destroyHandler.ReleaseObject(obj);
-        }
-
         private void ApplyNeighbourDamage(Vector2Int origin)
         {
             foreach (var dir in DirectionLookup.LinearDirections)

@@ -17,6 +17,7 @@ namespace Game.Level.Models
         void ProgressGoal(GridObjectType gridObjectType);
         void ConsumeMove();
         void AddGoal(GridObjectType gridObjectType, int count);
+        bool IsGoalComplete(GridObjectType gridObjectType);
         bool TryGetGoal(GridObjectType gridObjectType, out LevelGoal levelGoal);
     }
 }

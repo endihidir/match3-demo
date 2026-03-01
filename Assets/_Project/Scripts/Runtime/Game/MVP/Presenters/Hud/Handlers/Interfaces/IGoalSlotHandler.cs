@@ -9,6 +9,6 @@ namespace Game.HUD.Handlers
     {
         GoalSlotView[] GoalSlotViews { get; }
         void PopulateSlotViews(List<LevelGoal> levelGoals);
-        bool TryGetGoalSlotView(GridObjectType gridObjectType, out GoalSlotView goalSlotView);
+        bool TryGetGoalSlotView(GridObjectType gridObjectType, out GoalSlotView goalSlotView, bool showLogs = false);
     }
 }
