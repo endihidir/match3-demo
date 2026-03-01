@@ -136,7 +136,9 @@ namespace Game.Grid.States
             var buffer = new Vector2Int[model.Width * model.Height];
 
             var count = GridMatchCalcUtil.CollectMatchShapeFromCenter(model, grid, protectedCoord.x, protectedCoord.y, data.TypeId, visited, buffer);
-
+            
+            if(count < 4) return;
+            
             for (int i = 0; i < count; i++)
                 _protectedMatchGroups.Add(buffer[i]);
         }

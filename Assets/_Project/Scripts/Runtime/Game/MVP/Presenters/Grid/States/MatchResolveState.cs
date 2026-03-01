@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Game.Grid.Contexts;
 using Core.StateMachineCore;
 using Core.Utils;
@@ -47,14 +46,16 @@ namespace Game.Grid.States
 
         private async UniTask ResolveMaskAsync(bool[,] matchMask)
         {
+            var forcedCenter = Context.MergeCenterCoord;
+            Context.MergeCenterCoord = null;
+
             var model = Context.GridModel;
             var width = model.Width;
             var height = model.Height;
 
             var visited = new bool[width, height];
-
             var capacity = width * height;
-            
+
             _animationTasks.Clear();
 
             if (_coordBuffer.Length < capacity)
@@ -62,18 +63,13 @@ namespace Game.Grid.States
 
             var grid = model.BuildGridTypeData();
 
-            // 1) Forced center pass (priority)
-            if (Context.MergeCenterCoord.HasValue)
+            if (forcedCenter.HasValue)
             {
-                var forcedCenter = Context.MergeCenterCoord.Value;
-                // 1) Forced center pass
-                ScanRect(forcedCenter.x, forcedCenter.y, forcedCenter.x + 1, forcedCenter.y + 1, 3, 999);
+                var fc = forcedCenter.Value;
+                ScanRect(fc.x, fc.y, fc.x + 1, fc.y + 1, 3, 999);
             }
 
-            // 2) Booster (4+ or T/L/5 vs) pass
             ScanRect(0, 0, width, height, 4, 999);
-
-            // 3) Regular 3 pass
             ScanRect(0, 0, width, height, 3, 3);
 
             await UniTask.WhenAll(_animationTasks);
@@ -109,9 +105,7 @@ namespace Game.Grid.States
                 for (int i = 0; i < count; i++)
                     group.Add(_coordBuffer[i]);
 
-                var task = ResolveGroupAsync(model, matchMask, group, typeId);
-                
-                _animationTasks.Add(task);
+                _animationTasks.Add(ResolveGroupAsync(model, matchMask, group, typeId, forcedCenter));
             }
 
             void CommitVisited(int count)
@@ -124,7 +118,7 @@ namespace Game.Grid.States
             }
         }
 
-        private UniTask ResolveGroupAsync(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int typeId)
+        private UniTask ResolveGroupAsync(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int typeId, Vector2Int? forcedCenter)
         {
             if (GridMatchCalcUtil.IsAnyGroupObjectFall(model, group)) return UniTask.CompletedTask;
 
@@ -136,12 +130,12 @@ namespace Game.Grid.States
                 return UniTask.CompletedTask;
             }
 
-            var anyForced = TryConsumeForcedCenterCoord(group, out var forcedCoord);
-            var centerCoord = anyForced ? forcedCoord : GridBoosterDecisionUtil.SelectMergeCenter(group);
+            var isForcedCenterInGroup = forcedCenter.HasValue && group.Contains(forcedCenter.Value);
+            var centerCoord = isForcedCenterInGroup ? forcedCenter.Value : GridBoosterDecisionUtil.SelectMergeCenter(group);
 
             var mergeObjs = GridMatchCalcUtil.GetMergedGroupObject(group, model);
             var type = boosterType.Value;
-            
+
             _destructionHandler.ClearGroupForMerge(group);
 
             return _mergeHandler.PlayMergeAnimationAsync(mergeObjs, centerCoord)
@@ -152,27 +146,6 @@ namespace Game.Grid.States
         {
             _destructionHandler.ReleaseObjects(mergeObjs);
             _mergeHandler.SpawnBooster(centerCoord, boosterType);
-        }
-
-        private bool TryConsumeForcedCenterCoord(List<Vector2Int> group, out Vector2Int forcedCoord)
-        {
-            if (!Context.MergeCenterCoord.HasValue)
-            {
-                forcedCoord = default;
-                return false;
-            }
-
-            var coord = Context.MergeCenterCoord.Value;
-
-            if (group.Any(t => t == coord))
-            {
-                Context.MergeCenterCoord = null;
-                forcedCoord = coord;
-                return true;
-            }
-
-            forcedCoord = default;
-            return false;
         }
     }
 }
