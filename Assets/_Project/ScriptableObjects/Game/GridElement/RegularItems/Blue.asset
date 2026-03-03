@@ -16,5 +16,5 @@ MonoBehaviour:
     type: 3}
   <SpriteSizeMultiplier>k__BackingField: {x: 0.8, y: 0.8}
   <IsStationary>k__BackingField: 0
-  <IsCollectible>k__BackingField: 1
+  <IsCollectible>k__BackingField: 0
   <BlastColor>k__BackingField: {r: 0.03529412, g: 0.65882355, b: 0.9960785, a: 1}
