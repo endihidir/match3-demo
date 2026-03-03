@@ -30,7 +30,7 @@ A classic Match-3 puzzle game where players swap colored items on a grid to crea
 - Goal-based objectives (collect specific items/destroy obstacles)
 - Automatic shuffle detection when no valid moves remain
 - Chain reaction system with sequential booster resolution
-- Win/Fail conditions with dedicated end-level menus
+- Win/Fail conditions with dedicated end-level menus (`SuccessMenuView` / `FailMenuView`)
 
 ---
 
@@ -55,8 +55,8 @@ A classic Match-3 puzzle game where players swap colored items on a grid to crea
 
 The project follows the **MVP architectural pattern** to cleanly separate concerns:
 
-- **Model** — Pure data and state (e.g., `GridModel`, `LevelObjectiveModel`, `LevelProgressionModel`)
-- **View** — MonoBehaviour-based UI and visual representation (e.g., `GridView`, `HudView`, `LevelEndView`)
+- **Model** — Pure data and state (e.g., `GridModel`, `LevelGoalModel`, `LevelProgressionModel`)
+- **View** — MonoBehaviour-based UI and visual representation (e.g., `GridView`, `HudView`, `LevelEndView`, `SuccessMenuView`, `FailMenuView`)
 - **Presenter** — Orchestration logic connecting models and views (e.g., `GridPresenter`, `HudPresenter`, `LevelEndPresenter`)
 
 All communication between layers flows through **interfaces**, ensuring loose coupling and testability.
@@ -122,20 +122,28 @@ _Project/
 │       ├── GridElement/          # Item, booster, obstacle data definitions
 │       └── Pooled/               # Pool configs for grid objects, VFX, UI
 └── Scripts/
-    ├── Core/                     # (58 scripts) — Game-agnostic framework
+    ├── Editor/                   # (4 scripts) — Unity Editor tooling
+    │   ├── BoosterActionBaseDrawer.cs   # Custom inspector for booster actions
+    │   ├── LevelEditorWindow.cs         # Level design window (Tools → Level Editor)
+    │   ├── SceneIdGeneratorEditor.cs    # Auto-generates SceneIdLookup from build settings
+    │   └── SceneSelectionOverlay.cs     # Scene quick-switch overlay in Scene view
+    ├── Core/                     # (57 scripts) — Game-agnostic framework
     │   ├── Common/               # Shared data structures (EnumConfigMap, IDamagable)
     │   ├── Extensions/           # C# & Unity extension methods
-    │   ├── Modules/              # Animation & FX modules (bounce, fade, move, particle)
+    │   ├── Modules/              # Animation & FX modules
+    │   │   ├── Animation/        # bounce, fade, move, size, text, panel, animator
+    │   │   └── FX/               # particle, image FX
     │   ├── Services/             # Pool, Save, Scene loading services
     │   ├── Systems/              # State machine implementation
-    │   └── Utils/                # Async, build, pool, UI-world-space utilities
-    └── Game/                     # (184 scripts) — Gameplay-specific code
+    │   └── Utils/                # Async, build, pool, UI-world-space, poly utilities
+    └── Game/                     # (195 scripts) — Gameplay-specific code
         ├── Common/               # Cross-scene shared code
         │   ├── Bootstrappers/    # App & gameplay initialization
         │   ├── LifetimeScopes/   # VContainer DI scope definitions
         │   ├── Factories/        # SlotView & FXView factories
         │   ├── MVP/              # Shared models, presenters, views
-        │   └── Services/         # Input, level data, setup services
+        │   ├── Services/         # Input, level data, setup services
+        │   └── Utils/            # Grid utilities (index, match, direction, JSON mapping, randomization)
         ├── Editor/               # Level editor window, custom drawers
         ├── Factories/            # GridObjectFactory
         ├── GridElements/         # Core grid domain
@@ -146,9 +154,9 @@ _Project/
         │   ├── Extensions/       # Booster, GridLayout, GridMesh extensions
         │   └── GridObjects/      # BaseGridObject, ItemObject, BoosterObject, ObstacleObject
         └── MVP/
-            ├── Models/           # GridModel with type grid building
+            ├── Models/           # GridModel with typed grid building
             ├── Presenters/       # GridPresenter + Handlers, States, Strategies
-            └── Views/            # GridView, HudView, LevelEndView + pooled FX views
+            └── Views/            # GridView, HudView, LevelEndView, SuccessMenuView, FailMenuView + pooled FX views
 ```
 
 ---
@@ -172,10 +180,10 @@ Key responsibilities:
 ### Grid Fill Strategies
 Two interchangeable fill strategies, resolved at runtime via `FillStrategyResolver`:
 
-- **SlideDownFillStrategy** — Items slide diagonally into empty spaces (partial files for simulation, spawn, recording, workspace, and timeline scheduling)
-- **FallDownFillStrategy** — Items fall straight down into empty spaces
+- **SlideDownFillStrategy** — Items slide diagonally into empty spaces. Implemented as partial classes: `Simulation`, `Spawn`, `Recording`, `Workspace`, `TimelineScheduling`
+- **FallDownFillStrategy** — Items fall straight down into empty spaces. Also implemented as partial classes: `Simulation`, `Workspace`, `TimelineScheduling`
 
-Both strategies use dedicated `AnimationScheduler` classes to coordinate visual timing.
+Both strategies use dedicated `AnimationScheduler` classes (`SlideAnimationScheduler`, `FallAnimationScheduler`) to coordinate visual timing.
 
 ### Booster Action System
 Boosters are defined through a **data-driven action hierarchy**:
@@ -199,7 +207,7 @@ Levels are defined as **JSON files** loaded at runtime:
 }
 ```
 
-Grid cell types include: `rand` (random item), `empty` (no cell), `bo` (box obstacle), `v` (vase), and specific item/booster codes. The `LevelDefinitionProvider` and `LevelDataService` handle parsing and serving level data.
+Grid cell types include: `rand` (random item), `empty` (no cell), `bo` (box obstacle), `v` (vase), and specific item/booster codes. The `LevelDefinitionProvider` and `LevelDataService` handle parsing and serving level data. JSON utility logic is split between `LevelJsonEditorUtils` (editor-time) and `LevelJsonRuntimeUtils` (runtime).
 
 ### Animation Modules (Core)
 Reusable, composable animation building blocks:
@@ -210,10 +218,26 @@ Reusable, composable animation building blocks:
 - `SizeAnimationModule` — Scale animations
 - `TextAnimationModule` — Numeric text counters
 - `AnimatedPanelModule` — UI panel show/hide
+- `AnimatorModule` — Wraps Unity's `Animator` component with play/pause/trigger/state-check APIs and an `OnComplete` event
 - `ParticleFxModule` / `ImageFxModule` — VFX control
 
+### Cheat & Debug System
+`GridCheatHandler` (implements `IGridCheatHandler`, `ITickable`) provides **editor and development** keyboard shortcuts for rapid in-game testing:
+
+| Key | Action |
+|---|---|
+| `S / L / A / X` | Spawn Blue / Green / Red / Yellow item at mouse position |
+| `B / N` | Spawn Box / Vase obstacle at mouse position |
+| `T / H / V` | Spawn Bomb / Horizontal Rocket / Vertical Rocket at mouse position |
+| `R` | Remove grid object at mouse position |
+| `C / O` | Clear all Boosters / Obstacles from grid |
+| `F` | Force FillResolve state |
+| `Space` | Load main menu |
+| `D` | Log current state ID |
+| `P` *(Editor only)* | Toggle editor pause |
+
 ### Scene Management
-Async scene loading via `SceneLoadService` with `ProgressHandler` for loading bars, supporting both `AsyncOperation` and Addressable `AsyncOperationHandle` groups.
+Async scene loading via `SceneLoadService` with `ProgressHandler` for loading bars, supporting both `AsyncOperation` and Addressable `AsyncOperationHandle` groups. Scene IDs are auto-generated by `SceneIdGeneratorEditor` into `SceneIdLookup.cs`, eliminating hardcoded scene name strings. The `SceneSelectionOverlay` provides quick scene switching directly from the Scene view toolbar.
 
 ---
 
@@ -227,8 +251,8 @@ Async scene loading via `SceneLoadService` with `ProgressHandler` for loading ba
 | **Async** | UniTask |
 | **Architecture** | MVP + Custom State Machine |
 | **Data Config** | ScriptableObjects + JSON |
-| **Editor Tools** | NaughtyAttributes, Custom Level Editor |
-| **Assembly Defs** | `Core.asmdef`, `Game.asmdef` |
+| **Editor Tools** | NaughtyAttributes, Custom Level Editor, Scene ID Generator, Scene Selection Overlay |
+| **Assembly Defs** | `Core.asmdef`, `Game.asmdef`, `Editor.asmdef` |
 
 ---
 
@@ -236,12 +260,12 @@ Async scene loading via `SceneLoadService` with `ProgressHandler` for loading ba
 
 | Metric | Count |
 |---|---|
-| Total C# Scripts | 242 |
-| Core Layer Scripts | 58 |
-| Game Layer Scripts | 184 |
-| Interfaces | 40 |
-| ScriptableObject Types | 22 |
-| Prefabs | 19 |
+| Total C# Scripts | 256 |
+| Core Layer Scripts | 57 |
+| Game Layer Scripts | 195 |
+| Editor Scripts | 4 |
+| Interfaces | 48 |
+| ScriptableObject Types | 16 |
 | Scenes | 3 |
 | Level Definitions | 3 |
 
@@ -264,17 +288,21 @@ Async scene loading via `SceneLoadService` with `ProgressHandler` for loading ba
 5. Press Play — the app bootstrapper initializes services and transitions to the menu
 
 ### Level Editor
-A custom **Level Editor Window** (`Game/Editor/LevelEditorWindow.cs`) is available for designing and editing levels directly within the Unity Editor. The window can be opened via Tools → Level Editor.
+A custom **Level Editor Window** (`Scripts/Editor/LevelEditorWindow.cs`) is available for designing and editing levels directly within the Unity Editor. Open it via **Tools → Level Editor**.
+
+### Scene ID Generator
+`SceneIdGeneratorEditor` auto-generates the `SceneIdLookup.cs` file from Unity's build settings, keeping all scene references type-safe and refactor-friendly. Run it whenever scenes are added or reordered.
 
 ---
 
 ## 🎯 Design Principles
 
 - **Composition over Inheritance** — Modular animation/FX modules composed on objects rather than deep inheritance trees
-- **Interface-Driven** — 40 interfaces ensuring all dependencies are abstract and swappable
+- **Interface-Driven** — 48 interfaces ensuring all dependencies are abstract and swappable
 - **Data-Driven Design** — Game behavior configured through ScriptableObjects, not hardcoded
-- **Single Responsibility** — Handlers, helpers, and utilities each own one concern (e.g., `BlastFxHandler`, `GoalSlotHandler`, `GridMatchCalcUtil`)
+- **Single Responsibility** — Handlers, helpers, and utilities each own one concern (e.g., `BlastFxHandler`, `GoalSlotHandler`, `GridMatchCalcUtil`, `GridCheatHandler`)
 - **Clean Separation** — Core layer has zero knowledge of Game layer; Game layer references Core
+- **Partial Classes for Complex Systems** — Fill strategies use partial class files (`.Simulation`, `.Workspace`, `.TimelineScheduling`, etc.) to keep large logic units organized and readable
 
 ---
 
