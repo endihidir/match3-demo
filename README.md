@@ -274,7 +274,7 @@ Async scene loading via `SceneLoadService` with `ProgressHandler` for loading ba
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Unity (check `ProjectSettings` for exact version)
+- Unity 2022.3.32f1
 - VContainer package
 - UniTask package
 - NaughtyAttributes package
