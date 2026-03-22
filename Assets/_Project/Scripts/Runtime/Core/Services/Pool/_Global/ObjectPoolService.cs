@@ -19,19 +19,38 @@ namespace Core.Pool.Services
         private Transform _pooledObjectsRoot;
         public ObjectPoolService(PoolServiceConfigSO poolServiceConfigSo) => _poolServiceConfigSo = poolServiceConfigSo;
 
-        public void Initialize()
+        public IObjectPoolService Initialize()
         {
             var root = GameObject.Find(ROOT_NAME) ?? new GameObject(ROOT_NAME);
+            
             _pooledObjectsRoot = root.transform;
+            
+            CreateNonLazyPools();
+            
+            return this;
         }
         
-        public T GetObject<T>(T prefab, bool activate = true, int poolCount = 1, bool isLazy = true, bool showLogs = false) where T : Component
+        private void CreateNonLazyPools()
+        {
+            foreach (var pooledAssetConfig in _poolServiceConfigSo.PooledAssets)
+            {
+                if (pooledAssetConfig.IsLazy) continue;
+                
+                var objectPool = new ObjectPool(pooledAssetConfig.PoolObject, pooledAssetConfig.PoolSize, _pooledObjectsRoot);
+                
+                var key = pooledAssetConfig.PoolObject.GetComponent<IPooledObject>().GetType();
+                
+                _typePools.Add(key, objectPool);
+            }
+        }
+        
+        public T GetObject<T>(T prefab, bool activate = true, int poolCount = 1, bool showLogs = false) where T : Component
         {
             var key = prefab.gameObject.GetInstanceID();
             
             if (!_idPools.TryGetValue(key, out var objectPool))
             {
-                objectPool = CreateNewPool(prefab.gameObject, poolCount, isLazy);
+                objectPool = CreateNewPool(prefab.gameObject, poolCount);
                 
                 _idPools.Add(key, objectPool);
             }
@@ -175,10 +194,10 @@ namespace Core.Pool.Services
             _idPools.Clear();
         }
         
-        private ObjectPool CreateNewPool(GameObject prefab, int startPoolCount, bool isLazy = true)
+        private ObjectPool CreateNewPool(GameObject prefab, int startPoolCount)
         {
             prefab.GetOrAddComponent<PooledObject>();
-            return new ObjectPool(prefab, _pooledObjectsRoot, startPoolCount, isLazy);
+            return new ObjectPool(prefab, startPoolCount, _pooledObjectsRoot);
         }
 
         private ObjectPool CreateNewPool<T>() where T : Component, IPooledObject
@@ -193,8 +212,7 @@ namespace Core.Pool.Services
             }
             
             var startPoolCount = pooledAssetConfig.PoolSize;
-            var isLazy = pooledAssetConfig.IsLazy;
-            return new ObjectPool(pooledAssetConfig.PoolObject, _pooledObjectsRoot, startPoolCount, isLazy);
+            return new ObjectPool(pooledAssetConfig.PoolObject, startPoolCount, _pooledObjectsRoot);
         }
         
         public void Dispose() => RemoveAllPools();

@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using Game.Configs;
 using DG.Tweening;
 using UnityEngine;
@@ -20,48 +21,32 @@ namespace Game.Grid.Item
         {
             _itemHolderDefaultPos = ItemHolder.localPosition;
         }
-        public void CacheAnimations()
-        {
-            CacheShakeTween();
-            CacheSpringTween();
-        }
 
-        private void CacheShakeTween()
+        public void Shake()
         {
             var duration = Config.ShakeDuration / 3f;
-
-            if(_shakeTween != null) return;
             
-            _shakeTween?.Kill(); 
+            _shakeTween?.Kill(true); 
             
             _shakeTween = DOTween.Sequence()
-                .SetAutoKill(false)
                 .Append(ItemHolder.transform.DOLocalRotate(Vector3.forward * Config.ShakeRotAngle, duration))
                 .Append(ItemHolder.transform.DOLocalRotate(Vector3.back * Config.ShakeRotAngle, duration))
                 .Append(ItemHolder.transform.DOLocalRotate(Vector3.zero, duration))
                 .OnComplete(() => ItemHolder.transform.localRotation = Quaternion.identity)
-                .Pause()
                 .SetUpdate(Config.UseUnscaledTime);
         }
 
-        private void CacheSpringTween()
+        private void Spring()
         {
-            if(_springTween != null) return;
-            
             _springTween?.Kill();
             
             _springTween = DOTween.Sequence()
-                .SetAutoKill(false)
                 .Append(ItemHolder.transform.DOScale(Config.SpringScale, Config.SpringDuration).SetEase(Ease.OutQuad))
                 .Join(ItemHolder.transform.DOLocalMoveY(_itemHolderDefaultPos.y - Config.SpringYMoveOffset, Config.SpringDuration).SetEase(Ease.OutQuad))
                 .Append(ItemHolder.transform.DOScale(Vector3.one, Config.SpringDuration).SetEase(Ease.InQuad))
                 .Join(ItemHolder.transform.DOLocalMoveY(_itemHolderDefaultPos.y, Config.SpringDuration).SetEase(Ease.InQuad))
-                .Pause()
                 .SetUpdate(Config.UseUnscaledTime);
         }
-
-        public void Shake() => _shakeTween?.Restart();
-        private void Spring() => _springTween?.Restart();
 
         public Tween ShiftTo(Vector3 worldPos, float cellDistance, float delay = 0f)
         {
@@ -75,8 +60,9 @@ namespace Game.Grid.Item
             _shiftTween = transform.DOMove(worldPos, duration)
                 .SetEase(Ease.InQuad)
                 .SetDelay(Config.StartShiftDelay + delay)
-                .OnComplete(Spring)
                 .SetUpdate(Config.UseUnscaledTime);
+            
+            SpringAsync(_shiftTween).Forget();
 
             return _shiftTween;
         }
@@ -97,8 +83,17 @@ namespace Game.Grid.Item
             for (int i = 0; i < length; i++)
                 seq.Append(transform.DOMove(points[i], Config.SlideDuration + (cellDistances[i] * distanceMultiplier)).SetEase(Ease.InQuad));
 
-            _slideTween = seq.OnComplete(Spring);
+            _slideTween = seq;
+            
+            SpringAsync(_slideTween).Forget();
+            
             return _slideTween;
+        }
+
+        private async UniTask SpringAsync(Tween tween)
+        {
+            await tween;
+            Spring();
         }
         
         public float GetSlideDelay() => Config.SlideDelay;
