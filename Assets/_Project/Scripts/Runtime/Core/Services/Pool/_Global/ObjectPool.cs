@@ -9,25 +9,23 @@ namespace Core.Pool.Services
     public sealed class ObjectPool
     {
         private readonly GameObject _prefabObj;
-        private readonly int _startPoolCount;
+        private readonly int _poolCount;
         private readonly Transform _rootTransform;
         private GameObject _poolParent;
         private Queue<IPooledObject> Pool { get; } = new();
-        public bool IsLazy { get; private set; }
 
-        public ObjectPool(GameObject prefabObj, Transform rootTransformTransform, int startPoolCount, bool isLazy = true)
+        public ObjectPool(GameObject prefabObj, int poolCount, Transform rootTransform)
         {
             _prefabObj = prefabObj;
-            _rootTransform = rootTransformTransform;
-            _startPoolCount = startPoolCount;
-            IsLazy = isLazy;
+            _poolCount = poolCount;
+            _rootTransform = rootTransform;
             CreatePoolParent();
             CreatePool();
         }
 
         private void CreatePool()
         {
-            for (int i = 0; i < _startPoolCount; i++) 
+            for (int i = 0; i < _poolCount; i++) 
                 CreateNewObject(true);
         }
 
