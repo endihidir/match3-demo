@@ -75,7 +75,7 @@ namespace Game.Grid.Handlers
 
         public bool TryEnqueueInput(Vector2Int coord, Vector2Int direction)
         {
-            if (_stateMachine.TryGet<ShuffleState>(out var shuffleState) && shuffleState.IsInProgress) return false;
+            if (_shuffleState.IsInProgress) return false;
             
             if (direction == Vector2Int.zero)
                 return TryEnqueueTap(coord);
