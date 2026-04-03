@@ -123,7 +123,7 @@ namespace Game.Grid.Item
 
         private void OnDestroy()
         {
-            KillCachedTweens();
+            KillIdleTweens();
             Dispose();
         }
 
@@ -144,7 +144,7 @@ namespace Game.Grid.Item
             _moveTween?.Kill(true);
             _pingPongTween?.Kill(true);
         }
-        private void KillCachedTweens()
+        private void KillIdleTweens()
         {
             _shakeTween?.Kill();
             _springTween?.Kill();

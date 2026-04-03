@@ -118,16 +118,17 @@ namespace Game.Grid.States
             }
         }
 
-        private UniTask ResolveGroupAsync(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int typeId, Vector2Int? forcedCenter)
+        private async UniTask ResolveGroupAsync(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int typeId, Vector2Int? forcedCenter)
         {
-            if (GridMatchCalcUtil.IsAnyGroupObjectFall(model, group)) return UniTask.CompletedTask;
+            if (GridMatchCalcUtil.IsAnyGroupObjectFall(model, group))
+                await UniTask.WaitUntil(() => !GridMatchCalcUtil.IsAnyGroupObjectFall(model, group));
 
             var boosterType = GridBoosterDecisionUtil.DecideBoosterTypeFromGroup(model, matchMask, group, typeId);
 
             if (!boosterType.HasValue)
             {
                 _destructionHandler.DestroyGroup(group);
-                return UniTask.CompletedTask;
+                return;
             }
 
             var isForcedCenterInGroup = forcedCenter.HasValue && group.Contains(forcedCenter.Value);
@@ -138,8 +139,9 @@ namespace Game.Grid.States
 
             _destructionHandler.ClearGroupForMerge(group);
 
-            return _mergeHandler.PlayMergeAnimationAsync(mergeObjs, centerCoord)
-                                .ContinueWith(() => OnCompleteAnimation(mergeObjs, centerCoord, type));
+            await _mergeHandler.PlayMergeAnimationAsync(mergeObjs, centerCoord);
+            
+            OnCompleteAnimation(mergeObjs, centerCoord, type);
         }
 
         private void OnCompleteAnimation(BaseGridObject[] mergeObjs, Vector2Int centerCoord, BoosterType boosterType)
