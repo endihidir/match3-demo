@@ -141,13 +141,8 @@ namespace Game.Grid.States
 
             await _mergeHandler.PlayMergeAnimationAsync(mergeObjs, centerCoord);
             
-            OnCompleteAnimation(mergeObjs, centerCoord, type);
-        }
-
-        private void OnCompleteAnimation(BaseGridObject[] mergeObjs, Vector2Int centerCoord, BoosterType boosterType)
-        {
             _destructionHandler.ReleaseObjects(mergeObjs);
-            _mergeHandler.SpawnBooster(centerCoord, boosterType);
+            _mergeHandler.SpawnBooster(centerCoord, type);
         }
     }
 }
