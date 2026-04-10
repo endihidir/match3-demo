@@ -90,7 +90,7 @@ namespace Game.Grid.States
             if (obj is IBoosterActionSource source && source.TryBuildAction(coord, out var newAction))
             {
                 Context.PendingBoosterActions.Add(newAction);
-                _gridObjectDestroyHandler.RemoveObject(obj);
+                _gridObjectDestroyHandler.SetNullCoord(obj);
                 return obj;
             }
 
@@ -103,13 +103,13 @@ namespace Game.Grid.States
                 if (willBeDestroyed)
                 {
                     _levelGoalHandler.ProgressGoal(obj);
-                    _gridObjectDestroyHandler.RemoveObject(obj);
+                    _gridObjectDestroyHandler.SetNullCoord(obj);
                 }
 
                 return obj;
             }
 
-            _gridObjectDestroyHandler.RemoveObject(obj);
+            _gridObjectDestroyHandler.SetNullCoord(obj);
             return obj;
         }
         

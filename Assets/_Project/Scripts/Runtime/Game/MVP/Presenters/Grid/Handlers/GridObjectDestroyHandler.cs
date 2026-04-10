@@ -24,17 +24,17 @@ namespace Game.Grid.Handlers
         public void DestroyGridObject(BaseGridObject obj)
         {
             PlayBlastFx(obj);
-            RemoveObject(obj);
+            SetNullCoord(obj);
             ReleaseObject(obj);
         }
         
-        public void RemoveObject(BaseGridObject obj) => _gridModel.SetGridObject(obj.Coord, null);
-
         public void PlayBlastFx(BaseGridObject obj)
         {
             var pos = _gridView.GridToWorld(obj.Coord);
             _blastFxHandler.PlayBlastParticle(obj, pos, _gridView.FXParent);
         }
+        
+        public void SetNullCoord(BaseGridObject obj) => _gridModel.SetGridObject(obj.Coord, null);
         public void ReleaseObject(BaseGridObject obj) => _gridObjectFactory.ReleaseObject(obj);
     }
 }

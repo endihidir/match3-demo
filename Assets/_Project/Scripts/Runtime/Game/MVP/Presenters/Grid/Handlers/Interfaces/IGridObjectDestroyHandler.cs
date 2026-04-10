@@ -6,8 +6,7 @@ namespace Game.Grid.Handlers
     {
         void DestroyGridObject(BaseGridObject obj);
         void PlayBlastFx(BaseGridObject obj);
-        void RemoveObject(BaseGridObject obj);
+        void SetNullCoord(BaseGridObject obj);
         void ReleaseObject(BaseGridObject obj);
     }
 }
-
