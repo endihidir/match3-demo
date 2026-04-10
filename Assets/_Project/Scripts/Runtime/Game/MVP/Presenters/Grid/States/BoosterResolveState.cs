@@ -135,10 +135,14 @@ namespace Game.Grid.States
                     damageable.TakeDamage(damageAmount, GridDamageSource.Booster);
                     
                     if (model.GetGridObject(entries[i].Coord) != obj)
+                    {
+                        _gridObjectDestroyHandler.PlayBlastFx(obj);
                         _gridObjectDestroyHandler.ReleaseObject(obj);
+                    }
                 }
                 else
                 {
+                    _gridObjectDestroyHandler.PlayBlastFx(obj);
                     _gridObjectDestroyHandler.ReleaseObject(obj);
                 }
             }
