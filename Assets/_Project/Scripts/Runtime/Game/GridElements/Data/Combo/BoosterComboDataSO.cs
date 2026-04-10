@@ -21,7 +21,7 @@ namespace Game.Configs
                 return true;
             }
 
-            rule = default;
+            rule = null;
             return false;
         }
     }
