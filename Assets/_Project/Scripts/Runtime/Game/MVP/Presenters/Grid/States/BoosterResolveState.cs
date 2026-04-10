@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Game.Grid.Contexts;
 using Game.Grid.Item;
@@ -15,13 +16,17 @@ namespace Game.Grid.States
     public sealed class BoosterResolveState : StateBase<GridStateContext>
     {
         public override bool NeedsExitPermission => true;
+
         private readonly IGridObjectDestroyHandler _gridObjectDestroyHandler;
         private readonly ILevelGoalHandler _levelGoalHandler;
-
         private readonly IBoosterFxHandler _boosterFxHandler;
+
         private readonly HashSet<BoosterActionKey> _processedBoosters = new();
         private readonly HashSet<Vector2Int> _protectedMatchGroups = new();
-        private readonly List<UniTask> _activeTasks = new();
+        private readonly List<BaseGridObject> _releaseBuffer = new();
+
+        private bool[,] _visitedBuffer;
+        private Vector2Int[] _coordBuffer;
 
         public BoosterResolveState(GridStateContext context, IBoosterFxHandler boosterFxHandler, IGridObjectDestroyHandler objectDestroyHandler, ILevelGoalHandler goalHandler) : base(context)
         {
@@ -34,91 +39,111 @@ namespace Game.Grid.States
         {
             ClearBuffers();
             CollectProtectedMatchGroup();
-            ProcessBoostersAsync().Forget();
-        }
-
-        private async UniTask ProcessBoostersAsync()
-        {
-            while (Context.PendingBoosterActions.Count > 0 || _activeTasks.Count > 0)
-            {
-                while (Context.PendingBoosterActions.Count > 0)
-                {
-                    var action = Context.PendingBoosterActions[0];
-                    Context.PendingBoosterActions.RemoveAt(0);
-
-                    var key = new BoosterActionKey(action.OriginCoord, action.BoosterAction);
-                    if (!_processedBoosters.Add(key)) continue;
-
-                    _activeTasks.Add(ExecuteBoosterAsync(action));
-                }
-
-                _activeTasks.RemoveAll(t => t.Status.IsCompleted());
-                await UniTask.Yield();
-            }
-            
-            Context.RaiseDestructionStateComplete();
+            ProcessAllBoosters();
             RequestExit();
         }
 
-        private async UniTask ExecuteBoosterAsync(BoosterActionContext action)
+        private void ProcessAllBoosters()
+        {
+            while (Context.PendingBoosterActions.Count > 0)
+            {
+                var action = Context.PendingBoosterActions[0];
+                Context.PendingBoosterActions.RemoveAt(0);
+
+                var key = new BoosterActionKey(action.OriginCoord, action.BoosterAction);
+                if (!_processedBoosters.Add(key)) continue;
+
+                ExecuteBooster(action);
+            }
+
+            Context.RaiseDestructionStateComplete();
+        }
+
+        private void ExecuteBooster(BoosterActionContext action)
         {
             var model = Context.GridModel;
             var view = Context.GridView;
-            
+
             _boosterFxHandler.PlayBoosterFxAsync(action, out var animSpeed).Forget();
             var timeline = BoosterTimelineBuilder.BuildTimeline(action, model, view, animSpeed);
-            var timelineTask = ProcessTimelineAsync(timeline, action.BoosterAction.DamageAmount);
-            await UniTask.WhenAll(timelineTask);
-        }
-
-        private async UniTask ProcessTimelineAsync(ImpactTimeline timeline, int damageAmount)
-        {
             timeline.SortByDelayThenCoord();
-            var lastDelay = 0f;
 
-            foreach (var entry in timeline.Entries)
-            {
-                var waitTime = entry.Delay - lastDelay;
-                
-                if(waitTime > 0f)
-                    await UniTask.WaitForSeconds(waitTime);
-                
-                lastDelay = entry.Delay;
-                ApplyImpact(entry.Coord, damageAmount);
-            }
+            var entries = timeline.Entries;
+            var damageAmount = action.BoosterAction.DamageAmount;
+
+            _releaseBuffer.Clear();
+
+            for (int i = 0; i < entries.Count; i++)
+                _releaseBuffer.Add(ApplyLogicImpact(entries[i].Coord, damageAmount));
+
+            PlayTimelineVisualsAsync(entries, _releaseBuffer.ToArray(), damageAmount).Forget();
         }
-
-        private void ApplyImpact(Vector2Int coord, int damageAmount)
+        
+        private BaseGridObject ApplyLogicImpact(Vector2Int coord, int damageAmount)
         {
-            if (_protectedMatchGroups.Contains(coord)) return;
+            if (_protectedMatchGroups.Contains(coord)) return null;
 
             var model = Context.GridModel;
             var obj = model.GetGridObject(coord);
-            if (!obj) return;
+            if (!obj) return null;
 
             if (obj is IBoosterActionSource source && source.TryBuildAction(coord, out var newAction))
             {
                 Context.PendingBoosterActions.Add(newAction);
-                _gridObjectDestroyHandler.DestroyGridObject(obj);
-                return;
+                _gridObjectDestroyHandler.RemoveObject(obj);
+                return obj;
             }
 
             if (obj is IDamageableGridObject damageable)
             {
-                var result = damageable.TakeDamage(damageAmount, GridDamageSource.Booster);
+                var willBeDestroyed = (damageable.AllowedDamageSources & GridDamageSource.Booster) != 0
+                                   && damageable.Life > 0
+                                   && damageable.Life - damageAmount <= 0;
 
-                if (result == GridDamageResult.Destroyed)
+                if (willBeDestroyed)
                 {
                     _levelGoalHandler.ProgressGoal(obj);
-                    _gridObjectDestroyHandler.DestroyGridObject(obj);
+                    _gridObjectDestroyHandler.RemoveObject(obj);
                 }
+
+                return obj;
             }
-            else
-            {
-                _gridObjectDestroyHandler.DestroyGridObject(obj);
-            }
+
+            _gridObjectDestroyHandler.RemoveObject(obj);
+            return obj;
         }
         
+        private async UniTask PlayTimelineVisualsAsync(IReadOnlyList<ImpactEntry> entries, BaseGridObject[] pendingRelease, int damageAmount)
+        {
+            var lastDelay = 0f;
+            var model = Context.GridModel;
+
+            for (int i = 0; i < entries.Count; i++)
+            {
+                var waitTime = entries[i].Delay - lastDelay;
+
+                if (waitTime > 0f)
+                    await UniTask.WaitForSeconds(waitTime);
+
+                lastDelay = entries[i].Delay;
+
+                var obj = pendingRelease[i];
+                if (!obj) continue;
+
+                if (obj is IDamageableGridObject damageable)
+                {
+                    damageable.TakeDamage(damageAmount, GridDamageSource.Booster);
+                    
+                    if (model.GetGridObject(entries[i].Coord) != obj)
+                        _gridObjectDestroyHandler.ReleaseObject(obj);
+                }
+                else
+                {
+                    _gridObjectDestroyHandler.ReleaseObject(obj);
+                }
+            }
+        }
+
         private void CollectProtectedMatchGroup()
         {
             if (!Context.ProtectedCoord.HasValue) return;
@@ -132,21 +157,28 @@ namespace Game.Grid.States
 
             if (!GridMatchCalcUtil.IsRegularItem(data)) return;
 
-            var visited = new bool[model.Width, model.Height];
-            var buffer = new Vector2Int[model.Width * model.Height];
+            if (_visitedBuffer == null)
+            {
+                _visitedBuffer = new bool[model.Width, model.Height];
+                _coordBuffer = new Vector2Int[model.Width * model.Height];
+            }
+            else
+            {
+                Array.Clear(_visitedBuffer, 0, _visitedBuffer.Length);
+            }
 
-            var count = GridMatchCalcUtil.CollectMatchShapeFromCenter(model, grid, protectedCoord.x, protectedCoord.y, data.TypeId, visited, buffer);
-            
-            if(count < 4) return;
-            
+            var count = GridMatchCalcUtil.CollectMatchShapeFromCenter(
+                model, grid, protectedCoord.x, protectedCoord.y, data.TypeId, _visitedBuffer, _coordBuffer);
+
+            if (count < 4) return;
+
             for (int i = 0; i < count; i++)
-                _protectedMatchGroups.Add(buffer[i]);
+                _protectedMatchGroups.Add(_coordBuffer[i]);
         }
-        
+
         private void ClearBuffers()
         {
             _processedBoosters.Clear();
-            _activeTasks.Clear();
             _protectedMatchGroups.Clear();
         }
     }
