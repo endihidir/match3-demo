@@ -30,6 +30,8 @@ namespace Game.Bootstrappers
         {
             Application.targetFrameRate = _appSettings.TargetFrameRate;
             
+            Input.multiTouchEnabled = _appSettings.IsMultitouchEnabled;
+            
             if(!_sceneLoadService.IsInAnyGameScene) return;
 
             await _sceneLoadService.InitBootSceneAsync();
