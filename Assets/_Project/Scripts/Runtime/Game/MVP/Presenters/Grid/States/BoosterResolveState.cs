@@ -74,7 +74,10 @@ namespace Game.Grid.States
             _hitResultBuffer.Clear();
 
             for (int i = 0; i < entries.Count; i++)
-                _hitResultBuffer.Add(ApplyLogicImpact(entries[i].Coord, damageAmount));
+            {
+                var impactedObj = ApplyLogicImpact(entries[i].Coord, damageAmount);
+                _hitResultBuffer.Add(impactedObj);
+            }
 
             PlayTimelineVisualsAsync(entries, _hitResultBuffer.ToArray()).Forget();
         }
