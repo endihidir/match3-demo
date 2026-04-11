@@ -3,6 +3,7 @@ using Core.Generated;
 using Core.Scene.Services;
 using Core.Pool.Services;
 using DG.Tweening;
+using Game.Configs;
 using Game.Level.Models;
 using Game.Level.Services;
 using UnityEngine;
@@ -13,10 +14,7 @@ namespace Game.Bootstrappers
 {
     public class AppBootstrapper : IInitializable
     {
-        private const int TargetFrameRate = 60;
-        private const int TweenCapacity = 2000;
-        private const int SequenceCapacity = 500;
-        
+        [Inject] private readonly AppSettingsSO _appSettings;
         [Inject] private readonly IObjectResolver _objectResolver;
         [Inject] private readonly ISceneLoadService _sceneLoadService;
         [Inject] private readonly IObjectPoolService _objectPoolService;
@@ -30,7 +28,7 @@ namespace Game.Bootstrappers
 
         private async UniTask InitGame()
         {
-            Application.targetFrameRate = TargetFrameRate;
+            Application.targetFrameRate = _appSettings.TargetFrameRate;
             
             if(!_sceneLoadService.IsInAnyGameScene) return;
 
@@ -44,7 +42,7 @@ namespace Game.Bootstrappers
             
             _objectPoolService.Initialize();
             
-            DOTween.SetTweensCapacity(TweenCapacity, SequenceCapacity);
+            DOTween.SetTweensCapacity(_appSettings.TweenCapacity, _appSettings.SequenceCapacity);
             
             await _sceneLoadService.LoadSceneGroupAsync(SceneGroupType.MenuScene);
         }

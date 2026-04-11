@@ -18,6 +18,7 @@ namespace Game.DI
         
         protected override void Configure(IContainerBuilder builder)
         {
+            builder.RegisterInstance(AppConfigContainerSo.AppSettings);
             builder.RegisterInstance(AppConfigContainerSo.LevelDataServiceConfig);
             builder.RegisterInstance(AppConfigContainerSo.PoolServiceConfig);
             builder.RegisterInstance(AppConfigContainerSo.SceneLoadServiceConfig);

@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abd289f77ff14105a25984cc8ff9f74c, type: 3}
   m_Name: AppConfigContainer
   m_EditorClassIdentifier: 
+  <AppSettings>k__BackingField: {fileID: 11400000, guid: 248eedc4254e3bd4e9349437721a511d,
+    type: 2}
   <SceneLoadServiceConfig>k__BackingField: {fileID: 11400000, guid: 4d6eab558b2ec6b41b8945150b149cfa,
     type: 2}
   <PoolServiceConfig>k__BackingField: {fileID: 11400000, guid: c3b82a1ade8844248924be7eca5ebfa5,
