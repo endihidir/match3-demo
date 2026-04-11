@@ -3,17 +3,15 @@ using UnityEngine;
 
 namespace Game.Grid.Contexts
 {
-    public struct BoosterActionContext
+    public readonly struct BoosterActionContext
     {
-        public Vector2Int OriginCoord { get; private set; }
-        public BoosterActionBase BoosterAction { get; private set; }
-        public float TriggerDelay { get; private set; }
+        public readonly Vector2Int OriginCoord;
+        public readonly BoosterActionBase BoosterAction;
 
-        public BoosterActionContext(Vector2Int originCoord, BoosterActionBase boosterAction, float triggerDelay = 0f)
+        public BoosterActionContext(Vector2Int originCoord, BoosterActionBase boosterAction)
         {
             OriginCoord = originCoord;
             BoosterAction = boosterAction;
-            TriggerDelay = triggerDelay;
         }
     }
 }

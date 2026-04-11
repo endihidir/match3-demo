@@ -23,7 +23,6 @@ namespace Game.Grid.States
 
         private readonly HashSet<BoosterActionKey> _processedBoosters = new();
         private readonly HashSet<Vector2Int> _protectedMatchGroups = new();
-        private readonly List<BaseGridObject> _hitResultBuffer = new();
 
         private bool[,] _visitedBuffer;
         private Vector2Int[] _coordBuffer;
@@ -71,15 +70,14 @@ namespace Game.Grid.States
             var entries = timeline.Entries;
             var damageAmount = action.BoosterAction.DamageAmount;
 
-            _hitResultBuffer.Clear();
+            var hitResultBuffer = new BaseGridObject[entries.Count];
 
             for (int i = 0; i < entries.Count; i++)
             {
-                var impactedObj = ApplyLogicImpact(entries[i].Coord, damageAmount);
-                _hitResultBuffer.Add(impactedObj);
+                hitResultBuffer[i] = ApplyLogicImpact(entries[i].Coord, damageAmount);
             }
 
-            PlayTimelineVisualsAsync(entries, _hitResultBuffer.ToArray()).Forget();
+            PlayTimelineVisualsAsync(entries, hitResultBuffer).Forget();
         }
         
         private BaseGridObject ApplyLogicImpact(Vector2Int coord, int damageAmount)
