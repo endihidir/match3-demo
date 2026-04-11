@@ -10,7 +10,7 @@ namespace Game.Grid.Utils
 {
     public static class BoosterTimelineBuilder
     {
-        public static ImpactTimeline BuildTimeline(BoosterActionContext action, IGridModel model, IGridView view, float speed)
+        public static BoosterImpactTimeline BuildTimeline(BoosterActionContext action, IGridModel model, IGridView view, float speed)
         {
             var cellSize = view.GetCellSize();
 
@@ -19,7 +19,7 @@ namespace Game.Grid.Utils
                 RocketHorizontalAction rha => BuildLinearTimeline(action.OriginCoord, rha.LineCount, true, model, cellSize, speed),
                 RocketVerticalAction rva => BuildLinearTimeline(action.OriginCoord, rva.LineCount, false, model, cellSize, speed),
                 BombAction ba => BuildSquareTimeline(action.OriginCoord, ba.Radius, model),
-                _ => new ImpactTimeline()
+                _ => new BoosterImpactTimeline()
             };
         }
         
@@ -40,9 +40,9 @@ namespace Game.Grid.Utils
             return offsets;
         }
         
-        private static ImpactTimeline BuildLinearTimeline(Vector2Int origin, int lineCount, bool isHorizontal, IGridModel model, float cellSize, float speed)
+        private static BoosterImpactTimeline BuildLinearTimeline(Vector2Int origin, int lineCount, bool isHorizontal, IGridModel model, float cellSize, float speed)
         {
-            var timeline = new ImpactTimeline();
+            var timeline = new BoosterImpactTimeline();
             var offsets = BuildLineOffsets(lineCount);
             var timePerCell = cellSize / speed;
 
@@ -72,9 +72,9 @@ namespace Game.Grid.Utils
             return timeline;
         }
 
-        private static ImpactTimeline BuildSquareTimeline(Vector2Int origin, int radius, IGridModel model)
+        private static BoosterImpactTimeline BuildSquareTimeline(Vector2Int origin, int radius, IGridModel model)
         {
-            var timeline = new ImpactTimeline();
+            var timeline = new BoosterImpactTimeline();
 
             for (int r = 1; r <= radius; r++)
             {

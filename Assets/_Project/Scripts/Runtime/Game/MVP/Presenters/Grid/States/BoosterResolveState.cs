@@ -23,7 +23,7 @@ namespace Game.Grid.States
 
         private readonly HashSet<BoosterActionKey> _processedBoosters = new();
         private readonly HashSet<Vector2Int> _protectedMatchGroups = new();
-        private readonly List<BaseGridObject> _releaseBuffer = new();
+        private readonly List<BaseGridObject> _hitResultBuffer = new();
 
         private bool[,] _visitedBuffer;
         private Vector2Int[] _coordBuffer;
@@ -71,12 +71,12 @@ namespace Game.Grid.States
             var entries = timeline.Entries;
             var damageAmount = action.BoosterAction.DamageAmount;
 
-            _releaseBuffer.Clear();
+            _hitResultBuffer.Clear();
 
             for (int i = 0; i < entries.Count; i++)
-                _releaseBuffer.Add(ApplyLogicImpact(entries[i].Coord, damageAmount));
+                _hitResultBuffer.Add(ApplyLogicImpact(entries[i].Coord, damageAmount));
 
-            PlayTimelineVisualsAsync(entries, _releaseBuffer.ToArray(), damageAmount).Forget();
+            PlayTimelineVisualsAsync(entries, _hitResultBuffer.ToArray()).Forget();
         }
         
         private BaseGridObject ApplyLogicImpact(Vector2Int coord, int damageAmount)
@@ -96,11 +96,11 @@ namespace Game.Grid.States
 
             if (obj is IDamageableGridObject damageable)
             {
-                var willBeDestroyed = (damageable.AllowedDamageSources & GridDamageSource.Booster) != 0
-                                   && damageable.Life > 0
-                                   && damageable.Life - damageAmount <= 0;
+                var result = damageable.ApplyDamageLogic(damageAmount, GridDamageSource.Booster);
 
-                if (willBeDestroyed)
+                if (result == GridDamageResult.Ignored) return null;
+
+                if (result == GridDamageResult.Destroyed)
                 {
                     _levelGoalHandler.ProgressGoal(obj);
                     _gridObjectDestroyHandler.SetNullCoord(obj);
@@ -113,7 +113,7 @@ namespace Game.Grid.States
             return obj;
         }
         
-        private async UniTask PlayTimelineVisualsAsync(IReadOnlyList<ImpactEntry> entries, BaseGridObject[] pendingRelease, int damageAmount)
+        private async UniTask PlayTimelineVisualsAsync(IReadOnlyList<BoosterImpactEntry> entries, BaseGridObject[] pendingRelease)
         {
             var lastDelay = 0f;
             var model = Context.GridModel;
@@ -132,8 +132,8 @@ namespace Game.Grid.States
 
                 if (obj is IDamageableGridObject damageable)
                 {
-                    damageable.TakeDamage(damageAmount, GridDamageSource.Booster);
-                    
+                    damageable.ApplyDamageVisual();
+
                     if (model.GetGridObject(entries[i].Coord) != obj)
                     {
                         _gridObjectDestroyHandler.PlayBlastFx(obj);

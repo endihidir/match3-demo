@@ -16,7 +16,7 @@ namespace Game.Grid.Item
             ObstacleType = (ObstacleType)TypeId;
             UpdateIdentity();
         }
-        
+
         protected override void OnDeactivate()
         {
             base.OnDeactivate();
@@ -36,16 +36,24 @@ namespace Game.Grid.Item
                 BrokenSprites = obstacleConfigData.CrackedSprites;
             }
         }
-
+        
         public GridDamageResult TakeDamage(int damage, GridDamageSource source)
+        {
+            var result = ApplyDamageLogic(damage, source);
+            if (result != GridDamageResult.Ignored)
+                ApplyDamageVisual();
+            return result;
+        }
+        
+        public GridDamageResult ApplyDamageLogic(int damage, GridDamageSource source)
         {
             if ((AllowedDamageSources & source) == 0 || Life <= 0) return GridDamageResult.Ignored;
             Life -= damage;
             Life = Mathf.Max(0, Life);
-            SetBrokenSprite(Life);
             return Life <= 0 ? GridDamageResult.Destroyed : GridDamageResult.Damaged;
         }
-
+        
+        public void ApplyDamageVisual() => SetBrokenSprite(Life);
 
         private void SetBrokenSprite(int remainingLife)
         {
