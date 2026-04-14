@@ -30,11 +30,21 @@ namespace Game.Level.Handlers
         public void ProgressMove() => _levelGoalModel.ConsumeMove();
 
         public void ProgressGoal(BaseGridObject gridObject)
+        { 
+            ProgressGoalLogic(gridObject); 
+            ProgressGoalVisual(gridObject);
+        }
+        
+        public void ProgressGoalLogic(BaseGridObject gridObject)
         {
             var type = gridObject.ObjectType;
-            if(_levelGoalModel.IsGoalComplete(type)) return;
+            if (_levelGoalModel.IsGoalComplete(type)) return;
             _levelGoalModel.ProgressGoal(type);
-            
+        }
+
+        public void ProgressGoalVisual(BaseGridObject gridObject)
+        {
+            var type = gridObject.ObjectType;
             if (!TryBuildGoalCollectedData(type, gridObject.Coord, gridObject.SpriteRenderer.size, out var collectedData)) return;
             OnGoalCollected?.Invoke(collectedData);
         }

@@ -65,6 +65,7 @@ namespace Game.Grid.States
 
             _boosterFxHandler.PlayBoosterFxAsync(action, out var animSpeed).Forget();
             var timeline = BoosterTimelineBuilder.BuildTimeline(action, model, view, animSpeed);
+            timeline.OffsetDelays(action.TriggerDelay);
             timeline.SortByDelayThenCoord();
 
             var entries = timeline.Entries;
@@ -73,14 +74,12 @@ namespace Game.Grid.States
             var hitResultBuffer = new BaseGridObject[entries.Count];
 
             for (int i = 0; i < entries.Count; i++)
-            {
-                hitResultBuffer[i] = ApplyLogicImpact(entries[i].Coord, damageAmount);
-            }
+                hitResultBuffer[i] = ApplyLogicImpact(entries[i].Coord, entries[i].Delay, damageAmount);
 
             PlayTimelineVisualsAsync(entries, hitResultBuffer).Forget();
         }
-        
-        private BaseGridObject ApplyLogicImpact(Vector2Int coord, int damageAmount)
+
+        private BaseGridObject ApplyLogicImpact(Vector2Int coord, float entryDelay, int damageAmount)
         {
             if (_protectedMatchGroups.Contains(coord)) return null;
 
@@ -90,7 +89,8 @@ namespace Game.Grid.States
 
             if (obj is IBoosterActionSource source && source.TryBuildAction(coord, out var newAction))
             {
-                Context.PendingBoosterActions.Add(newAction);
+                var chainAction = new BoosterActionContext(newAction.OriginCoord, newAction.BoosterAction, entryDelay);
+                Context.PendingBoosterActions.Add(chainAction);
                 _gridObjectDestroyHandler.SetNullCoord(obj);
                 return obj;
             }
@@ -103,7 +103,7 @@ namespace Game.Grid.States
 
                 if (result == GridDamageResult.Destroyed)
                 {
-                    _levelGoalHandler.ProgressGoal(obj);
+                    _levelGoalHandler.ProgressGoalLogic(obj);
                     _gridObjectDestroyHandler.SetNullCoord(obj);
                 }
 
@@ -113,7 +113,7 @@ namespace Game.Grid.States
             _gridObjectDestroyHandler.SetNullCoord(obj);
             return obj;
         }
-        
+
         private async UniTask PlayTimelineVisualsAsync(IReadOnlyList<BoosterImpactEntry> entries, BaseGridObject[] pendingRelease)
         {
             var lastDelay = 0f;
@@ -137,6 +137,7 @@ namespace Game.Grid.States
 
                     if (model.GetGridObject(entries[i].Coord) != obj)
                     {
+                        _levelGoalHandler.ProgressGoalVisual(obj);
                         _gridObjectDestroyHandler.PlayBlastFx(obj);
                         _gridObjectDestroyHandler.ReleaseObject(obj);
                     }

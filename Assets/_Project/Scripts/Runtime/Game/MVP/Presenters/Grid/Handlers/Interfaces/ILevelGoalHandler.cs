@@ -9,6 +9,8 @@ namespace Game.Level.Handlers
         event Action<GoalCollectedData> OnGoalCollected;
         void ProgressMove();
         void ProgressGoal(BaseGridObject gridObject);
+        void ProgressGoalLogic(BaseGridObject gridObject);
+        void ProgressGoalVisual(BaseGridObject gridObject);
         void RegisterGoal(GridObjectType goalType, int count);
     }
 }
