@@ -41,7 +41,7 @@ namespace Game.Grid.Item
         {
             var result = ApplyDamageLogic(damage, source);
             if (result != GridDamageResult.Ignored)
-                ApplyDamageVisual();
+                ApplyDamageVisual(Life);
             return result;
         }
         
@@ -53,7 +53,7 @@ namespace Game.Grid.Item
             return Life <= 0 ? GridDamageResult.Destroyed : GridDamageResult.Damaged;
         }
         
-        public void ApplyDamageVisual() => SetBrokenSprite(Life);
+        public void ApplyDamageVisual(int remainingLife) => SetBrokenSprite(remainingLife);
 
         private void SetBrokenSprite(int remainingLife)
         {

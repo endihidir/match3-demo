@@ -72,15 +72,18 @@ namespace Game.Grid.States
             var damageAmount = action.BoosterAction.DamageAmount;
 
             var hitResultBuffer = new BaseGridObject[entries.Count];
+            var capturedLifeBuffer = new int[entries.Count];
 
             for (int i = 0; i < entries.Count; i++)
-                hitResultBuffer[i] = ApplyLogicImpact(entries[i].Coord, entries[i].Delay, damageAmount);
+                hitResultBuffer[i] = ApplyLogicImpact(entries[i].Coord, entries[i].Delay, damageAmount, out capturedLifeBuffer[i]);
 
-            PlayTimelineVisualsAsync(entries, hitResultBuffer).Forget();
+            PlayTimelineVisualsAsync(entries, hitResultBuffer, capturedLifeBuffer).Forget();
         }
 
-        private BaseGridObject ApplyLogicImpact(Vector2Int coord, float entryDelay, int damageAmount)
+        private BaseGridObject ApplyLogicImpact(Vector2Int coord, float entryDelay, int damageAmount, out int capturedLife)
         {
+            capturedLife = -1;
+
             if (_protectedMatchGroups.Contains(coord)) return null;
 
             var model = Context.GridModel;
@@ -101,6 +104,8 @@ namespace Game.Grid.States
 
                 if (result == GridDamageResult.Ignored) return null;
 
+                capturedLife = damageable.Life;
+
                 if (result == GridDamageResult.Destroyed)
                 {
                     _levelGoalHandler.ProgressGoalLogic(obj);
@@ -114,28 +119,26 @@ namespace Game.Grid.States
             return obj;
         }
 
-        private async UniTask PlayTimelineVisualsAsync(IReadOnlyList<BoosterImpactEntry> entries, BaseGridObject[] pendingRelease)
+        private async UniTask PlayTimelineVisualsAsync(IReadOnlyList<BoosterImpactEntry> entries, BaseGridObject[] pendingRelease, int[] capturedLife)
         {
-            var lastDelay = 0f;
+            var startTime = Time.time;
             var model = Context.GridModel;
 
             for (int i = 0; i < entries.Count; i++)
             {
-                var waitTime = entries[i].Delay - lastDelay;
+                var remaining = entries[i].Delay - (Time.time - startTime);
 
-                if (waitTime > 0f)
-                    await UniTask.WaitForSeconds(waitTime);
-
-                lastDelay = entries[i].Delay;
+                if (remaining > 0f)
+                    await UniTask.WaitForSeconds(remaining);
 
                 var obj = pendingRelease[i];
                 if (!obj) continue;
 
                 if (obj is IDamageableGridObject damageable)
                 {
-                    damageable.ApplyDamageVisual();
+                    damageable.ApplyDamageVisual(capturedLife[i]);
 
-                    if (model.GetGridObject(entries[i].Coord) != obj)
+                    if (capturedLife[i] <= 0)
                     {
                         _levelGoalHandler.ProgressGoalVisual(obj);
                         _gridObjectDestroyHandler.PlayBlastFx(obj);
