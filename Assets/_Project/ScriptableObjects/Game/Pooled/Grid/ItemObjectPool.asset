@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85d1cd021bdc484e81ee8f2723d6df97, type: 3}
   m_Name: ItemObjectPool
   m_EditorClassIdentifier: 
-  <IsLazy>k__BackingField: 1
+  <IsLazy>k__BackingField: 0
   <PoolSize>k__BackingField: 24
   <PoolObject>k__BackingField: {fileID: 530523186251299296, guid: 5d7fc2ae2e8e3d64fb8d408070049a58,
     type: 3}

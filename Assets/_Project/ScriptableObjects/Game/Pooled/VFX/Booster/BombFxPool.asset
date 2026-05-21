@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85d1cd021bdc484e81ee8f2723d6df97, type: 3}
   m_Name: BombFxPool
   m_EditorClassIdentifier: 
-  <IsLazy>k__BackingField: 1
+  <IsLazy>k__BackingField: 0
   <PoolSize>k__BackingField: 5
   <PoolObject>k__BackingField: {fileID: 1196079789397058087, guid: 88f36e9524fb8cf44b874bc2a06d2b2b,
     type: 3}

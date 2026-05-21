@@ -120,7 +120,7 @@ namespace Game.Grid.States
 
         private async UniTask ResolveGroupAsync(IGridModel model, bool[,] matchMask, List<Vector2Int> group, int typeId, Vector2Int? forcedCenter)
         {
-            if (GridMatchCalcUtil.IsAnyGroupObjectFall(model, group))
+            if (GridMatchCalcUtil.IsAnyGroupObjectFall(model, group)) 
                 await UniTask.WaitUntil(() => !GridMatchCalcUtil.IsAnyGroupObjectFall(model, group));
 
             var boosterType = GridBoosterDecisionUtil.DecideBoosterTypeFromGroup(model, matchMask, group, typeId);

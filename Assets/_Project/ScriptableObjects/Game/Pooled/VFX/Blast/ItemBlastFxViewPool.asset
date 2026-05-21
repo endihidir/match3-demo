@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85d1cd021bdc484e81ee8f2723d6df97, type: 3}
   m_Name: ItemBlastFxViewPool
   m_EditorClassIdentifier: 
-  <IsLazy>k__BackingField: 1
+  <IsLazy>k__BackingField: 0
   <PoolSize>k__BackingField: 5
   <PoolObject>k__BackingField: {fileID: 8988595705533355740, guid: 4661312d276edfc469d1916a095b6f29,
     type: 3}

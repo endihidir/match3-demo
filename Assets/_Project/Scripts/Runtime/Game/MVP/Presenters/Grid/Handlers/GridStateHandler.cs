@@ -59,7 +59,7 @@ namespace Game.Grid.Handlers
                                               .SetInitialState(_idleState);
 
             _stateMachine.AddTransition(_idleState, _inputState, () => HasAnyInput)
-                .AddTransition(_idleState, _matchState, () => MatchResolveRequested)
+                .AddTransition(_idleState, _matchState, () => MatchResolveRequested && !_fillState.IsInProgress)
                 .AddTransition(_idleState, _shuffleState, () => !MatchResolveRequested && !_fillState.IsInProgress && !_shuffleState.HasAnyMove())
                 .AddTransition(_shuffleState, _idleState, () => _shuffleState.IsExitReady)
                          
@@ -67,7 +67,7 @@ namespace Game.Grid.Handlers
                 .AddTransition(_inputState, _matchState, () => _inputState.IsExitReady && MatchResolveRequested && !HasPendingBoosterActions)
                 .AddTransition(_inputState, _idleState, () => _inputState.IsExitReady && !MatchResolveRequested && !HasPendingBoosterActions)
                         
-                .AddTransition(_boosterState, _matchState, () => _boosterState.IsExitReady && MatchResolveRequested)
+                .AddTransition(_boosterState, _matchState, () => _boosterState.IsExitReady && MatchResolveRequested && !_fillState.IsInProgress)
                 .AddTransition(_boosterState, _fillState, () => _boosterState.IsExitReady && !MatchResolveRequested)
                 .AddTransition(_matchState, _fillState, () => _matchState.IsExitReady)
                 .AddTransition(_fillState, _idleState, () => _fillState.IsExitReady);
