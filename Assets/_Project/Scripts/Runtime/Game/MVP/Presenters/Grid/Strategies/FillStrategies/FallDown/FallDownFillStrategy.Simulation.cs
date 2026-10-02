@@ -1,5 +1,4 @@
 using Core.Utils;
-using Game.Grid.Strategies.Data;
 using Game.Grid.Utils;
 using UnityEngine;
 
@@ -31,17 +30,16 @@ namespace Game.Grid.Strategies
                 _gridModel.SetGridObject(coord, item);
                 _gridModel.SetGridObject(src, null);
 
-                AddRecord(new FallDownMoveRecord(item, coord, isSpawn: false));
+                _motionPlanner.RecordMove(item, src, coord);
             }
         }
 
         /// <summary>
         /// Spawns new items into every empty active cell in column
         /// <paramref name="x"/> that has no stationary object above it
-        /// in the same segment, stacking spawn positions above
-        /// <paramref name="spawnWorldY"/>.
+        /// in the same segment.
         /// </summary>
-        private void FillColumn(int x, int height, float cellSize, float spawnWorldY)
+        private void FillColumn(int x, int height, float cellSize)
         {
             var stack = 0;
 
@@ -67,13 +65,9 @@ namespace Game.Grid.Strategies
                 item.SetParent(_gridView.GridObjectsParent);
                 item.SetSpriteSize(cellSize);
 
-                var worldPos = _gridView.GridToWorld(coord);
-                var startPos = new Vector3(worldPos.x, spawnWorldY + stack * cellSize, worldPos.z);
-
-                item.SetPosition(startPos);
                 _gridModel.SetGridObject(coord, item);
 
-                AddRecord(new FallDownMoveRecord(item, coord, isSpawn: true));
+                _motionPlanner.RecordSpawn(item, x, stack, coord);
                 stack++;
             }
         }

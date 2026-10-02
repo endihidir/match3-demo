@@ -2,7 +2,6 @@ using Game.Bootstrappers;
 using Game.Configs;
 using Game.Grid.Item.Factories;
 using Game.Grid.Strategies;
-using Game.Grid.Strategies.Schedulers;
 using Game.Grid.Handlers;
 using Game.Grid.Services;
 using Game.HUD.Handlers;
@@ -66,8 +65,7 @@ namespace Game.DI
             builder.RegisterEntryPoint<GridPresenter>();
     
             // GRID FILL
-            builder.Register<SlideAnimationScheduler>(Lifetime.Scoped).As<ISlideAnimationScheduler>();
-            builder.Register<FallAnimationScheduler>(Lifetime.Scoped).As<IFallAnimationScheduler>();
+            builder.Register<FillMotionPlanner>(Lifetime.Scoped).As<IFillMotionPlanner>();
             
             builder.Register<FillItemDecider>(Lifetime.Scoped).As<IFillItemDecider>();
             builder.Register<SlideDownFillStrategy>(Lifetime.Scoped).As<IFillStrategy>();

@@ -1,6 +1,5 @@
 using Cysharp.Threading.Tasks;
 using Game.Grid.Handlers;
-using Game.Grid.Strategies.Schedulers;
 using Game.Grid.Utils;
 using Game.Models;
 using Game.Views;
@@ -13,41 +12,37 @@ namespace Game.Grid.Strategies
         private readonly IGridView _gridView;
         private readonly IGridObjectCreateHandler _objectCreateHandler;
         private readonly IFillItemDecider _itemDecider;
-        private readonly IFallAnimationScheduler _fallAnimationScheduler;
+        private readonly IFillMotionPlanner _motionPlanner;
+
+        private UniTask _pendingAnimations = UniTask.CompletedTask;
 
         public FallDownFillStrategy(IGridModel gridModel, IGridView gridView, IGridObjectCreateHandler objectCreateHandler, IFillItemDecider itemDecider,
-            IFallAnimationScheduler fallAnimationScheduler)
+            IFillMotionPlanner motionPlanner)
         {
             _gridModel = gridModel;
             _gridView = gridView;
             _objectCreateHandler = objectCreateHandler;
             _itemDecider = itemDecider;
-            _fallAnimationScheduler = fallAnimationScheduler;
+            _motionPlanner = motionPlanner;
         }
 
         public bool CanHandle() => !GridFillCalcUtil.HasStationaryWithMovableSpaceBelow(_gridModel);
 
         public IFillStrategy Execute()
         {
-            var width= _gridModel.Width;
-            var height= _gridModel.Height;
-            var cellSize= _gridView.GetCellSize();
+            var width = _gridModel.Width;
+            var height = _gridModel.Height;
+            var cellSize = _gridView.GetCellSize();
 
-            PrepareForRun(width, height);
+            _motionPlanner.Begin();
 
             for (int x = 0; x < width; x++)
                 ShiftColumn(x, height);
 
             for (int x = 0; x < width; x++)
-            {
-                if (GridFillCalcUtil.TryGetSpawnCellCoord(_gridModel, x, out var spawnCell))
-                {
-                    var spawnY = _gridView.GridToWorld(spawnCell).y + cellSize;
-                    FillColumn(x, height, cellSize, spawnY);
-                }
-            }
+                FillColumn(x, height, cellSize);
 
-            _pendingAnimations = ScheduleAnimations();
+            _pendingAnimations = _motionPlanner.Commit();
             return this;
         }
 

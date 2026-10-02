@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <FillSpawnDecisionConfig>k__BackingField: {fileID: 11400000, guid: becfe7e5b59c2dd4c9fc46fc0f2cdda3,
     type: 2}
+  <AnimationConfig>k__BackingField: {fileID: 11400000, guid: c112eee4884670b47a03104c4339bf05, type: 2}
   <GridItemConfigContainers>k__BackingField:
   - {fileID: 11400000, guid: 742832dd9da827243926bb27794c6008, type: 2}
   - {fileID: 11400000, guid: a06a31c95e7d77a4683f121de75c8abb, type: 2}

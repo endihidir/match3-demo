@@ -7,6 +7,7 @@ namespace Game.Configs
     public sealed class GridConfigContainerSO : ScriptableObject
     { 
         [field: SerializeField] public FillSpawnDecisionConfigSO FillSpawnDecisionConfig { get; private set; }
+        [field: SerializeField] public GridObjectAnimationConfigSO AnimationConfig { get; private set; }
         [field: SerializeField] private BaseGridObjectConfigContinerSO[] GridItemConfigContainers { get; set; }
         
         public BaseGridObjectDataSO GetConfigData(GridObjectType objectType) => objectType.ObjectKind switch

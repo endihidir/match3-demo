@@ -6,6 +6,8 @@ namespace Game.Grid.Strategies
 {
     public sealed partial class SlideDownFillStrategy
     {
+        private int _diagonalPassId = 1;
+
         /// <summary>
         /// Repeatedly applies gravity passes until the grid is stable.
         ///
@@ -58,12 +60,10 @@ namespace Game.Grid.Strategies
                     var item = _gridModel.GetGridObject(src);
                     if (!item || item.IsStationary) continue;
 
-                    AddStep(item, src, isSpawn: false);
-
                     _gridModel.SetGridObject(src, null);
                     _gridModel.SetGridObject(dst, item);
 
-                    AddStep(item, dst, isSpawn: false);
+                    _motionPlanner.RecordMove(item, src, dst);
                     moved = true;
                 }
             }
@@ -80,9 +80,7 @@ namespace Game.Grid.Strategies
         {
             var moved = false;
 
-            // Advance stamps so this pass's deduplication is independent of all
-            // previous passes (including from prior Execute() calls).
-            AdvanceSlideStamps();
+            _diagonalPassId++;
 
             // Scan bottom-to-top, skipping row 0 (nothing can slide into row 0
             // from below — row index 0 is the topmost row in this coordinate
@@ -100,11 +98,11 @@ namespace Game.Grid.Strategies
                     if (GridFillCalcUtil.CanFallVertically(_gridModel, x, y, out _)) continue;
 
                     // Deterministic but alternating left/right preference.
-                    var preferLeft = ((x ^ y ^ _usedTargetStampId) & 1) == 0;
+                    var preferLeft = ((x ^ y ^ _diagonalPassId) & 1) == 0;
                     var dir1 = preferLeft ? -1 : +1;
                     var dir2 = -dir1;
 
-                    if (TryApplySlide(_gridModel, width, target, dir1) || TryApplySlide(_gridModel, width, target, dir2))
+                    if (TryApplySlide(_gridModel, target, dir1) || TryApplySlide(_gridModel, target, dir2))
                     {
                         moved = true;
                     }
@@ -116,34 +114,16 @@ namespace Game.Grid.Strategies
 
         /// <summary>
         /// Attempts to slide the item at <c>target + (dirX, -1)</c> into
-        /// <paramref name="target"/>.  Uses per-cell stamps to ensure each cell
-        /// is used at most once per diagonal pass (prevents double-moves).
+        /// <paramref name="target"/>.
         /// </summary>
-        private bool TryApplySlide(IGridModel model, int width, Vector2Int target, int dirX)
+        private bool TryApplySlide(IGridModel model, Vector2Int target, int dirX)
         {
             if (!GridFillCalcUtil.TryCollectDiagonalSide(model, target, dirX, out var candidate)) return false;
-
-            // Validate model still matches candidate (could have shifted since
-            // TryCollectDiagonalSide ran).
-            if (model.GetGridObject(candidate.From) != candidate.Item) return false;
-            if (model.GetGridObject(candidate.To)) return false;
-
-            // Dedup: each target cell may only be filled once per pass.
-            var ti = candidate.To.x + candidate.To.y * width;
-            if (_usedTargetStamp[ti] == _usedTargetStampId) return false;
-            _usedTargetStamp[ti] = _usedTargetStampId;
-
-            // Dedup: each source cell may only be emptied once per pass.
-            var fi = candidate.From.x + candidate.From.y * width;
-            if (_usedSourceStamp[fi] == _usedSourceStampId) return false;
-            _usedSourceStamp[fi] = _usedSourceStampId;
-
-            AddStep(candidate.Item, candidate.From, isSpawn: false);
 
             model.SetGridObject(candidate.From, null);
             model.SetGridObject(candidate.To,   candidate.Item);
 
-            AddStep(candidate.Item, candidate.To, isSpawn: false);
+            _motionPlanner.RecordMove(candidate.Item, candidate.From, candidate.To);
             return true;
         }
 

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Game.Configs;
 using DG.Tweening;
@@ -10,10 +11,24 @@ namespace Game.Grid.Item
         [field: SerializeField] private GridObjectAnimationConfigSO Config { get; set; }
         [field: SerializeField] private Transform ItemHolder { get; set; }
         
-        public bool IsFallInProgress => (_shiftTween != null && _shiftTween.IsActive() && !_shiftTween.IsComplete()) ||
-                                        (_slideTween != null && _slideTween.IsActive() && !_slideTween.IsComplete());
+        public bool IsFallInProgress
+        {
+            get
+            {
+                for (int i = 0; i < _placementTweens.Count; i++)
+                {
+                    if (IsRunning(_placementTweens[i])) return true;
+                }
 
-        private Tween _shakeTween, _moveTween, _pingPongTween, _shiftTween, _slideTween, _springTween;
+                return false;
+            }
+        }
+
+        public int PlacementVersion => _placementVersion;
+
+        private readonly List<Tween> _placementTweens = new(4);
+        private Tween _shakeTween, _moveTween, _pingPongTween, _springTween;
+        private int _placementVersion;
 
         private Vector3 _itemHolderDefaultPos;
         
@@ -48,55 +63,40 @@ namespace Game.Grid.Item
                 .SetUpdate(Config.UseUnscaledTime);
         }
 
-        public Tween ShiftTo(Vector3 worldPos, float cellDistance, float delay = 0f)
+        public Tween PlayPlacement(Vector3[] points, float[] durations, float[] waits, float[] easeSlopes, int count, float startDelay)
         {
             KillMovementTweens();
-            
-            _shiftTween?.Kill();
+            RemoveFinishedPlacements();
 
-            var distanceMultiplier = Config.ShiftDistanceMultiplier;
-            var duration = Config.ShiftDuration + (cellDistance * distanceMultiplier);
+            var version = ++_placementVersion;
 
-            _shiftTween = transform.DOMove(worldPos, duration)
-                .SetEase(Ease.InQuad)
-                .SetDelay(Config.StartShiftDelay + delay)
-                .SetUpdate(Config.UseUnscaledTime);
-            
-            SpringAsync(_shiftTween).Forget();
-
-            return _shiftTween;
-        }
-        
-        public float GetShiftDelay() => Config.ShiftDelay;
-
-        public Tween SlideAlongPath(Vector3[] points, int length, float[] cellDistances, float delay = 0f)
-        {
-            KillMovementTweens();
-            
-            _slideTween?.Kill();
-
-            var seq = DOTween.Sequence()
-                .SetDelay(Config.StartSlideDelay + delay)
+            var sequence = DOTween.Sequence()
+                .SetDelay(startDelay)
                 .SetUpdate(Config.UseUnscaledTime);
 
-            var distanceMultiplier = Config.SlideDistanceMultiplier;
-            for (int i = 0; i < length; i++)
-                seq.Append(transform.DOMove(points[i], Config.SlideDuration + (cellDistances[i] * distanceMultiplier)).SetEase(Ease.InQuad));
+            for (int i = 0; i < count; i++)
+            {
+                if (waits[i] > 0f)
+                    sequence.AppendInterval(waits[i]);
 
-            _slideTween = seq;
-            
-            SpringAsync(_slideTween).Forget();
-            
-            return _slideTween;
+                sequence.Append(transform.DOMove(points[i], durations[i]).SetEase(QuadraticEase.Get(easeSlopes[i])));
+            }
+
+            _placementTweens.Add(sequence);
+
+            SpringAsync(sequence, version).Forget();
+
+            return sequence;
         }
 
-        private async UniTask SpringAsync(Tween tween)
+        private async UniTask SpringAsync(Tween tween, int version)
         {
             await tween;
+
+            if (version != _placementVersion) return;
+
             Spring();
         }
-        
-        public float GetSlideDelay() => Config.SlideDelay;
 
         public Tween PingPongMove(Vector3 startPos, Vector3 targetPos)
         {
@@ -129,15 +129,30 @@ namespace Game.Grid.Item
 
         public void Dispose()
         {
+            _placementVersion++;
             KillPlacementTweens();
             KillMovementTweens();
+            _springTween?.Kill(true);
         }
 
         private void KillPlacementTweens()
         {
-            _slideTween?.Kill(true);
-            _shiftTween?.Kill(true);
+            for (int i = 0; i < _placementTweens.Count; i++)
+                _placementTweens[i]?.Kill(true);
+
+            _placementTweens.Clear();
         }
+
+        private void RemoveFinishedPlacements()
+        {
+            for (int i = _placementTweens.Count - 1; i >= 0; i--)
+            {
+                if (!IsRunning(_placementTweens[i]))
+                    _placementTweens.RemoveAt(i);
+            }
+        }
+
+        private static bool IsRunning(Tween tween) => tween != null && tween.IsActive() && !tween.IsComplete();
         
         private void KillMovementTweens()
         {

@@ -16,7 +16,6 @@ namespace Game.Grid.Strategies
             var spawnedAny = false;
             var segmentOpen = false;
             var segmentBlocked = false;
-            var segmentTopWorldY = 0f;
             var seenActiveBefore = false;
 
             for (int y = 0; y < height; y++)
@@ -33,7 +32,6 @@ namespace Game.Grid.Strategies
                 {
                     segmentOpen = true;
                     seenActiveBefore = true;
-                    segmentTopWorldY = _gridView.GridToWorld(c).y + cellSize;
                 }
 
                 var obj = _gridModel.GetGridObject(c);
@@ -43,14 +41,14 @@ namespace Game.Grid.Strategies
                 var runLength = GridFillCalcUtil.CountEmptiesDown(_gridModel, x, y, height);
                 if (runLength <= 0) continue;
 
-                spawnedAny |= SpawnRun(x, y, runLength, segmentTopWorldY, cellSize);
+                spawnedAny |= SpawnRun(x, y, runLength, cellSize);
                 y += runLength - 1;
             }
 
             return spawnedAny;
         }
 
-        private bool SpawnRun(int x, int startY, int count, float segmentTopWorldY, float cellSize)
+        private bool SpawnRun(int x, int startY, int count, float cellSize)
         {
             var baseStack = _spawnStackByX[x];
             var spawnedAny = false;
@@ -70,14 +68,10 @@ namespace Game.Grid.Strategies
                 item.SetParent(_gridView.GridObjectsParent);
                 item.SetSpriteSize(cellSize);
 
-                var worldTarget  = _gridView.GridToWorld(target);
                 var reverseIndex = (count - 1) - i;
-                var spawnWorldY= segmentTopWorldY + (baseStack + reverseIndex) * cellSize;
-
-                item.SetPosition(new Vector3(worldTarget.x, spawnWorldY, worldTarget.z));
 
                 _gridModel.SetGridObject(target, item);
-                AddStep(item, target, isSpawn: true);
+                _motionPlanner.RecordSpawn(item, x, baseStack + reverseIndex, target);
                 spawnedAny = true;
             }
 

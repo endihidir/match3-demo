@@ -13,14 +13,12 @@ MonoBehaviour:
   m_Name: GridObjectAnimationConfig
   m_EditorClassIdentifier: 
   <UseUnscaledTime>k__BackingField: 0
-  <ShiftDuration>k__BackingField: 0.18
-  <ShiftDelay>k__BackingField: 0.03
-  <ShiftDistanceMultiplier>k__BackingField: 0.05
-  <StartShiftDelay>k__BackingField: 0.1
-  <SlideDuration>k__BackingField: 0.03
-  <SlideDelay>k__BackingField: 0
-  <SlideDistanceMultiplier>k__BackingField: 0.05
-  <StartSlideDelay>k__BackingField: 0.1
+  <FallAcceleration>k__BackingField: 50
+  <FallMaxSpeed>k__BackingField: 18
+  <DiagonalStepMultiplier>k__BackingField: 1
+  <FallStagger>k__BackingField: 0.03
+  <FallStaggerLimit>k__BackingField: 0.15
+  <FallStartDelay>k__BackingField: 0.1
   <MoveDuration>k__BackingField: 0.15
   <PingPongDuration>k__BackingField: 0.15
   <ShakeDuration>k__BackingField: 0.25
