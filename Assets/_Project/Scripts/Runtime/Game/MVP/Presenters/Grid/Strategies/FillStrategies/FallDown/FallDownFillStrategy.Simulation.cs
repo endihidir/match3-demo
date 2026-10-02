@@ -1,3 +1,4 @@
+using Core.Utils;
 using Game.Grid.Strategies.Data;
 using Game.Grid.Utils;
 using UnityEngine;
@@ -56,6 +57,12 @@ namespace Game.Grid.Strategies
 
                 var itemType = _itemDecider.Decide(coord);
                 var item= _objectCreateHandler.CreateItem(itemType);
+
+                if (!item)
+                {
+                    EditorLogger.LogError($"[FallDownFillStrategy] Item could not be created: {itemType} at {coord}");
+                    continue;
+                }
 
                 item.SetParent(_gridView.GridObjectsParent);
                 item.SetSpriteSize(cellSize);

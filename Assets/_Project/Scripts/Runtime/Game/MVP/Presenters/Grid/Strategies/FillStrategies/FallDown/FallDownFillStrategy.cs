@@ -36,9 +36,10 @@ namespace Game.Grid.Strategies
             PrepareForRun(width, height);
 
             for (int x = 0; x < width; x++)
-            {
                 ShiftColumn(x, height);
 
+            for (int x = 0; x < width; x++)
+            {
                 if (GridFillCalcUtil.TryGetSpawnCellCoord(_gridModel, x, out var spawnCell))
                 {
                     var spawnY = _gridView.GridToWorld(spawnCell).y + cellSize;

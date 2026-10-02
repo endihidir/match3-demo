@@ -1,3 +1,4 @@
+using Core.Utils;
 using Game.Grid.Utils;
 using UnityEngine;
 
@@ -42,23 +43,29 @@ namespace Game.Grid.Strategies
                 var runLength = GridFillCalcUtil.CountEmptiesDown(_gridModel, x, y, height);
                 if (runLength <= 0) continue;
 
-                SpawnRun(x, y, runLength, segmentTopWorldY, cellSize);
-                spawnedAny = true;
+                spawnedAny |= SpawnRun(x, y, runLength, segmentTopWorldY, cellSize);
                 y += runLength - 1;
             }
 
             return spawnedAny;
         }
 
-        private void SpawnRun(int x, int startY, int count, float segmentTopWorldY, float cellSize)
+        private bool SpawnRun(int x, int startY, int count, float segmentTopWorldY, float cellSize)
         {
             var baseStack = _spawnStackByX[x];
+            var spawnedAny = false;
 
             for (int i = 0; i < count; i++)
             {
                 var target = new Vector2Int(x, startY + i);
                 var type = _itemDecider.Decide(target);
                 var item= _objectCreateHandler.CreateItem(type);
+
+                if (!item)
+                {
+                    EditorLogger.LogError($"[SlideDownFillStrategy] Item could not be created: {type} at {target}");
+                    continue;
+                }
 
                 item.SetParent(_gridView.GridObjectsParent);
                 item.SetSpriteSize(cellSize);
@@ -71,9 +78,11 @@ namespace Game.Grid.Strategies
 
                 _gridModel.SetGridObject(target, item);
                 AddStep(item, target, isSpawn: true);
+                spawnedAny = true;
             }
 
             _spawnStackByX[x] = baseStack + count;
+            return spawnedAny;
         }
     }
 }

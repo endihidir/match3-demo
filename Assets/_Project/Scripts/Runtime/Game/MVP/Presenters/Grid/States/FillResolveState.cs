@@ -37,14 +37,19 @@ namespace Game.Grid.States
             }
             
             IsInProgress = true;
-        
-            await strategy.Execute().WaitAnimationsAsync();
-            
-            await UniTask.WaitUntil(() => !IsAnyTileFalling());
-            
-            Context.MatchResolveRequested = GridMatchCalcUtil.HasAnyRegularMatchOnBoard(Context.GridModel);
-            
-            IsInProgress = false;
+
+            try
+            {
+                await strategy.Execute().WaitAnimationsAsync();
+
+                await UniTask.WaitUntil(() => !IsAnyTileFalling());
+
+                Context.MatchResolveRequested = GridMatchCalcUtil.HasAnyRegularMatchOnBoard(Context.GridModel);
+            }
+            finally
+            {
+                IsInProgress = false;
+            }
         }
         
         private bool IsAnyTileFalling()
